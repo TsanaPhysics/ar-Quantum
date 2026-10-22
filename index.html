@@ -20,15 +20,18 @@
   <style>
     :root {
       --bg-dark: #020617;
-      --card-bg: rgba(15, 23, 42, 0.82);
+      --card-bg: rgba(8, 14, 26, 0.92);
       --cyan-glow: #00f0ff;
       --cyan-dim: rgba(0, 240, 255, 0.18);
       --purple-glow: #8b5cf6;
       --pink-glow: #ec4899;
-      --gold-accent: #f59e0b;
+      --hud-gold: #facc15;
+      --hud-gold-bright: #fef08a;
+      --hud-gold-glow: rgba(250, 204, 21, 0.5);
+      --hud-gold-dim: rgba(250, 204, 21, 0.12);
+      --hud-gold-border: rgba(250, 204, 21, 0.38);
       --emerald: #10b981;
-      --hud-border: rgba(0, 240, 255, 0.35);
-      --hud-corner: #00f0ff;
+      --hud-border: rgba(250, 204, 21, 0.35);
       --text-main: #f8fafc;
       --text-sub: #94a3b8;
     }
@@ -43,20 +46,21 @@
     body {
       background: #020617;
       background-image: 
-        radial-gradient(circle at 50% 0%, #0f1d38 0%, #020617 80%),
-        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+        radial-gradient(circle at 50% 0%, #151e33 0%, #020617 80%),
+        linear-gradient(rgba(250, 204, 21, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(250, 204, 21, 0.025) 1px, transparent 1px);
       background-size: 100% 100%, 32px 32px, 32px 32px;
       color: var(--text-main);
       font-family: 'Prompt', sans-serif;
       min-height: 100vh;
-      padding: 16px 14px 120px; /* 120px bottom padding for Bangchak bottom bar */
+      padding: 14px 12px calc(110px + env(safe-area-inset-bottom, 20px));
       overflow-x: hidden;
     }
 
     .container {
       max-width: 1240px;
       margin: 0 auto;
+      width: 100%;
     }
 
     /* Sci-Fi Top Telemetry Bar (Image 3 Style) */
@@ -219,42 +223,107 @@
       }
     }
 
-    /* Sci-Fi HUD Cyber Cards (Image 3 Style with Corner Brackets) */
+    /* ==========================================================
+       CYBER MECH HUD CARD ARCHITECTURE (Reference Image Design)
+       ========================================================== */
     .card {
       background: var(--card-bg);
-      border: 1px solid rgba(0, 240, 255, 0.22);
-      border-radius: 16px;
-      padding: 18px 16px;
+      border: none;
+      position: relative;
+      overflow: hidden;
+      padding: 26px 18px 22px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75);
+      clip-path: polygon(
+        0 0,
+        calc(100% - 16px) 0,
+        100% 16px,
+        100% calc(100% - 24px),
+        calc(100% - 24px) 100%,
+        24px 100%,
+        0 calc(100% - 24px)
+      );
     }
     .card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(0, 240, 255, 0.6);
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 240, 255, 0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.85), 0 0 30px rgba(250, 204, 21, 0.25);
+    }
+    .card:hover .hud-frame-svg {
+      filter: drop-shadow(0 0 6px var(--hud-gold));
+    }
+    .card:hover .hud-top-spotlight {
+      opacity: 1;
+      filter: brightness(1.25);
     }
 
-    /* Sci-Fi Corner Brackets on Cards */
-    .card-corner {
+    /* SVG HUD Frame Overlay */
+    .hud-frame-svg {
       position: absolute;
-      width: 10px;
-      height: 10px;
-      border: 2px solid var(--cyan-glow);
+      inset: 0;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
-      opacity: 0.7;
-      transition: opacity 0.2s ease;
+      z-index: 1;
+      filter: drop-shadow(0 0 3px rgba(250, 204, 21, 0.4));
+      transition: filter 0.25s ease;
     }
-    .card:hover .card-corner { opacity: 1; filter: drop-shadow(0 0 4px var(--cyan-glow)); }
-    .cc-tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 6px 0 0 0; }
-    .cc-tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 6px 0 0; }
-    .cc-bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 6px; }
-    .cc-br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 6px 0; }
+
+    /* Top Glowing Spotlight Diffusion (Image Spotlight Effect) */
+    .hud-top-spotlight {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 110px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(250, 204, 21, 0.42) 0%, rgba(250, 204, 21, 0.1) 45%, transparent 75%);
+      pointer-events: none;
+      z-index: 1;
+      transition: opacity 0.25s ease, filter 0.25s ease;
+    }
+
+    /* Bottom-Left Slanted Hazard Vent Stripes (Image Design) */
+    .hud-vent-stripes {
+      position: absolute;
+      bottom: 7px;
+      left: 28px;
+      width: 48px;
+      height: 7px;
+      background: repeating-linear-gradient(
+        -45deg,
+        var(--hud-gold),
+        var(--hud-gold) 2px,
+        transparent 2px,
+        transparent 6px
+      );
+      opacity: 0.85;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Tech Dots on Top Notch Plate */
+    .hud-dots-accent {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.55rem;
+      letter-spacing: 3px;
+      color: #020617;
+      font-weight: 900;
+      pointer-events: none;
+      z-index: 2;
+      line-height: 10px;
+    }
+
+    /* Card Content Positioning */
+    .card-top, .card h2, .card p, .card-footer {
+      position: relative;
+      z-index: 3;
+    }
 
     /* Responsive Card Top */
     .card-top {
@@ -270,11 +339,11 @@
       font-family: 'Chakra Petch', sans-serif;
       font-size: 0.78rem;
       font-weight: 700;
-      color: var(--cyan-glow);
-      background: rgba(0, 240, 255, 0.12);
-      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--hud-gold);
+      background: rgba(250, 204, 21, 0.12);
+      border: 1px solid rgba(250, 204, 21, 0.4);
       padding: 3px 10px;
-      border-radius: 6px;
+      border-radius: 4px;
       display: inline-flex;
       align-items: center;
       gap: 5px;
@@ -282,10 +351,11 @@
     }
     .chapter-tag {
       font-size: 0.74rem;
-      color: var(--text-sub);
+      color: var(--hud-gold-bright);
       font-family: 'Chakra Petch', sans-serif;
       font-weight: 600;
       white-space: nowrap;
+      opacity: 0.85;
     }
 
     .card h2 {
@@ -322,44 +392,45 @@
     }
     .tag {
       font-size: 0.72rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(250, 204, 21, 0.06);
+      border: 1px solid rgba(250, 204, 21, 0.25);
       padding: 4px 8px;
-      border-radius: 6px;
-      color: #cbd5e1;
+      border-radius: 4px;
+      color: #fef08a;
       font-family: 'Chakra Petch', sans-serif;
       white-space: nowrap;
     }
 
-    /* High-Tech Responsive Launch Button */
+    /* High-Tech Responsive Cyber Launch Button with Chamfered Cut Corners */
     .btn-launch {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      background: rgba(0, 240, 255, 0.12);
-      border: 1.5px solid var(--cyan-glow);
-      color: var(--cyan-glow);
+      background: rgba(250, 204, 21, 0.08);
+      border: 1.5px solid var(--hud-gold);
+      color: var(--hud-gold-bright);
       padding: 12px 18px;
-      border-radius: 12px;
+      border-radius: 4px;
+      clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
       text-decoration: none;
       font-size: 0.92rem;
       font-weight: 700;
       font-family: 'Chakra Petch', sans-serif;
       letter-spacing: 0.3px;
       white-space: normal;
-      transition: all 0.2s ease;
+      transition: all 0.22s ease;
       width: 100%;
       min-height: 46px;
       text-align: center;
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+      box-shadow: 0 0 14px rgba(250, 204, 21, 0.15);
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
     .btn-launch:active, .btn-launch:hover {
-      background: var(--cyan-glow);
-      color: #030712;
-      box-shadow: 0 0 25px rgba(0, 240, 255, 0.7);
+      background: var(--hud-gold);
+      color: #020617;
+      box-shadow: 0 0 25px rgba(250, 204, 21, 0.75);
       transform: scale(0.99);
     }
 
@@ -381,28 +452,27 @@
     /* Master Universal AR Hero Card Styling */
     .master-ar-card {
       grid-column: 1 / -1;
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.9) 100%);
-      border: 1.5px solid var(--cyan-glow) !important;
-      box-shadow: 0 10px 40px rgba(0, 240, 255, 0.25) !important;
+      background: linear-gradient(135deg, rgba(12, 18, 34, 0.96) 0%, rgba(20, 28, 48, 0.94) 100%);
+      box-shadow: 0 12px 45px rgba(250, 204, 21, 0.2) !important;
     }
     .master-ar-card h2 {
       font-size: clamp(1.2rem, 3.2vw, 1.55rem);
-      background: linear-gradient(90deg, #00f0ff, #38bdf8, #ec4899);
+      background: linear-gradient(90deg, #facc15, #fef08a, #00f0ff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       font-family: 'Chakra Petch', sans-serif;
       font-weight: 700;
     }
     .btn-master-launch {
-      background: linear-gradient(135deg, #00f0ff, #0284c7) !important;
-      color: #030712 !important;
+      background: linear-gradient(135deg, #facc15, #eab308) !important;
+      color: #020617 !important;
       border: none !important;
-      box-shadow: 0 0 25px rgba(0, 240, 255, 0.5) !important;
+      box-shadow: 0 0 25px rgba(250, 204, 21, 0.6) !important;
       font-weight: 700 !important;
       min-height: 48px;
     }
     .btn-master-launch:hover, .btn-master-launch:active {
-      box-shadow: 0 0 35px rgba(0, 240, 255, 0.85) !important;
+      box-shadow: 0 0 35px rgba(250, 204, 21, 0.9) !important;
       transform: translateY(-2px);
     }
 
@@ -657,6 +727,48 @@
   </style>
 </head>
 <body>
+  <!-- REUSABLE SCI-FI / CYBER HUD FRAMES (Matching User Reference Design) -->
+  <svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Frame Style 1: Cyber Gold Notch with Bottom Chamfer & Triangle (Top-Left in reference image) -->
+      <symbol id="hud-frame-gold-1" viewBox="0 0 340 260" preserveAspectRatio="none">
+        <path d="M 0 0 L 105 0 L 118 10 L 222 10 L 235 0 L 340 0 L 340 238 L 318 260 L 22 260 L 0 238 Z" 
+              fill="none" stroke="#facc15" stroke-width="2" vector-effect="non-scaling-stroke" />
+        <polygon points="118 0, 222 0, 216 10, 124 10" fill="#facc15" />
+        <polygon points="318 260, 340 238, 340 260" fill="#facc15" />
+      </symbol>
+
+      <!-- Frame Style 2: Cyber Gold with Top Chamfer & Bottom Notch (Top-Right in reference image) -->
+      <symbol id="hud-frame-gold-2" viewBox="0 0 340 260" preserveAspectRatio="none">
+        <path d="M 0 0 L 110 0 L 122 10 L 218 10 L 230 0 L 318 0 L 340 22 L 340 260 L 24 260 L 0 236 Z" 
+              fill="none" stroke="#facc15" stroke-width="2" vector-effect="non-scaling-stroke" />
+        <polygon points="122 0, 218 0, 212 10, 128 10" fill="#facc15" />
+        <line x1="318" y1="0" x2="340" y2="22" stroke="#facc15" stroke-width="3" vector-effect="non-scaling-stroke" />
+        <polygon points="318 260, 340 238, 340 260" fill="#facc15" />
+      </symbol>
+
+      <!-- Frame Style 3: Cyber Universal Hero Frame (Dual Gold & Cyan Accents) -->
+      <symbol id="hud-frame-hero" viewBox="0 0 680 240" preserveAspectRatio="none">
+        <path d="M 0 0 L 230 0 L 245 12 L 435 12 L 450 0 L 658 0 L 680 22 L 680 218 L 658 240 L 22 240 L 0 218 Z" 
+              fill="none" stroke="#facc15" stroke-width="2.2" vector-effect="non-scaling-stroke" />
+        <polygon points="245 0, 435 0, 425 12, 255 12" fill="#facc15" />
+        <polygon points="658 240, 680 218, 680 240" fill="#facc15" />
+        <line x1="6" y1="50" x2="18" y2="50" stroke="#facc15" stroke-width="2.5" />
+        <line x1="6" y1="64" x2="18" y2="64" stroke="#facc15" stroke-width="2.5" />
+        <line x1="6" y1="78" x2="18" y2="78" stroke="#facc15" stroke-width="2.5" />
+        <line x1="6" y1="92" x2="18" y2="92" stroke="#facc15" stroke-width="2.5" />
+      </symbol>
+
+      <!-- Frame Style 4: Quantum Pink Frame (Photoelectric Special) -->
+      <symbol id="hud-frame-pink" viewBox="0 0 340 260" preserveAspectRatio="none">
+        <path d="M 0 0 L 105 0 L 118 10 L 222 10 L 235 0 L 340 0 L 340 238 L 318 260 L 22 260 L 0 238 Z" 
+              fill="none" stroke="#ec4899" stroke-width="2" vector-effect="non-scaling-stroke" />
+        <polygon points="118 0, 222 0, 216 10, 124 10" fill="#ec4899" />
+        <polygon points="318 260, 340 238, 340 260" fill="#ec4899" />
+      </symbol>
+    </defs>
+  </svg>
+
   <div class="container">
 
     <!-- Top Futuristic Telemetry Strip (Image 3 Style) -->
@@ -711,22 +823,24 @@
 
       <!-- MASTER UNIVERSAL MULTI-TARGET AR SCANNER HERO CARD -->
       <div class="card master-ar-card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-hero"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">••••••••••</div>
         <div class="card-top">
-          <span class="lab-num" style="color:var(--cyan-glow); background:rgba(0, 240, 255, 0.2);">
+          <span class="lab-num">
             <i class="fa-solid fa-wand-magic-sparkles"></i> UNIVERSAL AR SCANNER
           </span>
-          <span class="chapter-tag" style="color:var(--cyan-glow);">สแกนทุกภาพในตำรา</span>
+          <span class="chapter-tag">สแกนทุกภาพในตำรา</span>
         </div>
         <h2>ระบบสแกนเนอร์ AR อัจฉริยะหลายภาพ (Universal Multi-Target WebAR)</h2>
         <p>เปิดกล้องครั้งเดียว แล้วนำไปส่องภาพใดก็ได้ในตำราเรียน (ภาพที่ 1.1 โพรงวัตถุดำ, ภาพที่ 1.2 หลอดโฟโตอิเล็กทริก, ภาพที่ 2.1 เดวิสสัน-เจอร์เมอร์) ระบบจะตรวจจับและสลับแสดงผลแบบจำลอง 3 มิติเชิงกายภาพตรงตามภาพที่ส่องให้อัตโนมัติ พร้อมแอนิเมชัน แถบนำทาง Bangchak Curve และเสียงไซเบอร์ล็อกเป้าหมาย</p>
         <div class="card-footer">
           <div class="features">
-            <span class="tag" style="color:var(--cyan-glow); border-color:var(--cyan-glow);"><i class="fa-solid fa-robot"></i> Auto Target AI</span>
-            <span class="tag" style="color:var(--gold-accent);">ภาพ 1.1</span>
-            <span class="tag" style="color:var(--cyan-glow);">ภาพ 1.2</span>
-            <span class="tag" style="color:#ec4899;">ภาพ 2.1</span>
+            <span class="tag"><i class="fa-solid fa-robot"></i> Auto Target AI</span>
+            <span class="tag">ภาพ 1.1</span>
+            <span class="tag">ภาพ 1.2</span>
+            <span class="tag">ภาพ 2.1</span>
             <span class="tag">Hidden Until Tracked</span>
           </div>
           <a href="ar_universal_tracking.html" class="btn-launch btn-master-launch">
@@ -736,33 +850,37 @@
       </div>
 
       <!-- SPECIAL AR TRACKING LAB: FIG 1.1 BLACKBODY CAVITY -->
-      <div class="card" style="border-color: rgba(245, 158, 11, 0.45); background: rgba(15, 23, 42, 0.9);">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+      <div class="card">
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-1"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
-          <span class="lab-num" style="color:var(--gold-accent); background:rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.4);">
+          <span class="lab-num">
             <i class="fa-solid fa-crosshairs"></i> AR TRACKING
           </span>
-          <span class="chapter-tag" style="color:var(--gold-accent);">ภาพที่ 1.1 ในเล่ม</span>
+          <span class="chapter-tag">ภาพที่ 1.1 ในเล่ม</span>
         </div>
-        <h2 style="color:var(--gold-accent);">แบบจำลองโพรงรังสีวัตถุดำ (Cavity AR Target)</h2>
+        <h2 style="color:var(--hud-gold);">แบบจำลองโพรงรังสีวัตถุดำ (Cavity AR Target)</h2>
         <p>ส่องกล้องไปที่ภาพที่ 1.1 ในหนังสือ เพื่อเรนเดอร์โมเดลโพรงกลวง 3D ลอยตัวเหนือหน้ากระดาษ พร้อมแอนิเมชันลำแสงสะท้อนภายในหลายทอด โหมดคลื่นนิ่ง และเสียงอะคูสติกเรียลไทม์</p>
         <div class="card-footer">
           <div class="features">
-            <span class="tag" style="color:var(--gold-accent);">Image Tracking</span>
+            <span class="tag">Image Tracking</span>
             <span class="tag">Pinhole Ray</span>
             <span class="tag">Audio Synth</span>
           </div>
-          <a href="ar_blackbody_cavity_tracking.html" class="btn-launch" style="border-color:var(--gold-accent); color:var(--gold-accent); background:rgba(245, 158, 11, 0.15);">
+          <a href="ar_blackbody_cavity_tracking.html" class="btn-launch">
             <i class="fa-solid fa-camera"></i> เปิด AR ส่องหนังสือ ➜
           </a>
         </div>
       </div>
 
       <!-- SPECIAL AR TRACKING LAB: FIG 1.2 PHOTOELECTRIC APPARATUS -->
-      <div class="card" style="border-color: rgba(236, 72, 153, 0.45); background: rgba(15, 23, 42, 0.9);">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+      <div class="card" style="--card-accent: #ec4899;">
+        <svg class="hud-frame-svg"><use href="#hud-frame-pink"></use></svg>
+        <div class="hud-top-spotlight" style="background: radial-gradient(ellipse at 50% 0%, rgba(236, 72, 153, 0.45) 0%, rgba(236, 72, 153, 0.1) 45%, transparent 75%);"></div>
+        <div class="hud-vent-stripes" style="background: repeating-linear-gradient(-45deg, #ec4899, #ec4899 2px, transparent 2px, transparent 6px);"></div>
+        <div class="hud-dots-accent" style="color: #020617;">•••••</div>
         <div class="card-top">
           <span class="lab-num" style="color:var(--pink-glow); background:rgba(236, 72, 153, 0.15); border-color: rgba(236, 72, 153, 0.4);">
             <i class="fa-solid fa-crosshairs"></i> AR TRACKING
@@ -773,11 +891,11 @@
         <p>ส่องกล้องไปที่ภาพที่ 1.2 ในหนังสือหน้า 25 เพื่อเรนเดอร์หลอดสุญญากาศแก้ว 3D การปลดปล่อยโฟโตอิเล็กตรอน แสง UV ปรับความยาวคลื่น และศักย์หยุดยั้ง</p>
         <div class="card-footer">
           <div class="features">
-            <span class="tag" style="color:var(--pink-glow);">Image Tracking</span>
-            <span class="tag">Phototube 3D</span>
-            <span class="tag">e⁻ Stream</span>
+            <span class="tag" style="color:var(--pink-glow); border-color:rgba(236, 72, 153, 0.3);">Image Tracking</span>
+            <span class="tag" style="color:var(--pink-glow); border-color:rgba(236, 72, 153, 0.3);">Phototube 3D</span>
+            <span class="tag" style="color:var(--pink-glow); border-color:rgba(236, 72, 153, 0.3);">e⁻ Stream</span>
           </div>
-          <a href="ar_photoelectric_tracking.html" class="btn-launch" style="border-color:var(--pink-glow); color:var(--pink-glow); background:rgba(236, 72, 153, 0.15);">
+          <a href="ar_photoelectric_tracking.html" class="btn-launch" style="border-color:var(--pink-glow); color:var(--pink-glow); background:rgba(236, 72, 153, 0.12);">
             <i class="fa-solid fa-camera"></i> เปิด AR ส่องหนังสือ ➜
           </a>
         </div>
@@ -785,8 +903,10 @@
 
       <!-- LAB 01 -->
       <div class="card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-1"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
           <span class="lab-num">LAB 01</span>
           <span class="chapter-tag">บทที่ 1</span>
@@ -801,8 +921,10 @@
 
       <!-- LAB 02 -->
       <div class="card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-2"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
           <span class="lab-num">LAB 02</span>
           <span class="chapter-tag">บทที่ 2</span>
@@ -817,8 +939,10 @@
 
       <!-- LAB 03 -->
       <div class="card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-1"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
           <span class="lab-num">LAB 03</span>
           <span class="chapter-tag">บทที่ 3</span>
@@ -833,8 +957,10 @@
 
       <!-- LAB 04 -->
       <div class="card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-2"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
           <span class="lab-num">LAB 04</span>
           <span class="chapter-tag">บทที่ 4</span>
@@ -849,8 +975,10 @@
 
       <!-- LAB 05 -->
       <div class="card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-1"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
           <span class="lab-num">LAB 05</span>
           <span class="chapter-tag">บทที่ 5</span>
@@ -865,8 +993,10 @@
 
       <!-- LAB 06 -->
       <div class="card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-2"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
           <span class="lab-num">LAB 06</span>
           <span class="chapter-tag">บทที่ 6</span>
@@ -881,8 +1011,10 @@
 
       <!-- LAB 07 -->
       <div class="card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-1"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
           <span class="lab-num">LAB 07</span>
           <span class="chapter-tag">บทที่ 7</span>
@@ -897,8 +1029,10 @@
 
       <!-- LAB 08 -->
       <div class="card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-2"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
           <span class="lab-num">LAB 08</span>
           <span class="chapter-tag">บทที่ 8</span>
@@ -913,8 +1047,10 @@
 
       <!-- LAB 09 -->
       <div class="card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-1"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
           <span class="lab-num">LAB 09</span>
           <span class="chapter-tag">บทที่ 9</span>
@@ -929,8 +1065,10 @@
 
       <!-- LAB 10 -->
       <div class="card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-2"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
           <span class="lab-num">LAB 10</span>
           <span class="chapter-tag">บทที่ 10</span>
@@ -945,8 +1083,10 @@
 
       <!-- LAB 11 -->
       <div class="card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-1"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
           <span class="lab-num">LAB 11</span>
           <span class="chapter-tag">บทที่ 10</span>
@@ -961,8 +1101,10 @@
 
       <!-- LAB 12 -->
       <div class="card">
-        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
-        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
+        <svg class="hud-frame-svg"><use href="#hud-frame-gold-2"></use></svg>
+        <div class="hud-top-spotlight"></div>
+        <div class="hud-vent-stripes"></div>
+        <div class="hud-dots-accent">•••••</div>
         <div class="card-top">
           <span class="lab-num">LAB 12</span>
           <span class="chapter-tag">บทที่ 9</span>
