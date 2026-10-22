@@ -610,8 +610,10 @@
       border-radius: 20px;
       z-index: 30;
       display: none;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: pointer;
       box-shadow: 0 0 30px rgba(0, 240, 255, 0.25);
+      overflow: hidden;
     }
     .reticle-corner {
       position: absolute;
@@ -623,19 +625,151 @@
     .rc-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; border-radius: 0 12px 0 0; }
     .rc-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; border-radius: 0 0 0 12px; }
     .rc-br { bottom: -2px; right: -2px; border-left: none; border-top: none; border-radius: 0 0 12px 0; }
+    
+    .reticle-scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3), #00f0ff, #fff, #00f0ff, rgba(0, 240, 255, 0.3), transparent);
+      box-shadow: 0 0 14px #00f0ff, 0 0 24px rgba(0, 240, 255, 0.8);
+      animation: scanLaser 2.2s infinite ease-in-out;
+    }
+    @keyframes scanLaser {
+      0% { top: 3%; opacity: 0.2; }
+      50% { top: 94%; opacity: 1; }
+      100% { top: 3%; opacity: 0.2; }
+    }
+    #ar-reticle.locked .reticle-scan-line {
+      display: none;
+    }
+
     .reticle-tag {
       position: absolute;
-      bottom: -36px;
+      bottom: -38px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(3, 7, 18, 0.9);
+      background: rgba(3, 7, 18, 0.92);
       border: 1px solid var(--cyan);
       color: var(--cyan);
-      font-size: 0.76rem;
-      padding: 4px 14px;
+      font-size: 0.78rem;
+      padding: 5px 16px;
       border-radius: 20px;
       white-space: nowrap;
       font-family: 'Chakra Petch', sans-serif;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+      pointer-events: none;
+    }
+
+    /* AR Start Fullscreen Modal / Card */
+    #ar-start-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, rgba(15, 23, 42, 0.95), rgba(3, 7, 18, 0.98));
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 120;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .ar-start-box {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1.5px solid rgba(0, 240, 255, 0.5);
+      border-radius: 24px;
+      max-width: 440px;
+      width: 100%;
+      padding: 28px 22px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 240, 255, 0.2);
+    }
+    .ar-start-badge {
+      display: inline-block;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 20px;
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--cyan);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    .ar-start-icon-wrap {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(139, 92, 246, 0.2));
+      border: 1.5px solid var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: var(--cyan);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+    }
+    .ar-start-box h2 {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.35rem;
+      color: #fff;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .ar-start-sub {
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      line-height: 1.55;
+      margin-bottom: 22px;
+    }
+    .btn-ar-action {
+      width: 100%;
+      background: linear-gradient(135deg, #00f0ff 0%, #0284c7 50%, #6366f1 100%);
+      color: #fff;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 30px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0, 240, 255, 0.4), inset 0 2px 3px rgba(255, 255, 255, 0.6);
+      transition: all 0.2s;
+    }
+    .btn-ar-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 240, 255, 0.6);
+    }
+    .btn-ar-action:active {
+      transform: scale(0.96);
+    }
+    .ar-start-links {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .link-btn {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.74rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .link-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
     }
 
     /* Modal for Target Image */
@@ -914,13 +1048,35 @@
     </div>
   </nav>
 
-  <!-- AR Scanning Reticle -->
+  <!-- AR Scanning Reticle with Cyber Laser Sweep -->
   <div id="ar-reticle">
     <div class="reticle-corner rc-tl"></div>
     <div class="reticle-corner rc-tr"></div>
     <div class="reticle-corner rc-bl"></div>
     <div class="reticle-corner rc-br"></div>
-    <div class="reticle-tag">🎯 เล็งกล้องไปที่ ภาพที่ 1.1 แบบจำลองโพรงรังสีวัตถุดำ ในหนังสือ</div>
+    <div class="reticle-scan-line"></div>
+    <div class="reticle-tag">🎯 นำกล้องส่องไปที่ ภาพที่ 1.1 แบบจำลองโพรงรังสีวัตถุดำ</div>
+  </div>
+
+  <!-- AR Start Mobile Splash / Camera Request Card -->
+  <div id="ar-start-overlay">
+    <div class="ar-start-box">
+      <div class="ar-start-badge">RBRU WebAR Image Tracking</div>
+      <div class="ar-start-icon-wrap">
+        <i class="fa-solid fa-camera"></i>
+      </div>
+      <h2>สแกน AR ส่องภาพที่ 1.1</h2>
+      <p class="ar-start-sub">
+        เปิดกล้องสมาร์ทโฟน แล้วนำไปส่องที่ <strong>ภาพที่ 1.1 แบบจำลองโพรงรังสีวัตถุดำ</strong> ในหนังสือหน้า 14 เพื่อเรนเดอร์วัตถุจำลอง 3 มิติและการแผ่รังสีลอยตัวเสมือนจริง
+      </p>
+      <button id="btn-launch-camera-ar" class="btn-ar-action">
+        <i class="fa-solid fa-camera"></i> แตะเพื่อเปิดกล้องส่อง AR ทันที
+      </button>
+      <div class="ar-start-links">
+        <button id="btn-see-target-img" class="link-btn">📖 ดูตัวอย่างภาพที่ 1.1</button>
+        <button id="btn-explore-3d-fallback" class="link-btn">🌐 โหมด 3D จำลองบนจอภาพ</button>
+      </div>
+    </div>
   </div>
 
   <!-- Modal Showing Target Marker Image -->
@@ -995,6 +1151,7 @@
     // 3D MODEL: BLACKBODY CAVITY (แบบจำลองโพรงรังสีวัตถุดำ 3 มิติ)
     // ==========================================================
     const cavityRootGroup = new THREE.Group();
+    cavityRootGroup.visible = false; // Initially hidden until Figure 1.1 image is detected!
     scene.add(cavityRootGroup);
 
     // 1. Outer Sphere Shell (Metallic/Ceramic Double-wall)
@@ -1508,15 +1665,20 @@
       document.getElementById('hand-skeleton-canvas').style.display = hand ? 'block' : 'none';
 
       if (ar || hand) {
+        // In AR mode, 3D model is initially HIDDEN until camera sees Figure 1.1!
+        isTargetLocked = false;
+        cavityRootGroup.visible = false;
+        updateReticleStatus(false);
         startCamera(ar ? { facingMode: 'environment' } : { facingMode: 'user' });
       } else {
         stopCamera();
-        isTargetLocked = false;
+        isTargetLocked = true;
+        cavityRootGroup.visible = true; // In 3D exploration mode, show model
         updateReticleStatus(false);
       }
 
       if (ar) {
-        cavityRootGroup.scale.set(0.7, 0.7, 0.7);
+        cavityRootGroup.scale.set(0.05, 0.05, 0.05);
         cavityRootGroup.position.set(0, -0.2, 0);
         if (window.innerWidth <= 768 && typeof setActiveBangchakTab === 'function') {
           setActiveBangchakTab(document.getElementById('mobTabHide'));
@@ -1525,6 +1687,7 @@
         cavityRootGroup.scale.set(1.0, 1.0, 1.0);
         cavityRootGroup.position.set(0, 0, 0);
         cavityRootGroup.rotation.set(0, 0, 0);
+        cavityRootGroup.visible = true;
       }
     }
 
@@ -1656,23 +1819,37 @@
     function toggleManualLock() {
       isTargetLocked = !isTargetLocked;
       updateReticleStatus(isTargetLocked, true);
-      if (isTargetLocked) playLockChime();
+      if (isTargetLocked) {
+        cavityRootGroup.visible = true;
+        cavityRootGroup.scale.set(0.1, 0.1, 0.1);
+        playLockChime();
+      } else {
+        if (isARMode) cavityRootGroup.visible = false;
+      }
     }
 
     reticle.addEventListener('click', toggleManualLock);
 
     function updateReticleStatus(locked, manual = false) {
       const tag = document.querySelector('.reticle-tag');
+      const scanLine = document.querySelector('.reticle-scan-line');
       if (locked) {
         reticle.classList.add('locked');
-        if (tag) tag.innerHTML = `✅ ตรวจพบภาพที่ 1.1: ล็อกโมเดล 3D บนหน้าหนังสือแล้ว ${manual ? '(แตะเพื่อปลดล็อก)' : ''}`;
+        if (tag) tag.innerHTML = `✅ ตรวจพบภาพที่ 1.1: กำลังแสดงแบบจำลอง 3D ${manual ? '(ล็อกด้วยมือ)' : ''}`;
+        if (scanLine) scanLine.style.display = 'none';
+        cavityRootGroup.visible = true;
       } else {
         reticle.classList.remove('locked');
-        if (tag) tag.innerHTML = '🎯 เล็งกล้องไปที่ ภาพที่ 1.1 แบบจำลองโพรงรังสีวัตถุดำ ในหนังสือ';
+        if (tag) tag.innerHTML = '🎯 นำกล้องส่องไปที่ ภาพที่ 1.1 แบบจำลองโพรงรังสีวัตถุดำ';
+        if (scanLine) scanLine.style.display = 'block';
+        if (isARMode) {
+          cavityRootGroup.visible = false; // Hide 3D model when image is not in frame!
+        }
       }
     }
 
     // Process Video Frame for Optical Feature Extraction on Figure 1.1
+    // Figure 1.1 signature: Dark circular cavity core (r < 34) on bright book page (r > 46)
     function processAROpticalFrame() {
       if (!isARMode || video.readyState < 2) return;
 
@@ -1688,45 +1865,50 @@
       trackerCtx.drawImage(video, sx, sy, cropSize, cropSize, 0, 0, 120, 120);
       const imgData = trackerCtx.getImageData(0, 0, 120, 120).data;
 
-      // Analyze contrast & dark circular cavity characteristics of Figure 1.1
-      let totalLuma = 0;
-      let darkCount = 0;
-      let centerDarkCount = 0;
-      const totalPixels = 120 * 120;
+      let outerLumaSum = 0, outerCount = 0;
+      let innerLumaSum = 0, innerCount = 0;
 
-      for (let y = 0; y < 120; y++) {
-        for (let x = 0; x < 120; x++) {
-          const idx = (y * 120 + x) * 4;
-          const luma = 0.299 * imgData[idx] + 0.587 * imgData[idx + 1] + 0.114 * imgData[idx + 2];
-          totalLuma += luma;
-          if (luma < 92) darkCount++;
-          // check if dark pixels cluster near center (the cavity sphere)
+      for (let y = 0; y < 120; y += 2) {
+        for (let x = 0; x < 120; x += 2) {
           const dx = x - 60;
           const dy = y - 60;
-          if (dx * dx + dy * dy < 38 * 38 && luma < 96) {
-            centerDarkCount++;
+          const r2 = dx * dx + dy * dy;
+          const idx = (y * 120 + x) * 4;
+          const luma = 0.299 * imgData[idx] + 0.587 * imgData[idx + 1] + 0.114 * imgData[idx + 2];
+
+          if (r2 > 46 * 46) {
+            outerLumaSum += luma;
+            outerCount++;
+          } else if (r2 < 34 * 34) {
+            innerLumaSum += luma;
+            innerCount++;
           }
         }
       }
 
-      const avgLuma = totalLuma / totalPixels;
-      const darkRatio = darkCount / totalPixels;
-      const centerConcentration = centerDarkCount / (Math.PI * 38 * 38);
+      const avgOuter = outerLumaSum / (outerCount || 1);
+      const avgInner = innerLumaSum / (innerCount || 1);
+      const contrastDiff = avgOuter - avgInner;
 
-      // Figure 1.1 criteria:
-      // - Printed book page has bright background (average luma > 60)
-      // - Cavity circle in center has dark values (centerConcentration > 0.18 and darkRatio > 0.07)
-      const isCavityMatch = (avgLuma > 55 && centerConcentration > 0.16 && darkRatio > 0.06);
+      // Figure 1.1 match condition:
+      // The outer paper page is brighter than the dark blackbody cavity interior!
+      const isCavityMatch = (avgOuter > 50 && contrastDiff > 16);
 
       if (isCavityMatch) {
         lockHoldFrames++;
-        if (lockHoldFrames >= 3 && !isTargetLocked) {
+        if (lockHoldFrames >= 2 && !isTargetLocked) {
           isTargetLocked = true;
+          cavityRootGroup.visible = true;
+          cavityRootGroup.scale.set(0.08, 0.08, 0.08); // materialization scale burst
           updateReticleStatus(true);
           playLockChime();
         }
       } else {
         if (lockHoldFrames > 0) lockHoldFrames--;
+        // If lost target for more than ~2.5 seconds
+        if (lockHoldFrames === 0 && isTargetLocked && !isHandTracking) {
+          // Keep lock if user prefers or unlock gracefully
+        }
       }
     }
 
@@ -1740,6 +1922,33 @@
       }
     }, { passive: true });
 
+    // Buttons on AR Start Mobile Overlay
+    const btnLaunchCameraAR = document.getElementById('btn-launch-camera-ar');
+    const btnSeeTargetImg = document.getElementById('btn-see-target-img');
+    const btnExplore3DFallback = document.getElementById('btn-explore-3d-fallback');
+    const arStartOverlay = document.getElementById('ar-start-overlay');
+
+    if (btnLaunchCameraAR) {
+      btnLaunchCameraAR.addEventListener('click', () => {
+        if (arStartOverlay) arStartOverlay.style.display = 'none';
+        initAudio();
+        setMode(true, false);
+      });
+    }
+
+    if (btnSeeTargetImg) {
+      btnSeeTargetImg.addEventListener('click', () => {
+        document.getElementById('target-modal').style.display = 'flex';
+      });
+    }
+
+    if (btnExplore3DFallback) {
+      btnExplore3DFallback.addEventListener('click', () => {
+        if (arStartOverlay) arStartOverlay.style.display = 'none';
+        setMode(false, false);
+      });
+    }
+
     // Animation Loop
     let clock = new THREE.Clock();
     let lastTrackTime = 0;
@@ -1748,16 +1957,17 @@
       requestAnimationFrame(animate);
       const time = clock.getElapsedTime();
 
-      // Optical tracking check in AR mode (every 120ms)
+      // Optical tracking check in AR mode (every 100ms)
       if (isARMode) {
-        if (time - lastTrackTime > 0.12) {
+        if (time - lastTrackTime > 0.10) {
           lastTrackTime = time;
           processAROpticalFrame();
         }
 
         if (isTargetLocked) {
-          // Smooth Lerp anchoring to book target
-          cavityRootGroup.scale.lerp(new THREE.Vector3(0.85, 0.85, 0.85), 0.1);
+          // Model is revealed! Smooth lerp expand to anchored target
+          cavityRootGroup.visible = true;
+          cavityRootGroup.scale.lerp(new THREE.Vector3(0.85, 0.85, 0.85), 0.14);
           if (hasOrientationSupport) {
             // Compensate device tilt to anchor cavity squarely on the book!
             const targetRotX = (deviceOrientation.beta - 45) * (Math.PI / 180) * 0.45;
@@ -1765,7 +1975,13 @@
             cavityRootGroup.rotation.x = THREE.MathUtils.lerp(cavityRootGroup.rotation.x, targetRotX, 0.1);
             cavityRootGroup.rotation.z = THREE.MathUtils.lerp(cavityRootGroup.rotation.z, targetRotZ, 0.1);
           }
+        } else {
+          // In AR mode, HIDE the 3D model until the target image is scanned!
+          cavityRootGroup.visible = false;
         }
+      } else {
+        // In 3D exploration mode, model is always visible
+        cavityRootGroup.visible = true;
       }
 
       // Subtle cavity idle oscillation in 3D exploration mode
@@ -1912,7 +2128,9 @@
       }
     }
 
-    // Initial setup
+    // Initial setup: Default to AR Camera Scanning Mode
+    isARMode = true;
+    cavityRootGroup.visible = false;
     applyResponsiveLayout();
     updatePhysics(5800);
     animate();
