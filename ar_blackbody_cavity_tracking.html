@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>3D AR Simulation: แบบจำลองโพรงรังสีวัตถุดำ (Blackbody Cavity AR Tracking) — ผศ.ดร.ชีวะ ทัศนา</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Three.js (r128) & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- MediaPipe Hands & Camera Utils -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+  <style>
+    :root {
+      --cyan: #00f0ff;
+      --gold: #f59e0b;
+      --purple: #a855f7;
+      --pink: #ec4899;
+      --emerald: #10b981;
+      --navy-dark: #030712;
+      --panel-glass: rgba(10, 16, 36, 0.78);
+      --glass-border: rgba(0, 240, 255, 0.25);
+      --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+    body {
+      background: var(--navy-dark);
+      color: #f8fafc;
+      font-family: 'Prompt', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    #webgl-canvas-container {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: radial-gradient(circle at 50% 30%, #0f1d38 0%, #030712 90%);
+    }
+
+    /* Live Camera Feed for AR Tracking Mode */
+    #camera-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      display: none;
+    }
+
+    /* Hand Tracking Canvas */
+    #hand-skeleton-canvas {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 220px;
+      height: 165px;
+      border-radius: 14px;
+      border: 2px solid var(--cyan);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+      z-index: 45;
+      background: rgba(0, 0, 0, 0.6);
+      transform: scaleX(-1);
+      display: none;
+    }
+
+    /* Top Nav Mode Switcher */
+    .top-nav {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(10, 18, 40, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 6px 14px;
+      border-radius: 40px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      max-width: 95vw;
+    }
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 600;
+      font-size: 0.84rem;
+      padding: 7px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.22s ease;
+      white-space: nowrap;
+    }
+    .mode-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+    .mode-btn.active {
+      color: #030712;
+      background: var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+      font-weight: 700;
+    }
+    .btn-target-preview {
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: var(--gold);
+      background: rgba(245, 158, 11, 0.1);
+    }
+    .btn-target-preview:hover {
+      background: var(--gold);
+      color: #030712;
+    }
+
+    /* Left Control HUD */
+    .left-hud {
+      position: absolute;
+      top: 76px;
+      left: 18px;
+      z-index: 40;
+      width: clamp(280px, 24vw, 320px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: auto;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+
+    /* Right Telemetry HUD */
+    .right-hud {
+      position: absolute;
+      top: 76px;
+      right: 18px;
+      z-index: 40;
+      width: clamp(280px, 24vw, 320px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: auto;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+
+    .glass-card {
+      background: var(--panel-glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--glass-shadow);
+    }
+
+    .card-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+    }
+
+    /* Slider & Controls */
+    .control-row {
+      margin-bottom: 12px;
+    }
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .control-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.15);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .btn-preset {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 6px 4px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-family: 'Chakra Petch', sans-serif;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .btn-preset:hover, .btn-preset.active {
+      background: rgba(0, 240, 255, 0.18);
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.82rem;
+      color: #e2e8f0;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: rgba(255,255,255,0.2);
+      transition: .3s;
+      border-radius: 20px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--cyan); }
+    input:checked + .slider:before { transform: translateX(18px); }
+
+    /* Telemetry items */
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.82rem;
+    }
+    .metric-name { color: #94a3b8; }
+    .metric-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* AR Reticle Overlay */
+    #ar-reticle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(340px, 75vw);
+      height: min(340px, 75vw);
+      border: 2px dashed rgba(0, 240, 255, 0.6);
+      border-radius: 20px;
+      z-index: 30;
+      display: none;
+      pointer-events: none;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.25);
+    }
+    .reticle-corner {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--cyan);
+    }
+    .rc-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; border-radius: 12px 0 0 0; }
+    .rc-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; border-radius: 0 12px 0 0; }
+    .rc-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; border-radius: 0 0 0 12px; }
+    .rc-br { bottom: -2px; right: -2px; border-left: none; border-top: none; border-radius: 0 0 12px 0; }
+    .reticle-tag {
+      position: absolute;
+      bottom: -36px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(3, 7, 18, 0.9);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-size: 0.76rem;
+      padding: 4px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+      font-family: 'Chakra Petch', sans-serif;
+    }
+
+    /* Modal for Target Image */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal-card {
+      background: #0f172a;
+      border: 1px solid var(--cyan);
+      border-radius: 20px;
+      max-width: 520px;
+      width: 100%;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+    }
+    .modal-card img {
+      width: 100%;
+      max-height: 320px;
+      object-fit: contain;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #fff;
+      margin: 15px 0;
+    }
+    .btn-close-modal {
+      background: var(--cyan);
+      color: #030712;
+      border: none;
+      padding: 8px 24px;
+      border-radius: 20px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Live 2D Spectrum Canvas in HUD */
+    #spectrum-canvas {
+      width: 100%;
+      height: 90px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <div class="top-nav">
+    <button class="mode-btn active" id="btn-mode-3d">🌐 โหมด 3D สำรวจอิสระ</button>
+    <button class="mode-btn" id="btn-mode-ar">📷 โหมด AR ส่องหน้าหนังสือ</button>
+    <button class="mode-btn" id="btn-mode-hand">✋ AI สั่งการด้วยมือ</button>
+    <button class="mode-btn btn-target-preview" id="btn-view-target">📖 ดูภาพเป้าหมาย (ภาพที่ 1.1)</button>
+  </div>
+
+  <!-- Left Control HUD -->
+  <div class="left-hud">
+    <!-- Controller Card -->
+    <div class="glass-card">
+      <div class="card-title">
+        <span>🔥 อุณหภูมิโพรงรังสี (Cavity Temperature)</span>
+      </div>
+
+      <div class="control-row">
+        <div class="control-label">
+          <span>อุณหภูมิสัมบูรณ์ T</span>
+          <span class="control-val" id="disp-temp">5,800 K</span>
+        </div>
+        <input type="range" id="slider-temp" min="1000" max="8000" step="50" value="5800">
+      </div>
+
+      <div class="preset-grid">
+        <button class="btn-preset" onclick="setTemp(1800)">เตาอบ 1800K</button>
+        <button class="btn-preset" onclick="setTemp(2850)">หลอดไฟ 2850K</button>
+        <button class="btn-preset active" onclick="setTemp(5800)">ดวงอาทิตย์ 5800K</button>
+      </div>
+
+      <div class="toggle-row">
+        <span>เส้นทางการสะท้อนภายใน (Ray Tracing)</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-rays" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span>โหมดคลื่นนิ่งในโพรง (Standing Modes)</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-standing-waves" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span>ตัดขวางมองทะลุภายใน (Cutaway View)</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-cutaway" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Acoustic Sound Card -->
+    <div class="glass-card">
+      <div class="card-title" style="color:var(--purple);">
+        <span>🔊 เสียงสังเคราะห์อะคูสติกควอนตัม</span>
+      </div>
+      <div class="toggle-row">
+        <span>เปิดเสียงฮัมเรโซแนนซ์ (Thermal Hum)</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-audio">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div style="font-size:0.75rem; color:#94a3b8; line-height:1.4;">
+        สร้างเสียงแบบเรียลไทม์ด้วย Web Audio API ความถี่ผันแปรตามอุณหภูมิ $f \propto T$
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Telemetry HUD -->
+  <div class="right-hud">
+    <div class="glass-card">
+      <div class="card-title" style="color:var(--gold);">
+        <span>📊 การวัดเชิงฟิสิกส์ (Live Telemetry)</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-name">ความยาวคลื่นยอด $\lambda_{\max}$ (วีน)</span>
+        <span class="metric-value" id="val-lmax" style="color:var(--cyan);">499.6 nm</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-name">กำลังการแผ่รังสีรวม $P = \sigma T^4$</span>
+        <span class="metric-value" id="val-power" style="color:var(--gold);">6.42 × 10⁷ W/m²</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-name">พลังงานเฉลี่ยต่อโหมด (Planck)</span>
+        <span class="metric-value" id="val-eavg" style="color:var(--emerald);">0.500 eV</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-name">พลังงานเฉลี่ยคลาสสิก (Rayleigh)</span>
+        <span class="metric-value" id="val-erj" style="color:#ef4444;">0.500 eV</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-name">สีรังสีที่เปล่งจากรูเปิด</span>
+        <span class="metric-value" id="val-color-name" style="color:#fff;">ขาวสว่างสุริยะ</span>
+      </div>
+
+      <canvas id="spectrum-canvas" width="280" height="90"></canvas>
+    </div>
+
+    <div class="glass-card">
+      <div class="card-title" style="color:#38bdf8;">
+        <span>📖 ความสอดคล้องกับภาพที่ 1.1</span>
+      </div>
+      <div style="font-size:0.78rem; color:#cbd5e1; line-height:1.5;">
+        • <strong>รูเปิด (Pinhole)</strong>: แสงภายนอกลอดเข้าไปสะท้อนซ้ำแล้วถูกดูดกลืน 100% จึงทำหน้าที่เป็นวัตถุดำสมบูรณ์<br>
+        • <strong>รังสีที่เปล่งออก</strong>: สะท้อนสมดุลความร้อนของสนามแม่เหล็กไฟฟ้าภายในโพรง
+      </div>
+    </div>
+  </div>
+
+  <!-- AR Scanning Reticle -->
+  <div id="ar-reticle">
+    <div class="reticle-corner rc-tl"></div>
+    <div class="reticle-corner rc-tr"></div>
+    <div class="reticle-corner rc-bl"></div>
+    <div class="reticle-corner rc-br"></div>
+    <div class="reticle-tag">🎯 เล็งกล้องไปที่ ภาพที่ 1.1 แบบจำลองโพรงรังสีวัตถุดำ ในหนังสือ</div>
+  </div>
+
+  <!-- Modal Showing Target Marker Image -->
+  <div class="modal-backdrop" id="target-modal">
+    <div class="modal-card">
+      <h3 style="font-family:'Chakra Petch'; color:var(--cyan); font-size:1.15rem;">ภาพเป้าหมายสำหรับสแกน AR (Tracking Target)</h3>
+      <p style="font-size:0.85rem; color:#94a3b8; margin-top:4px;">
+        ภาพที่ 1.1 แบบจำลองโพรงรังสีวัตถุดำ จากหนังสือหน้า 14
+      </p>
+      <img src="target_fig1_blackbody_cavity.png" alt="Blackbody Cavity AR Target">
+      <p style="font-size:0.78rem; color:#f59e0b; margin-bottom:15px;">
+        💡 เปิดหน้านี้บนจอคอมพิวเตอร์ แล้วใช้สมาร์ทโฟนส่อง หรือส่องไปที่หน้าหนังสือจริง
+      </p>
+      <button class="btn-close-modal" onclick="closeTargetModal()">เข้าใจแล้ว / ปิดหน้าต่าง</button>
+    </div>
+  </div>
+
+  <!-- Video Element for AR Camera -->
+  <video id="camera-video" playsinline></video>
+  <canvas id="hand-skeleton-canvas"></canvas>
+
+  <!-- 3D WebGL Canvas Container -->
+  <div id="webgl-canvas-container"></div>
+
+  <script>
+    // Constants
+    const C_LIGHT = 2.99792458e8;
+    const H_PLANCK = 6.62607015e-34;
+    const K_BOLTZ = 1.380649e-23;
+    const SIGMA_SB = 5.670374419e-8;
+    const B_WIEN = 2.897771955e-3;
+
+    let currentTemp = 5800;
+    let isCutaway = true;
+    let showRays = true;
+    let showStandingWaves = true;
+    let isARMode = false;
+    let isHandTracking = false;
+
+    // WebGL Setup
+    const container = document.getElementById('webgl-canvas-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(3.8, 2.4, 5.0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxDistance = 15;
+    controls.minDistance = 1.5;
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    dirLight.position.set(5, 8, 5);
+    scene.add(dirLight);
+
+    const cavityGlowLight = new THREE.PointLight(0xffaa33, 2.5, 8, 1.2);
+    cavityGlowLight.position.set(0, 0, 0);
+    scene.add(cavityGlowLight);
+
+    // ==========================================================
+    // 3D MODEL: BLACKBODY CAVITY (แบบจำลองโพรงรังสีวัตถุดำ 3 มิติ)
+    // ==========================================================
+    const cavityRootGroup = new THREE.Group();
+    scene.add(cavityRootGroup);
+
+    // 1. Outer Sphere Shell (Metallic/Ceramic Double-wall)
+    const shellRadius = 1.6;
+    const outerShellGeo = new THREE.SphereGeometry(shellRadius, 48, 48, 0, Math.PI * 1.55); // Cutaway 3/4
+    const outerShellMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      metalness: 0.85,
+      roughness: 0.25,
+      side: THREE.DoubleSide
+    });
+    const outerShellMesh = new THREE.Mesh(outerShellGeo, outerShellMat);
+    cavityRootGroup.add(outerShellMesh);
+
+    // Closed full shell for toggle
+    const fullShellGeo = new THREE.SphereGeometry(shellRadius, 48, 48);
+    const fullShellMesh = new THREE.Mesh(fullShellGeo, outerShellMat);
+    fullShellMesh.visible = false;
+    cavityRootGroup.add(fullShellMesh);
+
+    // Inner Absorptive Carbon/Graphite Wall Lining
+    const innerRadius = 1.52;
+    const innerLiningGeo = new THREE.SphereGeometry(innerRadius, 48, 48, 0, Math.PI * 1.55);
+    const innerLiningMat = new THREE.MeshStandardMaterial({
+      color: 0x050508,
+      roughness: 0.95,
+      metalness: 0.1,
+      side: THREE.BackSide,
+      emissive: 0xff6600,
+      emissiveIntensity: 0.3
+    });
+    const innerLiningMesh = new THREE.Mesh(innerLiningGeo, innerLiningMat);
+    cavityRootGroup.add(innerLiningMesh);
+
+    // 2. Entrance Pinhole Aperture (รูเปิดขนาดเล็ก)
+    const apertureGeo = new THREE.CylinderGeometry(0.18, 0.35, 0.45, 32, 1, true);
+    apertureGeo.rotateZ(Math.PI / 2);
+    const apertureMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9, roughness: 0.15 });
+    const apertureMesh = new THREE.Mesh(apertureGeo, apertureMat);
+    apertureMesh.position.set(-shellRadius, 0, 0);
+    cavityRootGroup.add(apertureMesh);
+
+    // Aperture Exit Glow Ring
+    const glowRingGeo = new THREE.TorusGeometry(0.20, 0.03, 16, 32);
+    glowRingGeo.rotateY(Math.PI / 2);
+    const glowRingMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+    const glowRingMesh = new THREE.Mesh(glowRingGeo, glowRingMat);
+    glowRingMesh.position.set(-shellRadius - 0.22, 0, 0);
+    cavityRootGroup.add(glowRingMesh);
+
+    // 3. Multiple Internal Reflections Ray Tracing Paths (ลำรังสีสะท้อนภายใน)
+    const rayPoints = [
+      new THREE.Vector3(-3.2, 0.05, 0),       // Incoming incident beam from outside
+      new THREE.Vector3(-shellRadius, 0.05, 0),// Enters aperture
+      new THREE.Vector3(0.95, 0.98, -0.65),    // Bounce 1
+      new THREE.Vector3(1.2, -0.75, 0.60),     // Bounce 2
+      new THREE.Vector3(-0.85, -1.15, -0.45),  // Bounce 3
+      new THREE.Vector3(-1.10, 0.85, 0.55),    // Bounce 4
+      new THREE.Vector3(0.40, -1.35, -0.40),   // Bounce 5
+      new THREE.Vector3(1.35, 0.35, 0.50),     // Bounce 6
+      new THREE.Vector3(-0.30, 0.20, -1.35),   // Bounce 7
+      new THREE.Vector3(0.10, -0.10, 0.05)     // Completely absorbed inside core
+    ];
+
+    const raySegmentsGroup = new THREE.Group();
+    cavityRootGroup.add(raySegmentsGroup);
+
+    // Create segments with diminishing brightness (demonstrating absorption)
+    for (let i = 0; i < rayPoints.length - 1; i++) {
+      const p1 = rayPoints[i];
+      const p2 = rayPoints[i + 1];
+      const dist = p1.distanceTo(p2);
+      const cylGeo = new THREE.CylinderGeometry(0.025 * Math.pow(0.88, i), 0.025 * Math.pow(0.88, i), dist, 12);
+      
+      const mid = p1.clone().add(p2).multiplyScalar(0.5);
+      const orientation = new THREE.Matrix4();
+      orientation.lookAt(p1, p2, new THREE.Vector3(0, 1, 0));
+      orientation.multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+      cylGeo.applyMatrix4(orientation);
+      cylGeo.translate(mid.x, mid.y, mid.z);
+
+      const segmentMat = new THREE.MeshBasicMaterial({
+        color: 0xffea00,
+        transparent: true,
+        opacity: Math.max(0.15, Math.pow(0.85, i))
+      });
+      const segmentMesh = new THREE.Mesh(cylGeo, segmentMat);
+      raySegmentsGroup.add(segmentMesh);
+    }
+
+    // Emerging Thermal Emission Beam from Aperture
+    const emergingBeamGeo = new THREE.CylinderGeometry(0.16, 0.85, 2.5, 32, 1, true);
+    emergingBeamGeo.rotateZ(Math.PI / 2);
+    emergingBeamGeo.translate(-shellRadius - 1.45, 0, 0);
+    const emergingBeamMat = new THREE.MeshBasicMaterial({
+      color: 0xffaa00,
+      transparent: true,
+      opacity: 0.65,
+      side: THREE.DoubleSide
+    });
+    const emergingBeamMesh = new THREE.Mesh(emergingBeamGeo, emergingBeamMat);
+    cavityRootGroup.add(emergingBeamMesh);
+
+    // 4. Electromagnetic Standing Wave Modes (โหมดคลื่นนิ่งแม่เหล็กไฟฟ้า)
+    const standingWaveGroup = new THREE.Group();
+    cavityRootGroup.add(standingWaveGroup);
+
+    const wavePointsCount = 60;
+    const waveGeo = new THREE.BufferGeometry();
+    const wavePositions = new Float32Array(wavePointsCount * 3);
+    waveGeo.setAttribute('position', new THREE.BufferAttribute(wavePositions, 3));
+    const waveMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 2, transparent: true, opacity: 0.85 });
+    
+    // Create an orthogonal grid of standing wave harmonic lines
+    const waveLines = [];
+    for (let k = 0; k < 6; k++) {
+      const g = waveGeo.clone();
+      const line = new THREE.Line(g, waveMat.clone());
+      line.rotation.y = (k * Math.PI) / 3;
+      standingWaveGroup.add(line);
+      waveLines.push(line);
+    }
+
+    // 5. Thermal Photon Cloud Particle System
+    const photonCount = 200;
+    const photonGeo = new THREE.BufferGeometry();
+    const photonPos = new Float32Array(photonCount * 3);
+    const photonVel = [];
+    for (let p = 0; p < photonCount; p++) {
+      const r = Math.cbrt(Math.random()) * (innerRadius - 0.1);
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      photonPos[p * 3] = r * Math.sin(phi) * Math.cos(theta);
+      photonPos[p * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      photonPos[p * 3 + 2] = r * Math.cos(phi);
+      photonVel.push(new THREE.Vector3((Math.random() - 0.5) * 0.04, (Math.random() - 0.5) * 0.04, (Math.random() - 0.5) * 0.04));
+    }
+    photonGeo.setAttribute('position', new THREE.BufferAttribute(photonPos, 3));
+    const photonMat = new THREE.PointsMaterial({
+      size: 0.07,
+      color: 0xffaa00,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+    const photonSystem = new THREE.Points(photonGeo, photonMat);
+    cavityRootGroup.add(photonSystem);
+
+    // ==========================================================
+    // AUDIO SYNTHESIZER (WEB AUDIO API: 0-BYTE AUDIO)
+    // ==========================================================
+    let audioCtx = null;
+    let osc = null;
+    let gainNode = null;
+
+    function initAudio() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      osc = audioCtx.createOscillator();
+      gainNode = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+    }
+
+    // Color Temperature Mapper
+    function tempToColor(T) {
+      let r, g, b;
+      const t = T / 100;
+      if (t <= 66) {
+        r = 255;
+        g = Math.min(255, Math.max(0, 99.4708025861 * Math.log(t) - 161.1195681661));
+      } else {
+        r = Math.min(255, Math.max(0, 329.698727446 * Math.pow(t - 60, -0.1332047592)));
+        g = Math.min(255, Math.max(0, 288.1221695283 * Math.pow(t - 60, -0.0755148492)));
+      }
+      if (t >= 66) {
+        b = 255;
+      } else if (t <= 19) {
+        b = 0;
+      } else {
+        b = Math.min(255, Math.max(0, 138.5177312231 * Math.log(t - 10) - 305.0447927307));
+      }
+      return {
+        hex: (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(b),
+        css: `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`
+      };
+    }
+
+    // Update Physics Parameters
+    function updatePhysics(T) {
+      currentTemp = T;
+      document.getElementById('disp-temp').textContent = `${T.toLocaleString()} K`;
+
+      // Wien's Law: lambda_max = b / T
+      const lambda_max_m = B_WIEN / T;
+      const lambda_max_nm = lambda_max_m * 1e9;
+      document.getElementById('val-lmax').textContent = `${lambda_max_nm.toFixed(1)} nm`;
+
+      // Stefan-Boltzmann Law: P = sigma * T^4
+      const power = SIGMA_SB * Math.pow(T, 4);
+      document.getElementById('val-power').textContent = `${(power / 1e7).toFixed(2)} × 10⁷ W/m²`;
+
+      // Planck average mode energy at peak
+      const nu_max = C_LIGHT / lambda_max_m;
+      const x = (H_PLANCK * nu_max) / (K_BOLTZ * T);
+      const E_planck_J = (H_PLANCK * nu_max) / (Math.exp(x) - 1);
+      const E_planck_eV = E_planck_J / 1.602176634e-19;
+      const E_rj_eV = (K_BOLTZ * T) / 1.602176634e-19;
+      
+      document.getElementById('val-eavg').textContent = `${E_planck_eV.toFixed(3)} eV`;
+      document.getElementById('val-erj').textContent = `${E_rj_eV.toFixed(3)} eV`;
+
+      // Visual color update
+      const col = tempToColor(T);
+      const threeColor = new THREE.Color(col.hex);
+
+      innerLiningMat.emissive.copy(threeColor);
+      innerLiningMat.emissiveIntensity = Math.min(1.5, 0.15 + (T / 8000) * 1.2);
+      cavityGlowLight.color.copy(threeColor);
+      cavityGlowLight.intensity = 1.0 + (T / 8000) * 3.5;
+
+      emergingBeamMat.color.copy(threeColor);
+      emergingBeamMat.opacity = Math.min(0.85, 0.3 + (T / 8000) * 0.5);
+      glowRingMat.color.copy(threeColor);
+      photonMat.color.copy(threeColor);
+
+      // Color name description
+      let colorDesc = "แดงคล้ำ (Dull Red)";
+      if (T >= 2500 && T < 4500) colorDesc = "ส้ม-เหลืองทอง (Tungsten)";
+      else if (T >= 4500 && T < 6500) colorDesc = "ขาวสว่างสุริยะ (Solar White)";
+      else if (T >= 6500) colorDesc = "ฟ้า-น้ำเงินคราม (Sirius/Hot Star)";
+      document.getElementById('val-color-name').textContent = colorDesc;
+
+      // Update Audio Synthesizer
+      if (audioCtx && gainNode && document.getElementById('toggle-audio').checked) {
+        const freq = 90 + (T / 8000) * 220;
+        osc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
+      }
+
+      drawSpectrumCurve(T);
+    }
+
+    // Live 2D Planck Spectrum Canvas Graph
+    function drawSpectrumCurve(T) {
+      const cvs = document.getElementById('spectrum-canvas');
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width;
+      const h = cvs.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Background grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(30, 10); ctx.lineTo(30, h - 20); ctx.lineTo(w - 10, h - 20);
+      ctx.stroke();
+
+      // Planck curve
+      ctx.beginPath();
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 2;
+
+      const lambda_max_nm = (B_WIEN / T) * 1e9;
+      for (let px = 30; px < w - 10; px++) {
+        const lam = 100 + ((px - 30) / (w - 40)) * 2500; // 100 to 2600 nm
+        const lam_m = lam * 1e-9;
+        const u = (8 * Math.PI * H_PLANCK * C_LIGHT / Math.pow(lam_m, 5)) / (Math.exp((H_PLANCK * C_LIGHT) / (lam_m * K_BOLTZ * T)) - 1);
+        
+        // Normalize for graph
+        const u_peak = (8 * Math.PI * H_PLANCK * C_LIGHT / Math.pow(lambda_max_nm * 1e-9, 5)) / (Math.exp(4.96511423) - 1);
+        const py = (h - 22) - (u / u_peak) * (h - 35);
+        if (px === 30) ctx.moveTo(px, Math.max(10, py));
+        else ctx.lineTo(px, Math.max(10, py));
+      }
+      ctx.stroke();
+
+      // Peak indicator
+      const peakX = 30 + ((lambda_max_nm - 100) / 2500) * (w - 40);
+      if (peakX >= 30 && peakX <= w - 10) {
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(peakX, 15, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '9px JetBrains Mono';
+        ctx.fillText(`λ max`, peakX - 12, 10);
+      }
+    }
+
+    // UI Listeners
+    document.getElementById('slider-temp').addEventListener('input', (e) => {
+      updatePhysics(parseFloat(e.target.value));
+    });
+
+    function setTemp(t) {
+      document.getElementById('slider-temp').value = t;
+      document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      updatePhysics(t);
+    }
+
+    document.getElementById('toggle-cutaway').addEventListener('change', (e) => {
+      isCutaway = e.target.checked;
+      outerShellMesh.visible = isCutaway;
+      innerLiningMesh.visible = isCutaway;
+      fullShellMesh.visible = !isCutaway;
+    });
+
+    document.getElementById('toggle-rays').addEventListener('change', (e) => {
+      showRays = e.target.checked;
+      raySegmentsGroup.visible = showRays;
+    });
+
+    document.getElementById('toggle-standing-waves').addEventListener('change', (e) => {
+      showStandingWaves = e.target.checked;
+      standingWaveGroup.visible = showStandingWaves;
+    });
+
+    document.getElementById('toggle-audio').addEventListener('change', (e) => {
+      initAudio();
+      if (gainNode) {
+        gainNode.gain.setTargetAtTime(e.target.checked ? 0.08 : 0.0001, audioCtx.currentTime, 0.05);
+      }
+    });
+
+    // Modal Target Preview
+    document.getElementById('btn-view-target').addEventListener('click', () => {
+      document.getElementById('target-modal').style.display = 'flex';
+    });
+    function closeTargetModal() {
+      document.getElementById('target-modal').style.display = 'none';
+    }
+
+    // AR Mode Switcher
+    const video = document.getElementById('camera-video');
+    const reticle = document.getElementById('ar-reticle');
+
+    document.getElementById('btn-mode-3d').addEventListener('click', () => {
+      setMode(false, false);
+    });
+
+    document.getElementById('btn-mode-ar').addEventListener('click', () => {
+      setMode(true, false);
+    });
+
+    document.getElementById('btn-mode-hand').addEventListener('click', () => {
+      setMode(false, true);
+    });
+
+    function setMode(ar, hand) {
+      isARMode = ar;
+      isHandTracking = hand;
+
+      document.getElementById('btn-mode-3d').classList.toggle('active', !ar && !hand);
+      document.getElementById('btn-mode-ar').classList.toggle('active', ar);
+      document.getElementById('btn-mode-hand').classList.toggle('active', hand);
+
+      reticle.style.display = ar ? 'block' : 'none';
+      document.getElementById('hand-skeleton-canvas').style.display = hand ? 'block' : 'none';
+
+      if (ar || hand) {
+        startCamera(ar ? { facingMode: 'environment' } : { facingMode: 'user' });
+      } else {
+        stopCamera();
+      }
+
+      if (ar) {
+        cavityRootGroup.scale.set(0.7, 0.7, 0.7);
+        cavityRootGroup.position.set(0, -0.2, 0);
+      } else {
+        cavityRootGroup.scale.set(1.0, 1.0, 1.0);
+        cavityRootGroup.position.set(0, 0, 0);
+      }
+    }
+
+    let cameraStream = null;
+    async function startCamera(constraints) {
+      try {
+        if (cameraStream) stopCamera();
+        cameraStream = await navigator.mediaDevices.getUserMedia({ video: constraints, audio: false });
+        video.srcObject = cameraStream;
+        video.play();
+        video.style.display = 'block';
+
+        if (isHandTracking) {
+          initMediaPipeHands();
+        }
+      } catch (err) {
+        alert("ไม่สามารถเข้าถึงกล้องได้: " + err.message + "\nสลับกลับสู่โหมด 3D จำลองบนจอภาพ");
+        setMode(false, false);
+      }
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+      video.style.display = 'none';
+    }
+
+    // MediaPipe Hands AI Setup
+    let mpHands = null;
+    function initMediaPipeHands() {
+      if (mpHands) return;
+      mpHands = new Hands({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+      });
+      mpHands.setOptions({
+        maxNumHands: 1,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.65,
+        minTrackingConfidence: 0.6
+      });
+
+      const handCanvas = document.getElementById('hand-skeleton-canvas');
+      const handCtx = handCanvas.getContext('2d');
+
+      mpHands.onResults((results) => {
+        handCtx.clearRect(0, 0, handCanvas.width, handCanvas.height);
+        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+          const lms = results.multiHandLandmarks[0];
+          drawHandSkeleton(handCtx, lms, handCanvas.width, handCanvas.height);
+
+          // Pinch Gesture Detection: Thumb tip (4) to Index tip (8)
+          const dx = lms[4].x - lms[8].x;
+          const dy = lms[4].y - lms[8].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          // Hand position controls Temperature
+          if (dist < 0.08) {
+            // Pinching: Map Hand Y to Temperature
+            const targetT = Math.round(1000 + (1.0 - lms[8].y) * 7000);
+            updatePhysics(Math.max(1000, Math.min(8000, targetT)));
+            document.getElementById('slider-temp').value = currentTemp;
+          } else {
+            // Open Hand: Rotate Cavity based on Hand X
+            cavityRootGroup.rotation.y = (lms[9].x - 0.5) * Math.PI * 2;
+          }
+        }
+      });
+
+      const cameraUtil = new Camera(video, {
+        onFrame: async () => {
+          if (isHandTracking) await mpHands.send({ image: video });
+        },
+        width: 320,
+        height: 240
+      });
+      cameraUtil.start();
+    }
+
+    function drawHandSkeleton(ctx, lms, w, h) {
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 2;
+      ctx.fillStyle = '#f59e0b';
+      for (let i = 0; i < lms.length; i++) {
+        const x = lms[i].x * w;
+        const y = lms[i].y * h;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Animation Loop
+    let clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const time = clock.getElapsedTime();
+
+      // Subtle cavity idle oscillation
+      if (!isHandTracking) {
+        cavityRootGroup.rotation.y += 0.003;
+      }
+
+      // Animate Electromagnetic Standing Waves inside cavity
+      if (showStandingWaves) {
+        waveLines.forEach((line, idx) => {
+          const pos = line.geometry.attributes.position.array;
+          const k_harmonic = 2.0 + (idx % 3);
+          for (let i = 0; i < wavePointsCount; i++) {
+            const xi = -1.2 + (i / wavePointsCount) * 2.4;
+            const envelope = Math.sin(Math.PI * (i / wavePointsCount));
+            const yi = envelope * 0.45 * Math.sin(k_harmonic * xi * 2.5 - time * 6.0);
+            pos[i * 3] = xi;
+            pos[i * 3 + 1] = yi;
+            pos[i * 3 + 2] = 0;
+          }
+          line.geometry.attributes.position.needsUpdate = true;
+        });
+      }
+
+      // Animate Thermal Photons
+      const pos = photonSystem.geometry.attributes.position.array;
+      for (let p = 0; p < photonCount; p++) {
+        pos[p * 3] += photonVel[p].x;
+        pos[p * 3 + 1] += photonVel[p].y;
+        pos[p * 3 + 2] += photonVel[p].z;
+
+        // Bounce back if hit inner cavity wall
+        const currentR = Math.sqrt(pos[p * 3] ** 2 + pos[p * 3 + 1] ** 2 + pos[p * 3 + 2] ** 2);
+        if (currentR >= innerRadius - 0.05) {
+          photonVel[p].reflect(new THREE.Vector3(pos[p * 3], pos[p * 3 + 1], pos[p * 3 + 2]).normalize());
+        }
+      }
+      photonSystem.geometry.attributes.position.needsUpdate = true;
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initial setup
+    updatePhysics(5800);
+    animate();
+  </script>
+</body>
+</html>

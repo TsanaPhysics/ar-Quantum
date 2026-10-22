@@ -4,6 +4,8 @@ const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  './ar_blackbody_cavity_tracking.html',
+  './target_fig1_blackbody_cavity.png',
   './lab01_blackbody_photoelectric.html',
   './lab02_double_slit.html',
   './lab03_schrodinger_wavepacket.html',
