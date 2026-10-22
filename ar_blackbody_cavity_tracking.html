@@ -77,30 +77,36 @@
     /* Top Nav Mode Switcher */
     .top-nav {
       position: absolute;
-      top: 14px;
+      top: 12px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 50;
       display: flex;
       align-items: center;
-      gap: 8px;
-      background: rgba(10, 18, 40, 0.85);
+      gap: 6px;
+      background: rgba(10, 18, 40, 0.90);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      padding: 6px 14px;
+      padding: 6px 12px;
       border-radius: 40px;
       border: 1px solid var(--glass-border);
       box-shadow: var(--glass-shadow);
       max-width: 95vw;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .top-nav::-webkit-scrollbar { display: none; }
     .mode-btn {
       background: transparent;
       border: none;
       color: #94a3b8;
       font-family: 'Chakra Petch', sans-serif;
       font-weight: 600;
-      font-size: 0.84rem;
-      padding: 7px 16px;
+      font-size: 0.82rem;
+      padding: 6px 14px;
       border-radius: 20px;
       cursor: pointer;
       display: flex;
@@ -108,6 +114,7 @@
       gap: 6px;
       transition: all 0.22s ease;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .mode-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
     .mode-btn.active {
@@ -126,7 +133,7 @@
       color: #030712;
     }
 
-    /* Left Control HUD */
+    /* Left Control HUD (Desktop: Left side) */
     .left-hud {
       position: absolute;
       top: 76px;
@@ -141,7 +148,7 @@
       overflow-y: auto;
     }
 
-    /* Right Telemetry HUD */
+    /* Right Telemetry HUD (Desktop: Right side) */
     .right-hud {
       position: absolute;
       top: 76px;
@@ -154,6 +161,88 @@
       pointer-events: auto;
       max-height: calc(100vh - 100px);
       overflow-y: auto;
+    }
+
+    /* Mobile HUD Dock (Bottom Tabs for Smartphone Screens) */
+    .mobile-hud-dock {
+      display: none;
+    }
+
+    /* Responsive Mobile Rules (Prevent HUD cards and buttons from overlapping) */
+    @media (max-width: 768px) {
+      .top-nav {
+        top: 8px;
+        left: 8px;
+        right: 8px;
+        transform: none;
+        max-width: calc(100vw - 16px);
+        padding: 5px 8px;
+        gap: 5px;
+        border-radius: 25px;
+      }
+      .mode-btn {
+        font-size: 0.74rem;
+        padding: 5px 10px;
+      }
+
+      .mobile-hud-dock {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 60;
+        display: flex;
+        gap: 6px;
+        background: rgba(10, 18, 40, 0.94);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 30px;
+        padding: 4px 6px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.75);
+        max-width: 95vw;
+        width: max-content;
+      }
+      .mob-tab-btn {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-family: 'Chakra Petch', sans-serif;
+        font-size: 0.76rem;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .mob-tab-btn.active {
+        background: var(--cyan);
+        color: #030712;
+        font-weight: 700;
+        box-shadow: 0 0 14px rgba(0, 240, 255, 0.6);
+      }
+
+      /* Stack panels into non-overlapping bottom drawers */
+      .left-hud, .right-hud {
+        position: absolute;
+        top: auto !important;
+        bottom: 58px !important;
+        left: 10px !important;
+        right: 10px !important;
+        width: auto !important;
+        max-width: none !important;
+        max-height: 48vh !important;
+        z-index: 45;
+        overflow-y: auto;
+        padding-bottom: 8px;
+      }
+      .left-hud.mob-hidden, .right-hud.mob-hidden {
+        display: none !important;
+      }
     }
 
     .glass-card {
@@ -453,25 +542,25 @@
         </label>
       </div>
       <div style="font-size:0.75rem; color:#94a3b8; line-height:1.4;">
-        สร้างเสียงแบบเรียลไทม์ด้วย Web Audio API ความถี่ผันแปรตามอุณหภูมิ $f \propto T$
+        สร้างเสียงแบบเรียลไทม์ด้วย Web Audio API ความถี่ผันแปรตามอุณหภูมิ f ∝ T
       </div>
     </div>
   </div>
 
   <!-- Right Telemetry HUD -->
-  <div class="right-hud">
+  <div class="right-hud mob-hidden">
     <div class="glass-card">
       <div class="card-title" style="color:var(--gold);">
         <span>📊 การวัดเชิงฟิสิกส์ (Live Telemetry)</span>
       </div>
 
       <div class="metric-row">
-        <span class="metric-name">ความยาวคลื่นยอด $\lambda_{\max}$ (วีน)</span>
+        <span class="metric-name">ความยาวคลื่นยอด λ<sub>max</sub> (วีน)</span>
         <span class="metric-value" id="val-lmax" style="color:var(--cyan);">499.6 nm</span>
       </div>
 
       <div class="metric-row">
-        <span class="metric-name">กำลังการแผ่รังสีรวม $P = \sigma T^4$</span>
+        <span class="metric-name">กำลังการแผ่รังสีรวม P = σT⁴</span>
         <span class="metric-value" id="val-power" style="color:var(--gold);">6.42 × 10⁷ W/m²</span>
       </div>
 
@@ -502,6 +591,13 @@
         • <strong>รังสีที่เปล่งออก</strong>: สะท้อนสมดุลความร้อนของสนามแม่เหล็กไฟฟ้าภายในโพรง
       </div>
     </div>
+  </div>
+
+  <!-- Mobile HUD Dock (Bottom Drawer Tabs for Smartphone Screens) -->
+  <div class="mobile-hud-dock" id="mobile-dock">
+    <button class="mob-tab-btn active" id="mob-tab-ctrl">🔥 ควบคุม</button>
+    <button class="mob-tab-btn" id="mob-tab-telem">📊 ข้อมูลฟิสิกส์</button>
+    <button class="mob-tab-btn" id="mob-tab-hide">👁️ ซ่อนจอโล่ง (AR)</button>
   </div>
 
   <!-- AR Scanning Reticle -->
@@ -1098,6 +1194,7 @@
       if (ar) {
         cavityRootGroup.scale.set(0.7, 0.7, 0.7);
         cavityRootGroup.position.set(0, -0.2, 0);
+        if (window.innerWidth <= 768) switchMobTab('hide');
       } else {
         cavityRootGroup.scale.set(1.0, 1.0, 1.0);
         cavityRootGroup.position.set(0, 0, 0);
@@ -1252,14 +1349,61 @@
       renderer.render(scene, camera);
     }
 
-    // Resize handler
+    // Resize handler & Responsive HUD layout
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      applyResponsiveLayout();
     });
 
+    // ==========================================================
+    // MOBILE RESPONSIVE HUD DRAWER CONTROLLER
+    // ==========================================================
+    const mobTabCtrl = document.getElementById('mob-tab-ctrl');
+    const mobTabTelem = document.getElementById('mob-tab-telem');
+    const mobTabHide = document.getElementById('mob-tab-hide');
+    const leftHud = document.querySelector('.left-hud');
+    const rightHud = document.querySelector('.right-hud');
+
+    function switchMobTab(tab) {
+      if (!mobTabCtrl) return;
+      [mobTabCtrl, mobTabTelem, mobTabHide].forEach(b => b.classList.remove('active'));
+
+      if (tab === 'ctrl') {
+        mobTabCtrl.classList.add('active');
+        leftHud.classList.remove('mob-hidden');
+        rightHud.classList.add('mob-hidden');
+      } else if (tab === 'telem') {
+        mobTabTelem.classList.add('active');
+        leftHud.classList.add('mob-hidden');
+        rightHud.classList.remove('mob-hidden');
+      } else {
+        mobTabHide.classList.add('active');
+        leftHud.classList.add('mob-hidden');
+        rightHud.classList.add('mob-hidden');
+      }
+    }
+
+    if (mobTabCtrl) mobTabCtrl.addEventListener('click', () => switchMobTab('ctrl'));
+    if (mobTabTelem) mobTabTelem.addEventListener('click', () => switchMobTab('telem'));
+    if (mobTabHide) mobTabHide.addEventListener('click', () => switchMobTab('hide'));
+
+    function applyResponsiveLayout() {
+      if (window.innerWidth <= 768) {
+        if (isARMode) {
+          switchMobTab('hide');
+        } else {
+          switchMobTab('ctrl');
+        }
+      } else {
+        leftHud.classList.remove('mob-hidden');
+        rightHud.classList.remove('mob-hidden');
+      }
+    }
+
     // Initial setup
+    applyResponsiveLayout();
     updatePhysics(5800);
     animate();
   </script>
