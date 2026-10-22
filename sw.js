@@ -1,5 +1,5 @@
-// Service Worker for RBRU Quantum AR Simulation (Cache-First Offline Engine)
-const CACHE_NAME = 'rbru-quantum-ar-v1';
+// Service Worker for RBRU Quantum AR Simulation (Smart Network-First for HTML, Cache-First for Assets)
+const CACHE_NAME = 'rbru-quantum-ar-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -23,7 +23,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Pre-caching offline quantum simulators');
+      console.log('[SW] Pre-caching offline quantum simulators v2');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
@@ -36,7 +36,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
-            console.log('[SW] Deleting old cache:', key);
+            console.log('[SW] Purging stale cache:', key);
             return caches.delete(key);
           }
         })
@@ -47,26 +47,41 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        // Cache dynamic third-party resources (fonts, cdn js)
-        if (event.request.method === 'GET' && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+  const isHtml = event.request.mode === 'navigate' || 
+                 (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'));
+
+  if (isHtml) {
+    // Network-First strategy for HTML: always fetch freshest UI from GitHub
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request) || caches.match('./index.html'))
+    );
+  } else {
+    // Cache-First strategy for static assets
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
         }
-        return networkResponse;
-      }).catch(() => {
-        // Fallback for offline if not found
-        if (event.request.headers.get('accept').includes('text/html')) {
-          return caches.match('./index.html');
-        }
-      });
-    })
-  );
+        return fetch(event.request).then((networkResponse) => {
+          if (event.request.method === 'GET' && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+          }
+          return networkResponse;
+        });
+      })
+    );
+  }
 });
