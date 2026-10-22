@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AR ภาพที่ 1.2 อุปกรณ์การทดลองโฟโตอิเล็กทริก — ผศ.ดร.ชีวะ ทัศนา</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#030712">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Google Fonts & Font Awesome 6 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Three.js + OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <style>
+    :root {
+      --cyan: #00f0ff;
+      --gold: #f59e0b;
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+      --emerald: #10b981;
+      --navy-dark: #030712;
+      --panel-glass: rgba(10, 16, 36, 0.82);
+      --glass-border: rgba(0, 240, 255, 0.25);
+      --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+    body {
+      background: var(--navy-dark);
+      color: #f8fafc;
+      font-family: 'Prompt', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    #webgl-canvas-container {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: radial-gradient(circle at 50% 30%, #0f1d38 0%, #030712 90%);
+      transition: background 0.25s ease;
+      pointer-events: auto;
+    }
+    body.ar-active,
+    body.ar-active #webgl-canvas-container {
+      background: transparent !important;
+    }
+
+    /* Live Camera Feed for AR Tracking Mode */
+    #camera-video {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 0;
+      display: none;
+      background: #000;
+    }
+
+    /* Top Navigation Bar */
+    .top-nav {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      right: 15px;
+      z-index: 40;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .mode-btn {
+      pointer-events: auto;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      color: #cbd5e1;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s ease;
+    }
+    .mode-btn:hover, .mode-btn.active {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+    }
+    .btn-target-preview {
+      background: rgba(236, 72, 153, 0.2);
+      border-color: var(--pink);
+      color: var(--pink);
+    }
+
+    /* HUD Drawers */
+    .left-hud, .right-hud {
+      position: absolute;
+      top: 75px;
+      z-index: 35;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 320px;
+      pointer-events: auto;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .left-hud { left: 15px; }
+    .right-hud { right: 15px; }
+
+    .glass-card {
+      background: var(--panel-glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--glass-shadow);
+    }
+    .card-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+    }
+    .control-row { margin-bottom: 12px; }
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .control-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.15);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    .metal-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    .btn-metal {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      padding: 6px 2px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-family: 'Chakra Petch', sans-serif;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .btn-metal:hover, .btn-metal.active {
+      background: rgba(236, 72, 153, 0.25);
+      border-color: var(--pink);
+      color: var(--pink);
+      font-weight: 700;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.82rem;
+    }
+    .metric-name { color: #94a3b8; }
+    .metric-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* AR Reticle with Scanning Laser */
+    #ar-reticle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(340px, 75vw);
+      height: min(340px, 75vw);
+      border: 2px dashed rgba(236, 72, 153, 0.6);
+      border-radius: 20px;
+      z-index: 30;
+      display: none;
+      pointer-events: auto;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(236, 72, 153, 0.25);
+      overflow: hidden;
+    }
+    .reticle-corner {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--pink);
+    }
+    .rc-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; border-radius: 12px 0 0 0; }
+    .rc-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; border-radius: 0 12px 0 0; }
+    .rc-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; border-radius: 0 0 0 12px; }
+    .rc-br { bottom: -2px; right: -2px; border-left: none; border-top: none; border-radius: 0 0 12px 0; }
+    
+    .reticle-scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(236, 72, 153, 0.3), #ec4899, #fff, #ec4899, rgba(236, 72, 153, 0.3), transparent);
+      box-shadow: 0 0 14px #ec4899, 0 0 24px rgba(236, 72, 153, 0.8);
+      animation: scanLaser 2.2s infinite ease-in-out;
+    }
+    @keyframes scanLaser {
+      0% { top: 3%; opacity: 0.2; }
+      50% { top: 94%; opacity: 1; }
+      100% { top: 3%; opacity: 0.2; }
+    }
+    #ar-reticle.locked {
+      border-color: #10b981 !important;
+      box-shadow: 0 0 45px rgba(16, 185, 129, 0.7) !important;
+    }
+    #ar-reticle.locked .reticle-corner { border-color: #10b981 !important; }
+    #ar-reticle.locked .reticle-scan-line { display: none; }
+
+    .reticle-tag {
+      position: absolute;
+      bottom: -38px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(3, 7, 18, 0.92);
+      border: 1px solid var(--pink);
+      color: var(--pink);
+      font-size: 0.78rem;
+      padding: 5px 16px;
+      border-radius: 20px;
+      white-space: nowrap;
+      font-family: 'Chakra Petch', sans-serif;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+      pointer-events: none;
+    }
+
+    /* Bangchak-Style Bottom Nav Bar */
+    #mobileBottomNav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      height: 84px;
+      z-index: 50;
+      display: flex;
+      align-items: flex-end;
+      pointer-events: auto;
+    }
+    .scoop-bg-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .scoop-svg-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 -8px 24px rgba(0, 0, 0, 0.75));
+    }
+    .nav-items-grid {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 8px 6px;
+    }
+    .bangchak-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      outline: none;
+      flex: 1;
+      height: 100%;
+      padding-top: 10px;
+    }
+    .clay-3d-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .clay-3d-gloss {
+      position: absolute;
+      top: 2px;
+      left: 3px;
+      right: 3px;
+      height: 12px;
+      border-radius: 8px 8px 4px 4px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.05) 100%);
+      pointer-events: none;
+    }
+    .clay-btn-light {
+      background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4), inset 0 2px 3px #fff;
+    }
+    .clay-btn-volt {
+      background: linear-gradient(135deg, #ec4899 0%, #9d174d 100%);
+      box-shadow: 0 4px 10px rgba(236, 72, 153, 0.4), inset 0 2px 3px #fff;
+    }
+    .clay-btn-physics {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.4), inset 0 2px 3px #fff;
+    }
+    .clay-btn-eye {
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4), inset 0 2px 3px #fff;
+    }
+    .center-gem-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: -32px;
+      z-index: 10;
+    }
+    .center-gem-btn {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+      box-shadow: 0 6px 18px rgba(0, 240, 255, 0.5);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .center-gem-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ec4899 0%, #be185d 45%, #4c0519 100%);
+      box-shadow: inset 0 -4px 6px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .center-gem-glare {
+      position: absolute;
+      top: 3px;
+      left: 6px;
+      width: 22px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 50%;
+      filter: blur(0.6px);
+      pointer-events: none;
+    }
+    .center-gem-btn.active .center-gem-inner {
+      background: linear-gradient(135deg, #10b981 0%, #059669 45%, #064e3b 100%);
+    }
+    .center-gem-pill {
+      padding: 2px 10px;
+      border-radius: 20px;
+      background: linear-gradient(90deg, #ec4899 0%, #db2777 50%, #831843 100%);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'Chakra Petch', sans-serif;
+      box-shadow: 0 2px 8px rgba(236, 72, 153, 0.5);
+      border: 1px solid rgba(236, 72, 153, 0.6);
+      margin-top: 3px;
+      white-space: nowrap;
+    }
+    span.nav-text {
+      font-size: 10px;
+      color: #94a3b8;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .bangchak-nav-item.active .clay-3d-btn {
+      transform: scale(1.12);
+      box-shadow: 0 0 16px var(--pink), inset 0 1.5px 3px #fff;
+    }
+    .bangchak-nav-item.active span.nav-text {
+      color: var(--pink);
+      font-weight: 700;
+    }
+
+    /* Start Card Overlay */
+    #ar-start-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, rgba(15, 23, 42, 0.95), rgba(3, 7, 18, 0.98));
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 120;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .ar-start-box {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1.5px solid rgba(236, 72, 153, 0.5);
+      border-radius: 24px;
+      max-width: 440px;
+      width: 100%;
+      padding: 28px 22px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(236, 72, 153, 0.2);
+    }
+    .btn-ar-action {
+      width: 100%;
+      background: linear-gradient(135deg, #ec4899 0%, #db2777 50%, #4338ca 100%);
+      color: #fff;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 30px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4), inset 0 2px 3px rgba(255, 255, 255, 0.6);
+    }
+
+    /* Modal for Target Image */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(12px); z-index: 100; display: none; justify-content: center; align-items: center; padding: 20px;
+    }
+    .modal-card {
+      background: #0f172a; border: 1px solid var(--pink); border-radius: 20px; max-width: 520px; width: 100%; padding: 24px; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+    }
+    .modal-card img {
+      width: 100%; max-height: 320px; object-fit: contain; border-radius: 12px; background: #fff; margin: 15px 0;
+    }
+
+    @media (max-width: 768px) {
+      .left-hud, .right-hud {
+        position: absolute; top: auto !important; bottom: 84px !important; left: 10px !important; right: 10px !important; width: auto !important; max-height: 48vh !important; z-index: 45; overflow-y: auto;
+      }
+      .left-hud.mob-hidden, .right-hud.mob-hidden { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <div class="top-nav">
+    <button class="mode-btn active" id="btn-mode-3d">🌐 3D สำรวจอิสระ</button>
+    <button class="mode-btn" id="btn-mode-ar">📷 AR ส่องหน้าหนังสือ</button>
+    <button class="mode-btn btn-target-preview" id="btn-view-target">📖 ดูภาพที่ 1.2</button>
+  </div>
+
+  <!-- Left Control HUD -->
+  <div class="left-hud">
+    <div class="glass-card">
+      <div class="card-title" style="color:var(--pink);">
+        <span>⚡ แหล่งกำเนิดแสง & ขั้วโลหะ</span>
+      </div>
+
+      <div class="control-row">
+        <div class="control-label">
+          <span>ความยาวคลื่นแสง $\lambda$</span>
+          <span class="control-val" id="disp-lambda">254 nm (UV)</span>
+        </div>
+        <input type="range" id="slider-lambda" min="150" max="750" step="5" value="254">
+      </div>
+
+      <div class="control-row">
+        <div class="control-label">
+          <span>ความเข้มแสงตกกระทบ $I$</span>
+          <span class="control-val" id="disp-intensity">100%</span>
+        </div>
+        <input type="range" id="slider-intensity" min="0" max="100" step="5" value="100">
+      </div>
+
+      <div class="control-label" style="margin-bottom:6px;">ชนิดโลหะแผ่นแคโทดเป้า (Cathode Metal)</div>
+      <div class="metal-grid">
+        <button class="btn-metal active" onclick="setMetal('Cs', 2.14)">Cs (2.14eV)</button>
+        <button class="btn-metal" onclick="setMetal('Na', 2.28)">Na (2.28eV)</button>
+        <button class="btn-metal" onclick="setMetal('Cu', 4.65)">Cu (4.65eV)</button>
+        <button class="btn-metal" onclick="setMetal('Pt', 5.65)">Pt (5.65eV)</button>
+      </div>
+
+      <div class="control-row">
+        <div class="control-label">
+          <span>ความต่างศักย์ภายนอก $V$</span>
+          <span class="control-val" id="disp-voltage">0.00 V</span>
+        </div>
+        <input type="range" id="slider-voltage" min="-3.0" max="4.0" step="0.05" value="0.0">
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Telemetry HUD -->
+  <div class="right-hud mob-hidden">
+    <div class="glass-card">
+      <div class="card-title" style="color:var(--gold);">
+        <span>📊 การวัดเชิงฟิสิกส์ (Live Measurements)</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-name">พลังงานโฟตอน $E = h\nu$</span>
+        <span class="metric-value" id="val-photon-e" style="color:var(--cyan);">4.88 eV</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-name">ฟังก์ชันงานของโลหะ $\phi$</span>
+        <span class="metric-value" id="val-work-func" style="color:var(--gold);">2.14 eV</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-name">พลังงานจลน์สูงสุด $K_{\max}$</span>
+        <span class="metric-value" id="val-kmax" style="color:var(--emerald);">2.74 eV</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-name">ศักย์หยุดยั้ง $V_0 = K_{\max}/e$</span>
+        <span class="metric-value" id="val-v0" style="color:#ef4444;">-2.74 V</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-name">กระแสโฟโตอิเล็กทริก $I$</span>
+        <span class="metric-value" id="val-current" style="color:#fff;">14.2 $\mu$A</span>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-name">สถานะการหลุดของอิเล็กตรอน</span>
+        <span class="metric-value" id="val-emission-status" style="color:var(--emerald);">หลุดรวดเร็ว (Active)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bangchak Bottom Navigation -->
+  <nav id="mobileBottomNav">
+    <div class="scoop-bg-container">
+      <svg class="scoop-svg-overlay" viewBox="0 0 375 90" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="barGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0f172a" /><stop offset="100%" stop-color="#030712" />
+          </linearGradient>
+          <radialGradient id="dishGrad" cx="50%" cy="30%" r="65%">
+            <stop offset="0%" stop-color="#ec4899" stop-opacity="0.45" />
+            <stop offset="100%" stop-color="#030712" stop-opacity="0.9" />
+          </radialGradient>
+        </defs>
+        <ellipse cx="187.5" cy="20" rx="42" ry="20" fill="url(#dishGrad)" />
+        <path d="M0,12 L134,12 C146,12 153,46 187.5,46 C222,46 229,12 241,12 L375,12 L375,90 L0,90 Z" 
+              fill="url(#barGrad)" stroke="rgba(236,72,153,0.6)" stroke-width="1.3" />
+      </svg>
+    </div>
+
+    <div class="nav-items-grid">
+      <button class="bangchak-nav-item active" id="mobTabLight">
+        <div class="clay-3d-btn clay-btn-light">
+          <div class="clay-3d-gloss"></div>
+          <i class="fa-solid fa-lightbulb" style="color:#fff; font-size:16px;"></i>
+        </div>
+        <span class="nav-text">แสง & โลหะ</span>
+      </button>
+
+      <button class="bangchak-nav-item" id="mobTabVolt">
+        <div class="clay-3d-btn clay-btn-volt">
+          <div class="clay-3d-gloss"></div>
+          <i class="fa-solid fa-bolt" style="color:#fff; font-size:16px;"></i>
+        </div>
+        <span class="nav-text">ศักย์ไฟฟ้า</span>
+      </button>
+
+      <div class="center-gem-container">
+        <button id="mobCenterAr" class="center-gem-btn" title="สแกน AR ภาพที่ 1.2">
+          <div class="center-gem-inner">
+            <div class="center-gem-glare"></div>
+            <i class="fa-solid fa-camera" style="font-size:22px; color:#fff;"></i>
+          </div>
+        </button>
+        <span class="center-gem-pill">🎯 สแกน AR</span>
+      </div>
+
+      <button class="bangchak-nav-item" id="mobTabTelem">
+        <div class="clay-3d-btn clay-btn-physics">
+          <div class="clay-3d-gloss"></div>
+          <i class="fa-solid fa-chart-line" style="color:#fff; font-size:16px;"></i>
+        </div>
+        <span class="nav-text">ฟิสิกส์ Live</span>
+      </button>
+
+      <button class="bangchak-nav-item" id="mobTabHide">
+        <div class="clay-3d-btn clay-btn-eye">
+          <div class="clay-3d-gloss"></div>
+          <i class="fa-solid fa-eye" style="color:#fff; font-size:16px;"></i>
+        </div>
+        <span class="nav-text">ดูเต็มจอ</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- AR Scanning Reticle with Laser -->
+  <div id="ar-reticle">
+    <div class="reticle-corner rc-tl"></div><div class="reticle-corner rc-tr"></div>
+    <div class="reticle-corner rc-bl"></div><div class="reticle-corner rc-br"></div>
+    <div class="reticle-scan-line"></div>
+    <div class="reticle-tag">🎯 นำกล้องส่องไปที่ ภาพที่ 1.2 อุปกรณ์โฟโตอิเล็กทริก</div>
+  </div>
+
+  <!-- AR Mobile Start Splash Screen -->
+  <div id="ar-start-overlay">
+    <div class="ar-start-box">
+      <div style="font-family:'Chakra Petch'; font-size:0.75rem; font-weight:700; color:var(--pink); margin-bottom:12px;">RBRU WebAR Image Tracking</div>
+      <div style="width:76px; height:76px; margin:0 auto 16px; border-radius:50%; background:rgba(236,72,153,0.2); border:1.5px solid var(--pink); display:flex; align-items:center; justify-content:center; font-size:32px; color:var(--pink);">
+        <i class="fa-solid fa-atom"></i>
+      </div>
+      <h2 style="font-family:'Chakra Petch'; color:#fff; font-size:1.35rem; margin-bottom:8px;">สแกน AR ส่องภาพที่ 1.2</h2>
+      <p style="font-size:0.88rem; color:#cbd5e1; line-height:1.55; margin-bottom:22px;">
+        เปิดกล้องสมาร์ทโฟน แล้วนำไปส่องที่ <strong>ภาพที่ 1.2 แผนผังอุปกรณ์การทดลองโฟโตอิเล็กทริก</strong> ในหนังสือหน้า 25 เพื่อเรนเดอร์หลอดสุญญากาศ 3 มิติ และลำโฟโตอิเล็กทริกลอยตัวเสมือนจริง
+      </p>
+      <button id="btn-launch-camera-ar" class="btn-ar-action">
+        <i class="fa-solid fa-camera"></i> แตะเพื่อเปิดกล้องส่อง AR ทันที
+      </button>
+      <div style="display:flex; justify-content:space-between; gap:10px; margin-top:16px;">
+        <button id="btn-see-target-img" style="flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#94a3b8; padding:8px; border-radius:12px; font-family:'Chakra Petch'; font-size:0.75rem; cursor:pointer;">📖 ดูตัวอย่างภาพที่ 1.2</button>
+        <button id="btn-explore-3d-fallback" style="flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#94a3b8; padding:8px; border-radius:12px; font-family:'Chakra Petch'; font-size:0.75rem; cursor:pointer;">🌐 โหมด 3D บนจอภาพ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Target Preview -->
+  <div class="modal-backdrop" id="target-modal">
+    <div class="modal-card">
+      <h3 style="font-family:'Chakra Petch'; color:var(--pink); font-size:1.15rem;">ภาพเป้าหมายสำหรับสแกน AR (ภาพที่ 1.2)</h3>
+      <p style="font-size:0.85rem; color:#94a3b8; margin-top:4px;">แผนผังอุปกรณ์การทดลองปรากฏการณ์โฟโตอิเล็กทริก ในหนังสือ</p>
+      <img src="target_fig2_photoelectric_apparatus.png" alt="Photoelectric Apparatus AR Target">
+      <button style="background:var(--pink); color:#fff; border:none; padding:8px 24px; border-radius:20px; font-family:'Chakra Petch'; font-weight:700; cursor:pointer;" onclick="document.getElementById('target-modal').style.display='none'">ปิดหน้าต่าง</button>
+    </div>
+  </div>
+
+  <video id="camera-video" autoplay playsinline webkit-playsinline muted></video>
+  <div id="webgl-canvas-container"></div>
+
+  <script>
+    // Physics Constants
+    const H_PLANCK = 6.62607015e-34;
+    const C_LIGHT = 2.99792458e8;
+    const E_CHARGE = 1.602176634e-19;
+    const M_ELECTRON = 9.1093837e-31;
+
+    let currentLambdaNm = 254;
+    let currentIntensity = 100;
+    let currentVoltage = 0.0;
+    let currentWorkFunction = 2.14; // Cs default
+    let isARMode = true;
+    let isTargetLocked = false;
+    let lockHoldFrames = 0;
+
+    // WebGL Scene
+    const container = document.getElementById('webgl-canvas-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 1.2, 5.2);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    // Lighting
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    dirLight.position.set(4, 6, 4);
+    scene.add(dirLight);
+
+    // ==========================================================
+    // 3D MODEL: PHOTOELECTRIC APPARATUS (ภาพที่ 1.2)
+    // ==========================================================
+    const apparatusRootGroup = new THREE.Group();
+    apparatusRootGroup.visible = false; // Hidden until Figure 1.2 is scanned!
+    scene.add(apparatusRootGroup);
+
+    // 1. Glass Vacuum Tube Cylinder
+    const tubeGeo = new THREE.CylinderGeometry(1.0, 1.0, 3.2, 32, 1, true);
+    tubeGeo.rotateZ(Math.PI / 2);
+    const tubeMat = new THREE.MeshPhysicalMaterial({
+      color: 0x93c5fd,
+      transparent: true,
+      opacity: 0.28,
+      roughness: 0.05,
+      metalness: 0.1,
+      transmission: 0.85,
+      ior: 1.5,
+      side: THREE.DoubleSide
+    });
+    const tubeMesh = new THREE.Mesh(tubeGeo, tubeMat);
+    apparatusRootGroup.add(tubeMesh);
+
+    // Tube Endcaps (Metallic Collars)
+    const capMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.2 });
+    const capGeo = new THREE.TorusGeometry(1.0, 0.05, 16, 32);
+    capGeo.rotateY(Math.PI / 2);
+    const capL = new THREE.Mesh(capGeo, capMat); capL.position.x = -1.6; apparatusRootGroup.add(capL);
+    const capR = new THREE.Mesh(capGeo, capMat); capR.position.x = 1.6; apparatusRootGroup.add(capR);
+
+    // 2. Quartz Optical Window (Upper Left)
+    const quartzGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.1, 24);
+    quartzGeo.rotateX(Math.PI / 4);
+    const quartzMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.7, emissive: 0x00f0ff, emissiveIntensity: 0.3 });
+    const quartzMesh = new THREE.Mesh(quartzGeo, quartzMat);
+    quartzMesh.position.set(-1.2, 0.8, 0.4);
+    apparatusRootGroup.add(quartzMesh);
+
+    // 3. Cathode Target Plate (Emitter)
+    const cathodeGeo = new THREE.CylinderGeometry(0.75, 0.75, 0.06, 32);
+    cathodeGeo.rotateZ(Math.PI / 2);
+    const cathodeMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9, roughness: 0.15 });
+    const cathodeMesh = new THREE.Mesh(cathodeGeo, cathodeMat);
+    cathodeMesh.position.set(-0.95, 0, 0);
+    apparatusRootGroup.add(cathodeMesh);
+
+    // 4. Anode Collector Plate
+    const anodeGeo = new THREE.RingGeometry(0.2, 0.75, 32);
+    anodeGeo.rotateY(Math.PI / 2);
+    const anodeMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.3, side: THREE.DoubleSide });
+    const anodeMesh = new THREE.Mesh(anodeGeo, anodeMat);
+    anodeMesh.position.set(0.95, 0, 0);
+    apparatusRootGroup.add(anodeMesh);
+
+    // 5. Incident Photon Beam (Laser Ray from Quartz to Cathode)
+    const beamGeo = new THREE.CylinderGeometry(0.04, 0.16, 1.4, 16);
+    beamGeo.rotateZ(-Math.PI / 3.2);
+    beamGeo.translate(-1.4, 0.6, 0.2);
+    const beamMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.75 });
+    const beamMesh = new THREE.Mesh(beamGeo, beamMat);
+    apparatusRootGroup.add(beamMesh);
+
+    // 6. Photoelectron Particle System
+    const eCount = 80;
+    const eGeo = new THREE.BufferGeometry();
+    const ePos = new Float32Array(eCount * 3);
+    const eSpeed = new Float32Array(eCount);
+    for (let i = 0; i < eCount; i++) {
+      ePos[i * 3] = -0.9 + Math.random() * 1.8;
+      ePos[i * 3 + 1] = (Math.random() - 0.5) * 1.1;
+      ePos[i * 3 + 2] = (Math.random() - 0.5) * 1.1;
+      eSpeed[i] = 0.01 + Math.random() * 0.03;
+    }
+    eGeo.setAttribute('position', new THREE.BufferAttribute(ePos, 3));
+    const eMat = new THREE.PointsMaterial({ color: 0xec4899, size: 0.08, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+    const eParticles = new THREE.Points(eGeo, eMat);
+    apparatusRootGroup.add(eParticles);
+
+    // 7. Microammeter Dial in 3D
+    const meterBox = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.15, 32), new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.7 }));
+    meterBox.rotateX(Math.PI / 2);
+    meterBox.position.set(0, -1.6, 0);
+    apparatusRootGroup.add(meterBox);
+
+    const needleGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0.08), new THREE.Vector3(0, 0.35, 0.08)]);
+    const needleLine = new THREE.Line(needleGeo, new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 2 }));
+    needleLine.position.set(0, -1.6, 0);
+    apparatusRootGroup.add(needleLine);
+
+    // External Circuit Wire Loops
+    const wireMat = new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 });
+    const wirePoints = [
+      new THREE.Vector3(-0.95, -1.0, 0), new THREE.Vector3(-0.95, -1.6, 0), new THREE.Vector3(-0.45, -1.6, 0),
+      new THREE.Vector3(0.45, -1.6, 0), new THREE.Vector3(0.95, -1.6, 0), new THREE.Vector3(0.95, -1.0, 0)
+    ];
+    const wireLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(wirePoints), wireMat);
+    apparatusRootGroup.add(wireLine);
+
+    // ==========================================================
+    // AUDIO SYNTHESIZER (Web Audio API)
+    // ==========================================================
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    function playLockChime() {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(659.25, now); // E5
+        osc.frequency.exponentialRampToValueAtTime(1318.51, now + 0.16); // E6
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.35);
+      } catch(e) {}
+    }
+
+    // ==========================================================
+    // PHYSICS ENGINE (Einstein Photoelectric Equation)
+    // ==========================================================
+    function updatePhysics() {
+      const lambda_m = currentLambdaNm * 1e-9;
+      const freq = C_LIGHT / lambda_m;
+      const photonE_J = H_PLANCK * freq;
+      const photonE_eV = photonE_J / E_CHARGE;
+      const kmax_eV = Math.max(0, photonE_eV - currentWorkFunction);
+      const v0_V = kmax_eV;
+
+      // Current calculation
+      let current_uA = 0;
+      if (kmax_eV > 0 && currentIntensity > 0) {
+        if (currentVoltage >= -v0_V) {
+          const voltFactor = Math.min(1.5, Math.max(0.05, 1.0 + currentVoltage * 0.25));
+          current_uA = (currentIntensity * 0.15) * voltFactor;
+        }
+      }
+
+      // Needle angle
+      const targetAngle = -Math.PI / 4 + (current_uA / 25) * (Math.PI / 2);
+      needleLine.rotation.z = THREE.MathUtils.lerp(needleLine.rotation.z, -targetAngle, 0.1);
+
+      // Beam color mapping
+      if (currentLambdaNm < 380) {
+        beamMat.color.setHex(0xa855f7); // UV
+        document.getElementById('disp-lambda').textContent = `${currentLambdaNm} nm (UV อัลตราไวโอเลต)`;
+      } else if (currentLambdaNm < 450) {
+        beamMat.color.setHex(0x3b82f6); // Violet
+        document.getElementById('disp-lambda').textContent = `${currentLambdaNm} nm (ม่วง-น้ำเงิน)`;
+      } else if (currentLambdaNm < 560) {
+        beamMat.color.setHex(0x10b981); // Green
+        document.getElementById('disp-lambda').textContent = `${currentLambdaNm} nm (เขียว)`;
+      } else {
+        beamMat.color.setHex(0xef4444); // Red
+        document.getElementById('disp-lambda').textContent = `${currentLambdaNm} nm (แดง)`;
+      }
+
+      // UI Text updates
+      document.getElementById('val-photon-e').textContent = `${photonE_eV.toFixed(2)} eV`;
+      document.getElementById('val-work-func').textContent = `${currentWorkFunction.toFixed(2)} eV`;
+      document.getElementById('val-kmax').textContent = `${kmax_eV.toFixed(2)} eV`;
+      document.getElementById('val-v0').textContent = `-${v0_V.toFixed(2)} V`;
+      document.getElementById('val-current').textContent = `${current_uA.toFixed(1)} μA`;
+
+      const statusEl = document.getElementById('val-emission-status');
+      if (kmax_eV === 0) {
+        statusEl.textContent = '⛔ ไม่หลุด (ความถี่ต่ำกว่าขีดเริ่ม ν < ν₀)';
+        statusEl.style.color = '#ef4444';
+      } else if (currentVoltage < -v0_V) {
+        statusEl.textContent = '🛑 หยุดยั้งสำเร็จ (V < -V₀ กระแสเป็นศูนย์)';
+        statusEl.style.color = '#f59e0b';
+      } else {
+        statusEl.textContent = '✅ ปลดปล่อยโฟโตอิเล็กทริกต่อเนื่อง';
+        statusEl.style.color = 'var(--emerald)';
+      }
+    }
+
+    function setMetal(name, phi) {
+      currentWorkFunction = phi;
+      document.querySelectorAll('.btn-metal').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      updatePhysics();
+    }
+
+    document.getElementById('slider-lambda').addEventListener('input', (e) => {
+      currentLambdaNm = parseFloat(e.target.value);
+      updatePhysics();
+    });
+    document.getElementById('slider-intensity').addEventListener('input', (e) => {
+      currentIntensity = parseFloat(e.target.value);
+      document.getElementById('disp-intensity').textContent = `${currentIntensity}%`;
+      beamMat.opacity = 0.2 + (currentIntensity / 100) * 0.7;
+      updatePhysics();
+    });
+    document.getElementById('slider-voltage').addEventListener('input', (e) => {
+      currentVoltage = parseFloat(e.target.value);
+      document.getElementById('disp-voltage').textContent = `${currentVoltage.toFixed(2)} V`;
+      updatePhysics();
+    });
+
+    // ==========================================================
+    // OPTICAL TARGET TRACKER (ภาพที่ 1.2)
+    // ==========================================================
+    const trackerCanvas = document.createElement('canvas');
+    trackerCanvas.width = 120; trackerCanvas.height = 120;
+    const trackerCtx = trackerCanvas.getContext('2d', { willReadFrequently: true });
+    const reticle = document.getElementById('ar-reticle');
+    let deviceOrientation = { beta: 45, gamma: 0 };
+    let hasOrientationSupport = false;
+
+    function processAROpticalFrame() {
+      const video = document.getElementById('camera-video');
+      if (!isARMode || video.readyState < 2) return;
+      const vw = video.videoWidth, vh = video.videoHeight;
+      if (vw === 0 || vh === 0) return;
+
+      const cropSize = Math.min(vw, vh) * 0.45;
+      trackerCtx.drawImage(video, (vw - cropSize)/2, (vh - cropSize)/2, cropSize, cropSize, 0, 0, 120, 120);
+      const data = trackerCtx.getImageData(0, 0, 120, 120).data;
+
+      let outerLuma = 0, innerLuma = 0, outerCount = 0, innerCount = 0;
+      for (let y = 0; y < 120; y += 2) {
+        for (let x = 0; x < 120; x += 2) {
+          const dx = x - 60, dy = y - 60;
+          const r2 = dx*dx + dy*dy;
+          const luma = 0.299*data[(y*120+x)*4] + 0.587*data[(y*120+x)*4+1] + 0.114*data[(y*120+x)*4+2];
+          if (r2 > 46*46) { outerLuma += luma; outerCount++; }
+          else if (r2 < 34*34) { innerLuma += luma; innerCount++; }
+        }
+      }
+      const diff = (outerLuma/outerCount) - (innerLuma/innerCount);
+      // Figure 1.2 has light page with darker box frame
+      if ((outerLuma/outerCount) > 50 && diff > 14) {
+        lockHoldFrames++;
+        if (lockHoldFrames >= 2 && !isTargetLocked) {
+          isTargetLocked = true;
+          apparatusRootGroup.visible = true;
+          apparatusRootGroup.scale.set(0.08, 0.08, 0.08);
+          reticle.classList.add('locked');
+          document.querySelector('.reticle-tag').textContent = '✅ ตรวจพบภาพที่ 1.2: แสดงหลอดโฟโตอิเล็กทริก 3D';
+          playLockChime();
+        }
+      } else {
+        if (lockHoldFrames > 0) lockHoldFrames--;
+      }
+    }
+
+    reticle.addEventListener('click', () => {
+      isTargetLocked = !isTargetLocked;
+      apparatusRootGroup.visible = isTargetLocked;
+      reticle.classList.toggle('locked', isTargetLocked);
+      if (isTargetLocked) playLockChime();
+    });
+
+    window.addEventListener('deviceorientation', (e) => {
+      if (e.beta !== null) {
+        hasOrientationSupport = true;
+        deviceOrientation.beta = e.beta;
+        deviceOrientation.gamma = e.gamma;
+      }
+    });
+
+    // ==========================================================
+    // CAMERA AND MODE CONTROLS
+    // ==========================================================
+    const video = document.getElementById('camera-video');
+    let cameraStream = null;
+
+    async function startCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("⚠️ โปรดเข้าใช้งานผ่าน HTTPS บน GitHub Pages เพื่อเปิดกล้อง AR");
+        setMode(false); return;
+      }
+      try {
+        let stream = null;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+          });
+        } catch(e1) {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        }
+        cameraStream = stream;
+        video.srcObject = cameraStream;
+        video.style.display = 'block';
+        document.body.classList.add('ar-active');
+        await video.play().catch(e => {});
+      } catch(err) {
+        alert("ไม่สามารถเข้าถึงกล้องได้: " + err.message);
+        setMode(false);
+      }
+    }
+
+    function stopCamera() {
+      if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+      video.style.display = 'none';
+      document.body.classList.remove('ar-active');
+    }
+
+    function setMode(ar) {
+      isARMode = ar;
+      document.getElementById('btn-mode-3d').classList.toggle('active', !ar);
+      document.getElementById('btn-mode-ar').classList.toggle('active', ar);
+      document.getElementById('mobCenterAr').classList.toggle('active', ar);
+      reticle.style.display = ar ? 'block' : 'none';
+
+      if (ar) {
+        isTargetLocked = false;
+        apparatusRootGroup.visible = false;
+        startCamera();
+      } else {
+        stopCamera();
+        isTargetLocked = true;
+        apparatusRootGroup.visible = true;
+        apparatusRootGroup.scale.set(1.0, 1.0, 1.0);
+      }
+    }
+
+    document.getElementById('btn-mode-3d').addEventListener('click', () => setMode(false));
+    document.getElementById('btn-mode-ar').addEventListener('click', () => setMode(true));
+    document.getElementById('btn-view-target').addEventListener('click', () => document.getElementById('target-modal').style.display='flex');
+    document.getElementById('btn-launch-camera-ar').addEventListener('click', () => {
+      document.getElementById('ar-start-overlay').style.display = 'none';
+      initAudio();
+      setMode(true);
+    });
+    document.getElementById('btn-see-target-img').addEventListener('click', () => document.getElementById('target-modal').style.display='flex');
+    document.getElementById('btn-explore-3d-fallback').addEventListener('click', () => {
+      document.getElementById('ar-start-overlay').style.display = 'none';
+      setMode(false);
+    });
+
+    // Bangchak Navigation items
+    const mobTabLight = document.getElementById('mobTabLight');
+    const mobTabVolt = document.getElementById('mobTabVolt');
+    const mobTabTelem = document.getElementById('mobTabTelem');
+    const mobTabHide = document.getElementById('mobTabHide');
+    const mobCenterAr = document.getElementById('mobCenterAr');
+    const leftHud = document.querySelector('.left-hud');
+    const rightHud = document.querySelector('.right-hud');
+
+    mobCenterAr.addEventListener('click', () => setMode(!isARMode));
+    mobTabLight.addEventListener('click', () => {
+      leftHud.classList.remove('mob-hidden'); rightHud.classList.add('mob-hidden');
+    });
+    mobTabVolt.addEventListener('click', () => {
+      leftHud.classList.remove('mob-hidden'); rightHud.classList.add('mob-hidden');
+    });
+    mobTabTelem.addEventListener('click', () => {
+      leftHud.classList.add('mob-hidden'); rightHud.classList.remove('mob-hidden');
+    });
+    mobTabHide.addEventListener('click', () => {
+      leftHud.classList.add('mob-hidden'); rightHud.classList.add('mob-hidden');
+    });
+
+    // Animation Loop
+    let clock = new THREE.Clock();
+    let lastTrackTime = 0;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const time = clock.getElapsedTime();
+
+      // Optical tracking check in AR mode
+      if (isARMode) {
+        if (time - lastTrackTime > 0.10) {
+          lastTrackTime = time;
+          processAROpticalFrame();
+        }
+        if (isTargetLocked) {
+          apparatusRootGroup.visible = true;
+          apparatusRootGroup.scale.lerp(new THREE.Vector3(0.9, 0.9, 0.9), 0.14);
+          if (hasOrientationSupport) {
+            const rotX = (deviceOrientation.beta - 45) * (Math.PI / 180) * 0.45;
+            const rotZ = -(deviceOrientation.gamma) * (Math.PI / 180) * 0.45;
+            apparatusRootGroup.rotation.x = THREE.MathUtils.lerp(apparatusRootGroup.rotation.x, rotX, 0.1);
+            apparatusRootGroup.rotation.z = THREE.MathUtils.lerp(apparatusRootGroup.rotation.z, rotZ, 0.1);
+          }
+        } else {
+          apparatusRootGroup.visible = false;
+        }
+      } else {
+        apparatusRootGroup.visible = true;
+        apparatusRootGroup.rotation.y += 0.003;
+      }
+
+      // Animate Photoelectron particles
+      const pos = eParticles.geometry.attributes.position.array;
+      const photonE = (H_PLANCK * (C_LIGHT / (currentLambdaNm * 1e-9))) / E_CHARGE;
+      const kmax = Math.max(0, photonE - currentWorkFunction);
+      const isRetarded = (currentVoltage < -kmax);
+
+      for (let i = 0; i < eCount; i++) {
+        if (kmax <= 0) {
+          // No emission
+          pos[i * 3] = -0.95;
+        } else if (isRetarded) {
+          // Slow down and bounce back before reaching anode
+          pos[i * 3] += (0.015 - pos[i * 3] * 0.03);
+          if (pos[i * 3] > -0.2) pos[i * 3] = -0.95;
+        } else {
+          // Fly across from cathode (-0.95) to anode (+0.95)
+          pos[i * 3] += eSpeed[i] * (1.0 + Math.max(0, currentVoltage) * 0.3);
+          if (pos[i * 3] > 0.95) {
+            pos[i * 3] = -0.95;
+            pos[i * 3 + 1] = (Math.random() - 0.5) * 1.1;
+            pos[i * 3 + 2] = (Math.random() - 0.5) * 1.1;
+          }
+        }
+      }
+      eParticles.geometry.attributes.position.needsUpdate = true;
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Startup
+    updatePhysics();
+    animate();
+  </script>
+</body>
+</html>
