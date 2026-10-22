@@ -185,52 +185,129 @@
         padding: 5px 10px;
       }
 
+      /* ==========================================================
+         FUTURISTIC 3D CONCAVE CYBER DOCK (เมนูบาร์ล่างมิติโค้งเว้า 3 มิติ)
+         ========================================================== */
       .mobile-hud-dock {
-        position: absolute;
+        position: fixed;
         bottom: 12px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 60;
+        z-index: 90;
         display: flex;
-        gap: 6px;
-        background: rgba(10, 18, 40, 0.94);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: 30px;
-        padding: 4px 6px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.75);
+        align-items: center;
+        justify-content: space-between;
+        gap: 2px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.90) 0%, rgba(3, 7, 18, 0.97) 100%);
+        backdrop-filter: blur(28px) saturate(220%);
+        -webkit-backdrop-filter: blur(28px) saturate(220%);
+        border: 1.5px solid rgba(0, 240, 255, 0.38);
+        border-radius: 40px 40px 32px 32px;
+        padding: 6px 10px 8px;
+        box-shadow: 
+          0 -8px 30px rgba(0, 240, 255, 0.28),
+          0 14px 45px rgba(0, 0, 0, 0.92),
+          inset 0 1.5px 2px rgba(255, 255, 255, 0.45),
+          inset 0 -1px 1px rgba(0, 240, 255, 0.2);
+        width: min(440px, 95vw);
         max-width: 95vw;
-        width: max-content;
       }
+
+      /* Concave Top Accent Line with Ambient Pulsing Glow */
+      .mobile-hud-dock::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: 15%;
+        right: 15%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--cyan), #a855f7, var(--cyan), transparent);
+        border-radius: 50%;
+        filter: blur(1px);
+        animation: dockGlowPulse 4s ease-in-out infinite alternate;
+      }
+
+      @keyframes dockGlowPulse {
+        0% { opacity: 0.6; filter: blur(1px); }
+        100% { opacity: 1.0; filter: blur(2px); box-shadow: 0 0 10px var(--cyan); }
+      }
+
       .mob-tab-btn {
         background: transparent;
         border: none;
         color: #94a3b8;
         font-family: 'Chakra Petch', sans-serif;
-        font-size: 0.76rem;
+        font-size: 0.68rem;
         font-weight: 600;
-        padding: 6px 12px;
-        border-radius: 20px;
+        padding: 2px 4px;
+        border-radius: 16px;
         cursor: pointer;
-        transition: all 0.2s;
-        white-space: nowrap;
+        transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 4px;
-      }
-      .mob-tab-btn.active {
-        background: var(--cyan);
-        color: #030712;
-        font-weight: 700;
-        box-shadow: 0 0 14px rgba(0, 240, 255, 0.6);
+        gap: 3px;
+        flex: 1;
+        position: relative;
+        touch-action: manipulation;
+        outline: none;
       }
 
-      /* Stack panels into non-overlapping bottom drawers */
+      /* 3D Dimensional Icon Pod Container */
+      .icon-3d {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+      }
+      .icon-3d svg {
+        width: 30px;
+        height: 30px;
+        transition: transform 0.3s ease;
+      }
+
+      .mob-tab-btn span.tab-title {
+        transition: all 0.22s;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+        font-size: 0.66rem;
+      }
+
+      /* Active State: 3D Elevated Pod Lifting with Concave Dimensional Aura */
+      .mob-tab-btn.active {
+        color: var(--cyan);
+      }
+      .mob-tab-btn.active .icon-3d {
+        transform: translateY(-11px) scale(1.22);
+        background: radial-gradient(circle at 35% 30%, rgba(0, 240, 255, 0.45) 0%, rgba(15, 30, 65, 0.95) 100%);
+        box-shadow: 
+          0 10px 22px rgba(0, 240, 255, 0.6),
+          0 0 14px var(--cyan),
+          inset 0 1.5px 2px rgba(255, 255, 255, 0.85);
+        border: 1.5px solid var(--cyan);
+        filter: drop-shadow(0 10px 18px rgba(0, 240, 255, 0.5));
+        animation: floatActivePod 2.6s ease-in-out infinite alternate;
+      }
+      .mob-tab-btn.active span.tab-title {
+        color: #ffffff;
+        font-weight: 700;
+        text-shadow: 0 0 10px rgba(0, 240, 255, 0.9);
+      }
+
+      @keyframes floatActivePod {
+        0% { transform: translateY(-11px) scale(1.22); }
+        100% { transform: translateY(-15px) scale(1.26); }
+      }
+
+      /* Stack panels into non-overlapping bottom drawers above 3D dock */
       .left-hud, .right-hud {
         position: absolute;
         top: auto !important;
-        bottom: 58px !important;
+        bottom: 74px !important;
         left: 10px !important;
         right: 10px !important;
         width: auto !important;
@@ -593,11 +670,127 @@
     </div>
   </div>
 
-  <!-- Mobile HUD Dock (Bottom Drawer Tabs for Smartphone Screens) -->
+  <!-- Futuristic 3D Curved Concave Cyber Dock for Smartphones -->
   <div class="mobile-hud-dock" id="mobile-dock">
-    <button class="mob-tab-btn active" id="mob-tab-ctrl">🔥 ควบคุม</button>
-    <button class="mob-tab-btn" id="mob-tab-telem">📊 ข้อมูลฟิสิกส์</button>
-    <button class="mob-tab-btn" id="mob-tab-hide">👁️ ซ่อนจอโล่ง (AR)</button>
+    <!-- Tab 1: 3D Thermal Reactor -->
+    <button class="mob-tab-btn active" id="mob-tab-ctrl">
+      <div class="icon-3d">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="sunSphere3d" cx="35%" cy="30%" r="65%">
+              <stop offset="0%" stop-color="#fffbde"/>
+              <stop offset="30%" stop-color="#ffbf00"/>
+              <stop offset="70%" stop-color="#ff3b00"/>
+              <stop offset="95%" stop-color="#800000"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="24" cy="24" rx="20" ry="7" stroke="#f59e0b" stroke-width="1.8" opacity="0.8" transform="rotate(-25 24 24)"/>
+          <circle cx="24" cy="24" r="13" fill="url(#sunSphere3d)"/>
+          <ellipse cx="20" cy="18" rx="3.8" ry="2" fill="#ffffff" opacity="0.85" transform="rotate(-15 20 18)"/>
+          <path d="M 7 28 A 20 7 0 0 0 41 20" stroke="#00f0ff" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.9"/>
+        </svg>
+      </div>
+      <span class="tab-title">เตาความร้อน</span>
+    </button>
+
+    <!-- Tab 2: 3D Hologram Crystal Prism -->
+    <button class="mob-tab-btn" id="mob-tab-holo">
+      <div class="icon-3d">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="prismSide1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#00f0ff"/>
+              <stop offset="100%" stop-color="#0284c7"/>
+            </linearGradient>
+            <linearGradient id="prismSide2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#38bdf8"/>
+              <stop offset="100%" stop-color="#a855f7"/>
+            </linearGradient>
+            <linearGradient id="prismTop" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#e0f2fe"/>
+              <stop offset="100%" stop-color="#38bdf8"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="24" cy="38" rx="15" ry="4.5" stroke="#00f0ff" stroke-width="1.4" stroke-dasharray="3 2" opacity="0.8"/>
+          <polygon points="24,6 12,22 24,36" fill="url(#prismSide1)" opacity="0.9"/>
+          <polygon points="24,6 36,22 24,36" fill="url(#prismSide2)" opacity="0.95"/>
+          <polygon points="24,6 12,22 24,25 36,22" fill="url(#prismTop)" opacity="0.85"/>
+          <circle cx="24" cy="22" r="2.2" fill="#ffffff"/>
+        </svg>
+      </div>
+      <span class="tab-title">ฮอโลแกรม</span>
+    </button>
+
+    <!-- Tab 3: 3D Quantum Telemetry Gauge -->
+    <button class="mob-tab-btn" id="mob-tab-telem">
+      <div class="icon-3d">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bar3d1" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#047857"/>
+            </linearGradient>
+            <linearGradient id="bar3d2" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0369a1"/>
+            </linearGradient>
+            <linearGradient id="bar3d3" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#b45309"/>
+            </linearGradient>
+          </defs>
+          <path d="M 8 36 L 40 36 L 36 41 L 12 41 Z" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+          <path d="M 12 26 L 18 26 L 18 36 L 12 36 Z" fill="url(#bar3d1)"/>
+          <polygon points="12,26 15,23 21,23 18,26" fill="#6ee7b7"/>
+          <path d="M 21 17 L 27 17 L 27 36 L 21 36 Z" fill="url(#bar3d2)"/>
+          <polygon points="21,17 24,14 30,14 27,17" fill="#7dd3fc"/>
+          <path d="M 30 10 L 36 10 L 36 36 L 30 36 Z" fill="url(#bar3d3)"/>
+          <polygon points="30,10 33,7 39,7 36,10" fill="#fde68a"/>
+          <path d="M 10 34 Q 24 8 38 28" stroke="#00f0ff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="tab-title">ฟิสิกส์ Live</span>
+    </button>
+
+    <!-- Tab 4: 3D AR Spatial Scanner -->
+    <button class="mob-tab-btn" id="mob-tab-ar">
+      <div class="icon-3d">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="lensGrad3d" cx="40%" cy="35%" r="60%">
+              <stop offset="0%" stop-color="#e0f2fe"/><stop offset="40%" stop-color="#0284c7"/><stop offset="100%" stop-color="#020617"/>
+            </radialGradient>
+            <linearGradient id="bodyGrad3d" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#475569"/><stop offset="100%" stop-color="#0f172a"/>
+            </linearGradient>
+          </defs>
+          <rect x="8" y="14" width="32" height="24" rx="6" fill="url(#bodyGrad3d)" stroke="#64748b" stroke-width="1.2"/>
+          <rect x="18" y="10" width="12" height="4" rx="2" fill="#334155"/>
+          <circle cx="24" cy="26" r="9.5" fill="#0f172a" stroke="#00f0ff" stroke-width="1.5"/>
+          <circle cx="24" cy="26" r="7.5" fill="url(#lensGrad3d)"/>
+          <path d="M 19 23 A 5.5 5.5 0 0 1 27 21" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity="0.9"/>
+          <path d="M 5 18 L 5 11 L 12 11" stroke="#f59e0b" stroke-width="2" fill="none"/>
+          <path d="M 43 18 L 43 11 L 36 11" stroke="#f59e0b" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+      <span class="tab-title">กล้อง AR</span>
+    </button>
+
+    <!-- Tab 5: 3D Fullscreen Immersive Eye -->
+    <button class="mob-tab-btn" id="mob-tab-hide">
+      <div class="icon-3d">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="irisGrad3d" cx="40%" cy="35%" r="55%">
+              <stop offset="0%" stop-color="#67e8f9"/><stop offset="50%" stop-color="#06b6d4"/><stop offset="100%" stop-color="#020617"/>
+            </radialGradient>
+          </defs>
+          <path d="M 6 24 C 12 14 36 14 42 24 C 36 34 12 34 6 24 Z" fill="#0f172a" stroke="#00f0ff" stroke-width="1.8"/>
+          <circle cx="24" cy="24" r="7.5" fill="url(#irisGrad3d)" stroke="#22d3ee" stroke-width="1"/>
+          <circle cx="24" cy="24" r="3.2" fill="#020617"/>
+          <circle cx="22.5" cy="22" r="1.4" fill="#ffffff" opacity="0.9"/>
+          <path d="M 10 16 L 6 20 M 38 16 L 42 20 M 10 32 L 6 28 M 38 32 L 42 28" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="tab-title">ดูเต็มจอ</span>
+    </button>
   </div>
 
   <!-- AR Scanning Reticle -->
@@ -1171,6 +1364,9 @@
         btn.textContent = '✨ โหมดฮอโลแกรม (Hologram)';
         btn.style.boxShadow = 'none';
       }
+      if (document.getElementById('mob-tab-holo')) {
+        document.getElementById('mob-tab-holo').classList.toggle('active', isHolographicMode);
+      }
     }
     document.getElementById('btn-toggle-hologram').addEventListener('click', toggleHologramMode);
 
@@ -1181,6 +1377,10 @@
       document.getElementById('btn-mode-3d').classList.toggle('active', !ar && !hand);
       document.getElementById('btn-mode-ar').classList.toggle('active', ar);
       document.getElementById('btn-mode-hand').classList.toggle('active', hand);
+
+      if (document.getElementById('mob-tab-ar')) {
+        document.getElementById('mob-tab-ar').classList.toggle('active', ar);
+      }
 
       reticle.style.display = ar ? 'block' : 'none';
       document.getElementById('hand-skeleton-canvas').style.display = hand ? 'block' : 'none';
@@ -1194,7 +1394,7 @@
       if (ar) {
         cavityRootGroup.scale.set(0.7, 0.7, 0.7);
         cavityRootGroup.position.set(0, -0.2, 0);
-        if (window.innerWidth <= 768) switchMobTab('hide');
+        if (window.innerWidth <= 768) setActiveMobTab(document.getElementById('mob-tab-hide'));
       } else {
         cavityRootGroup.scale.set(1.0, 1.0, 1.0);
         cavityRootGroup.position.set(0, 0, 0);
@@ -1358,43 +1558,79 @@
     });
 
     // ==========================================================
-    // MOBILE RESPONSIVE HUD DRAWER CONTROLLER
+    // FUTURISTIC 3D CYBER DOCK CONTROLLER (5 TABS)
     // ==========================================================
     const mobTabCtrl = document.getElementById('mob-tab-ctrl');
+    const mobTabHolo = document.getElementById('mob-tab-holo');
     const mobTabTelem = document.getElementById('mob-tab-telem');
+    const mobTabAr = document.getElementById('mob-tab-ar');
     const mobTabHide = document.getElementById('mob-tab-hide');
     const leftHud = document.querySelector('.left-hud');
     const rightHud = document.querySelector('.right-hud');
 
-    function switchMobTab(tab) {
-      if (!mobTabCtrl) return;
-      [mobTabCtrl, mobTabTelem, mobTabHide].forEach(b => b.classList.remove('active'));
-
-      if (tab === 'ctrl') {
-        mobTabCtrl.classList.add('active');
-        leftHud.classList.remove('mob-hidden');
-        rightHud.classList.add('mob-hidden');
-      } else if (tab === 'telem') {
-        mobTabTelem.classList.add('active');
-        leftHud.classList.add('mob-hidden');
-        rightHud.classList.remove('mob-hidden');
-      } else {
-        mobTabHide.classList.add('active');
-        leftHud.classList.add('mob-hidden');
-        rightHud.classList.add('mob-hidden');
-      }
+    function setActiveMobTab(activeBtn) {
+      [mobTabCtrl, mobTabTelem, mobTabHide].forEach(b => {
+        if (b) b.classList.remove('active');
+      });
+      if (activeBtn) activeBtn.classList.add('active');
     }
 
-    if (mobTabCtrl) mobTabCtrl.addEventListener('click', () => switchMobTab('ctrl'));
-    if (mobTabTelem) mobTabTelem.addEventListener('click', () => switchMobTab('telem'));
-    if (mobTabHide) mobTabHide.addEventListener('click', () => switchMobTab('hide'));
+    if (mobTabCtrl) {
+      mobTabCtrl.addEventListener('click', () => {
+        setActiveMobTab(mobTabCtrl);
+        leftHud.classList.remove('mob-hidden');
+        rightHud.classList.add('mob-hidden');
+      });
+    }
+
+    if (mobTabHolo) {
+      mobTabHolo.addEventListener('click', () => {
+        toggleHologramMode();
+      });
+    }
+
+    if (mobTabTelem) {
+      mobTabTelem.addEventListener('click', () => {
+        setActiveMobTab(mobTabTelem);
+        leftHud.classList.add('mob-hidden');
+        rightHud.classList.remove('mob-hidden');
+      });
+    }
+
+    if (mobTabAr) {
+      mobTabAr.addEventListener('click', () => {
+        if (!isARMode) {
+          setMode(true, false);
+          setActiveMobTab(mobTabHide);
+          leftHud.classList.add('mob-hidden');
+          rightHud.classList.add('mob-hidden');
+        } else {
+          setMode(false, false);
+          setActiveMobTab(mobTabCtrl);
+          leftHud.classList.remove('mob-hidden');
+          rightHud.classList.add('mob-hidden');
+        }
+      });
+    }
+
+    if (mobTabHide) {
+      mobTabHide.addEventListener('click', () => {
+        setActiveMobTab(mobTabHide);
+        leftHud.classList.add('mob-hidden');
+        rightHud.classList.add('mob-hidden');
+      });
+    }
 
     function applyResponsiveLayout() {
       if (window.innerWidth <= 768) {
         if (isARMode) {
-          switchMobTab('hide');
+          setActiveMobTab(mobTabHide);
+          leftHud.classList.add('mob-hidden');
+          rightHud.classList.add('mob-hidden');
         } else {
-          switchMobTab('ctrl');
+          setActiveMobTab(mobTabCtrl);
+          leftHud.classList.remove('mob-hidden');
+          rightHud.classList.add('mob-hidden');
         }
       } else {
         leftHud.classList.remove('mob-hidden');
