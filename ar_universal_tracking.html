@@ -50,12 +50,15 @@
       width: 100vw;
     }
 
-    /* WebGL Canvas & AR Video Feed */
+    /* WebGL Canvas & AR Video Feed with Tactical Dotted Grid */
     #webgl-canvas-container {
       position: absolute;
       inset: 0;
       z-index: 2;
-      background: radial-gradient(circle at 50% 30%, #0f1d38 0%, #030712 90%);
+      background: 
+        radial-gradient(circle at 50% 45%, rgba(15, 29, 56, 0.95) 0%, #020617 88%),
+        radial-gradient(rgba(0, 240, 255, 0.16) 1.2px, transparent 1.2px);
+      background-size: 100% 100%, 20px 20px;
       transition: background 0.3s ease;
     }
     body.ar-active, body.ar-active #webgl-canvas-container {
@@ -73,19 +76,20 @@
       background: #000;
     }
 
-    /* Top Glass Header */
+    /* Top Cyber Tactical Header */
     .top-header {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       z-index: 40;
-      padding: 12px 16px;
+      padding: 10px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: linear-gradient(180deg, rgba(3, 7, 18, 0.95) 0%, rgba(3, 7, 18, 0.6) 80%, transparent 100%);
-      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(8, 14, 26, 0.96) 0%, rgba(8, 14, 26, 0.75) 80%, transparent 100%);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+      backdrop-filter: blur(14px);
     }
     .brand-title {
       font-family: 'Chakra Petch', sans-serif;
@@ -94,103 +98,124 @@
       letter-spacing: 0.5px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       color: #fff;
     }
     .brand-title i {
       color: var(--cyan);
-      text-shadow: 0 0 10px var(--cyan);
+      text-shadow: 0 0 14px var(--cyan);
     }
     .header-actions {
       display: flex;
       gap: 8px;
     }
+    /* Cyber Mech Tactical Key Buttons */
     .icon-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--glass-border);
-      color: #fff;
+      width: 38px;
+      height: 38px;
+      background: rgba(8, 14, 26, 0.88);
+      border: 1.5px solid rgba(0, 240, 255, 0.45);
+      clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+      color: var(--cyan);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       cursor: pointer;
       text-decoration: none;
+      transition: all 0.22s ease;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.15);
+    }
+    .icon-btn:hover, .icon-btn:active {
+      background: var(--cyan);
+      color: #020617;
+      box-shadow: 0 0 22px rgba(0, 240, 255, 0.85);
+      transform: translateY(-2px);
     }
 
-    /* Target Selector Bar (Quick Carousel) */
+    /* Target Selector Bar (Cyber Modular Carousel) */
     .target-selector-bar {
       position: absolute;
-      top: 60px;
+      top: 58px;
       left: 0;
       right: 0;
       z-index: 38;
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      padding: 6px 16px;
+      padding: 6px 18px;
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
-      background: linear-gradient(180deg, rgba(3, 7, 18, 0.7) 0%, transparent 100%);
+      background: linear-gradient(180deg, rgba(8, 14, 26, 0.75) 0%, transparent 100%);
     }
     .target-selector-bar::-webkit-scrollbar { display: none; }
     
+    /* Cyber Mech Target Pills */
     .target-pill {
       flex: 0 0 auto;
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      border-radius: 20px;
+      gap: 8px;
+      padding: 7px 16px;
+      border-radius: 4px;
+      clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
       font-family: 'Chakra Petch', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 600;
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      background: rgba(8, 14, 26, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.35);
       color: #94a3b8;
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.22s ease;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
     }
-    .target-pill.active {
-      background: rgba(0, 240, 255, 0.22);
+    .target-pill:hover {
       border-color: var(--cyan);
       color: #fff;
-      box-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
     }
-    .target-pill i { font-size: 0.75rem; }
+    .target-pill.active {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(2, 132, 199, 0.45));
+      border-color: var(--cyan);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.6), inset 0 0 10px rgba(0, 240, 255, 0.25);
+    }
+    .target-pill i { font-size: 0.78rem; }
     .pill-auto.active i { color: var(--gold); }
     .pill-fig1.active i { color: var(--gold); }
     .pill-fig2.active i { color: var(--cyan); }
     .pill-fig3.active i { color: var(--pink); }
 
-    /* Active Target Info Banner with Sci-Fi HUD Frame */
+    /* Active Target Info Banner with Sci-Fi HUD Frame & Matrix Grid */
     .active-target-banner {
       position: absolute;
       top: 106px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 36;
-      width: min(380px, 92vw);
-      background: rgba(8, 14, 26, 0.90);
+      width: min(560px, 94vw);
+      background: rgba(8, 14, 26, 0.92);
+      background-image: radial-gradient(rgba(0, 240, 255, 0.22) 1.2px, transparent 1.2px);
+      background-size: 16px 16px;
       border: none;
-      padding: 12px 18px;
+      padding: 14px 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
       backdrop-filter: blur(16px);
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.75), 0 0 25px rgba(0, 240, 255, 0.2);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(0, 240, 255, 0.2);
       animation: fadeInDown 0.3s ease;
       clip-path: polygon(
         0 0,
-        calc(100% - 16px) 0,
-        100% 16px,
-        100% calc(100% - 16px),
-        calc(100% - 16px) 100%,
-        16px 100%,
-        0 calc(100% - 16px)
+        calc(100% - 18px) 0,
+        100% 18px,
+        100% calc(100% - 18px),
+        calc(100% - 18px) 100%,
+        18px 100%,
+        0 calc(100% - 18px)
       );
       transition: all 0.3s ease;
     }
@@ -201,49 +226,82 @@
     .target-badge {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
     }
     .target-badge-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      background: rgba(0, 240, 255, 0.15);
-      border: 1px solid rgba(0, 240, 255, 0.4);
+      width: 38px;
+      height: 38px;
+      border-radius: 6px;
+      clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+      background: rgba(0, 240, 255, 0.16);
+      border: 1.5px solid rgba(0, 240, 255, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--cyan);
-      font-size: 1rem;
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+      font-size: 1.05rem;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
+      flex-shrink: 0;
+    }
+    .target-badge-text {
+      flex: 1;
+      min-width: 0;
     }
     .target-badge-text h4 {
-      font-size: 0.86rem;
+      font-size: clamp(0.88rem, 2.5vw, 1.05rem);
       font-weight: 700;
       color: #fff;
       font-family: 'Chakra Petch', sans-serif;
       letter-spacing: 0.3px;
+      line-height: 1.35;
+      white-space: normal;
     }
     .target-badge-text p {
-      font-size: 0.72rem;
+      font-size: 0.74rem;
       color: #94a3b8;
+      line-height: 1.3;
     }
     .target-status-tag {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
-      background: rgba(245, 158, 11, 0.2);
+      padding: 5px 12px;
+      border-radius: 4px;
+      clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+      background: rgba(245, 158, 11, 0.22);
       color: var(--gold);
-      border: 1px solid rgba(245, 158, 11, 0.5);
+      border: 1px solid rgba(245, 158, 11, 0.55);
       font-family: 'Chakra Petch', sans-serif;
       letter-spacing: 0.5px;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
+      flex-shrink: 0;
+    }
+    .status-pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 6px var(--gold);
+      animation: pulseDot 1.4s infinite;
     }
     .target-status-tag.locked {
       background: rgba(16, 185, 129, 0.25);
       color: var(--emerald);
       border-color: var(--emerald);
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.45);
+    }
+    .target-status-tag.locked .status-pulse-dot {
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.7); }
     }
 
     /* SVG HUD Frame Overlay for Panels & Cards */
@@ -415,7 +473,7 @@
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
     }
 
-    /* Fullscreen Ambient Tactical HUD Viewport Overlay (AR Cockpit Visor) */
+    /* Fullscreen Ambient Tactical Mech HUD Viewport (Matching Image 2 Reference) */
     #tacticalHudOverlay {
       position: fixed;
       inset: 0;
@@ -424,36 +482,32 @@
       overflow: hidden;
       transition: all 0.3s ease;
     }
-    .hud-corner {
+    .fullscreen-mech-hud-svg {
       position: absolute;
-      width: 30px;
-      height: 30px;
-      border: 2px solid rgba(0, 240, 255, 0.45);
+      inset: 6px;
+      width: calc(100vw - 12px);
+      height: calc(100vh - 12px);
       pointer-events: none;
+      filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.45));
     }
-    .hud-c-tl { top: 62px; left: 10px; border-right: none; border-bottom: none; }
-    .hud-c-tr { top: 62px; right: 10px; border-left: none; border-bottom: none; }
-    .hud-c-bl { bottom: 84px; left: 10px; border-right: none; border-top: none; }
-    .hud-c-br { bottom: 84px; right: 10px; border-left: none; border-top: none; }
-
     .hud-telemetry-left, .hud-telemetry-right {
       position: absolute;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.62rem;
-      color: rgba(0, 240, 255, 0.7);
+      font-size: 0.65rem;
+      color: rgba(0, 240, 255, 0.75);
       display: flex;
       flex-direction: column;
-      gap: 3px;
-      text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+      gap: 4px;
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
       pointer-events: none;
     }
     .hud-telemetry-left {
       top: 154px;
-      left: 14px;
+      left: 18px;
     }
     .hud-telemetry-right {
       top: 154px;
-      right: 14px;
+      right: 18px;
       text-align: right;
     }
 
@@ -469,7 +523,7 @@
       transform: scale(0.95);
     }
 
-    /* Bangchak-Style Curve & Notch Bottom Bar */
+    /* Bangchak-Style Curve & Cyber Notch Bottom Bar */
     #mobileBottomNav {
       position: fixed;
       bottom: 0;
@@ -477,8 +531,8 @@
       right: 0;
       margin: 0 auto;
       width: 100%;
-      max-width: 500px;
-      height: calc(74px + env(safe-area-inset-bottom, 12px));
+      max-width: 520px;
+      height: calc(76px + env(safe-area-inset-bottom, 12px));
       z-index: 50;
       display: flex;
       align-items: flex-end;
@@ -496,8 +550,8 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 86px;
-      filter: drop-shadow(0 -10px 24px rgba(0, 0, 0, 0.65));
+      height: 88px;
+      filter: drop-shadow(0 -10px 24px rgba(0, 0, 0, 0.75));
       pointer-events: none;
     }
     .nav-buttons-row {
@@ -507,8 +561,8 @@
       justify-content: space-around;
       align-items: center;
       width: 100%;
-      height: 70px;
-      padding: 0 10px 6px 10px;
+      height: 72px;
+      padding: 0 12px 6px 12px;
     }
     .nav-btn {
       flex: 1;
@@ -516,7 +570,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 3px;
+      gap: 4px;
       background: transparent;
       border: none;
       color: #94a3b8;
@@ -524,36 +578,42 @@
       position: relative;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    /* Cyber Mech Key Plate for Bottom Nav Buttons */
     .nav-btn .clay-icon-wrap {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.05rem;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      transition: all 0.2s ease;
+      font-size: 1.15rem;
+      background: rgba(8, 14, 26, 0.88);
+      border: 1.5px solid rgba(0, 240, 255, 0.3);
+      color: #94a3b8;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+    }
+    .nav-btn:hover .clay-icon-wrap, .nav-btn.active .clay-icon-wrap {
+      background: rgba(0, 240, 255, 0.25);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.65);
+      transform: translateY(-2px);
     }
     .nav-btn span {
-      font-size: 0.68rem;
-      font-family: 'Prompt', sans-serif;
-      font-weight: 500;
+      font-size: 0.72rem;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.3px;
     }
     .nav-btn.active {
       color: var(--cyan);
     }
-    .nav-btn.active .clay-icon-wrap {
-      background: rgba(0, 240, 255, 0.18);
-      border-color: var(--cyan);
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
-      color: #fff;
-    }
 
-    /* Floating Center 58px Gem Button */
+    /* Floating Center Tactical Arc Reactor Core Button */
     .center-action-spacer {
-      flex: 1.2;
+      flex: 1.25;
       display: flex;
       justify-content: center;
       align-items: flex-start;
@@ -562,34 +622,48 @@
     }
     .floating-gem-btn {
       position: absolute;
-      top: -26px;
-      width: 58px;
-      height: 58px;
+      top: -30px;
+      width: 66px;
+      height: 66px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #38bdf8 0%, #0284c7 60%, #0369a1 100%);
-      border: 2.5px solid rgba(255, 255, 255, 0.8);
+      background: radial-gradient(circle at 40% 35%, #00f0ff 0%, #0284c7 48%, #030712 95%);
+      border: 2.5px solid #00f0ff;
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 2px;
-      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.6), 0 0 0 4px rgba(15, 23, 42, 0.8);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.85), 0 0 0 5px rgba(8, 14, 26, 0.95);
       cursor: pointer;
       pointer-events: auto;
       transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .floating-gem-btn:active {
-      transform: scale(0.92);
+    .floating-gem-btn::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(0, 240, 255, 0.65);
+      animation: reactorSpin 10s linear infinite;
+    }
+    @keyframes reactorSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .floating-gem-btn:hover, .floating-gem-btn:active {
+      transform: scale(0.94);
+      box-shadow: 0 0 35px rgba(0, 240, 255, 1), 0 0 0 6px rgba(0, 240, 255, 0.4);
     }
     .floating-gem-btn i {
-      font-size: 1.25rem;
+      font-size: 1.35rem;
+      text-shadow: 0 0 10px #fff;
     }
     .floating-gem-btn span {
-      font-size: 0.58rem;
+      font-size: 0.6rem;
       font-family: 'Chakra Petch', sans-serif;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
     }
 
     /* Interactive Drawer / Parameter Sheet with Sci-Fi HUD Framing */
@@ -776,12 +850,34 @@
     </defs>
   </svg>
 
-  <!-- Fullscreen Ambient Tactical HUD Viewport Overlay (AR Cockpit Visor) -->
+  <!-- Fullscreen Ambient Tactical Mech HUD Viewport Overlay (Matching Image 2 Reference) -->
   <div id="tacticalHudOverlay">
-    <div class="hud-corner hud-c-tl"></div>
-    <div class="hud-corner hud-c-tr"></div>
-    <div class="hud-corner hud-c-bl"></div>
-    <div class="hud-corner hud-c-br"></div>
+    <svg class="fullscreen-mech-hud-svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
+      <!-- Outer Double Cyber Border with 45-degree Chamfered Corners -->
+      <path d="M 0 32 L 32 0 L 350 0 L 370 14 L 630 14 L 650 0 L 968 0 L 1000 32 L 1000 568 L 968 600 L 650 600 L 630 586 L 370 586 L 350 600 L 32 600 L 0 568 Z"
+            fill="none" stroke="#00f0ff" stroke-width="2.2" vector-effect="non-scaling-stroke" />
+      <path d="M 12 40 L 40 12 L 345 12 M 655 12 L 960 12 L 988 40 L 988 560 L 960 588 L 655 588 M 345 588 L 40 588 L 12 560 Z"
+            fill="none" stroke="rgba(0, 240, 255, 0.45)" stroke-width="1.2" vector-effect="non-scaling-stroke" />
+      <!-- Top Stepped Wing Brackets -->
+      <path d="M 335 0 L 355 14 L 645 14 L 665 0" fill="none" stroke="#00f0ff" stroke-width="2" vector-effect="non-scaling-stroke" />
+      <line x1="375" y1="7" x2="625" y2="7" stroke="#00f0ff" stroke-width="2" vector-effect="non-scaling-stroke" />
+      <!-- Left Side Measurement Ticks -->
+      <line x1="16" y1="200" x2="26" y2="200" stroke="#00f0ff" stroke-width="1.8" />
+      <line x1="16" y1="230" x2="22" y2="230" stroke="#00f0ff" stroke-width="1.4" />
+      <line x1="16" y1="260" x2="26" y2="260" stroke="#00f0ff" stroke-width="1.8" />
+      <line x1="16" y1="290" x2="22" y2="290" stroke="#00f0ff" stroke-width="1.4" />
+      <line x1="16" y1="320" x2="26" y2="320" stroke="#00f0ff" stroke-width="1.8" />
+      <line x1="16" y1="350" x2="22" y2="350" stroke="#00f0ff" stroke-width="1.4" />
+      <line x1="16" y1="380" x2="26" y2="380" stroke="#00f0ff" stroke-width="1.8" />
+      <!-- Right Side Measurement Ticks -->
+      <line x1="974" y1="200" x2="984" y2="200" stroke="#00f0ff" stroke-width="1.8" />
+      <line x1="978" y1="230" x2="984" y2="230" stroke="#00f0ff" stroke-width="1.4" />
+      <line x1="974" y1="260" x2="984" y2="260" stroke="#00f0ff" stroke-width="1.8" />
+      <line x1="978" y1="290" x2="984" y2="290" stroke="#00f0ff" stroke-width="1.4" />
+      <line x1="974" y1="320" x2="984" y2="320" stroke="#00f0ff" stroke-width="1.8" />
+      <line x1="978" y1="350" x2="984" y2="350" stroke="#00f0ff" stroke-width="1.4" />
+      <line x1="974" y1="380" x2="984" y2="380" stroke="#00f0ff" stroke-width="1.8" />
+    </svg>
     <div class="hud-telemetry-left">
       <span>SYS: QUANTUM-XR-2026</span>
       <span>FREQ: 5.8 GHz</span>
@@ -843,7 +939,10 @@
         <p id="bannerSubtitle">นำกล้องส่องไปที่ ภาพที่ 1.1, 1.2 หรือ 2.1</p>
       </div>
     </div>
-    <div class="target-status-tag" id="bannerStatus">รอภาพ (WAIT)</div>
+    <div class="target-status-tag" id="bannerStatus">
+      <span class="status-pulse-dot"></span>
+      <span id="bannerStatusText">รอภาพ (WAIT)</span>
+    </div>
   </div>
 
   <!-- AR Scanning Reticle -->
@@ -1099,6 +1198,23 @@
     const cyanPoint = new THREE.PointLight(0x00f0ff, 1.5, 12);
     cyanPoint.position.set(-3, 2, 2);
     scene.add(cyanPoint);
+
+    // Tactical Holographic Polar Grid Base Platform (Sci-Fi Holo Projection)
+    const holoPlatform = new THREE.Group();
+    holoPlatform.position.y = -1.35;
+
+    const polarGrid = new THREE.PolarGridHelper(3.2, 16, 6, 64, 0x00f0ff, 0x0284c7);
+    polarGrid.material.opacity = 0.35;
+    polarGrid.material.transparent = true;
+    holoPlatform.add(polarGrid);
+
+    const ringGeo = new THREE.RingGeometry(3.0, 3.12, 64);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.55, side: THREE.DoubleSide });
+    const outerRing = new THREE.Mesh(ringGeo, ringMat);
+    outerRing.rotation.x = Math.PI / 2;
+    holoPlatform.add(outerRing);
+
+    scene.add(holoPlatform);
 
     // ==========================================================
     // 3. BUILD 3D MODELS FOR ALL TARGETS
@@ -1378,6 +1494,13 @@
     const statusBanner = document.getElementById('bannerStatus');
     const reticleTag = document.getElementById('reticleTagText');
 
+    function updateBannerStatus(text, isLocked = false) {
+      if (statusBanner) {
+        statusBanner.classList.toggle('locked', isLocked);
+        statusBanner.innerHTML = `<span class="status-pulse-dot"></span><span id="bannerStatusText">${text}</span>`;
+      }
+    }
+
     function processMultiTargetOpticalFrame() {
       const video = document.getElementById('camera-video');
       if (!isARMode || video.readyState < 2) return;
@@ -1448,8 +1571,7 @@
               switch3DTarget(detected);
               masterGroup.scale.set(0.12, 0.12, 0.12);
               reticle.classList.add('locked');
-              statusBanner.classList.add('locked');
-              statusBanner.textContent = '✅ ตรวจพบเป้าหมาย (LOCKED)';
+              updateBannerStatus('ตรวจพบเป้าหมาย (LOCKED)', true);
               reticleTag.innerHTML = `🎯 ล็อกเป้าหมาย: ${TARGET_CATALOG[detected].title}`;
               playLockChime();
             }
@@ -1468,8 +1590,7 @@
       isTargetLocked = !isTargetLocked;
       models[activeTargetId].group.visible = isTargetLocked;
       reticle.classList.toggle('locked', isTargetLocked);
-      statusBanner.classList.toggle('locked', isTargetLocked);
-      statusBanner.textContent = isTargetLocked ? '✅ ตรวจพบเป้าหมาย (LOCKED)' : 'รอภาพ (WAIT)';
+      updateBannerStatus(isTargetLocked ? 'ตรวจพบเป้าหมาย (LOCKED)' : 'รอภาพ (WAIT)', isTargetLocked);
       if (isTargetLocked) {
         masterGroup.scale.set(0.15, 0.15, 0.15);
         playLockChime();
@@ -1545,8 +1666,7 @@
         isTargetLocked = false;
         Object.values(models).forEach(m => m.group.visible = false);
         reticle.classList.remove('locked');
-        statusBanner.classList.remove('locked');
-        statusBanner.textContent = 'รอภาพ (WAIT)';
+        updateBannerStatus('รอภาพ (WAIT)', false);
       } catch(err) {
         alert("ไม่สามารถเปิดกล้องได้: " + err.message + "\nโปรดตรวจสอบการอนุญาตสิทธิ์กล้องในเบราว์เซอร์");
       }
@@ -1583,8 +1703,7 @@
       if (isARMode) {
         models[activeTargetId].group.visible = false;
         reticle.classList.remove('locked');
-        statusBanner.classList.remove('locked');
-        statusBanner.textContent = 'รอภาพ (WAIT)';
+        updateBannerStatus('รอภาพ (WAIT)', false);
       }
     }
 
@@ -1762,6 +1881,12 @@
       // Smooth Scale Lerp when target locked
       if (isTargetLocked) {
         masterGroup.scale.lerp(new THREE.Vector3(1.0, 1.0, 1.0), 0.08);
+      }
+
+      // Rotate Tactical Holographic Polar Grid Base Platform
+      if (holoPlatform) {
+        holoPlatform.rotation.y += 0.003;
+        holoPlatform.visible = !isARMode;
       }
 
       // Model 1 animations
