@@ -10,6 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 
+  <!-- Font Awesome 6 (same as edge-xaiot-agrienvi) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
   <!-- Three.js (r128) & OrbitControls -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -186,128 +189,253 @@
       }
 
       /* ==========================================================
-         FUTURISTIC 3D CONCAVE CYBER DOCK (เมนูบาร์ล่างมิติโค้งเว้า 3 มิติ)
+         BANGCHAK STYLE CURVE & CONCAVE SCOOP BOTTOM DOCK (sciexhub2026 standard)
+         Directly matching edge-xaiot-agrienvi/includes/bottom_nav.php
          ========================================================== */
-      .mobile-hud-dock {
+      #mobileBottomNav {
+        display: block;
         position: fixed;
-        bottom: 12px;
-        left: 50%;
-        transform: translateX(-50%);
+        bottom: 0;
+        left: 0;
+        right: 0;
         z-index: 90;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 2px;
-        background: linear-gradient(180deg, rgba(15, 23, 42, 0.90) 0%, rgba(3, 7, 18, 0.97) 100%);
-        backdrop-filter: blur(28px) saturate(220%);
-        -webkit-backdrop-filter: blur(28px) saturate(220%);
-        border: 1.5px solid rgba(0, 240, 255, 0.38);
-        border-radius: 40px 40px 32px 32px;
-        padding: 6px 10px 8px;
-        box-shadow: 
-          0 -8px 30px rgba(0, 240, 255, 0.28),
-          0 14px 45px rgba(0, 0, 0, 0.92),
-          inset 0 1.5px 2px rgba(255, 255, 255, 0.45),
-          inset 0 -1px 1px rgba(0, 240, 255, 0.2);
-        width: min(440px, 95vw);
-        max-width: 95vw;
+        pointer-events: auto;
+        user-select: none;
+        width: 100%;
+        max-width: 100vw;
+        overflow: visible;
+        padding-bottom: max(env(safe-area-inset-bottom, 0px), 6px);
       }
 
-      /* Concave Top Accent Line with Ambient Pulsing Glow */
-      .mobile-hud-dock::before {
-        content: '';
+      /* 3D Curved Scoop Background with Molded Recessed Dish */
+      .scoop-bg-container {
         position: absolute;
-        top: -1px;
-        left: 15%;
-        right: 15%;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, var(--cyan), #a855f7, var(--cyan), transparent);
-        border-radius: 50%;
-        filter: blur(1px);
-        animation: dockGlowPulse 4s ease-in-out infinite alternate;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 78px;
+        pointer-events: none;
+      }
+      .scoop-solid-shield {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(3, 7, 18, 0.98) 100%);
+        backdrop-filter: blur(24px) saturate(200%);
+        -webkit-backdrop-filter: blur(24px) saturate(200%);
+        box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.85);
+      }
+      .scoop-svg-overlay {
+        position: absolute;
+        top: -12px;
+        left: 0;
+        width: 100%;
+        height: 90px;
+        filter: drop-shadow(0 -8px 20px rgba(0, 240, 255, 0.28));
       }
 
-      @keyframes dockGlowPulse {
-        0% { opacity: 0.6; filter: blur(1px); }
-        100% { opacity: 1.0; filter: blur(2px); box-shadow: 0 0 10px var(--cyan); }
+      /* Navigation Items Grid */
+      .nav-items-grid {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding: 0 10px 8px;
+        height: 76px;
+        width: 100%;
+        max-width: 440px;
+        margin: 0 auto;
+        z-index: 20;
       }
 
-      .mob-tab-btn {
-        background: transparent;
-        border: none;
-        color: #94a3b8;
-        font-family: 'Chakra Petch', sans-serif;
-        font-size: 0.68rem;
-        font-weight: 600;
-        padding: 2px 4px;
-        border-radius: 16px;
-        cursor: pointer;
-        transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+      .bangchak-nav-item {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 3px;
-        flex: 1;
-        position: relative;
-        touch-action: manipulation;
+        justify-content: center;
+        width: 58px;
+        cursor: pointer;
+        background: transparent;
+        border: none;
         outline: none;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        text-decoration: none;
+        padding: 0;
+      }
+      .bangchak-nav-item:active {
+        transform: scale(0.90);
       }
 
-      /* 3D Dimensional Icon Pod Container */
-      .icon-3d {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
+      /* 3D Claymorphic Icon Button */
+      .clay-3d-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 14px;
+        position: relative;
+        overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
-        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
-      .icon-3d svg {
-        width: 30px;
-        height: 30px;
-        transition: transform 0.3s ease;
-      }
-
-      .mob-tab-btn span.tab-title {
-        transition: all 0.22s;
-        letter-spacing: 0.2px;
-        white-space: nowrap;
-        font-size: 0.66rem;
+      /* 3D Specular Highlight Gloss */
+      .clay-3d-gloss {
+        position: absolute;
+        left: 3px;
+        right: 3px;
+        top: 2px;
+        height: 12px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0) 100%);
+        border-radius: 10px 10px 0 0;
+        pointer-events: none;
       }
 
-      /* Active State: 3D Elevated Pod Lifting with Concave Dimensional Aura */
-      .mob-tab-btn.active {
-        color: var(--cyan);
+      /* Tab Gradients */
+      /* Tab 1: เตาความร้อน (Amber/Fire) */
+      .clay-btn-fire {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #dc2626 100%);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.45), inset 0 1.5px 2px rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(251, 191, 36, 0.5);
       }
-      .mob-tab-btn.active .icon-3d {
-        transform: translateY(-11px) scale(1.22);
-        background: radial-gradient(circle at 35% 30%, rgba(0, 240, 255, 0.45) 0%, rgba(15, 30, 65, 0.95) 100%);
-        box-shadow: 
-          0 10px 22px rgba(0, 240, 255, 0.6),
-          0 0 14px var(--cyan),
-          inset 0 1.5px 2px rgba(255, 255, 255, 0.85);
-        border: 1.5px solid var(--cyan);
-        filter: drop-shadow(0 10px 18px rgba(0, 240, 255, 0.5));
-        animation: floatActivePod 2.6s ease-in-out infinite alternate;
+      /* Tab 2: ฮอโลแกรม (Fuchsia/Cyan) */
+      .clay-btn-holo {
+        background: linear-gradient(135deg, #38bdf8 0%, #8b5cf6 50%, #c026d3 100%);
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.45), inset 0 1.5px 2px rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(168, 85, 247, 0.5);
       }
-      .mob-tab-btn.active span.tab-title {
-        color: #ffffff;
+      /* Tab 3: ฟิสิกส์ (Blue/Cyan) */
+      .clay-btn-physics {
+        background: linear-gradient(135deg, #00f0ff 0%, #0284c7 50%, #1e40af 100%);
+        box-shadow: 0 4px 12px rgba(0, 240, 255, 0.45), inset 0 1.5px 2px rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(56, 189, 248, 0.5);
+      }
+      /* Tab 4: ดูเต็มจอ (Emerald/Teal) */
+      .clay-btn-eye {
+        background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #0f766e 100%);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.45), inset 0 1.5px 2px rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(52, 211, 153, 0.5);
+      }
+
+      /* Center 3D Floating Action Sphere in Scoop */
+      .center-gem-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        top: -12px;
+        z-index: 30;
+      }
+      .center-gem-btn {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        padding: 4px;
+        background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 40%, #0f172a 100%);
+        box-shadow: 0 10px 25px rgba(0, 240, 255, 0.65), 0 2px 6px rgba(0, 0, 0, 0.5);
+        border: 1.5px solid rgba(0, 240, 255, 0.85);
+        cursor: pointer;
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        outline: none;
+      }
+      .center-gem-btn:hover {
+        transform: scale(1.08);
+      }
+      .center-gem-btn:active {
+        transform: scale(0.92);
+      }
+      .center-gem-btn.active {
+        box-shadow: 0 0 25px #00f0ff, 0 10px 24px rgba(0, 240, 255, 0.7);
+        animation: pulse-gem 1.5s infinite alternate;
+      }
+      .center-gem-btn.active .center-gem-inner {
+        background: linear-gradient(135deg, #10b981 0%, #059669 45%, #064e3b 100%);
+      }
+      @keyframes pulse-gem {
+        from { transform: scale(1.0); }
+        to { transform: scale(1.1); box-shadow: 0 0 35px #10b981, 0 12px 28px rgba(16, 185, 129, 0.85); }
+      }
+      .center-gem-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00f0ff 0%, #0284c7 45%, #0f172a 100%);
+        box-shadow: inset 0 -4px 6px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .center-gem-glare {
+        position: absolute;
+        top: 3px;
+        left: 6px;
+        width: 22px;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 50%;
+        filter: blur(0.6px);
+        pointer-events: none;
+      }
+      .center-gem-pill {
+        padding: 2px 10px;
+        border-radius: 20px;
+        background: linear-gradient(90deg, #00f0ff 0%, #0284c7 50%, #1e40af 100%);
+        color: #fff;
+        font-size: 10px;
         font-weight: 700;
-        text-shadow: 0 0 10px rgba(0, 240, 255, 0.9);
+        font-family: 'Chakra Petch', sans-serif;
+        box-shadow: 0 2px 8px rgba(0, 240, 255, 0.5);
+        border: 1px solid rgba(0, 240, 255, 0.6);
+        margin-top: 3px;
+        white-space: nowrap;
+        letter-spacing: 0.2px;
       }
 
-      @keyframes floatActivePod {
-        0% { transform: translateY(-11px) scale(1.22); }
-        100% { transform: translateY(-15px) scale(1.26); }
+      /* Active State for Clay Tabs */
+      .bangchak-nav-item.active .clay-3d-btn {
+        transform: scale(1.12);
+        box-shadow: 0 0 16px var(--cyan), inset 0 1.5px 3px #fff;
+      }
+      .bangchak-nav-item.active span.nav-text {
+        font-weight: 700;
+        color: var(--cyan);
+        text-shadow: 0 0 8px rgba(0, 240, 255, 0.7);
+      }
+      .bangchak-nav-item.active .nav-dot {
+        opacity: 1;
       }
 
-      /* Stack panels into non-overlapping bottom drawers above 3D dock */
+      span.nav-text {
+        font-size: 10px;
+        color: #94a3b8;
+        font-family: 'Chakra Petch', sans-serif;
+        font-weight: 600;
+        margin-top: 4px;
+        letter-spacing: -0.2px;
+        transition: color 0.2s;
+      }
+      .nav-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--cyan);
+        box-shadow: 0 0 6px var(--cyan);
+        margin-top: 2px;
+        opacity: 0;
+        transition: opacity 0.25s;
+      }
+
+      /* Stack panels into non-overlapping bottom drawers above Bangchak dock */
       .left-hud, .right-hud {
         position: absolute;
         top: auto !important;
-        bottom: 74px !important;
+        bottom: 84px !important;
         left: 10px !important;
         right: 10px !important;
         width: auto !important;
@@ -319,6 +447,21 @@
       }
       .left-hud.mob-hidden, .right-hud.mob-hidden {
         display: none !important;
+      }
+
+      /* Reticle lock styles */
+      #ar-reticle.locked {
+        border-color: #10b981 !important;
+        box-shadow: 0 0 45px rgba(16, 185, 129, 0.7) !important;
+      }
+      #ar-reticle.locked .reticle-corner {
+        border-color: #10b981 !important;
+      }
+      #ar-reticle.locked .reticle-tag {
+        background: rgba(6, 78, 59, 0.95) !important;
+        border-color: #10b981 !important;
+        color: #6ee7b7 !important;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.6) !important;
       }
     }
 
@@ -670,128 +813,106 @@
     </div>
   </div>
 
-  <!-- Futuristic 3D Curved Concave Cyber Dock for Smartphones -->
-  <div class="mobile-hud-dock" id="mobile-dock">
-    <!-- Tab 1: 3D Thermal Reactor -->
-    <button class="mob-tab-btn active" id="mob-tab-ctrl">
-      <div class="icon-3d">
-        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="sunSphere3d" cx="35%" cy="30%" r="65%">
-              <stop offset="0%" stop-color="#fffbde"/>
-              <stop offset="30%" stop-color="#ffbf00"/>
-              <stop offset="70%" stop-color="#ff3b00"/>
-              <stop offset="95%" stop-color="#800000"/>
-            </radialGradient>
-          </defs>
-          <ellipse cx="24" cy="24" rx="20" ry="7" stroke="#f59e0b" stroke-width="1.8" opacity="0.8" transform="rotate(-25 24 24)"/>
-          <circle cx="24" cy="24" r="13" fill="url(#sunSphere3d)"/>
-          <ellipse cx="20" cy="18" rx="3.8" ry="2" fill="#ffffff" opacity="0.85" transform="rotate(-15 20 18)"/>
-          <path d="M 7 28 A 20 7 0 0 0 41 20" stroke="#00f0ff" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.9"/>
-        </svg>
-      </div>
-      <span class="tab-title">เตาความร้อน</span>
-    </button>
+  <!-- Mobile App Bottom Navigation (Bangchak Style Curve & Notch matching edge-xaiot-agrienvi) -->
+  <nav id="mobileBottomNav">
+    <!-- 3D Curved Scoop Background with Molded Recessed Dish -->
+    <div class="scoop-bg-container">
+      <div class="scoop-solid-shield"></div>
+      <svg class="scoop-svg-overlay" viewBox="0 0 375 90" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="barGradient3D" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0f172a" />
+            <stop offset="40%" stop-color="#090e1a" />
+            <stop offset="100%" stop-color="#030712" />
+          </linearGradient>
+          <radialGradient id="scoopDish3D" cx="50%" cy="30%" r="65%">
+            <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.4" />
+            <stop offset="50%" stop-color="#8b5cf6" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#030712" stop-opacity="0.9" />
+          </radialGradient>
+          <linearGradient id="rimStroke3D" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#334155" />
+            <stop offset="35%" stop-color="#00f0ff" />
+            <stop offset="50%" stop-color="#a855f7" />
+            <stop offset="65%" stop-color="#00f0ff" />
+            <stop offset="100%" stop-color="#334155" />
+          </linearGradient>
+        </defs>
+        <!-- Molded 3D Concave Dish Backing (under the scoop) -->
+        <ellipse cx="187.5" cy="20" rx="42" ry="20" fill="url(#scoopDish3D)" />
+        <!-- Main Sculpted Curved Bar Body -->
+        <path d="M0,12 
+                 L134,12 
+                 C146,12 153,46 187.5,46 
+                 C222,46 229,12 241,12 
+                 L375,12 
+                 L375,90 
+                 L0,90 Z" 
+              fill="url(#barGradient3D)" 
+              stroke="url(#rimStroke3D)" 
+              stroke-width="1.3" />
+        <!-- Subtle Inner Scoop Shadow Curve for high-end depth -->
+        <path d="M136,13 C148,13 155,47 187.5,47 C220,47 227,13 239,13" 
+              fill="none" 
+              stroke="rgba(0, 240, 255, 0.45)" 
+              stroke-width="2.5" />
+      </svg>
+    </div>
 
-    <!-- Tab 2: 3D Hologram Crystal Prism -->
-    <button class="mob-tab-btn" id="mob-tab-holo">
-      <div class="icon-3d">
-        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="prismSide1" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#00f0ff"/>
-              <stop offset="100%" stop-color="#0284c7"/>
-            </linearGradient>
-            <linearGradient id="prismSide2" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#38bdf8"/>
-              <stop offset="100%" stop-color="#a855f7"/>
-            </linearGradient>
-            <linearGradient id="prismTop" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#e0f2fe"/>
-              <stop offset="100%" stop-color="#38bdf8"/>
-            </linearGradient>
-          </defs>
-          <ellipse cx="24" cy="38" rx="15" ry="4.5" stroke="#00f0ff" stroke-width="1.4" stroke-dasharray="3 2" opacity="0.8"/>
-          <polygon points="24,6 12,22 24,36" fill="url(#prismSide1)" opacity="0.9"/>
-          <polygon points="24,6 36,22 24,36" fill="url(#prismSide2)" opacity="0.95"/>
-          <polygon points="24,6 12,22 24,25 36,22" fill="url(#prismTop)" opacity="0.85"/>
-          <circle cx="24" cy="22" r="2.2" fill="#ffffff"/>
-        </svg>
-      </div>
-      <span class="tab-title">ฮอโลแกรม</span>
-    </button>
+    <!-- Navigation Items Grid -->
+    <div class="nav-items-grid">
+      <!-- Tab 1: เตาความร้อน (Home/Controls - 3D Amber Orb) -->
+      <button class="bangchak-nav-item active" id="mobTabCtrl">
+        <div class="clay-3d-btn clay-btn-fire">
+          <div class="clay-3d-gloss"></div>
+          <i class="fa-solid fa-fire" style="filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); font-size:16px; color:#fff;"></i>
+        </div>
+        <span class="nav-text">เตาความร้อน</span>
+        <span class="nav-dot"></span>
+      </button>
 
-    <!-- Tab 3: 3D Quantum Telemetry Gauge -->
-    <button class="mob-tab-btn" id="mob-tab-telem">
-      <div class="icon-3d">
-        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="bar3d1" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#047857"/>
-            </linearGradient>
-            <linearGradient id="bar3d2" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0369a1"/>
-            </linearGradient>
-            <linearGradient id="bar3d3" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#b45309"/>
-            </linearGradient>
-          </defs>
-          <path d="M 8 36 L 40 36 L 36 41 L 12 41 Z" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-          <path d="M 12 26 L 18 26 L 18 36 L 12 36 Z" fill="url(#bar3d1)"/>
-          <polygon points="12,26 15,23 21,23 18,26" fill="#6ee7b7"/>
-          <path d="M 21 17 L 27 17 L 27 36 L 21 36 Z" fill="url(#bar3d2)"/>
-          <polygon points="21,17 24,14 30,14 27,17" fill="#7dd3fc"/>
-          <path d="M 30 10 L 36 10 L 36 36 L 30 36 Z" fill="url(#bar3d3)"/>
-          <polygon points="30,10 33,7 39,7 36,10" fill="#fde68a"/>
-          <path d="M 10 34 Q 24 8 38 28" stroke="#00f0ff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <span class="tab-title">ฟิสิกส์ Live</span>
-    </button>
+      <!-- Tab 2: ฮอโลแกรม (Hologram - 3D Fuchsia/Purple Orb) -->
+      <button class="bangchak-nav-item" id="mobTabHolo">
+        <div class="clay-3d-btn clay-btn-holo">
+          <div class="clay-3d-gloss"></div>
+          <i class="fa-solid fa-wand-magic-sparkles" style="filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); font-size:16px; color:#fff;"></i>
+        </div>
+        <span class="nav-text">ฮอโลแกรม</span>
+        <span class="nav-dot"></span>
+      </button>
 
-    <!-- Tab 4: 3D AR Spatial Scanner -->
-    <button class="mob-tab-btn" id="mob-tab-ar">
-      <div class="icon-3d">
-        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="lensGrad3d" cx="40%" cy="35%" r="60%">
-              <stop offset="0%" stop-color="#e0f2fe"/><stop offset="40%" stop-color="#0284c7"/><stop offset="100%" stop-color="#020617"/>
-            </radialGradient>
-            <linearGradient id="bodyGrad3d" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#475569"/><stop offset="100%" stop-color="#0f172a"/>
-            </linearGradient>
-          </defs>
-          <rect x="8" y="14" width="32" height="24" rx="6" fill="url(#bodyGrad3d)" stroke="#64748b" stroke-width="1.2"/>
-          <rect x="18" y="10" width="12" height="4" rx="2" fill="#334155"/>
-          <circle cx="24" cy="26" r="9.5" fill="#0f172a" stroke="#00f0ff" stroke-width="1.5"/>
-          <circle cx="24" cy="26" r="7.5" fill="url(#lensGrad3d)"/>
-          <path d="M 19 23 A 5.5 5.5 0 0 1 27 21" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity="0.9"/>
-          <path d="M 5 18 L 5 11 L 12 11" stroke="#f59e0b" stroke-width="2" fill="none"/>
-          <path d="M 43 18 L 43 11 L 36 11" stroke="#f59e0b" stroke-width="2" fill="none"/>
-        </svg>
+      <!-- Center 3D Floating Action Button: สแกน AR บนภาพที่ 1.1 (Ultra 3D Gem Sphere in Scoop) -->
+      <div class="center-gem-container">
+        <button id="mobCenterAr" class="center-gem-btn" title="สแกน AR ส่องภาพที่ 1.1">
+          <div class="center-gem-inner">
+            <div class="center-gem-glare"></div>
+            <i class="fa-solid fa-camera" style="font-size:22px; color:#fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));"></i>
+          </div>
+        </button>
+        <span class="center-gem-pill">🎯 สแกน AR</span>
       </div>
-      <span class="tab-title">กล้อง AR</span>
-    </button>
 
-    <!-- Tab 5: 3D Fullscreen Immersive Eye -->
-    <button class="mob-tab-btn" id="mob-tab-hide">
-      <div class="icon-3d">
-        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="irisGrad3d" cx="40%" cy="35%" r="55%">
-              <stop offset="0%" stop-color="#67e8f9"/><stop offset="50%" stop-color="#06b6d4"/><stop offset="100%" stop-color="#020617"/>
-            </radialGradient>
-          </defs>
-          <path d="M 6 24 C 12 14 36 14 42 24 C 36 34 12 34 6 24 Z" fill="#0f172a" stroke="#00f0ff" stroke-width="1.8"/>
-          <circle cx="24" cy="24" r="7.5" fill="url(#irisGrad3d)" stroke="#22d3ee" stroke-width="1"/>
-          <circle cx="24" cy="24" r="3.2" fill="#020617"/>
-          <circle cx="22.5" cy="22" r="1.4" fill="#ffffff" opacity="0.9"/>
-          <path d="M 10 16 L 6 20 M 38 16 L 42 20 M 10 32 L 6 28 M 38 32 L 42 28" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <span class="tab-title">ดูเต็มจอ</span>
-    </button>
-  </div>
+      <!-- Tab 3: ฟิสิกส์ Live (Telemetry - 3D Blue/Cyan Orb) -->
+      <button class="bangchak-nav-item" id="mobTabTelem">
+        <div class="clay-3d-btn clay-btn-physics">
+          <div class="clay-3d-gloss"></div>
+          <i class="fa-solid fa-chart-line" style="filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); font-size:16px; color:#fff;"></i>
+        </div>
+        <span class="nav-text">ฟิสิกส์ Live</span>
+        <span class="nav-dot"></span>
+      </button>
+
+      <!-- Tab 4: ดูเต็มจอ (Full View - 3D Emerald/Teal Orb) -->
+      <button class="bangchak-nav-item" id="mobTabHide">
+        <div class="clay-3d-btn clay-btn-eye">
+          <div class="clay-3d-gloss"></div>
+          <i class="fa-solid fa-eye" style="filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5)); font-size:16px; color:#fff;"></i>
+        </div>
+        <span class="nav-text">ดูเต็มจอ</span>
+        <span class="nav-dot"></span>
+      </button>
+    </div>
+  </nav>
 
   <!-- AR Scanning Reticle -->
   <div id="ar-reticle">
@@ -1364,8 +1485,8 @@
         btn.textContent = '✨ โหมดฮอโลแกรม (Hologram)';
         btn.style.boxShadow = 'none';
       }
-      if (document.getElementById('mob-tab-holo')) {
-        document.getElementById('mob-tab-holo').classList.toggle('active', isHolographicMode);
+      if (document.getElementById('mobTabHolo')) {
+        document.getElementById('mobTabHolo').classList.toggle('active', isHolographicMode);
       }
     }
     document.getElementById('btn-toggle-hologram').addEventListener('click', toggleHologramMode);
@@ -1378,8 +1499,9 @@
       document.getElementById('btn-mode-ar').classList.toggle('active', ar);
       document.getElementById('btn-mode-hand').classList.toggle('active', hand);
 
-      if (document.getElementById('mob-tab-ar')) {
-        document.getElementById('mob-tab-ar').classList.toggle('active', ar);
+      const centerGemBtn = document.getElementById('mobCenterAr');
+      if (centerGemBtn) {
+        centerGemBtn.classList.toggle('active', ar);
       }
 
       reticle.style.display = ar ? 'block' : 'none';
@@ -1389,15 +1511,20 @@
         startCamera(ar ? { facingMode: 'environment' } : { facingMode: 'user' });
       } else {
         stopCamera();
+        isTargetLocked = false;
+        updateReticleStatus(false);
       }
 
       if (ar) {
         cavityRootGroup.scale.set(0.7, 0.7, 0.7);
         cavityRootGroup.position.set(0, -0.2, 0);
-        if (window.innerWidth <= 768) setActiveMobTab(document.getElementById('mob-tab-hide'));
+        if (window.innerWidth <= 768 && typeof setActiveBangchakTab === 'function') {
+          setActiveBangchakTab(document.getElementById('mobTabHide'));
+        }
       } else {
         cavityRootGroup.scale.set(1.0, 1.0, 1.0);
         cavityRootGroup.position.set(0, 0, 0);
+        cavityRootGroup.rotation.set(0, 0, 0);
       }
     }
 
@@ -1491,14 +1618,158 @@
       }
     }
 
+    // ==========================================================
+    // AR OPTICAL IMAGE TRACKER & SENSOR FUSION (ภาพที่ 1.1 TRACKING)
+    // ==========================================================
+    const trackerCanvas = document.createElement('canvas');
+    trackerCanvas.width = 120;
+    trackerCanvas.height = 120;
+    const trackerCtx = trackerCanvas.getContext('2d', { willReadFrequently: true });
+
+    let isTargetLocked = false;
+    let lockHoldFrames = 0;
+    let deviceOrientation = { beta: 45, gamma: 0, alpha: 0 };
+    let hasOrientationSupport = false;
+
+    // Cyber audio chime for lock-on
+    function playLockChime() {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const chimeOsc = audioCtx.createOscillator();
+        const chimeGain = audioCtx.createGain();
+        chimeOsc.type = 'sine';
+        chimeOsc.frequency.setValueAtTime(880, now); // A5
+        chimeOsc.frequency.exponentialRampToValueAtTime(1760, now + 0.14); // A6
+        chimeGain.gain.setValueAtTime(0.22, now);
+        chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+        chimeOsc.connect(chimeGain);
+        chimeGain.connect(audioCtx.destination);
+        chimeOsc.start(now);
+        chimeOsc.stop(now + 0.32);
+      } catch (e) {
+        console.warn("Audio chime prevented:", e);
+      }
+    }
+
+    function toggleManualLock() {
+      isTargetLocked = !isTargetLocked;
+      updateReticleStatus(isTargetLocked, true);
+      if (isTargetLocked) playLockChime();
+    }
+
+    reticle.addEventListener('click', toggleManualLock);
+
+    function updateReticleStatus(locked, manual = false) {
+      const tag = document.querySelector('.reticle-tag');
+      if (locked) {
+        reticle.classList.add('locked');
+        if (tag) tag.innerHTML = `✅ ตรวจพบภาพที่ 1.1: ล็อกโมเดล 3D บนหน้าหนังสือแล้ว ${manual ? '(แตะเพื่อปลดล็อก)' : ''}`;
+      } else {
+        reticle.classList.remove('locked');
+        if (tag) tag.innerHTML = '🎯 เล็งกล้องไปที่ ภาพที่ 1.1 แบบจำลองโพรงรังสีวัตถุดำ ในหนังสือ';
+      }
+    }
+
+    // Process Video Frame for Optical Feature Extraction on Figure 1.1
+    function processAROpticalFrame() {
+      if (!isARMode || video.readyState < 2) return;
+
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      if (vw === 0 || vh === 0) return;
+
+      // Crop center 45% (inside reticle)
+      const cropSize = Math.min(vw, vh) * 0.45;
+      const sx = (vw - cropSize) / 2;
+      const sy = (vh - cropSize) / 2;
+
+      trackerCtx.drawImage(video, sx, sy, cropSize, cropSize, 0, 0, 120, 120);
+      const imgData = trackerCtx.getImageData(0, 0, 120, 120).data;
+
+      // Analyze contrast & dark circular cavity characteristics of Figure 1.1
+      let totalLuma = 0;
+      let darkCount = 0;
+      let centerDarkCount = 0;
+      const totalPixels = 120 * 120;
+
+      for (let y = 0; y < 120; y++) {
+        for (let x = 0; x < 120; x++) {
+          const idx = (y * 120 + x) * 4;
+          const luma = 0.299 * imgData[idx] + 0.587 * imgData[idx + 1] + 0.114 * imgData[idx + 2];
+          totalLuma += luma;
+          if (luma < 92) darkCount++;
+          // check if dark pixels cluster near center (the cavity sphere)
+          const dx = x - 60;
+          const dy = y - 60;
+          if (dx * dx + dy * dy < 38 * 38 && luma < 96) {
+            centerDarkCount++;
+          }
+        }
+      }
+
+      const avgLuma = totalLuma / totalPixels;
+      const darkRatio = darkCount / totalPixels;
+      const centerConcentration = centerDarkCount / (Math.PI * 38 * 38);
+
+      // Figure 1.1 criteria:
+      // - Printed book page has bright background (average luma > 60)
+      // - Cavity circle in center has dark values (centerConcentration > 0.18 and darkRatio > 0.07)
+      const isCavityMatch = (avgLuma > 55 && centerConcentration > 0.16 && darkRatio > 0.06);
+
+      if (isCavityMatch) {
+        lockHoldFrames++;
+        if (lockHoldFrames >= 3 && !isTargetLocked) {
+          isTargetLocked = true;
+          updateReticleStatus(true);
+          playLockChime();
+        }
+      } else {
+        if (lockHoldFrames > 0) lockHoldFrames--;
+      }
+    }
+
+    // Gyroscope tracking for smartphone 6-DOF immersion
+    window.addEventListener('deviceorientation', (e) => {
+      if (e.beta !== null && e.gamma !== null) {
+        hasOrientationSupport = true;
+        deviceOrientation.beta = e.beta;
+        deviceOrientation.gamma = e.gamma;
+        deviceOrientation.alpha = e.alpha || 0;
+      }
+    }, { passive: true });
+
     // Animation Loop
     let clock = new THREE.Clock();
+    let lastTrackTime = 0;
+
     function animate() {
       requestAnimationFrame(animate);
       const time = clock.getElapsedTime();
 
-      // Subtle cavity idle oscillation
-      if (!isHandTracking) {
+      // Optical tracking check in AR mode (every 120ms)
+      if (isARMode) {
+        if (time - lastTrackTime > 0.12) {
+          lastTrackTime = time;
+          processAROpticalFrame();
+        }
+
+        if (isTargetLocked) {
+          // Smooth Lerp anchoring to book target
+          cavityRootGroup.scale.lerp(new THREE.Vector3(0.85, 0.85, 0.85), 0.1);
+          if (hasOrientationSupport) {
+            // Compensate device tilt to anchor cavity squarely on the book!
+            const targetRotX = (deviceOrientation.beta - 45) * (Math.PI / 180) * 0.45;
+            const targetRotZ = -(deviceOrientation.gamma) * (Math.PI / 180) * 0.45;
+            cavityRootGroup.rotation.x = THREE.MathUtils.lerp(cavityRootGroup.rotation.x, targetRotX, 0.1);
+            cavityRootGroup.rotation.z = THREE.MathUtils.lerp(cavityRootGroup.rotation.z, targetRotZ, 0.1);
+          }
+        }
+      }
+
+      // Subtle cavity idle oscillation in 3D exploration mode
+      if (!isHandTracking && (!isARMode || !isTargetLocked)) {
         cavityRootGroup.rotation.y += 0.003;
       }
 
@@ -1558,18 +1829,18 @@
     });
 
     // ==========================================================
-    // FUTURISTIC 3D CYBER DOCK CONTROLLER (5 TABS)
+    // BANGCHAK BOTTOM BAR CONTROLLER (MATCHING edge-xaiot-agrienvi)
     // ==========================================================
-    const mobTabCtrl = document.getElementById('mob-tab-ctrl');
-    const mobTabHolo = document.getElementById('mob-tab-holo');
-    const mobTabTelem = document.getElementById('mob-tab-telem');
-    const mobTabAr = document.getElementById('mob-tab-ar');
-    const mobTabHide = document.getElementById('mob-tab-hide');
+    const mobTabCtrl = document.getElementById('mobTabCtrl');
+    const mobTabHolo = document.getElementById('mobTabHolo');
+    const mobCenterAr = document.getElementById('mobCenterAr');
+    const mobTabTelem = document.getElementById('mobTabTelem');
+    const mobTabHide = document.getElementById('mobTabHide');
     const leftHud = document.querySelector('.left-hud');
     const rightHud = document.querySelector('.right-hud');
 
-    function setActiveMobTab(activeBtn) {
-      [mobTabCtrl, mobTabTelem, mobTabHide].forEach(b => {
+    function setActiveBangchakTab(activeBtn) {
+      [mobTabCtrl, mobTabHolo, mobTabTelem, mobTabHide].forEach(b => {
         if (b) b.classList.remove('active');
       });
       if (activeBtn) activeBtn.classList.add('active');
@@ -1577,7 +1848,7 @@
 
     if (mobTabCtrl) {
       mobTabCtrl.addEventListener('click', () => {
-        setActiveMobTab(mobTabCtrl);
+        setActiveBangchakTab(mobTabCtrl);
         leftHud.classList.remove('mob-hidden');
         rightHud.classList.add('mob-hidden');
       });
@@ -1586,36 +1857,39 @@
     if (mobTabHolo) {
       mobTabHolo.addEventListener('click', () => {
         toggleHologramMode();
+        setActiveBangchakTab(mobTabHolo);
       });
     }
 
-    if (mobTabTelem) {
-      mobTabTelem.addEventListener('click', () => {
-        setActiveMobTab(mobTabTelem);
-        leftHud.classList.add('mob-hidden');
-        rightHud.classList.remove('mob-hidden');
-      });
-    }
-
-    if (mobTabAr) {
-      mobTabAr.addEventListener('click', () => {
+    if (mobCenterAr) {
+      mobCenterAr.addEventListener('click', () => {
         if (!isARMode) {
           setMode(true, false);
-          setActiveMobTab(mobTabHide);
+          mobCenterAr.classList.add('active');
+          setActiveBangchakTab(mobTabHide);
           leftHud.classList.add('mob-hidden');
           rightHud.classList.add('mob-hidden');
         } else {
           setMode(false, false);
-          setActiveMobTab(mobTabCtrl);
+          mobCenterAr.classList.remove('active');
+          setActiveBangchakTab(mobTabCtrl);
           leftHud.classList.remove('mob-hidden');
           rightHud.classList.add('mob-hidden');
         }
       });
     }
 
+    if (mobTabTelem) {
+      mobTabTelem.addEventListener('click', () => {
+        setActiveBangchakTab(mobTabTelem);
+        leftHud.classList.add('mob-hidden');
+        rightHud.classList.remove('mob-hidden');
+      });
+    }
+
     if (mobTabHide) {
       mobTabHide.addEventListener('click', () => {
-        setActiveMobTab(mobTabHide);
+        setActiveBangchakTab(mobTabHide);
         leftHud.classList.add('mob-hidden');
         rightHud.classList.add('mob-hidden');
       });
@@ -1624,11 +1898,11 @@
     function applyResponsiveLayout() {
       if (window.innerWidth <= 768) {
         if (isARMode) {
-          setActiveMobTab(mobTabHide);
+          setActiveBangchakTab(mobTabHide);
           leftHud.classList.add('mob-hidden');
           rightHud.classList.add('mob-hidden');
         } else {
-          setActiveMobTab(mobTabCtrl);
+          setActiveBangchakTab(mobTabCtrl);
           leftHud.classList.remove('mob-hidden');
           rightHud.classList.add('mob-hidden');
         }
