@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>ห้องปฏิบัติการเสมือนจริงควอนตัมฟิสิกส์ 3 มิติ WebAR & PWA — ผศ.ดร.ชีวะ ทัศนา</title>
   
   <link rel="manifest" href="manifest.json">
@@ -11,295 +11,782 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts & Font Awesome 6 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
     :root {
-      --bg-dark: #030712;
-      --card-bg: rgba(15, 23, 42, 0.78);
+      --bg-dark: #020617;
+      --card-bg: rgba(15, 23, 42, 0.82);
       --cyan-glow: #00f0ff;
+      --cyan-dim: rgba(0, 240, 255, 0.18);
       --purple-glow: #8b5cf6;
+      --pink-glow: #ec4899;
       --gold-accent: #f59e0b;
       --emerald: #10b981;
+      --hud-border: rgba(0, 240, 255, 0.35);
+      --hud-corner: #00f0ff;
       --text-main: #f8fafc;
       --text-sub: #94a3b8;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
-      background: radial-gradient(circle at 50% 10%, #0f172a 0%, #030712 100%);
+      background: #020617;
+      background-image: 
+        radial-gradient(circle at 50% 0%, #0f1d38 0%, #020617 80%),
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px, 32px 32px;
       color: var(--text-main);
       font-family: 'Prompt', sans-serif;
       min-height: 100vh;
-      padding: 30px 20px 60px;
+      padding: 16px 14px 120px; /* 120px bottom padding for Bangchak bottom bar */
+      overflow-x: hidden;
     }
+
     .container {
-      max-width: 1200px;
+      max-width: 1240px;
       margin: 0 auto;
     }
+
+    /* Sci-Fi Top Telemetry Bar (Image 3 Style) */
+    .hud-telemetry-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 14px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--cyan-glow);
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.08);
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .hud-node {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+      animation: pulseBlink 1.8s infinite;
+    }
+    @keyframes pulseBlink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* Futuristic Header with Digital Interface Lines */
     header {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
       position: relative;
     }
-    .badge {
-      display: inline-block;
-      padding: 6px 16px;
-      background: rgba(0, 240, 255, 0.12);
+    .hud-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 16px;
+      background: rgba(0, 240, 255, 0.1);
       border: 1px solid var(--cyan-glow);
       color: var(--cyan-glow);
       border-radius: 30px;
-      font-size: 0.82rem;
-      font-weight: 600;
+      font-size: 0.75rem;
+      font-weight: 700;
       letter-spacing: 1px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       font-family: 'Chakra Petch', sans-serif;
       text-transform: uppercase;
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
     }
     h1 {
       font-family: 'Chakra Petch', sans-serif;
-      font-size: 2.2rem;
+      font-size: clamp(1.4rem, 4.5vw, 2.3rem);
       font-weight: 700;
-      background: linear-gradient(135deg, #00f0ff 0%, #a855f7 50%, #ec4899 100%);
+      background: linear-gradient(135deg, #00f0ff 0%, #38bdf8 30%, #c084fc 70%, #ec4899 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       line-height: 1.3;
+      text-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
     }
     p.lead {
       color: var(--text-sub);
-      font-size: 1.05rem;
-      max-width: 780px;
+      font-size: clamp(0.85rem, 2.5vw, 1.02rem);
+      max-width: 820px;
       margin: 0 auto 10px;
       line-height: 1.6;
     }
     p.author {
-      font-size: 0.95rem;
+      font-size: clamp(0.82rem, 2.2vw, 0.95rem);
       color: var(--cyan-glow);
       font-weight: 500;
+      font-family: 'Chakra Petch', sans-serif;
     }
-    .instruction-bar {
-      background: rgba(139, 92, 246, 0.15);
-      border: 1px solid rgba(139, 92, 246, 0.4);
-      padding: 14px 20px;
-      border-radius: 14px;
-      margin: 25px auto 40px;
-      max-width: 860px;
+
+    /* Futuristic Digital SVG Waveform Line */
+    .hud-header-decor {
+      margin: 15px auto 25px;
+      max-width: 500px;
+      height: 16px;
       display: flex;
       align-items: center;
+      justify-content: center;
+    }
+    .hud-header-decor svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 6px var(--cyan-glow));
+    }
+
+    /* Instruction Glass HUD Banner */
+    .instruction-bar {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 14px 18px;
+      border-radius: 14px;
+      margin: 15px auto 30px;
+      max-width: 880px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
       justify-content: space-between;
-      gap: 15px;
-      backdrop-filter: blur(10px);
+      gap: 12px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
     }
     .instruction-text {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #e2e8f0;
-      line-height: 1.5;
+      line-height: 1.6;
+      flex: 1 1 280px;
     }
     .btn-install {
       background: linear-gradient(135deg, var(--cyan-glow), var(--purple-glow));
       color: #030712;
       border: none;
-      padding: 10px 22px;
-      border-radius: 25px;
+      padding: 9px 20px;
+      border-radius: 20px;
       font-family: 'Chakra Petch', sans-serif;
       font-weight: 700;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.2s ease;
       display: none;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
     }
     .btn-install:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.7);
     }
+
+    /* Grid Layout - Mobile First Responsive */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 22px;
+      grid-template-columns: 1fr;
+      gap: 16px;
     }
+    @media (min-width: 680px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+    }
+    @media (min-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+      }
+    }
+
+    /* Sci-Fi HUD Cyber Cards (Image 3 Style with Corner Brackets) */
     .card {
       background: var(--card-bg);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 18px;
-      padding: 24px;
+      border: 1px solid rgba(0, 240, 255, 0.22);
+      border-radius: 16px;
+      padding: 18px 16px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: all 0.3s ease;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
-      backdrop-filter: blur(12px);
-    }
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; width: 4px; height: 100%;
-      background: linear-gradient(to bottom, var(--cyan-glow), var(--purple-glow));
-      opacity: 0.7;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
     }
     .card:hover {
-      transform: translateY(-5px);
-      border-color: rgba(0, 240, 255, 0.4);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.2);
+      transform: translateY(-3px);
+      border-color: rgba(0, 240, 255, 0.6);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 240, 255, 0.2);
     }
+
+    /* Sci-Fi Corner Brackets on Cards */
+    .card-corner {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border: 2px solid var(--cyan-glow);
+      pointer-events: none;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+    }
+    .card:hover .card-corner { opacity: 1; filter: drop-shadow(0 0 4px var(--cyan-glow)); }
+    .cc-tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 6px 0 0 0; }
+    .cc-tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 6px 0 0; }
+    .cc-bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 6px; }
+    .cc-br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 6px 0; }
+
+    /* Responsive Card Top */
     .card-top {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
+      gap: 6px;
       margin-bottom: 12px;
+      width: 100%;
     }
     .lab-num {
       font-family: 'Chakra Petch', sans-serif;
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       font-weight: 700;
       color: var(--cyan-glow);
-      background: rgba(0, 240, 255, 0.1);
-      padding: 4px 10px;
-      border-radius: 8px;
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 3px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
     }
     .chapter-tag {
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       color: var(--text-sub);
-    }
-    .card h2 {
-      font-size: 1.15rem;
+      font-family: 'Chakra Petch', sans-serif;
       font-weight: 600;
-      margin-bottom: 10px;
+      white-space: nowrap;
+    }
+
+    .card h2 {
+      font-size: clamp(1.06rem, 3vw, 1.22rem);
+      font-weight: 600;
+      margin-bottom: 8px;
       color: #fff;
       line-height: 1.4;
+      font-family: 'Prompt', sans-serif;
+      word-break: break-word;
     }
     .card p {
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       color: #94a3b8;
       line-height: 1.6;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       flex-grow: 1;
     }
+
+    /* Responsive Card Footer & Full-Width / Responsive Buttons */
     .card-footer {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 15px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      flex-direction: column;
+      gap: 12px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      width: 100%;
     }
     .features {
       display: flex;
+      flex-wrap: wrap;
       gap: 6px;
+      width: 100%;
     }
     .tag {
       font-size: 0.72rem;
       background: rgba(255, 255, 255, 0.05);
-      padding: 3px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 4px 8px;
       border-radius: 6px;
       color: #cbd5e1;
+      font-family: 'Chakra Petch', sans-serif;
+      white-space: nowrap;
     }
+
+    /* High-Tech Responsive Launch Button */
     .btn-launch {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      gap: 8px;
       background: rgba(0, 240, 255, 0.12);
-      border: 1px solid var(--cyan-glow);
+      border: 1.5px solid var(--cyan-glow);
       color: var(--cyan-glow);
-      padding: 8px 18px;
-      border-radius: 20px;
+      padding: 12px 18px;
+      border-radius: 12px;
       text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 600;
-      transition: all 0.2s;
+      font-size: 0.92rem;
+      font-weight: 700;
+      font-family: 'Chakra Petch', sans-serif;
+      letter-spacing: 0.3px;
+      white-space: normal;
+      transition: all 0.2s ease;
+      width: 100%;
+      min-height: 46px;
+      text-align: center;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
-    .btn-launch:hover {
+    .btn-launch:active, .btn-launch:hover {
       background: var(--cyan-glow);
       color: #030712;
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.7);
+      transform: scale(0.99);
     }
+
+    /* Desktop Footer Adjustments */
+    @media (min-width: 680px) {
+      .card-footer {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .btn-launch {
+        width: auto;
+        min-width: 160px;
+        padding: 10px 20px;
+        white-space: nowrap;
+      }
+    }
+
+    /* Master Universal AR Hero Card Styling */
+    .master-ar-card {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.9) 100%);
+      border: 1.5px solid var(--cyan-glow) !important;
+      box-shadow: 0 10px 40px rgba(0, 240, 255, 0.25) !important;
+    }
+    .master-ar-card h2 {
+      font-size: clamp(1.2rem, 3.2vw, 1.55rem);
+      background: linear-gradient(90deg, #00f0ff, #38bdf8, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 700;
+    }
+    .btn-master-launch {
+      background: linear-gradient(135deg, #00f0ff, #0284c7) !important;
+      color: #030712 !important;
+      border: none !important;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.5) !important;
+      font-weight: 700 !important;
+      min-height: 48px;
+    }
+    .btn-master-launch:hover, .btn-master-launch:active {
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.85) !important;
+      transform: translateY(-2px);
+    }
+
+    /* ==========================================================
+       BANGCHAK-STYLE CURVED SCOOP BOTTOM NAVIGATION BAR (Image 1 & 2 Request)
+       ========================================================== */
+    #mobileBottomNav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 500px;
+      z-index: 9999;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .scoop-bar-container {
+      position: relative;
+      width: 100%;
+      height: calc(72px + env(safe-area-inset-bottom, 12px));
+      pointer-events: auto;
+    }
+    .scoop-svg-bg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 -8px 25px rgba(0, 0, 0, 0.9));
+      pointer-events: none;
+    }
+    .nav-buttons-row {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 100%;
+      height: 68px;
+      padding: 0 4px env(safe-area-inset-bottom, 12px) 4px;
+    }
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      padding: 2px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-btn .clay-icon-wrap {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      transition: all 0.2s ease;
+      color: #cbd5e1;
+    }
+    .nav-btn span {
+      font-size: 0.65rem;
+      font-family: 'Prompt', sans-serif;
+      font-weight: 500;
+      white-space: nowrap;
+      color: #94a3b8;
+      transition: color 0.2s ease;
+    }
+    .nav-btn:active .clay-icon-wrap {
+      transform: scale(0.92);
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan-glow);
+    }
+    .nav-btn.active {
+      color: var(--cyan-glow);
+    }
+    .nav-btn.active .clay-icon-wrap {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--cyan-glow);
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
+      color: #fff;
+    }
+    .nav-btn.active span {
+      color: var(--cyan-glow);
+      font-weight: 600;
+    }
+
+    /* Center 58px Floating Action Gem Button */
+    .center-action-spacer {
+      flex: 1.1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100%;
+      position: relative;
+    }
+    .floating-gem-btn {
+      position: absolute;
+      top: -24px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #38bdf8 0%, #0284c7 60%, #0369a1 100%);
+      border: 2.5px solid rgba(255, 255, 255, 0.95);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      box-shadow: 0 8px 25px rgba(2, 132, 199, 0.75), 0 0 0 5px rgba(15, 23, 42, 0.95);
+      cursor: pointer;
+      pointer-events: auto;
+      text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: gemGlowPulse 2.4s infinite;
+    }
+    .floating-gem-btn:active {
+      transform: scale(0.92);
+    }
+    .floating-gem-btn i {
+      font-size: 1.25rem;
+    }
+    .floating-gem-btn span {
+      font-size: 0.56rem;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    @keyframes gemGlowPulse {
+      0%, 100% {
+        box-shadow: 0 8px 22px rgba(2, 132, 199, 0.7), 0 0 0 5px rgba(15, 23, 42, 0.95);
+      }
+      50% {
+        box-shadow: 0 10px 30px rgba(0, 240, 255, 0.95), 0 0 0 6px rgba(0, 240, 255, 0.4);
+      }
+    }
+
+    /* Target Figures Modal - Responsive */
+    #targetFiguresModal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(2, 6, 23, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .modal-box {
+      background: #0f172a;
+      border: 1.5px solid var(--cyan-glow);
+      border-radius: 18px;
+      max-width: 480px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 18px 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(0, 240, 255, 0.25);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .modal-header h3 {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.1rem;
+      color: var(--cyan-glow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-close-modal {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      color: #94a3b8;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-close-modal:hover, .btn-close-modal:active {
+      color: #fff;
+      background: rgba(236, 72, 153, 0.3);
+      border-color: var(--pink-glow);
+    }
+    .target-preview-item {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+    .target-preview-item img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      background: #fff;
+      margin: 8px 0;
+      display: block;
+    }
+    .target-preview-item h4 {
+      font-size: 0.95rem;
+      color: #fff;
+      font-family: 'Chakra Petch', sans-serif;
+      margin-bottom: 4px;
+    }
+    .target-preview-item p {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
     footer {
       text-align: center;
-      margin-top: 60px;
+      margin-top: 40px;
       padding-top: 25px;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       color: var(--text-sub);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       line-height: 1.6;
     }
   </style>
 </head>
 <body>
   <div class="container">
+
+    <!-- Top Futuristic Telemetry Strip (Image 3 Style) -->
+    <div class="hud-telemetry-strip">
+      <div class="hud-node">
+        <span class="pulse-dot"></span>
+        <span>SYS: QUANTUM-XR-2026</span>
+      </div>
+      <div class="hud-node">
+        <i class="fa-solid fa-satellite-dish"></i>
+        <span>OPTICAL AR: READY</span>
+      </div>
+      <div class="hud-node">
+        <i class="fa-solid fa-microchip"></i>
+        <span>FPS: 120 (SMOOTH)</span>
+      </div>
+      <div class="hud-node">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>PWA: OFFLINE CACHE v8</span>
+      </div>
+    </div>
+
+    <!-- Header Section -->
     <header>
-      <span class="badge">RBRU Interactive AR/XR Quantum Simulation Portal</span>
+      <div class="hud-badge">
+        <i class="fa-solid fa-atom fa-spin"></i>
+        <span>RBRU Interactive Quantum Simulation Portal</span>
+      </div>
       <h1>ห้องปฏิบัติการเสมือนจริงควอนตัมฟิสิกส์ 3 มิติ WebAR</h1>
-      <p class="lead">ชุดสื่อการเรียนรู้เชิงประจักษ์แบบจำลอง 3 มิติ ตอบสนองไร้สัมผัสผ่านกล้อง และเทคโนโลยีเสมือนผสานโลกจริง ประกอบตำราวิชาการ "ควอนตัมฟิสิกส์เบื้องต้น"</p>
+      <p class="lead">ชุดสื่อการเรียนรู้เชิงประจักษ์แบบจำลอง 3 มิติ ตอบสนองไร้สัมผัสผ่านกล้องสมาร์ทโฟน และเทคโนโลยีเสมือนผสานโลกจริง ประกอบตำราวิชาการ "ควอนตัมฟิสิกส์เบื้องต้น"</p>
       <p class="author">ผู้ช่วยศาสตราจารย์ ดร.ชีวะ ทัศนา • มหาวิทยาลัยราชภัฏรำไพพรรณี</p>
       
+      <!-- Futuristic SVG Waveform (Image 3 Aesthetic) -->
+      <div class="hud-header-decor">
+        <svg viewBox="0 0 500 16" fill="none">
+          <path d="M 0 8 L 150 8 L 165 2 L 180 14 L 195 4 L 210 12 L 225 8 L 275 8 L 290 14 L 305 2 L 320 12 L 335 4 L 350 8 L 500 8" stroke="#00f0ff" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="225" cy="8" r="3" fill="#ec4899"/>
+          <circle cx="275" cy="8" r="3" fill="#f59e0b"/>
+        </svg>
+      </div>
+
       <div class="instruction-bar">
         <div class="instruction-text">
-          ✨ <strong>การใช้งาน:</strong> แตะปุ่ม <em>"เปิดการทดลอง"</em> เพื่อเข้าสู่แล็บเสมือนจริง สามารถควบคุมมุมมอง 3D ด้วยการลากนิ้ว หรือเปิดกล้องเพื่อใช้งาน <strong>AI ตรวจจับท่าทางมือ (MediaPipe Hand Gestures)</strong> แบบไร้สัมผัส
+          ✨ <strong>คำแนะนำ:</strong> แตะปุ่ม <em>"เปิดการทดลอง"</em> เพื่อเข้าสู่แล็บเสมือนจริง หรือแตะปุ่มกลาง <strong>"AR SCAN"</strong> ด้านล่างเพื่อส่องกล้องไปยังรูปภาพในหนังสือเรียน โมเดล 3D จะปรากฏขึ้นลอยตัวอยู่บนหน้ากระดาษทันที
         </div>
         <button id="pwa-install-btn" class="btn-install">📱 ติดตั้งลงเครื่อง (PWA)</button>
       </div>
     </header>
 
-    <div class="grid">
-      <!-- MASTER UNIVERSAL MULTI-TARGET AR SCANNER -->
-      <div class="card" style="grid-column: 1 / -1; border-color: rgba(0, 240, 255, 0.7); background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.85) 100%); box-shadow: 0 10px 40px rgba(0, 240, 255, 0.25);">
+    <!-- Lab Simulators Grid -->
+    <div class="grid" id="labsGrid">
+
+      <!-- MASTER UNIVERSAL MULTI-TARGET AR SCANNER HERO CARD -->
+      <div class="card master-ar-card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
-          <span class="lab-num" style="color:var(--cyan-glow); background:rgba(0, 240, 255, 0.2); font-size: 0.95rem;">⚡ SMART UNIVERSAL AR SCANNER</span>
-          <span class="chapter-tag" style="color:var(--cyan-glow); font-weight: 700;">สแกนได้ทุกภาพในตำราเรียน</span>
+          <span class="lab-num" style="color:var(--cyan-glow); background:rgba(0, 240, 255, 0.2);">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> UNIVERSAL AR SCANNER
+          </span>
+          <span class="chapter-tag" style="color:var(--cyan-glow);">สแกนทุกภาพในตำรา</span>
         </div>
-        <h2 style="font-size: 1.45rem; background: linear-gradient(90deg, #00f0ff, #38bdf8, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-          ระบบสแกนเนอร์ AR อัจฉริยะหลายภาพ (Universal Multi-Target WebAR)
-        </h2>
-        <p style="font-size: 0.95rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 12px;">
-          เปิดกล้องครั้งเดียว แล้วนำไปส่องภาพใดก็ได้ในตำราเรียน (ภาพที่ 1.1 โพรงวัตถุดำ, ภาพที่ 1.2 หลอดโฟโตอิเล็กทริก, ภาพที่ 2.1 เดวิสสัน-เจอร์เมอร์) ระบบจะตรวจจับและสลับแสดงผลแบบจำลอง 3 มิติเชิงกายภาพตรงตามภาพที่ส่องให้อัตโนมัติ พร้อมแอนิเมชัน แถบนำทาง Bangchak Curve และเสียงไซเบอร์ล็อกเป้าหมาย
-        </p>
-        <div class="card-footer" style="margin-top: 15px;">
+        <h2>ระบบสแกนเนอร์ AR อัจฉริยะหลายภาพ (Universal Multi-Target WebAR)</h2>
+        <p>เปิดกล้องครั้งเดียว แล้วนำไปส่องภาพใดก็ได้ในตำราเรียน (ภาพที่ 1.1 โพรงวัตถุดำ, ภาพที่ 1.2 หลอดโฟโตอิเล็กทริก, ภาพที่ 2.1 เดวิสสัน-เจอร์เมอร์) ระบบจะตรวจจับและสลับแสดงผลแบบจำลอง 3 มิติเชิงกายภาพตรงตามภาพที่ส่องให้อัตโนมัติ พร้อมแอนิเมชัน แถบนำทาง Bangchak Curve และเสียงไซเบอร์ล็อกเป้าหมาย</p>
+        <div class="card-footer">
           <div class="features">
-            <span class="tag" style="color:var(--cyan-glow); border-color:var(--cyan-glow);">Auto Target AI</span>
-            <span class="tag" style="color:var(--gold-accent);">Fig 1.1</span>
-            <span class="tag" style="color:var(--cyan-glow);">Fig 1.2</span>
-            <span class="tag" style="color:#ec4899;">Fig 2.1</span>
+            <span class="tag" style="color:var(--cyan-glow); border-color:var(--cyan-glow);"><i class="fa-solid fa-robot"></i> Auto Target AI</span>
+            <span class="tag" style="color:var(--gold-accent);">ภาพ 1.1</span>
+            <span class="tag" style="color:var(--cyan-glow);">ภาพ 1.2</span>
+            <span class="tag" style="color:#ec4899;">ภาพ 2.1</span>
             <span class="tag">Hidden Until Tracked</span>
           </div>
-          <a href="ar_universal_tracking.html" class="btn-launch" style="border-color:var(--cyan-glow); color:#030712; background: linear-gradient(135deg, var(--cyan-glow), #38bdf8); font-weight: 700; padding: 10px 24px; box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);">
-            🚀 เปิดสแกนเนอร์ AR รวมทุกภาพ ➜
+          <a href="ar_universal_tracking.html" class="btn-launch btn-master-launch">
+            <i class="fa-solid fa-camera"></i> เปิดสแกนเนอร์ AR รวมทุกภาพ ➜
           </a>
         </div>
       </div>
 
       <!-- SPECIAL AR TRACKING LAB: FIG 1.1 BLACKBODY CAVITY -->
-      <div class="card" style="border-color: rgba(245, 158, 11, 0.4); background: rgba(15, 23, 42, 0.9);">
+      <div class="card" style="border-color: rgba(245, 158, 11, 0.45); background: rgba(15, 23, 42, 0.9);">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
-          <span class="lab-num" style="color:var(--gold); background:rgba(245, 158, 11, 0.15);">AR TRACKING 🎯</span>
-          <span class="chapter-tag" style="color:var(--gold);">ภาพที่ 1.1 ในเล่ม</span>
+          <span class="lab-num" style="color:var(--gold-accent); background:rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.4);">
+            <i class="fa-solid fa-crosshairs"></i> AR TRACKING
+          </span>
+          <span class="chapter-tag" style="color:var(--gold-accent);">ภาพที่ 1.1 ในเล่ม</span>
         </div>
-        <h2 style="color:var(--gold);">แบบจำลองโพรงรังสีวัตถุดำ (Cavity AR Target)</h2>
+        <h2 style="color:var(--gold-accent);">แบบจำลองโพรงรังสีวัตถุดำ (Cavity AR Target)</h2>
         <p>ส่องกล้องไปที่ภาพที่ 1.1 ในหนังสือ เพื่อเรนเดอร์โมเดลโพรงกลวง 3D ลอยตัวเหนือหน้ากระดาษ พร้อมแอนิเมชันลำแสงสะท้อนภายในหลายทอด โหมดคลื่นนิ่ง และเสียงอะคูสติกเรียลไทม์</p>
         <div class="card-footer">
-          <div class="features"><span class="tag" style="color:var(--gold);">Image Tracking</span><span class="tag">Pinhole Ray</span><span class="tag">Audio</span></div>
-          <a href="ar_blackbody_cavity_tracking.html" class="btn-launch" style="border-color:var(--gold); color:var(--gold); background:rgba(245, 158, 11, 0.15);">เปิด AR ส่องหนังสือ ➜</a>
+          <div class="features">
+            <span class="tag" style="color:var(--gold-accent);">Image Tracking</span>
+            <span class="tag">Pinhole Ray</span>
+            <span class="tag">Audio Synth</span>
+          </div>
+          <a href="ar_blackbody_cavity_tracking.html" class="btn-launch" style="border-color:var(--gold-accent); color:var(--gold-accent); background:rgba(245, 158, 11, 0.15);">
+            <i class="fa-solid fa-camera"></i> เปิด AR ส่องหนังสือ ➜
+          </a>
         </div>
       </div>
 
       <!-- SPECIAL AR TRACKING LAB: FIG 1.2 PHOTOELECTRIC APPARATUS -->
-      <div class="card" style="border-color: rgba(236, 72, 153, 0.4); background: rgba(15, 23, 42, 0.9);">
+      <div class="card" style="border-color: rgba(236, 72, 153, 0.45); background: rgba(15, 23, 42, 0.9);">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
-          <span class="lab-num" style="color:var(--pink); background:rgba(236, 72, 153, 0.15);">AR TRACKING 🎯</span>
-          <span class="chapter-tag" style="color:var(--pink);">ภาพที่ 1.2 ในเล่ม</span>
+          <span class="lab-num" style="color:var(--pink-glow); background:rgba(236, 72, 153, 0.15); border-color: rgba(236, 72, 153, 0.4);">
+            <i class="fa-solid fa-crosshairs"></i> AR TRACKING
+          </span>
+          <span class="chapter-tag" style="color:var(--pink-glow);">ภาพที่ 1.2 ในเล่ม</span>
         </div>
-        <h2 style="color:var(--pink);">อุปกรณ์ทดลองโฟโตอิเล็กทริก (Photoelectric AR)</h2>
+        <h2 style="color:var(--pink-glow);">อุปกรณ์ทดลองโฟโตอิเล็กทริก (Photoelectric AR)</h2>
         <p>ส่องกล้องไปที่ภาพที่ 1.2 ในหนังสือหน้า 25 เพื่อเรนเดอร์หลอดสุญญากาศแก้ว 3D การปลดปล่อยโฟโตอิเล็กตรอน แสง UV ปรับความยาวคลื่น และศักย์หยุดยั้ง</p>
         <div class="card-footer">
-          <div class="features"><span class="tag" style="color:var(--pink);">Image Tracking</span><span class="tag">Phototube</span><span class="tag">e⁻ Stream</span></div>
-          <a href="ar_photoelectric_tracking.html" class="btn-launch" style="border-color:var(--pink); color:var(--pink); background:rgba(236, 72, 153, 0.15);">เปิด AR ส่องหนังสือ ➜</a>
+          <div class="features">
+            <span class="tag" style="color:var(--pink-glow);">Image Tracking</span>
+            <span class="tag">Phototube 3D</span>
+            <span class="tag">e⁻ Stream</span>
+          </div>
+          <a href="ar_photoelectric_tracking.html" class="btn-launch" style="border-color:var(--pink-glow); color:var(--pink-glow); background:rgba(236, 72, 153, 0.15);">
+            <i class="fa-solid fa-camera"></i> เปิด AR ส่องหนังสือ ➜
+          </a>
         </div>
       </div>
 
       <!-- LAB 01 -->
       <div class="card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
           <span class="lab-num">LAB 01</span>
           <span class="chapter-tag">บทที่ 1</span>
@@ -314,6 +801,8 @@
 
       <!-- LAB 02 -->
       <div class="card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
           <span class="lab-num">LAB 02</span>
           <span class="chapter-tag">บทที่ 2</span>
@@ -328,6 +817,8 @@
 
       <!-- LAB 03 -->
       <div class="card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
           <span class="lab-num">LAB 03</span>
           <span class="chapter-tag">บทที่ 3</span>
@@ -342,6 +833,8 @@
 
       <!-- LAB 04 -->
       <div class="card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
           <span class="lab-num">LAB 04</span>
           <span class="chapter-tag">บทที่ 4</span>
@@ -349,61 +842,69 @@
         <h2>ควอนตัมทันเนลลิงและกล้อง STM ระดับอะตอม</h2>
         <p>สำรวจหัวเข็ม STM สแกนพื้นผิวโลหะระดับอะตอม และการทะลุผ่านกำแพงศักย์ของอิเล็กตรอน</p>
         <div class="card-footer">
-          <div class="features"><span class="tag">STM Needle</span><span class="tag">Tunneling</span></div>
+          <div class="features"><span class="tag">Quantum Tunneling</span><span class="tag">STM Nanotip</span></div>
           <a href="lab04_quantum_tunneling.html" class="btn-launch">เปิดการทดลอง ➜</a>
         </div>
       </div>
 
       <!-- LAB 05 -->
       <div class="card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
           <span class="lab-num">LAB 05</span>
           <span class="chapter-tag">บทที่ 5</span>
         </div>
-        <h2>ตัวแกว่งกวัดฮาร์มอนิกและสถานะอาพันธ์</h2>
-        <p>โครงสร้างระดับพลังงานควอนไตซ์ ฟังก์ชันคลื่นพหุนามแอร์มีต และพื้นผิวฟังก์ชันวิกเนอร์ 3 มิติ</p>
+        <h2>ตัวกวัดแกว่งฮาร์มอนิกควอนตัม (QHO)</h2>
+        <p>ฟังก์ชันคลื่นพหุนามแอร์มีต พลังงานจุดศูนย์ $E_0 = \frac{1}{2}\hbar\omega$ และสถานะเชื่อมโยง</p>
         <div class="card-footer">
-          <div class="features"><span class="tag">Wigner Mesh</span><span class="tag">Ladder Ops</span></div>
+          <div class="features"><span class="tag">Hermite Poly</span><span class="tag">Zero-Point</span></div>
           <a href="lab05_harmonic_oscillator.html" class="btn-launch">เปิดการทดลอง ➜</a>
         </div>
       </div>
 
       <!-- LAB 06 -->
       <div class="card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
           <span class="lab-num">LAB 06</span>
           <span class="chapter-tag">บทที่ 6</span>
         </div>
-        <h2>ออร์บิทัลอะตอมไฮโดรเจนและสปิน 3 มิติ</h2>
-        <p>กลุ่มเมฆความหนาแน่นความน่าจะเป็นของออร์บิทัล $s, p, d, f$ และการทดลองสเติร์น-เกอร์แลก</p>
+        <h2>ออร์บิทัลอะตอมไฮโดรเจนและสปิน</h2>
+        <p>เมฆหมอกความน่าจะเป็นสามมิติ $\psi_{n\ell m}(r,\theta,\phi)$ สำหรับออร์บิทัล $s, p, d, f$ และการทดลองสเติร์น-เกอร์แลค</p>
         <div class="card-footer">
-          <div class="features"><span class="tag">Orbitals</span><span class="tag">Stern-Gerlach</span></div>
+          <div class="features"><span class="tag">3D Orbitals</span><span class="tag">Stern-Gerlach</span></div>
           <a href="lab06_hydrogen_orbitals.html" class="btn-launch">เปิดการทดลอง ➜</a>
         </div>
       </div>
 
       <!-- LAB 07 -->
       <div class="card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
           <span class="lab-num">LAB 07</span>
           <span class="chapter-tag">บทที่ 7</span>
         </div>
-        <h2>การควบแน่นโบส-ไอน์สไตน์และสถิติควอนตัม</h2>
-        <p>เลเซอร์ดักจับอะตอม (MOT) อุณหภูมินาโนเคลวิน และการเปลี่ยนเฟสสู่กลุ่มก้อนสสารคลื่นเดี่ยว</p>
+        <h2>การควบแน่นโบส-ไอน์สไตน์ (BEC)</h2>
+        <p>การดักจับอะตอมด้วยเลเซอร์และแม่เหล็ก และการเปลี่ยนผ่านสถานะสู่สถานะควอนตัมมหภาคที่อุณหภูมินาโนเคลวิน</p>
         <div class="card-footer">
-          <div class="features"><span class="tag">BEC Phase</span><span class="tag">Laser Cooling</span></div>
+          <div class="features"><span class="tag">Laser Cooling</span><span class="tag">BEC Phase</span></div>
           <a href="lab07_bec_quantum_statistics.html" class="btn-launch">เปิดการทดลอง ➜</a>
         </div>
       </div>
 
       <!-- LAB 08 -->
       <div class="card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
           <span class="lab-num">LAB 08</span>
           <span class="chapter-tag">บทที่ 8</span>
         </div>
         <h2>ทรงกลมบล็อคสามมิติและเกตควอนตัม</h2>
-        <p>หมุนเวกเตอร์สถานะคิวบิต $\ket{\psi}$ ผ่านเกต Pauli X, Y, Z, Hadamard และหมุนรอบแกนอิสระ</p>
+        <p>หมุนเวกเตอร์สถานะคิวบิต $|\psi\rangle$ ผ่านเกต Pauli X, Y, Z, Hadamard และหมุนรอบแกนอิสระ</p>
         <div class="card-footer">
           <div class="features"><span class="tag">Bloch Sphere</span><span class="tag">Quantum Gates</span></div>
           <a href="lab08_bloch_sphere.html" class="btn-launch">เปิดการทดลอง ➜</a>
@@ -412,6 +913,8 @@
 
       <!-- LAB 09 -->
       <div class="card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
           <span class="lab-num">LAB 09</span>
           <span class="chapter-tag">บทที่ 9</span>
@@ -426,6 +929,8 @@
 
       <!-- LAB 10 -->
       <div class="card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
           <span class="lab-num">LAB 10</span>
           <span class="chapter-tag">บทที่ 10</span>
@@ -440,6 +945,8 @@
 
       <!-- LAB 11 -->
       <div class="card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
           <span class="lab-num">LAB 11</span>
           <span class="chapter-tag">บทที่ 10</span>
@@ -454,6 +961,8 @@
 
       <!-- LAB 12 -->
       <div class="card">
+        <div class="card-corner cc-tl"></div><div class="card-corner cc-tr"></div>
+        <div class="card-corner cc-bl"></div><div class="card-corner cc-br"></div>
         <div class="card-top">
           <span class="lab-num">LAB 12</span>
           <span class="chapter-tag">บทที่ 9</span>
@@ -467,18 +976,149 @@
       </div>
     </div>
 
+    <!-- Footer -->
     <footer>
       <p>สาขาวิชาดิจิทัลการเกษตรและสิ่งแวดล้อม คณะวิทยาศาสตร์และเทคโนโลยี มหาวิทยาลัยราชภัฏรำไพพรรณี</p>
       <p>โครงการพัฒนาสื่อนวัตกรรมการศึกษาดิจิทัล พ.ศ. ๒๕๖๙ • โครงการชุดตำราวิชาการ Latex2026</p>
     </footer>
   </div>
 
+  <!-- TARGET FIGURES MODAL -->
+  <div id="targetFiguresModal" onclick="closeTargetModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-book-open"></i> ภาพเป้าหมายในตำราเรียน (AR Targets)</h3>
+        <button class="btn-close-modal" onclick="closeTargetModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="target-preview-item">
+          <h4>ภาพที่ 1.1 แบบจำลองโพรงรังสีวัตถุดำ (Cavity)</h4>
+          <p>เปิดหนังสือเรียนไปที่หน้า 18 หรือส่องจอแสดงภาพนี้</p>
+          <img src="target_fig1_blackbody_cavity.png" alt="Target Fig 1.1">
+          <a href="ar_blackbody_cavity_tracking.html" class="btn-launch" style="padding: 8px; font-size: 0.8rem;">เปิดกล้องส่องภาพนี้ ➜</a>
+        </div>
+
+        <div class="target-preview-item">
+          <h4>ภาพที่ 1.2 หลอดทดลองโฟโตอิเล็กทริก (Photoelectric)</h4>
+          <p>เปิดหนังสือเรียนไปที่หน้า 25 หรือส่องจอแสดงภาพนี้</p>
+          <img src="target_fig2_photoelectric_apparatus.png" alt="Target Fig 1.2">
+          <a href="ar_photoelectric_tracking.html" class="btn-launch" style="padding: 8px; font-size: 0.8rem;">เปิดกล้องส่องภาพนี้ ➜</a>
+        </div>
+
+        <div class="target-preview-item">
+          <h4>ภาพที่ 2.1 การทดลองเดวิสสัน-เจอร์เมอร์ (Davisson-Germer)</h4>
+          <p>เปิดหนังสือเรียนไปที่หน้า 42 หรือส่องจอแสดงภาพนี้</p>
+          <img src="target_fig3_davisson_germer.png" alt="Target Fig 2.1">
+          <a href="ar_universal_tracking.html" class="btn-launch" style="padding: 8px; font-size: 0.8rem;">เปิดกล้องส่องภาพนี้ ➜</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BANGCHAK-STYLE CURVED SCOOP BOTTOM NAVIGATION BAR (Image 1 & 2 Request) -->
+  <nav id="mobileBottomNav">
+    <div class="scoop-bar-container">
+      <svg class="scoop-svg-bg" viewBox="0 0 375 86" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="navGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0f172a" stop-opacity="0.96"/>
+            <stop offset="100%" stop-color="#020617" stop-opacity="0.99"/>
+          </linearGradient>
+        </defs>
+        <path d="M 0 16 Q 0 0 16 0 L 132 0 C 146 0 154 10 160 22 C 168 38 182 46 187.5 46 C 193 46 207 38 215 22 C 221 10 229 0 243 0 L 359 0 Q 375 0 375 16 L 375 86 L 0 86 Z" 
+              fill="url(#navGradient)" stroke="rgba(0, 240, 255, 0.25)" stroke-width="1.2"/>
+        <ellipse cx="187.5" cy="46" rx="34" ry="10" fill="none" stroke="rgba(0, 240, 255, 0.3)" stroke-width="1.5"/>
+      </svg>
+
+      <div class="nav-buttons-row">
+        <!-- Tab 1: Home (Active) -->
+        <a href="#" id="tabHome" class="nav-btn active" onclick="scrollToTop(event)">
+          <div class="clay-icon-wrap"><i class="fa-solid fa-house"></i></div>
+          <span>หน้าหลัก</span>
+        </a>
+
+        <!-- Tab 2: Scroll to Labs -->
+        <a href="#labsGrid" id="tabLabs" class="nav-btn" onclick="scrollToLabs(event)">
+          <div class="clay-icon-wrap"><i class="fa-solid fa-cube"></i></div>
+          <span>แล็บ 3D</span>
+        </a>
+
+        <!-- Center 58px Floating Action Gem Button (Opens Universal AR Scanner) -->
+        <div class="center-action-spacer">
+          <a href="ar_universal_tracking.html" class="floating-gem-btn" title="เปิดสแกนเนอร์ AR รวมทุกภาพ">
+            <i class="fa-solid fa-camera"></i>
+            <span>AR SCAN</span>
+          </a>
+        </div>
+
+        <!-- Tab 3: Target Figures Modal -->
+        <button type="button" id="tabFigures" class="nav-btn" onclick="openTargetModal()">
+          <div class="clay-icon-wrap"><i class="fa-solid fa-book-open"></i></div>
+          <span>รูปตำรา</span>
+        </button>
+
+        <!-- Tab 4: PWA Install -->
+        <button type="button" id="tabInstall" class="nav-btn" onclick="triggerPWAInstall()">
+          <div class="clay-icon-wrap"><i class="fa-solid fa-download"></i></div>
+          <span>ติดตั้ง</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
   <script>
+    // Smooth Scroll Navigation Helpers
+    function scrollToTop(e) {
+      if (e) e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setActiveNav('tabHome');
+    }
+
+    function scrollToLabs(e) {
+      if (e) e.preventDefault();
+      const labs = document.getElementById('labsGrid');
+      if (labs) {
+        const yOffset = -20;
+        const y = labs.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+      setActiveNav('tabLabs');
+    }
+
+    function setActiveNav(activeId) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(activeId);
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    // Scroll Spy for Home / Labs Tabs
+    let isScrollTicking = false;
+    window.addEventListener('scroll', () => {
+      if (!isScrollTicking) {
+        window.requestAnimationFrame(() => {
+          const labs = document.getElementById('labsGrid');
+          if (labs) {
+            const rect = labs.getBoundingClientRect();
+            if (rect.top <= 250) {
+              setActiveNav('tabLabs');
+            } else {
+              setActiveNav('tabHome');
+            }
+          }
+          isScrollTicking = false;
+        });
+        isScrollTicking = true;
+      }
+    }, { passive: true });
+
     // Service Worker Registration for PWA Offline Mode
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('PWA Service Worker registered:', reg.scope))
+          .then(reg => {
+            console.log('PWA Service Worker registered:', reg.scope);
+            reg.update(); // Check for fresh worker
+          })
           .catch(err => console.log('Service Worker registration failed:', err));
       });
     }
@@ -490,17 +1130,46 @@
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.style.display = 'block';
+      if (installBtn) installBtn.style.display = 'block';
     });
 
-    installBtn.addEventListener('click', async () => {
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        triggerPWAInstall();
+      });
+    }
+
+    async function triggerPWAInstall() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         console.log(`User response to install prompt: ${outcome}`);
         deferredPrompt = null;
-        installBtn.style.display = 'none';
+        if (installBtn) installBtn.style.display = 'none';
+      } else {
+        alert("✨ สามารถติดตั้งได้โดยแตะเมนูของเบราว์เซอร์ แล้วเลือก 'Add to Home Screen' หรือ 'ติดตั้งแอป'");
       }
+    }
+
+    // Modal Helpers
+    function openTargetModal() {
+      const modal = document.getElementById('targetFiguresModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+    }
+    function closeTargetModal() {
+      const modal = document.getElementById('targetFiguresModal');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    }
+
+    // Close modal on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeTargetModal();
     });
   </script>
 </body>
