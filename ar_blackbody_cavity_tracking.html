@@ -48,17 +48,24 @@
       inset: 0;
       z-index: 2;
       background: radial-gradient(circle at 50% 30%, #0f1d38 0%, #030712 90%);
+      transition: background 0.25s ease;
+      pointer-events: auto;
+    }
+    body.ar-active,
+    body.ar-active #webgl-canvas-container {
+      background: transparent !important;
     }
 
     /* Live Camera Feed for AR Tracking Mode */
     #camera-video {
-      position: absolute;
+      position: fixed;
       inset: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       object-fit: cover;
-      z-index: 1;
+      z-index: 0;
       display: none;
+      background: #000;
     }
 
     /* Hand Tracking Canvas */
@@ -1095,7 +1102,7 @@
   </div>
 
   <!-- Video Element for AR Camera -->
-  <video id="camera-video" playsinline></video>
+  <video id="camera-video" autoplay playsinline webkit-playsinline muted></video>
   <canvas id="hand-skeleton-canvas"></canvas>
 
   <!-- 3D WebGL Canvas Container -->
@@ -1693,18 +1700,78 @@
 
     let cameraStream = null;
     async function startCamera(constraints) {
+      // 1. Verify Secure Context (HTTPS or localhost)
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        const isSecure = window.isSecureContext || window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        if (!isSecure) {
+          alert("⚠️ กล้องไม่สามารถเปิดได้เนื่องจากไม่ได้เข้าใช้งานผ่าน HTTPS\n\nเบราว์เซอร์บนสมาร์ทโฟน (iOS Safari / Android Chrome) มีระบบความปลอดภัยที่ไม่อนุญาตให้เปิดกล้องผ่าน HTTP ทั่วไป\n\n👉 โปรดเปิดผ่านลิงก์ HTTPS ของ GitHub Pages:\nhttps://tsanaphysics.github.io/ar-Quantum/ar_blackbody_cavity_tracking.html");
+        } else {
+          alert("⚠️ เบราว์เซอร์ของคุณไม่รองรับ navigator.mediaDevices.getUserMedia");
+        }
+        setMode(false, false);
+        return;
+      }
+
       try {
         if (cameraStream) stopCamera();
-        cameraStream = await navigator.mediaDevices.getUserMedia({ video: constraints, audio: false });
+
+        // Multi-level camera fallback: ideal environment -> direct environment -> any camera
+        let stream = null;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: 'environment' },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            audio: false
+          });
+        } catch (e1) {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: 'environment' },
+              audio: false
+            });
+          } catch (e2) {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: true,
+              audio: false
+            });
+          }
+        }
+
+        cameraStream = stream;
         video.srcObject = cameraStream;
-        video.play();
+        video.setAttribute('autoplay', '');
+        video.setAttribute('muted', '');
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
+        video.muted = true;
+        video.playsInline = true;
         video.style.display = 'block';
+
+        document.body.classList.add('ar-active');
+        const webglContainer = document.getElementById('webgl-canvas-container');
+        if (webglContainer) webglContainer.style.background = 'transparent';
+
+        await video.play().catch(playErr => {
+          console.warn("Video play was interrupted or deferred:", playErr);
+        });
 
         if (isHandTracking) {
           initMediaPipeHands();
         }
       } catch (err) {
-        alert("ไม่สามารถเข้าถึงกล้องได้: " + err.message + "\nสลับกลับสู่โหมด 3D จำลองบนจอภาพ");
+        console.error("Camera access error:", err);
+        let errorMsg = "ไม่สามารถเข้าถึงกล้องได้: " + err.message;
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          errorMsg = "⚠️ เบราว์เซอร์ถูกปฏิเสธการเข้าถึงกล้อง:\n\nโปรดแตะที่ไอคอนแม่กุญแจ 🔒 บนแถบ URL ของเบราว์เซอร์ แล้วเลือก 'อนุญาตการเข้าถึงกล้อง' (Allow Camera Permission) จากนั้นรีเฟรชหน้าเว็บ";
+        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+          errorMsg = "⚠️ ไม่พบอุปกรณ์กล้องบนเครื่องของคุณ";
+        } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+          errorMsg = "⚠️ กล้องกำลังถูกใช้งานโดยแอปพลิเคชันอื่น โปรดปิดแอปอื่นก่อน";
+        }
+        alert(errorMsg + "\n\nสลับเข้าสู่โหมด 3D สำรวจบนจอภาพแทน");
         setMode(false, false);
       }
     }
@@ -1715,6 +1782,9 @@
         cameraStream = null;
       }
       video.style.display = 'none';
+      document.body.classList.remove('ar-active');
+      const webglContainer = document.getElementById('webgl-canvas-container');
+      if (webglContainer) webglContainer.style.background = 'radial-gradient(circle at 50% 30%, #0f1d38 0%, #030712 90%)';
     }
 
     // MediaPipe Hands AI Setup
