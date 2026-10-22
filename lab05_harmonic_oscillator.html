@@ -1,0 +1,2248 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ห้องปฏิบัติการเสมือนจริง 3 มิติ และ WebAR ---- ตัวแกว่งกวัดฮาร์มอนิกควอนตัมและสถานะอาพันธ์ — ผศ.ดร.ชีวะ ทัศนา</title>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  <style>
+    :root {
+      --bg-space: #030712;
+      --panel-glass: rgba(6, 12, 28, 0.45);
+      --panel-border: rgba(0, 240, 255, 0.22);
+      --accent-cyan: #00f0ff;
+      --accent-gold: #f59e0b;
+      --accent-pink: #ec4899;
+      --accent-green: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-red: #ef4444;
+      --font-th: 'Prompt', sans-serif;
+      --font-tech: 'Chakra Petch', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: var(--bg-space);
+      color: #f8fafc;
+      font-family: var(--font-th);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Top Universal Navigation Bar */
+    .top-nav {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel-glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--panel-border);
+      border-radius: 40px;
+      padding: 6px 14px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+
+    .nav-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-right: 12px;
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+      font-family: var(--font-tech);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      white-space: nowrap;
+    }
+
+    .mode-pills {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mode-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-pill:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+    }
+
+    .mode-pill.active {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(139, 92, 246, 0.3));
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+    }
+
+    .btn-zen {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #94a3b8;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-zen:hover {
+      color: #ffffff;
+      border-color: var(--accent-gold);
+    }
+
+    .btn-zen.active {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: var(--accent-gold);
+      color: #ffffff;
+    }
+
+    /* Left Floating Control Panel */
+    .hud-left {
+      position: absolute;
+      top: 68px;
+      left: 18px;
+      z-index: 40;
+      width: 380px;
+      max-width: calc(100vw - 36px);
+      max-height: calc(100vh - 84px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+
+    .hud-left.collapsed {
+      transform: translateX(-420px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Right Telemetry & Physics Panel */
+    .hud-right {
+      position: absolute;
+      top: 68px;
+      right: 18px;
+      z-index: 40;
+      width: 350px;
+      max-width: calc(100vw - 36px);
+      max-height: calc(100vh - 84px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+
+    .hud-right.collapsed {
+      transform: translateX(390px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Mini Collapsed Open Docks */
+    .dock-btn {
+      position: absolute;
+      top: 74px;
+      z-index: 45;
+      background: var(--panel-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      color: var(--accent-cyan);
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-family: var(--font-tech);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      transition: all 0.25s ease;
+    }
+    .dock-btn:hover {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--accent-cyan);
+    }
+    #dock-left { left: 18px; }
+    #dock-right { right: 18px; }
+
+    /* Glass Cards */
+    .glass-card {
+      background: var(--panel-glass);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-family: var(--font-tech);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.5px;
+    }
+
+    .card-title .tag {
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+    }
+
+    /* Scenario Tabs */
+    .scenario-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .scenario-tab {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 8px 4px;
+      font-size: 0.72rem;
+      font-family: var(--font-tech);
+      color: #94a3b8;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .scenario-tab:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    .scenario-tab.active {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(139, 92, 246, 0.25));
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+    }
+
+    /* Controls Styling */
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ctrl-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ctrl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+    }
+
+    .ctrl-val {
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.12);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Preset Button Rows */
+    .preset-btns {
+      display: flex;
+      gap: 5px;
+      margin-top: 2px;
+    }
+
+    .preset-btn {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 4px 6px;
+      color: #94a3b8;
+      font-size: 0.70rem;
+      font-family: var(--font-tech);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .preset-btn:hover {
+      background: rgba(0, 240, 255, 0.15);
+      color: #ffffff;
+      border-color: var(--accent-cyan);
+    }
+
+    .preset-btn.active {
+      background: var(--accent-cyan);
+      color: #030712;
+      font-weight: 700;
+      border-color: var(--accent-cyan);
+    }
+
+    /* Ladder Operators Action Group */
+    .ladder-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-ladder {
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      color: #e2e8f0;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-family: var(--font-tech);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-ladder:hover {
+      background: rgba(139, 92, 246, 0.35);
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-ladder.down {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-ladder.down:hover {
+      background: rgba(239, 68, 68, 0.35);
+      border-color: var(--accent-red);
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Action Buttons Row */
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .btn-act {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-family: var(--font-tech);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-act:hover {
+      background: rgba(0, 240, 255, 0.18);
+      border-color: var(--accent-cyan);
+    }
+
+    .btn-act.primary {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(139, 92, 246, 0.25));
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+    }
+
+    /* Waveform Legends */
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      font-size: 0.70rem;
+      color: #94a3b8;
+      margin-top: 8px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      padding-top: 8px;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-bar {
+      width: 14px;
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    /* Telemetry Lists */
+    .telem-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.78rem;
+    }
+
+    .telem-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3px 0;
+    }
+
+    .telem-label {
+      color: #cbd5e1;
+    }
+
+    .telem-value {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .telem-value.gold { color: var(--accent-gold); }
+    .telem-value.green { color: var(--accent-green); }
+    .telem-value.pink { color: var(--accent-pink); }
+    .telem-value.purple { color: var(--accent-purple); }
+
+    /* Modals & Dialogs */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      background: rgba(3, 7, 18, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: rgba(8, 15, 30, 0.94);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      padding: 20px 24px;
+      max-width: 580px;
+      width: 100%;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+      position: relative;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-tech);
+      font-size: 1.05rem;
+      color: var(--accent-cyan);
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #ffffff;
+    }
+
+    /* Hand PIP Container */
+    #hand-pip-container {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 60;
+      width: 190px;
+      height: 142px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid var(--accent-cyan);
+      border-radius: 12px;
+      overflow: hidden;
+      display: none;
+      box-shadow: 0 8px 30px rgba(0, 240, 255, 0.4);
+    }
+
+    #hand-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .hand-badge {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      font-size: 0.65rem;
+      background: rgba(0, 240, 255, 0.25);
+      color: var(--accent-cyan);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-tech);
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 240, 255, 0.25);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 240, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div id="webgl-canvas"></div>
+
+  <!-- Top Universal Navigation -->
+  <div class="top-nav">
+    <div class="nav-title">
+      <span>🔔</span> LAB 05 ---- ตัวแกว่งกวัดฮาร์มอนิกควอนตัม (Quantum Harmonic Oscillator)
+    </div>
+    <div class="mode-pills">
+      <div class="mode-pill active" onclick="switchMode(1)">
+        <span>🎮</span> 3D Virtual Lab
+      </div>
+      <div class="mode-pill" onclick="switchMode(2)">
+        <span>📖</span> AR Hiro Marker
+      </div>
+      <div class="mode-pill" onclick="switchMode(3)">
+        <span>🖐</span> สั่งการด้วยมือ AI (Touchless)
+      </div>
+    </div>
+    <button class="btn-zen" id="btn-zen" onclick="toggleZenMode()">
+      <span>👁</span> <span>ย่อทุกบาร์ (H)</span>
+    </button>
+  </div>
+
+  <!-- Mini Docks for Expanding HUD -->
+  <button class="dock-btn" id="dock-left" style="display:none;" onclick="toggleLeftHUD(false)">
+    <span>▶</span> แผงควบคุมควอนตัม
+  </button>
+  <button class="dock-btn" id="dock-right" style="display:none;" onclick="toggleRightHUD(false)">
+    <span>◀</span> ผลการตรวจวัด
+  </button>
+
+  <!-- Left Floating HUD: Parameter Controls -->
+  <div class="hud-left" id="hud-left">
+    <!-- Header Card -->
+    <div class="glass-card">
+      <div class="card-title">
+        <span>ตัวแกว่งกวัดฮาร์มอนิกควอนตัม & สถานะอาพันธ์</span>
+        <button class="modal-close" style="font-size:1.0rem;" onclick="toggleLeftHUD(true)">◀</button>
+      </div>
+      <p style="font-size:0.75rem; color:#cbd5e1; line-height:1.5;">
+        จำลองระดับพลังงานขั้นบันได $E_n = (n + \frac{1}{2})\hbar\omega$ ฟังก์ชันคลื่นพหุนามแอร์มีต การเปลี่ยนระดับพลังงานด้วยตัวดำเนินการบันได $\hat{a}^\dagger, \hat{a}$ และการเคลื่อนที่ไม่แผ่กว้างของสถานะอาพันธ์เกลาเบอร์ $|\alpha\rangle$
+      </p>
+      <div style="font-size:0.70rem; color:var(--accent-gold); margin-top:6px; display:flex; align-items:center; gap:6px;">
+        <span>โดย</span> <strong style="color:#ffffff;">ผศ.ดร.ชีวะ ทัศนา</strong> <span>สาขาวิชาฟิสิกส์ มรภ.รำไพพรรณี</span>
+      </div>
+    </div>
+
+    <!-- Controls Card -->
+    <div class="glass-card">
+      <!-- Scenario Selector Tabs -->
+      <div class="scenario-tabs">
+        <div class="scenario-tab active" id="tab-eig" onclick="setScenario('eig')">
+          <span>⚛️</span> สถานะคงตัว |n⟩
+        </div>
+        <div class="scenario-tab" id="tab-coh" onclick="setScenario('coh')">
+          <span>🌀</span> อาพันธ์ |α⟩
+        </div>
+        <div class="scenario-tab" id="tab-cat" onclick="setScenario('cat')">
+          <span>🐱</span> แมว / ซ้อนทับ
+        </div>
+        <div class="scenario-tab" id="tab-sqz" onclick="setScenario('sqz')">
+          <span>📏</span> บีบอัด |ξ,α⟩
+        </div>
+      </div>
+
+      <div class="card-title">
+        <span id="title-controls">พารามิเตอร์ของระบบควอนตัม</span>
+        <span class="tag" id="tag-state-type">EIGENSTATE</span>
+      </div>
+
+      <div class="ctrl-group">
+        <!-- Quantum Number n Control (Eigenstate mode) -->
+        <div class="ctrl-item" id="item-n">
+          <div class="ctrl-header">
+            <span>ระดับควอนตัม n</span>
+            <span class="ctrl-val" id="val-n">n = 0 (Ground State)</span>
+          </div>
+          <input type="range" id="slider-n" min="0" max="7" step="1" value="0">
+          <div class="preset-btns">
+            <button class="preset-btn active" onclick="setQuantumN(0)">n = 0 (ZPE)</button>
+            <button class="preset-btn" onclick="setQuantumN(1)">n = 1</button>
+            <button class="preset-btn" onclick="setQuantumN(2)">n = 2</button>
+            <button class="preset-btn" onclick="setQuantumN(4)">n = 4</button>
+            <button class="preset-btn" onclick="setQuantumN(7)">n = 7</button>
+          </div>
+        </div>
+
+        <!-- Ladder Operators (Quantum Jumps) -->
+        <div class="ctrl-item" id="item-ladder">
+          <div class="ctrl-header">
+            <span>ตัวดำเนินการบันไดควอนตัม (Ladder Operators)</span>
+            <span style="font-size:0.68rem; color:var(--accent-purple);">Δn = ±1</span>
+          </div>
+          <div class="ladder-grid">
+            <button class="btn-ladder" onclick="quantumRaise()">
+              <span>⬆️</span> ดูดกลืนโฟตอน (+ℏω)
+            </button>
+            <button class="btn-ladder down" onclick="quantumLower()">
+              <span>⬇️</span> เปล่งโฟตอน (-ℏω)
+            </button>
+          </div>
+        </div>
+
+        <!-- Coherent Amplitude |alpha| (Coherent / Cat / Squeezed mode) -->
+        <div class="ctrl-item" id="item-alpha" style="display:none;">
+          <div class="ctrl-header">
+            <span>ขนาดแอมพลิจูดการกระจัด |α|</span>
+            <span class="ctrl-val" id="val-alpha">|α| = 1.60</span>
+          </div>
+          <input type="range" id="slider-alpha" min="0.0" max="3.2" step="0.1" value="1.6">
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setAlpha(0.0)">|α| = 0 (สุญญากาศ)</button>
+            <button class="preset-btn" onclick="setAlpha(0.8)">|α| = 0.8</button>
+            <button class="preset-btn active" onclick="setAlpha(1.6)">|α| = 1.6</button>
+            <button class="preset-btn" onclick="setAlpha(2.6)">|α| = 2.6</button>
+          </div>
+        </div>
+
+        <!-- Decoherence Rate Gamma (Cat mode only) -->
+        <div class="ctrl-item" id="item-decoherence" style="display:none;">
+          <div class="ctrl-header">
+            <span>การสลายสภาพเชื่อมแน่น (Decoherence Rate γ)</span>
+            <span class="ctrl-val" id="val-gamma">γ = 0.00 (Pure Quantum)</span>
+          </div>
+          <input type="range" id="slider-gamma" min="0.0" max="1.0" step="0.05" value="0.0">
+          <div class="preset-btns">
+            <button class="preset-btn active" onclick="setDecoherence(0.0)">0.0 (ควอนตัมบริสุทธิ์)</button>
+            <button class="preset-btn" onclick="setDecoherence(0.5)">0.5 (ริ้วจางลง)</button>
+            <button class="preset-btn" onclick="setDecoherence(1.0)">1.0 (คลาสสิก 50/50)</button>
+          </div>
+        </div>
+
+        <!-- Squeezing Parameters r & theta (Squeezed mode only) -->
+        <div class="ctrl-item" id="item-squeeze" style="display:none;">
+          <div class="ctrl-header">
+            <span>พารามิเตอร์การบีบอัด r (Squeezing Parameter)</span>
+            <span class="ctrl-val" id="val-sqz-r">r = 0.80 (6.95 dB)</span>
+          </div>
+          <input type="range" id="slider-sqz-r" min="0.0" max="1.5" step="0.05" value="0.8">
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setSqueezeR(0.0)">r = 0.0 (Uncompressed)</button>
+            <button class="preset-btn" onclick="setSqueezeR(0.5)">r = 0.5 (4.3 dB)</button>
+            <button class="preset-btn active" onclick="setSqueezeR(0.8)">r = 0.8 (7.0 dB)</button>
+            <button class="preset-btn" onclick="setSqueezeR(1.2)">r = 1.2 (LIGO 10.4 dB)</button>
+          </div>
+
+          <div class="ctrl-header" style="margin-top:6px;">
+            <span>มุมเฟสการบีบอัดควอดราเจอร์ θ</span>
+            <span class="ctrl-val" id="val-sqz-theta">0°</span>
+          </div>
+          <input type="range" id="slider-sqz-theta" min="0" max="180" step="5" value="0">
+        </div>
+
+        <!-- Angular Frequency omega -->
+        <div class="ctrl-item">
+          <div class="ctrl-header">
+            <span>ความถี่เชิงมุมของบ่อศักย์ ω</span>
+            <span class="ctrl-val" id="val-omega">1.20 rad/s</span>
+          </div>
+          <input type="range" id="slider-omega" min="0.5" max="2.5" step="0.1" value="1.2">
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-row">
+          <button class="btn-act primary" id="btn-play" onclick="togglePlayPause()">
+            <span>⏸</span> หยุดชั่วคราว
+          </button>
+          <button class="btn-act" onclick="resetView()">
+            <span>🔄</span> รีเซ็ตมุมมอง
+          </button>
+        </div>
+
+        <!-- Quantum Diagnostics Modals Buttons -->
+        <button class="btn-act" id="btn-wigner" onclick="openWignerModal()" style="margin-top:4px; border-color:var(--accent-purple); color:var(--accent-purple);">
+          <span>🌌</span> โพแทรนเชียลเฟส Wigner W(x, p)
+        </button>
+
+        <button class="btn-act" id="btn-poisson" onclick="openPoissonModal()" style="margin-top:2px; border-color:var(--accent-cyan); color:var(--accent-cyan);">
+          <span>📊</span> การแจกแจงจำนวนโฟตอน P(n) ปัวซง
+        </button>
+
+        <button class="btn-act" id="btn-sound" onclick="toggleSound()" style="margin-top:2px;">
+          <span>🔊</span> สังเคราะห์เสียงความถี่ฮาร์มอนิก (Web Audio)
+        </button>
+
+        <!-- Waveform Legends -->
+        <div class="legend-grid">
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#f59e0b;"></div>
+            <span>บ่อศักย์พาราโบลา V(x)</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#00f0ff;"></div>
+            <span>ฟังก์ชันคลื่น Re(ψ)</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#ec4899;"></div>
+            <span>ส่วนจินตภาพ Im(ψ)</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#10b981;"></div>
+            <span>ความหนาแน่น |ψ|²</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Floating HUD: Quantum Telemetry & Theory -->
+  <div class="hud-right" id="hud-right">
+    <div class="glass-card">
+      <div class="card-title">
+        <span>ผลการตรวจวัดควอนตัมเชิงตัวเลข</span>
+        <button class="modal-close" style="font-size:1.0rem;" onclick="toggleRightHUD(true)">▶</button>
+      </div>
+
+      <div class="telem-list">
+        <div class="telem-row">
+          <span class="telem-label">พลังงานของสถานะ E</span>
+          <span class="telem-value green" id="telem-energy">0.60 ℏω</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">พลังงานจุดศูนย์ (ZPE E₀)</span>
+          <span class="telem-value gold" id="telem-zpe">0.50 ℏω</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">จุดกลับตัวคลาสสิก (Turning Points)</span>
+          <span class="telem-value pink" id="telem-xc">± 1.000 x₀</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">การลอดผ่านแนวกั้นต้องห้ามคลาสสิก</span>
+          <span class="telem-value" id="telem-tunnel-tail">15.7 %</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">จำนวนบัพคลื่น (Nodes)</span>
+          <span class="telem-value" id="telem-nodes">0 บัพ</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ความสมมาตรพาริตี (Parity)</span>
+          <span class="telem-value gold" id="telem-parity">คู่ (Even, +1)</span>
+        </div>
+
+        <div class="telem-row" style="border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px; margin-top:2px;">
+          <span class="telem-label">ผลคูณความไม่แน่นอน Δx·Δp</span>
+          <span class="telem-value green" id="telem-uncert">0.500 ℏ (Minimum)</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">จำนวนควอนตัมเฉลี่ย ⟨n⟩</span>
+          <span class="telem-value" id="telem-avgn">0.00</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">การกระจายตัวของโฟตอน Δn</span>
+          <span class="telem-value pink" id="telem-deltan">0.00 (Fock State)</span>
+        </div>
+
+        <div class="telem-row" id="row-squeezing" style="display:none;">
+          <span class="telem-label">การลดสัญญาณรบกวน (Squeezing)</span>
+          <span class="telem-value green" id="telem-sqz-db">- 6.95 dB (Below SQL)</span>
+        </div>
+
+        <div class="telem-row" id="row-coherence" style="display:none;">
+          <span class="telem-label">ทัศนวิสัยริ้วควอนตัม (Visibility)</span>
+          <span class="telem-value green" id="telem-visibility">100.0 % (Coherent)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quantum Theory Helper Card -->
+    <div class="glass-card">
+      <div class="card-title">
+        <span>หลักฟิสิกส์สำคัญประจำบท</span>
+        <span class="tag">FORMULAS</span>
+      </div>
+      <div style="font-size:0.72rem; color:#cbd5e1; line-height:1.5;">
+        <p>• <strong>ระดับพลังงานขั้นบันได</strong> ---- $E_n = \left(n + \frac{1}{2}\right)\hbar\omega$ โดยที่ระยะห่างระหว่างระดับเท่ากันเสมอ $\Delta E = \hbar\omega$</p>
+        <p>• <strong>ฟังก์ชันคลื่นพหุนามแอร์มีต</strong> ---- $\psi_n(x) = \frac{1}{\sqrt{2^n n! \sqrt{\pi} x_0}} H_n\left(\frac{x}{x_0}\right) e^{-\frac{x^2}{2x_0^2}}$</p>
+        <p>• <strong>ตัวดำเนินการบันได</strong> ---- $\hat{a}^\dagger |n\rangle = \sqrt{n+1}|n+1\rangle$ และ $\hat{a}|n\rangle = \sqrt{n}|n-1\rangle$</p>
+        <p>• <strong>สถานะอาพันธ์เกลาเบอร์</strong> ---- $|\alpha\rangle = e^{-\frac{|\alpha|^2}{2}} \sum_{n=0}^\infty \frac{\alpha^n}{\sqrt{n!}}|n\rangle$ เคลื่อนที่แบบฮาร์มอนิกโดยซองคลื่นไม่แผ่กว้างออกตามกาลเวลา</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wigner Quasi-Probability Phase Space Modal -->
+  <div class="modal-overlay" id="wigner-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>🌌 การแจกแจงเสมือนความน่าจะเป็นวิกเนอร์ W(x, p) ในปริภูมิเฟส</span>
+        <button class="modal-close" onclick="closeWignerModal()">✕</button>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:100%; height:260px; background:#020617; border-radius:12px; border:1px solid rgba(139,92,246,0.3); overflow:hidden; position:relative;">
+          <canvas id="wigner-canvas" width="520" height="260" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#94a3b8; margin-top:8px;">
+          <span>สถานะปัจจุบัน ---- <strong style="color:var(--accent-cyan);" id="wigner-state-name">Fock State |0⟩</strong></span>
+          <span>เครื่องหมายควอนตัมลบ ---- <strong style="color:var(--accent-pink);">W(x, p) &lt; 0 บ่งบอก Non-classicality</strong></span>
+        </div>
+        <p style="font-size:0.75rem; color:#cbd5e1; margin-top:10px; line-height:1.4; text-align:left;">
+          สำหรับสถานะฟ็อกก์ $|n\rangle$ การแจกแจงวิกเนอร์ $W_n(x, p) = \frac{(-1)^n}{\pi\hbar} e^{-\rho^2} L_n(2\rho^2)$ จะแสดงวงแหวนสลับที่มีค่าติดลบ ซึ่งเป็นคุณสมบัติควอนตัมแท้บริสุทธิ์ ขณะที่สถานะอาพันธ์ $|\alpha\rangle$ จะเป็นวงกลมเกาส์เซียนหมุนวนรอบจุดกำเนิดอย่างราบรื่น
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Poisson Distribution Modal -->
+  <div class="modal-overlay" id="poisson-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📊 การแจกแจงจำนวนโฟตอนของสถานะอาพันธ์ P(n)</span>
+        <button class="modal-close" onclick="closePoissonModal()">✕</button>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:100%; height:240px; background:#020617; border-radius:12px; border:1px solid rgba(0,240,255,0.3); overflow:hidden;">
+          <canvas id="poisson-canvas" width="520" height="240" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#94a3b8; margin-top:8px;">
+          <span>จำนวนโฟตอนเฉลี่ย ⟨n⟩ ---- <strong style="color:var(--accent-gold);" id="poisson-avg-n">2.56</strong></span>
+          <span>การแจกแจงแบบปัวซง ---- <strong style="color:var(--accent-green);">Δn = √⟨n⟩</strong></span>
+        </div>
+        <p style="font-size:0.75rem; color:#cbd5e1; margin-top:10px; line-height:1.4; text-align:left;">
+          สถานะอาพันธ์มีความน่าจะเป็นที่จะตรวจพบ $n$ โฟตอนเป็นไปตามกฎของปัวซง $P(n) = e^{-|\alpha|^2} \frac{|\alpha|^{2n}}{n!}$ โดยมีค่าความไม่แน่นอนของจำนวนอนุภาค $\Delta n = \sqrt{\langle n \rangle}$ ซึ่งสอดคล้องกับแสงเลเซอร์อุดมคติในทัศนศาสตร์ควอนตัม
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- AR Hiro Marker Modal -->
+  <div class="modal-overlay" id="ar-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📖 สแกนภาพมาร์กเกอร์หนังสือ AR (Hiro Marker)</span>
+        <button class="modal-close" onclick="closeARModal()">✕</button>
+      </div>
+      <div style="text-align:center; padding:10px 0;">
+        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Hiro Marker" style="width:190px; height:190px; border-radius:12px; border:4px solid var(--accent-cyan); box-shadow:0 0 20px rgba(0,240,255,0.4);">
+        <p style="font-size:0.82rem; color:#cbd5e1; margin-top:14px; line-height:1.5;">
+          ส่องกล้องมาที่มาร์กเกอร์ Hiro ในตำราฟิสิกส์ควอนตัมบทที่ 5<br>
+          บ่อศักย์พาราโบลาและคลื่นพหุนามแอร์มีตจะลอยปรากฏขึ้นมาบนหน้าหนังสือทันที
+        </p>
+        <div style="margin-top:16px; display:flex; justify-content:center; gap:10px;">
+          <button class="btn-act primary" onclick="closeARModal()">เข้าใจแล้ว เริ่มการทดลอง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MediaPipe Hands PIP Video Feed -->
+  <div id="hand-pip-container">
+    <div class="hand-badge">🖐 AI Hand Tracking Active</div>
+    <video id="hand-video" playsinline autoplay muted></video>
+  </div>
+
+  <!-- ------------------------------------------------------------- -->
+  <!-- Main Three.js & Quantum Physics Engine Simulation Script       -->
+  <!-- ------------------------------------------------------------- -->
+  <script>
+    // -------------------------------------------------------------
+    // Scene Setup, Camera, Lighting & Instruments
+    // -------------------------------------------------------------
+    const canvasContainer = document.getElementById('webgl-canvas');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x030712);
+    scene.fog = new THREE.FogExp2(0x030712, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 11, 26);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    canvasContainer.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 + 0.05;
+    controls.minDistance = 6;
+    controls.maxDistance = 60;
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0x00f0ff, 0.9);
+    keyLight.position.set(12, 22, 16);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x8b5cf6, 0.6);
+    fillLight.position.set(-12, 14, -10);
+    scene.add(fillLight);
+
+    const glowLight = new THREE.PointLight(0xf59e0b, 1.2, 30);
+    glowLight.position.set(0, 4, 0);
+    scene.add(glowLight);
+
+    // Grid Floor
+    const gridHelper = new THREE.GridHelper(36, 36, 0x00f0ff, 0x1e293b);
+    gridHelper.position.y = -0.01;
+    scene.add(gridHelper);
+
+    // -------------------------------------------------------------
+    // Physical Simulation State Variables
+    // -------------------------------------------------------------
+    let currentScenario = 'eig'; // 'eig' | 'coh' | 'cat' | 'sqz'
+    let currentN = 0; // 0 to 7
+    let alphaVal = 1.6;
+    let omegaVal = 1.2;
+    let sqz_r = 0.8;
+    let sqz_theta = 0.0;
+    let decoherenceGamma = 0.0;
+    let animTime = 0.0;
+    let isPlaying = true;
+    const x0 = 1.0; // characteristic harmonic length scale sqrt(hbar / (m * omega))
+
+    // -------------------------------------------------------------
+    // 3D Objects: Parabolic Potential Well, Energy Ladders, Wave Ribbon
+    // -------------------------------------------------------------
+    const N_POINTS = 320;
+    const X_RANGE = 9.0;
+
+    // 1. 3D Parabolic Wireframe Bowl Mesh V(x, z) = 0.5 * k * (x^2 + z^2)
+    const bowlGeo = new THREE.CylinderGeometry(8.2, 0.1, 7.5, 36, 12, true);
+    // Deform cylinder into paraboloid
+    const bowlPos = bowlGeo.attributes.position.array;
+    for (let i = 0; i < bowlPos.length; i += 3) {
+      const r = Math.hypot(bowlPos[i], bowlPos[i + 2]);
+      bowlPos[i + 1] = 0.12 * r * r;
+    }
+    bowlGeo.computeVertexNormals();
+    const bowlMat = new THREE.MeshStandardMaterial({
+      color: 0x8b5cf6,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.14,
+      roughness: 0.2
+    });
+    const bowlMesh = new THREE.Mesh(bowlGeo, bowlMat);
+    scene.add(bowlMesh);
+
+    // Front 2D Parabolic Potential Curve V(x) = 0.5 * m * omega^2 * x^2
+    const potGeo = new THREE.BufferGeometry();
+    const potPos = new Float32Array(N_POINTS * 3);
+    for (let i = 0; i < N_POINTS; i++) {
+      const x = -X_RANGE + (2.0 * X_RANGE / (N_POINTS - 1)) * i;
+      potPos[i * 3] = x;
+      potPos[i * 3 + 1] = 0.18 * x * x;
+      potPos[i * 3 + 2] = 0;
+    }
+    potGeo.setAttribute('position', new THREE.BufferAttribute(potPos, 3));
+    const potMat = new THREE.LineBasicMaterial({ color: 0xf59e0b, linewidth: 3 });
+    const potLine = new THREE.Line(potGeo, potMat);
+    scene.add(potLine);
+
+    // 2. Quantized Energy Level Ladders (n = 0 to 7)
+    const levelGroup = new THREE.Group();
+    scene.add(levelGroup);
+    const levelLines = [];
+    const turningPointMarkers = [];
+
+    for (let n = 0; n <= 7; n++) {
+      const E = (n + 0.5) * 1.1;
+      const xMax = Math.sqrt(E / 0.18);
+
+      // Level dashed line
+      const lGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(-xMax, E, 0),
+        new THREE.Vector3(xMax, E, 0)
+      ]);
+      const lMat = new THREE.LineDashedMaterial({
+        color: 0x475569,
+        dashSize: 0.35,
+        gapSize: 0.2,
+        linewidth: 2
+      });
+      const line = new THREE.Line(lGeo, lMat);
+      line.computeLineDistances();
+      levelGroup.add(line);
+      levelLines.push(line);
+
+      // Classical turning point red vertical pins at x = +/- x_c
+      const pinMat = new THREE.LineBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.4 });
+      const pinGeoL = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(-xMax, 0, 0),
+        new THREE.Vector3(-xMax, E + 0.4, 0)
+      ]);
+      const pinGeoR = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(xMax, 0, 0),
+        new THREE.Vector3(xMax, E + 0.4, 0)
+      ]);
+      const pinL = new THREE.Line(pinGeoL, pinMat);
+      const pinR = new THREE.Line(pinGeoR, pinMat);
+      levelGroup.add(pinL);
+      levelGroup.add(pinR);
+      turningPointMarkers.push({ left: pinL, right: pinR });
+    }
+
+    // 3. Dynamic Wavefunction 3D Helical Ribbon
+    const waveGeom = new THREE.BufferGeometry();
+    const wavePos = new Float32Array(N_POINTS * 3);
+    const waveColors = new Float32Array(N_POINTS * 3);
+    waveGeom.setAttribute('position', new THREE.BufferAttribute(wavePos, 3));
+    waveGeom.setAttribute('color', new THREE.BufferAttribute(waveColors, 3));
+    const waveMat = new THREE.LineBasicMaterial({ vertexColors: true, linewidth: 3.5 });
+    const waveLine = new THREE.Line(waveGeom, waveMat);
+    scene.add(waveLine);
+
+    // Probability Density |Psi|^2 Shaded Fill Mesh
+    const fillPlaneGeo = new THREE.PlaneGeometry(1, 1, N_POINTS - 1, 1);
+    const fillPlaneMat = new THREE.MeshBasicMaterial({
+      color: 0x10b981,
+      transparent: true,
+      opacity: 0.28,
+      side: THREE.DoubleSide
+    });
+    const fillMesh = new THREE.Mesh(fillPlaneGeo, fillPlaneMat);
+    scene.add(fillMesh);
+
+    // 4. Classical Spring-Bob Analogy (Comparison Model)
+    const springGroup = new THREE.Group();
+    springGroup.position.set(0, 0.4, 3.5);
+    scene.add(springGroup);
+
+    // Bob mass sphere
+    const bobGeo = new THREE.SphereGeometry(0.48, 24, 24);
+    const bobMat = new THREE.MeshStandardMaterial({
+      color: 0xf59e0b,
+      metalness: 0.85,
+      roughness: 0.25
+    });
+    const bobMesh = new THREE.Mesh(bobGeo, bobMat);
+    springGroup.add(bobMesh);
+
+    // Coiled Spring line
+    const N_COILS = 120;
+    const springGeo = new THREE.BufferGeometry();
+    const springPos = new Float32Array(N_COILS * 3);
+    springGeo.setAttribute('position', new THREE.BufferAttribute(springPos, 3));
+    const springMat = new THREE.LineBasicMaterial({ color: 0x94a3b8, linewidth: 2 });
+    const springLine = new THREE.Line(springGeo, springMat);
+    springGroup.add(springLine);
+
+    // 5. Photon Jump Pulse Particles (Creation / Annihilation effect)
+    const photonCount = 30;
+    const photonGeo = new THREE.BufferGeometry();
+    const photonPos = new Float32Array(photonCount * 3);
+    const photonVel = new Float32Array(photonCount * 3);
+    for (let p = 0; p < photonCount; p++) {
+      photonPos[p * 3] = 0;
+      photonPos[p * 3 + 1] = -100; // initially hidden
+      photonPos[p * 3 + 2] = 0;
+    }
+    photonGeo.setAttribute('position', new THREE.BufferAttribute(photonPos, 3));
+    const photonMat = new THREE.PointsMaterial({
+      color: 0x8b5cf6,
+      size: 0.35,
+      transparent: true,
+      opacity: 0.9,
+      blending: THREE.AdditiveBlending
+    });
+    const photonPoints = new THREE.Points(photonGeo, photonMat);
+    scene.add(photonPoints);
+    let photonAnimActive = false;
+    let photonTimer = 0;
+
+    // -------------------------------------------------------------
+    // Web Audio Synthesizer: Continuous Tone & Quantum Jump Sounds
+    // -------------------------------------------------------------
+    let audioCtx = null;
+    let audioActive = false;
+    let masterGain = null;
+    let toneOsc = null;
+
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioClass();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        masterGain.connect(audioCtx.destination);
+
+        toneOsc = audioCtx.createOscillator();
+        toneOsc.type = 'sine';
+        toneOsc.frequency.setValueAtTime(120 * omegaVal, audioCtx.currentTime);
+        toneOsc.connect(masterGain);
+        toneOsc.start();
+        audioActive = true;
+      } catch (e) {
+        console.warn('Audio not available', e);
+      }
+    }
+
+    function toggleSound() {
+      if (!audioCtx) initAudio();
+      audioActive = !audioActive;
+      const btn = document.getElementById('btn-sound');
+      if (audioActive) {
+        masterGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        btn.classList.add('primary');
+        btn.innerHTML = '<span>🔊</span> สังเคราะห์เสียงความถี่ฮาร์มอนิก (เปิด)';
+      } else {
+        masterGain.gain.setValueAtTime(0.0, audioCtx.currentTime);
+        btn.classList.remove('primary');
+        btn.innerHTML = '<span>🔇</span> สังเคราะห์เสียงความถี่ฮาร์มอนิก (ปิด)';
+      }
+    }
+
+    function playLadderSound(isUp) {
+      if (!audioActive || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = isUp ? 'triangle' : 'sine';
+      
+      const startFreq = isUp ? 220 + currentN * 65 : 660 - currentN * 45;
+      const endFreq = isUp ? startFreq + 140 : startFreq - 140;
+
+      osc.frequency.setValueAtTime(startFreq, now);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(60, endFreq), now + 0.25);
+
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + 0.3);
+    }
+
+    function triggerPhotonPulse(isUp, energyY) {
+      photonAnimActive = true;
+      photonTimer = 0;
+      photonMat.color.setHex(isUp ? 0x8b5cf6 : 0xef4444);
+      const pos = photonGeo.attributes.position.array;
+      for (let p = 0; p < photonCount; p++) {
+        pos[p * 3] = (Math.random() - 0.5) * 1.2;
+        pos[p * 3 + 1] = energyY + (Math.random() - 0.5) * 0.5;
+        pos[p * 3 + 2] = (Math.random() - 0.5) * 1.2;
+
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.random() * Math.PI;
+        const speed = 0.08 + Math.random() * 0.12;
+        photonVel[p * 3] = Math.sin(phi) * Math.cos(theta) * speed;
+        photonVel[p * 3 + 1] = (isUp ? 1 : -1) * Math.cos(phi) * speed + (isUp ? 0.06 : -0.06);
+        photonVel[p * 3 + 2] = Math.sin(phi) * Math.sin(theta) * speed;
+      }
+      photonGeo.attributes.position.needsUpdate = true;
+    }
+
+    // -------------------------------------------------------------
+    // Analytical Hermite Polynomials & Quantum Physics Equations
+    // -------------------------------------------------------------
+    function hermite(n, xi) {
+      if (n === 0) return 1.0;
+      if (n === 1) return 2.0 * xi;
+      if (n === 2) return 4.0 * xi * xi - 2.0;
+      if (n === 3) return 8.0 * Math.pow(xi, 3) - 12.0 * xi;
+      if (n === 4) return 16.0 * Math.pow(xi, 4) - 48.0 * xi * xi + 12.0;
+      if (n === 5) return 32.0 * Math.pow(xi, 5) - 160.0 * Math.pow(xi, 3) + 120.0 * xi;
+      if (n === 6) return 64.0 * Math.pow(xi, 6) - 480.0 * Math.pow(xi, 4) + 720.0 * xi * xi - 120.0;
+      if (n === 7) return 128.0 * Math.pow(xi, 7) - 1344.0 * Math.pow(xi, 5) + 3360.0 * Math.pow(xi, 3) - 1680.0 * xi;
+      return 1.0;
+    }
+
+    function factorial(k) {
+      let f = 1;
+      for (let i = 2; i <= k; i++) f *= i;
+      return f;
+    }
+
+    // -------------------------------------------------------------
+    // Scenario Switcher: Eigenstate |n> vs Coherent |alpha> vs Cat vs Squeezed
+    // -------------------------------------------------------------
+    function setScenario(scen) {
+      currentScenario = scen;
+      document.getElementById('tab-eig').classList.toggle('active', scen === 'eig');
+      document.getElementById('tab-coh').classList.toggle('active', scen === 'coh');
+      document.getElementById('tab-cat').classList.toggle('active', scen === 'cat');
+      document.getElementById('tab-sqz').classList.toggle('active', scen === 'sqz');
+
+      const itemN = document.getElementById('item-n');
+      const itemLadder = document.getElementById('item-ladder');
+      const itemAlpha = document.getElementById('item-alpha');
+      const itemDecoherence = document.getElementById('item-decoherence');
+      const itemSqueeze = document.getElementById('item-squeeze');
+      const tagState = document.getElementById('tag-state-type');
+      const rowSqueezing = document.getElementById('row-squeezing');
+      const rowCoherence = document.getElementById('row-coherence');
+
+      if (scen === 'eig') {
+        itemN.style.display = 'flex';
+        itemLadder.style.display = 'flex';
+        itemAlpha.style.display = 'none';
+        if (itemDecoherence) itemDecoherence.style.display = 'none';
+        if (itemSqueeze) itemSqueeze.style.display = 'none';
+        if (rowSqueezing) rowSqueezing.style.display = 'none';
+        if (rowCoherence) rowCoherence.style.display = 'none';
+        tagState.innerText = 'EIGENSTATE |n⟩';
+        tagState.style.color = '#00f0ff';
+      } else if (scen === 'coh') {
+        itemN.style.display = 'none';
+        itemLadder.style.display = 'none';
+        itemAlpha.style.display = 'flex';
+        if (itemDecoherence) itemDecoherence.style.display = 'none';
+        if (itemSqueeze) itemSqueeze.style.display = 'none';
+        if (rowSqueezing) rowSqueezing.style.display = 'none';
+        if (rowCoherence) rowCoherence.style.display = 'none';
+        tagState.innerText = 'COHERENT |α⟩';
+        tagState.style.color = '#f59e0b';
+      } else if (scen === 'cat') {
+        itemN.style.display = 'none';
+        itemLadder.style.display = 'none';
+        itemAlpha.style.display = 'flex';
+        if (itemDecoherence) itemDecoherence.style.display = 'flex';
+        if (itemSqueeze) itemSqueeze.style.display = 'none';
+        if (rowSqueezing) rowSqueezing.style.display = 'none';
+        if (rowCoherence) rowCoherence.style.display = 'flex';
+        tagState.innerText = 'SCHRÖDINGER CAT';
+        tagState.style.color = '#ec4899';
+      } else if (scen === 'sqz') {
+        itemN.style.display = 'none';
+        itemLadder.style.display = 'none';
+        itemAlpha.style.display = 'flex';
+        if (itemDecoherence) itemDecoherence.style.display = 'none';
+        if (itemSqueeze) itemSqueeze.style.display = 'flex';
+        if (rowSqueezing) rowSqueezing.style.display = 'flex';
+        if (rowCoherence) rowCoherence.style.display = 'none';
+        tagState.innerText = 'SQUEEZED STATE |ξ,α⟩';
+        tagState.style.color = '#38bdf8';
+      }
+      updatePhysics();
+    }
+
+    // -------------------------------------------------------------
+    // Core Quantum Physics Calculations & Wave Evolution
+    // -------------------------------------------------------------
+    function updatePhysics() {
+      // Scale potential bowl based on omega
+      const k_eff = 0.18 * (omegaVal / 1.2);
+      const bowlPosArr = bowlGeo.attributes.position.array;
+      for (let i = 0; i < bowlPosArr.length; i += 3) {
+        const r = Math.hypot(bowlPosArr[i], bowlPosArr[i + 2]);
+        bowlPosArr[i + 1] = k_eff * 0.7 * r * r;
+      }
+      bowlGeo.attributes.position.needsUpdate = true;
+
+      // Update Parabolic Curve
+      const potPosArr = potGeo.attributes.position.array;
+      for (let i = 0; i < N_POINTS; i++) {
+        const x = -X_RANGE + (2.0 * X_RANGE / (N_POINTS - 1)) * i;
+        potPosArr[i * 3 + 1] = k_eff * x * x;
+      }
+      potGeo.attributes.position.needsUpdate = true;
+
+      // Update Energy Level Lines and Classical Turning Points
+      for (let n = 0; n <= 7; n++) {
+        const E = (n + 0.5) * 1.1 * (omegaVal / 1.2);
+        const xMax = Math.sqrt(E / Math.max(0.01, k_eff));
+        const line = levelLines[n];
+        const pins = turningPointMarkers[n];
+
+        const linePos = line.geometry.attributes.position.array;
+        linePos[0] = -xMax; linePos[1] = E; linePos[2] = 0;
+        linePos[3] = xMax; linePos[4] = E; linePos[5] = 0;
+        line.geometry.attributes.position.needsUpdate = true;
+        line.computeLineDistances();
+
+        // Highlight active level
+        if (currentScenario === 'eig' && n === currentN) {
+          line.material.color.setHex(0x00f0ff);
+          pins.left.visible = true;
+          pins.right.visible = true;
+        } else {
+          line.material.color.setHex(0x334155);
+          pins.left.visible = false;
+          pins.right.visible = false;
+        }
+
+        // Update pin heights
+        const pL = pins.left.geometry.attributes.position.array;
+        pL[0] = -xMax; pL[1] = 0; pL[2] = 0;
+        pL[3] = -xMax; pL[4] = E + 0.5; pL[5] = 0;
+        pins.left.geometry.attributes.position.needsUpdate = true;
+
+        const pR = pins.right.geometry.attributes.position.array;
+        pR[0] = xMax; pR[1] = 0; pR[2] = 0;
+        pR[3] = xMax; pR[4] = E + 0.5; pR[5] = 0;
+        pins.right.geometry.attributes.position.needsUpdate = true;
+      }
+
+      // Audio modulation
+      if (audioActive && toneOsc) {
+        toneOsc.frequency.setTargetAtTime(120 * omegaVal, audioCtx.currentTime, 0.05);
+      }
+
+      // Wave Ribbon and Density Fill
+      const pos = waveGeom.attributes.position.array;
+      const col = waveGeom.attributes.color.array;
+      const meshPos = fillMesh.geometry.attributes.position.array;
+
+      let baselineEnergy = 0.0;
+      let x_center = 0.0;
+
+      if (currentScenario === 'eig') {
+        // Pure Fock Eigenstate |n>
+        baselineEnergy = (currentN + 0.5) * 1.1 * (omegaVal / 1.2);
+        const norm = 1.0 / Math.sqrt(Math.pow(2, currentN) * factorial(currentN) * Math.sqrt(Math.PI));
+        const omega_n = (currentN + 0.5) * omegaVal;
+
+        for (let i = 0; i < N_POINTS; i++) {
+          const x = -X_RANGE + (2.0 * X_RANGE / (N_POINTS - 1)) * i;
+          const xi = x * 0.88;
+          const Hn = hermite(currentN, xi);
+          const spatial = norm * Hn * Math.exp(-0.5 * xi * xi);
+
+          // Time phase: e^(-i*E_n*t/hbar) = cos(wt) - i*sin(wt)
+          const rePsi = spatial * Math.cos(animTime * omega_n);
+          const imPsi = -spatial * Math.sin(animTime * omega_n);
+          const probDensity = spatial * spatial;
+
+          const idx3 = i * 3;
+          pos[idx3] = x;
+          pos[idx3 + 1] = baselineEnergy + rePsi * 2.2;
+          pos[idx3 + 2] = imPsi * 2.2;
+
+          // Vertex color according to phase arg(psi)
+          const phase = Math.atan2(imPsi, rePsi);
+          const hue = (phase / (Math.PI * 2) + 1.0) % 1.0;
+          const rgb = hslToRgb(hue, 0.9, 0.55);
+          col[idx3] = rgb[0];
+          col[idx3 + 1] = rgb[1];
+          col[idx3 + 2] = rgb[2];
+
+          // Density Fill Plane
+          const idx6 = i * 6;
+          meshPos[idx6] = x;
+          meshPos[idx6 + 1] = baselineEnergy + probDensity * 4.5;
+          meshPos[idx6 + 2] = 0;
+          meshPos[idx6 + 3] = x;
+          meshPos[idx6 + 4] = baselineEnergy;
+          meshPos[idx6 + 5] = 0;
+        }
+
+        // Classical Turning point for |n>
+        const turning_xc = Math.sqrt(2 * currentN + 1);
+
+        // Telemetry Update
+        document.getElementById('telem-energy').innerText = (currentN + 0.5).toFixed(2) + ' ℏω';
+        document.getElementById('telem-zpe').innerText = '0.50 ℏω';
+        document.getElementById('telem-xc').innerText = '± ' + turning_xc.toFixed(3) + ' x₀';
+        document.getElementById('telem-nodes').innerText = currentN + ' บัพ';
+        document.getElementById('telem-parity').innerText = (currentN % 2 === 0) ? 'คู่ (Even, +1)' : 'คี่ (Odd, -1)';
+        document.getElementById('telem-uncert').innerText = (currentN === 0) ? '0.500 ℏ (Minimum)' : ((currentN + 0.5)).toFixed(3) + ' ℏ';
+        document.getElementById('telem-avgn').innerText = currentN.toFixed(2);
+        document.getElementById('telem-deltan').innerText = '0.00 (Fock State)';
+
+        // Classical Tunneling Tail percentage into V(x) > E_n
+        const tailPct = (currentN === 0) ? 15.7 : Math.max(3.0, 16.0 - currentN * 1.8);
+        document.getElementById('telem-tunnel-tail').innerText = tailPct.toFixed(1) + ' %';
+
+      } else if (currentScenario === 'coh') {
+        // Coherent State |alpha>: Rigid Gaussian packet oscillating without spreading
+        x_center = Math.sqrt(2) * alphaVal * Math.cos(animTime * omegaVal);
+        const p_center = -Math.sqrt(2) * alphaVal * Math.sin(animTime * omegaVal);
+        baselineEnergy = 0.5 * 1.1 * (omegaVal / 1.2);
+        const avg_E = (alphaVal * alphaVal + 0.5);
+
+        for (let i = 0; i < N_POINTS; i++) {
+          const x = -X_RANGE + (2.0 * X_RANGE / (N_POINTS - 1)) * i;
+          const dx = x - x_center;
+          const envelope = Math.exp(-0.5 * dx * dx);
+          const carrierPhase = p_center * x - 0.5 * animTime * omegaVal;
+
+          const rePsi = envelope * Math.cos(carrierPhase);
+          const imPsi = envelope * Math.sin(carrierPhase);
+          const probDensity = envelope * envelope;
+
+          const idx3 = i * 3;
+          pos[idx3] = x;
+          pos[idx3 + 1] = baselineEnergy + rePsi * 2.0;
+          pos[idx3 + 2] = imPsi * 2.0;
+
+          // Color
+          const phase = Math.atan2(imPsi, rePsi);
+          const hue = (phase / (Math.PI * 2) + 1.0) % 1.0;
+          const rgb = hslToRgb(hue, 0.85, 0.55);
+          col[idx3] = rgb[0];
+          col[idx3 + 1] = rgb[1];
+          col[idx3 + 2] = rgb[2];
+
+          // Density Fill
+          const idx6 = i * 6;
+          meshPos[idx6] = x;
+          meshPos[idx6 + 1] = baselineEnergy + probDensity * 3.8;
+          meshPos[idx6 + 2] = 0;
+          meshPos[idx6 + 3] = x;
+          meshPos[idx6 + 4] = baselineEnergy;
+          meshPos[idx6 + 5] = 0;
+        }
+
+        // Telemetry
+        const avg_n = alphaVal * alphaVal;
+        document.getElementById('telem-energy').innerText = avg_E.toFixed(2) + ' ℏω (เฉลี่ย)';
+        document.getElementById('telem-zpe').innerText = '0.50 ℏω';
+        document.getElementById('telem-xc').innerText = '± ' + (Math.sqrt(2) * alphaVal).toFixed(3) + ' x₀';
+        document.getElementById('telem-nodes').innerText = '0 บัพ (ซองคลื่นเกาส์เซียน)';
+        document.getElementById('telem-parity').innerText = 'ผสม (Mixed Parity)';
+        document.getElementById('telem-uncert').innerText = '0.500 ℏ (Minimum)';
+        document.getElementById('telem-avgn').innerText = avg_n.toFixed(2);
+        document.getElementById('telem-deltan').innerText = Math.sqrt(avg_n).toFixed(2) + ' (ปัวซง)';
+        document.getElementById('telem-tunnel-tail').innerText = 'แปรผันตามแอมพลิจูด';
+
+      } else if (currentScenario === 'cat') {
+        // Schrödinger Cat State with Decoherence: (|alpha> + |-alpha>) with damping factor (1 - gamma)
+        const x_plus = Math.sqrt(2) * alphaVal * Math.cos(animTime * omegaVal);
+        const x_minus = -x_plus;
+        const p_plus = -Math.sqrt(2) * alphaVal * Math.sin(animTime * omegaVal);
+        const p_minus = -p_plus;
+        baselineEnergy = 0.5 * 1.1 * (omegaVal / 1.2);
+
+        const coherenceFactor = Math.max(0.0, 1.0 - decoherenceGamma);
+
+        for (let i = 0; i < N_POINTS; i++) {
+          const x = -X_RANGE + (2.0 * X_RANGE / (N_POINTS - 1)) * i;
+          const dx1 = x - x_plus;
+          const dx2 = x - x_minus;
+          const env1 = Math.exp(-0.5 * dx1 * dx1);
+          const env2 = Math.exp(-0.5 * dx2 * dx2);
+
+          const rePsi1 = env1 * Math.cos(p_plus * x);
+          const imPsi1 = env1 * Math.sin(p_plus * x);
+          const rePsi2 = env2 * Math.cos(p_minus * x);
+          const imPsi2 = env2 * Math.sin(p_minus * x);
+
+          const rePsi = 0.707 * (rePsi1 + coherenceFactor * rePsi2);
+          const imPsi = 0.707 * (imPsi1 + coherenceFactor * imPsi2);
+
+          // Density matrix: 0.5*|psi1|^2 + 0.5*|psi2|^2 + (1 - gamma)*Re[psi1* psi2]
+          const p1 = env1 * env1;
+          const p2 = env2 * env2;
+          const interference = 2.0 * env1 * env2 * Math.cos((p_plus - p_minus) * x);
+          const probDensity = 0.5 * (p1 + p2 + coherenceFactor * interference);
+
+          const idx3 = i * 3;
+          pos[idx3] = x;
+          pos[idx3 + 1] = baselineEnergy + rePsi * 2.0;
+          pos[idx3 + 2] = imPsi * 2.0;
+
+          const phase = Math.atan2(imPsi, rePsi);
+          const hue = (phase / (Math.PI * 2) + 1.0) % 1.0;
+          const rgb = hslToRgb(hue, 0.85, 0.55);
+          col[idx3] = rgb[0];
+          col[idx3 + 1] = rgb[1];
+          col[idx3 + 2] = rgb[2];
+
+          const idx6 = i * 6;
+          meshPos[idx6] = x;
+          meshPos[idx6 + 1] = baselineEnergy + probDensity * 3.2;
+          meshPos[idx6 + 2] = 0;
+          meshPos[idx6 + 3] = x;
+          meshPos[idx6 + 4] = baselineEnergy;
+          meshPos[idx6 + 5] = 0;
+        }
+
+        const avg_n = alphaVal * alphaVal;
+        document.getElementById('telem-energy').innerText = (avg_n + 0.5).toFixed(2) + ' ℏω';
+        document.getElementById('telem-zpe').innerText = '0.50 ℏω';
+        document.getElementById('telem-xc').innerText = '± ' + (Math.sqrt(2) * alphaVal).toFixed(3) + ' x₀';
+        document.getElementById('telem-nodes').innerText = decoherenceGamma > 0.85 ? 'ริ้วสลายสภาพ (Decohered)' : 'ริ้วแทรกสอดควอนตัมตรงกลาง';
+        document.getElementById('telem-parity').innerText = decoherenceGamma > 0.5 ? 'ผสม (Statistical Mixture)' : 'คู่แท้ (Even Cat, +1)';
+        document.getElementById('telem-uncert').innerText = '> 0.500 ℏ (Non-classical)';
+        document.getElementById('telem-avgn').innerText = avg_n.toFixed(2);
+        document.getElementById('telem-deltan').innerText = '> √⟨n⟩ (Super-Poissonian)';
+        document.getElementById('telem-tunnel-tail').innerText = 'ริ้วสลายตัวสมมาตร';
+        const telemCoh = document.getElementById('telem-coherence');
+        if (telemCoh) telemCoh.innerText = (coherenceFactor * 100).toFixed(0) + ' %';
+
+      } else if (currentScenario === 'sqz') {
+        // Squeezed Coherent State |xi, alpha>: Breathing Wavepacket
+        const rotPhase = 2.0 * animTime * omegaVal - 2.0 * sqz_theta;
+        const cosh2r = Math.cosh(2.0 * sqz_r);
+        const sinh2r = Math.sinh(2.0 * sqz_r);
+        const varX = 0.5 * (cosh2r - sinh2r * Math.cos(rotPhase));
+        const sigmaX = Math.sqrt(Math.max(0.01, varX));
+
+        x_center = Math.sqrt(2) * alphaVal * Math.cos(animTime * omegaVal);
+        const p_center = -Math.sqrt(2) * alphaVal * Math.sin(animTime * omegaVal);
+        baselineEnergy = 0.5 * 1.1 * (omegaVal / 1.2);
+
+        const chirp = -sinh2r * Math.sin(rotPhase) / (4.0 * Math.max(0.01, varX));
+        const normFactor = 1.0 / Math.pow(2.0 * Math.PI * varX, 0.25);
+
+        for (let i = 0; i < N_POINTS; i++) {
+          const x = -X_RANGE + (2.0 * X_RANGE / (N_POINTS - 1)) * i;
+          const dx = x - x_center;
+          const envelope = normFactor * Math.exp(-dx * dx / (4.0 * Math.max(0.01, varX)));
+          const phaseVal = p_center * x + chirp * dx * dx - 0.5 * animTime * omegaVal;
+
+          const rePsi = envelope * Math.cos(phaseVal);
+          const imPsi = envelope * Math.sin(phaseVal);
+          const probDensity = envelope * envelope;
+
+          const idx3 = i * 3;
+          pos[idx3] = x;
+          pos[idx3 + 1] = baselineEnergy + rePsi * 2.2;
+          pos[idx3 + 2] = imPsi * 2.2;
+
+          const phase = Math.atan2(imPsi, rePsi);
+          const hue = (phase / (Math.PI * 2) + 1.0) % 1.0;
+          const rgb = hslToRgb(hue, 0.9, 0.55);
+          col[idx3] = rgb[0];
+          col[idx3 + 1] = rgb[1];
+          col[idx3 + 2] = rgb[2];
+
+          const idx6 = i * 6;
+          meshPos[idx6] = x;
+          meshPos[idx6 + 1] = baselineEnergy + probDensity * 4.2;
+          meshPos[idx6 + 2] = 0;
+          meshPos[idx6 + 3] = x;
+          meshPos[idx6 + 4] = baselineEnergy;
+          meshPos[idx6 + 5] = 0;
+        }
+
+        const avg_n = alphaVal * alphaVal + Math.pow(Math.sinh(sqz_r), 2);
+        const avg_E = avg_n + 0.5;
+        const sqzDb = (8.686 * sqz_r).toFixed(2);
+        document.getElementById('telem-energy').innerText = avg_E.toFixed(2) + ' ℏω (เฉลี่ย)';
+        document.getElementById('telem-zpe').innerText = '0.50 ℏω';
+        document.getElementById('telem-xc').innerText = '± ' + (Math.sqrt(2) * alphaVal).toFixed(3) + ' x₀';
+        document.getElementById('telem-nodes').innerText = 'การหายใจของซองคลื่น (σ_x = ' + sigmaX.toFixed(2) + ')';
+        document.getElementById('telem-parity').innerText = 'ผสม (Squeezed Quadrature)';
+        document.getElementById('telem-uncert').innerText = '0.500 ℏ (Minimum State)';
+        document.getElementById('telem-avgn').innerText = avg_n.toFixed(2);
+        document.getElementById('telem-deltan').innerText = (sqz_r > 0 ? 'Sub/Super-Poissonian' : '√⟨n⟩');
+        document.getElementById('telem-tunnel-tail').innerText = 'แกว่งแบบฮาร์มอนิกบีบอัด';
+        const telemSqz = document.getElementById('telem-squeezing');
+        if (telemSqz) telemSqz.innerText = sqzDb + ' dB (r = ' + sqz_r.toFixed(2) + ')';
+      }
+
+      waveGeom.attributes.position.needsUpdate = true;
+      waveGeom.attributes.color.needsUpdate = true;
+      fillMesh.geometry.attributes.position.needsUpdate = true;
+
+      // Animate Classical Spring & Bob
+      const bobX = (currentScenario === 'eig')
+        ? Math.sqrt(2 * currentN + 1) * 0.85 * Math.cos(animTime * omegaVal)
+        : ((currentScenario === 'coh' || currentScenario === 'sqz') ? x_center : Math.sqrt(2) * alphaVal * Math.cos(animTime * omegaVal));
+
+      bobMesh.position.x = bobX;
+      glowLight.position.x = bobX;
+
+      // Update coiled spring geometry from fixed wall at x = -7.5 to bob
+      const wallX = -7.5;
+      const sPos = springGeo.attributes.position.array;
+      for (let s = 0; s < N_COILS; s++) {
+        const u = s / (N_COILS - 1);
+        const sx = wallX + (bobX - wallX) * u;
+        const coilR = 0.22;
+        const coilTheta = u * Math.PI * 2 * 14;
+        sPos[s * 3] = sx;
+        sPos[s * 3 + 1] = Math.sin(coilTheta) * coilR;
+        sPos[s * 3 + 2] = Math.cos(coilTheta) * coilR;
+      }
+      springGeo.attributes.position.needsUpdate = true;
+
+      // Animate Photon Pulse Particles
+      if (photonAnimActive) {
+        photonTimer += 0.05;
+        const pPos = photonGeo.attributes.position.array;
+        for (let p = 0; p < photonCount; p++) {
+          pPos[p * 3] += photonVel[p * 3];
+          pPos[p * 3 + 1] += photonVel[p * 3 + 1];
+          pPos[p * 3 + 2] += photonVel[p * 3 + 2];
+        }
+        photonGeo.attributes.position.needsUpdate = true;
+        photonMat.opacity = Math.max(0.0, 1.0 - photonTimer / 1.8);
+        if (photonTimer >= 1.8) {
+          photonAnimActive = false;
+        }
+      }
+    }
+
+    // Helper: HSL to RGB
+    function hslToRgb(h, s, l) {
+      let r, g, b;
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+      }
+      return [r, g, b];
+    }
+
+    // -------------------------------------------------------------
+    // Slider Listeners & Ladder Operator Handlers
+    // -------------------------------------------------------------
+    const sliderN = document.getElementById('slider-n');
+    sliderN.addEventListener('input', (e) => {
+      setQuantumN(parseInt(e.target.value));
+    });
+
+    function setQuantumN(n) {
+      currentN = Math.max(0, Math.min(7, n));
+      sliderN.value = currentN;
+      const names = [
+        'n = 0 (Ground State)', 'n = 1 (1st Excited)', 'n = 2 (2nd Excited)',
+        'n = 3 (3rd Excited)', 'n = 4 (4th Excited)', 'n = 5 (5th Excited)',
+        'n = 6 (6th Excited)', 'n = 7 (7th Excited)'
+      ];
+      document.getElementById('val-n').innerText = names[currentN];
+      document.querySelectorAll('#slider-n ~ .preset-btns .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes('n = ' + currentN));
+      });
+      updatePhysics();
+    }
+
+    function quantumRaise() {
+      if (currentN < 7) {
+        const nextN = currentN + 1;
+        setQuantumN(nextN);
+        playLadderSound(true);
+        triggerPhotonPulse(true, (nextN + 0.5) * 1.1 * (omegaVal / 1.2));
+      }
+    }
+
+    function quantumLower() {
+      if (currentN > 0) {
+        const nextN = currentN - 1;
+        setQuantumN(nextN);
+        playLadderSound(false);
+        triggerPhotonPulse(false, (nextN + 0.5) * 1.1 * (omegaVal / 1.2));
+      }
+    }
+
+    const sliderAlpha = document.getElementById('slider-alpha');
+    sliderAlpha.addEventListener('input', (e) => {
+      setAlpha(parseFloat(e.target.value));
+    });
+
+    function setAlpha(val) {
+      alphaVal = val;
+      sliderAlpha.value = val;
+      document.getElementById('val-alpha').innerText = '|α| = ' + alphaVal.toFixed(2);
+      document.querySelectorAll('#slider-alpha ~ .preset-btns .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes(val.toFixed(1)));
+      });
+      updatePhysics();
+    }
+
+    const sliderGamma = document.getElementById('slider-gamma');
+    if (sliderGamma) {
+      sliderGamma.addEventListener('input', (e) => {
+        setDecoherence(parseFloat(e.target.value));
+      });
+    }
+
+    function setDecoherence(val) {
+      decoherenceGamma = Math.max(0.0, Math.min(1.0, val));
+      if (sliderGamma) sliderGamma.value = decoherenceGamma;
+      const label = (decoherenceGamma === 0.0)
+        ? 'γ = 0.00 (Pure Quantum)'
+        : ((decoherenceGamma === 1.0) ? 'γ = 1.00 (Classical Mix)' : 'γ = ' + decoherenceGamma.toFixed(2));
+      document.getElementById('val-gamma').innerText = label;
+      document.querySelectorAll('#item-decoherence .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes(decoherenceGamma.toFixed(1)));
+      });
+      updatePhysics();
+    }
+
+    const sliderSqzR = document.getElementById('slider-sqz-r');
+    if (sliderSqzR) {
+      sliderSqzR.addEventListener('input', (e) => {
+        setSqueezeR(parseFloat(e.target.value));
+      });
+    }
+
+    function setSqueezeR(val) {
+      sqz_r = Math.max(0.0, Math.min(1.5, val));
+      if (sliderSqzR) sliderSqzR.value = sqz_r;
+      const sqzDb = (8.686 * sqz_r).toFixed(2);
+      document.getElementById('val-sqz-r').innerText = 'r = ' + sqz_r.toFixed(2) + ' (' + sqzDb + ' dB)';
+      document.querySelectorAll('#item-squeeze .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes('r = ' + sqz_r.toFixed(1)));
+      });
+      updatePhysics();
+    }
+
+    const sliderSqzTheta = document.getElementById('slider-sqz-theta');
+    if (sliderSqzTheta) {
+      sliderSqzTheta.addEventListener('input', (e) => {
+        setSqueezeTheta(parseFloat(e.target.value));
+      });
+    }
+
+    function setSqueezeTheta(val) {
+      sqz_theta = (parseFloat(val) * Math.PI) / 180.0;
+      if (sliderSqzTheta) sliderSqzTheta.value = val;
+      document.getElementById('val-sqz-theta').innerText = Math.round(val) + '°';
+      updatePhysics();
+    }
+
+    const sliderOmega = document.getElementById('slider-omega');
+    sliderOmega.addEventListener('input', (e) => {
+      omegaVal = parseFloat(e.target.value);
+      document.getElementById('val-omega').innerText = omegaVal.toFixed(2) + ' rad/s';
+      updatePhysics();
+    });
+
+    function togglePlayPause() {
+      isPlaying = !isPlaying;
+      const btn = document.getElementById('btn-play');
+      btn.innerHTML = isPlaying ? '<span>⏸</span> หยุดชั่วคราว' : '<span>▶️</span> เล่นต่อ';
+      btn.classList.toggle('primary', isPlaying);
+    }
+
+    function resetView() {
+      camera.position.set(0, 11, 26);
+      controls.target.set(0, 3, 0);
+      controls.update();
+    }
+
+    // -------------------------------------------------------------
+    // HUD Collapsible Dock & Zen Mode Controls
+    // -------------------------------------------------------------
+    let leftCollapsed = false;
+    let rightCollapsed = false;
+    let zenModeActive = false;
+
+    function toggleLeftHUD(collapse) {
+      leftCollapsed = collapse !== undefined ? collapse : !leftCollapsed;
+      document.getElementById('hud-left').classList.toggle('collapsed', leftCollapsed);
+      document.getElementById('dock-left').style.display = leftCollapsed ? 'flex' : 'none';
+    }
+
+    function toggleRightHUD(collapse) {
+      rightCollapsed = collapse !== undefined ? collapse : !rightCollapsed;
+      document.getElementById('hud-right').classList.toggle('collapsed', rightCollapsed);
+      document.getElementById('dock-right').style.display = rightCollapsed ? 'flex' : 'none';
+    }
+
+    function toggleZenMode() {
+      zenModeActive = !zenModeActive;
+      toggleLeftHUD(zenModeActive);
+      toggleRightHUD(zenModeActive);
+      const zenBtn = document.getElementById('btn-zen');
+      zenBtn.classList.toggle('active', zenModeActive);
+      zenBtn.querySelector('span:last-child').innerText = zenModeActive ? 'แสดงบาร์' : 'ย่อทุกบาร์ (H)';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'h' || e.key === 'H') toggleZenMode();
+      if (e.key === ' ') { e.preventDefault(); togglePlayPause(); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); quantumRaise(); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); quantumLower(); }
+    });
+
+    // -------------------------------------------------------------
+    // Mode Switching: 3D Lab / Marker AR / Touchless Hand AI
+    // -------------------------------------------------------------
+    function switchMode(modeIndex) {
+      document.querySelectorAll('.mode-pill').forEach((pill, idx) => {
+        pill.classList.toggle('active', idx === modeIndex - 1);
+      });
+
+      if (modeIndex === 1) {
+        closeARModal();
+        stopHandAI();
+      } else if (modeIndex === 2) {
+        openARModal();
+        stopHandAI();
+      } else if (modeIndex === 3) {
+        closeARModal();
+        startHandAI();
+      }
+    }
+
+    function openARModal() {
+      document.getElementById('ar-modal').style.display = 'flex';
+    }
+    function closeARModal() {
+      document.getElementById('ar-modal').style.display = 'none';
+    }
+
+    // -------------------------------------------------------------
+    // Wigner Phase Space Modal & 2D Canvas Engine
+    // -------------------------------------------------------------
+    let wignerAnimId = null;
+    function openWignerModal() {
+      document.getElementById('wigner-modal').style.display = 'flex';
+      renderWignerCanvas();
+    }
+    function closeWignerModal() {
+      document.getElementById('wigner-modal').style.display = 'none';
+      if (wignerAnimId) cancelAnimationFrame(wignerAnimId);
+    }
+
+    // Laguerre Polynomial L_n(x)
+    function laguerre(n, x) {
+      if (n === 0) return 1.0;
+      if (n === 1) return 1.0 - x;
+      if (n === 2) return 1.0 - 2.0 * x + 0.5 * x * x;
+      if (n === 3) return 1.0 - 3.0 * x + 1.5 * x * x - (1/6) * Math.pow(x, 3);
+      if (n === 4) return 1.0 - 4.0 * x + 3.0 * x * x - (2/3) * Math.pow(x, 3) + (1/24) * Math.pow(x, 4);
+      return 1.0 - n * x;
+    }
+
+    function renderWignerCanvas() {
+      const canvas = document.getElementById('wigner-canvas');
+      if (!canvas || document.getElementById('wigner-modal').style.display !== 'flex') return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Grid Coordinate Axes
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h);
+      ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2);
+      ctx.stroke();
+
+      // Axis Labels
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px JetBrains Mono';
+      ctx.fillText('+p (โมเมนตัม)', w / 2 + 6, 16);
+      ctx.fillText('+x (ตำแหน่ง)', w - 85, h / 2 - 6);
+
+      const stateLabel = document.getElementById('wigner-state-name');
+      if (currentScenario === 'eig') {
+        stateLabel.innerText = 'Fock State |' + currentN + '⟩';
+      } else if (currentScenario === 'coh') {
+        stateLabel.innerText = 'Coherent State |α=' + alphaVal.toFixed(1) + '⟩';
+      } else if (currentScenario === 'cat') {
+        stateLabel.innerText = 'Schrödinger Cat (γ = ' + decoherenceGamma.toFixed(2) + ')';
+      } else if (currentScenario === 'sqz') {
+        const sqzDb = (8.686 * sqz_r).toFixed(2);
+        stateLabel.innerText = 'Squeezed State |ξ=' + sqz_r.toFixed(2) + ' (' + sqzDb + ' dB), α=' + alphaVal.toFixed(1) + '⟩';
+      }
+
+      // Draw Wigner 2D Heatmap / Contour Rings
+      const step = 4;
+      const imgData = ctx.createImageData(w, h);
+      const data = imgData.data;
+
+      const scaleX = 7.0 / (w / 2);
+      const scaleP = 3.5 / (h / 2);
+
+      const t = animTime * omegaVal;
+      const alpha_x = Math.sqrt(2) * alphaVal * Math.cos(t);
+      const alpha_p = -Math.sqrt(2) * alphaVal * Math.sin(t);
+
+      for (let py = 0; py < h; py += step) {
+        const p_val = -(py - h / 2) * scaleP;
+        for (let px = 0; px < w; px += step) {
+          const x_val = (px - w / 2) * scaleX;
+          let W = 0.0;
+
+          if (currentScenario === 'eig') {
+            // W_n(x, p) = (-1)^n / (pi * hbar) * exp(-2*H) * L_n(4*H)
+            const rho2 = (x_val * x_val + p_val * p_val);
+            const sign = (currentN % 2 === 0) ? 1.0 : -1.0;
+            W = sign * Math.exp(-rho2) * laguerre(currentN, 2.0 * rho2);
+          } else if (currentScenario === 'coh') {
+            // Coherent state Gaussian ball orbiting at (alpha_x, alpha_p)
+            const dx = x_val - alpha_x;
+            const dp = p_val - alpha_p;
+            W = Math.exp(-(dx * dx + dp * dp));
+          } else if (currentScenario === 'cat') {
+            // Cat state with decoherence: Two Gaussian balls + Damped Interference fringe
+            const dx1 = x_val - alpha_x;
+            const dp1 = p_val - alpha_p;
+            const dx2 = x_val + alpha_x;
+            const dp2 = p_val + alpha_p;
+            const blob1 = Math.exp(-(dx1 * dx1 + dp1 * dp1));
+            const blob2 = Math.exp(-(dx2 * dx2 + dp2 * dp2));
+            const fringe = 2.0 * Math.exp(-(x_val * x_val + p_val * p_val)) * Math.cos(2.0 * (x_val * alpha_p - p_val * alpha_x));
+            const coh = Math.max(0.0, 1.0 - decoherenceGamma);
+            W = 0.5 * (blob1 + blob2 + coh * fringe);
+          } else if (currentScenario === 'sqz') {
+            // Squeezed state rotated ellipse in phase space
+            const rot = sqz_theta + animTime * omegaVal;
+            const cosT = Math.cos(rot);
+            const sinT = Math.sin(rot);
+            const dx = x_val - alpha_x;
+            const dp = p_val - alpha_p;
+            const x_prime = dx * cosT + dp * sinT;
+            const p_prime = -dx * sinT + dp * cosT;
+            const exp2r = Math.exp(2.0 * sqz_r);
+            const expMinus2r = Math.exp(-2.0 * sqz_r);
+            W = Math.exp(-(exp2r * x_prime * x_prime + expMinus2r * p_prime * p_prime));
+          }
+
+          // Map W to color: Positive -> Cyan/Blue, Negative -> Pink/Red
+          let r = 0, g = 0, b = 0, a = 255;
+          if (W >= 0) {
+            const intensity = Math.min(1.0, W);
+            r = Math.floor(0 * intensity);
+            g = Math.floor(240 * intensity);
+            b = Math.floor(255 * intensity);
+            a = Math.floor(intensity * 210);
+          } else {
+            // Quantum Negative regions!
+            const negIntensity = Math.min(1.0, -W);
+            r = Math.floor(236 * negIntensity);
+            g = Math.floor(72 * negIntensity);
+            b = Math.floor(153 * negIntensity);
+            a = Math.floor(negIntensity * 230);
+          }
+
+          for (let dy = 0; dy < step && py + dy < h; dy++) {
+            for (let dx = 0; dx < step && px + dx < w; dx++) {
+              const idx = ((py + dy) * w + (px + dx)) * 4;
+              data[idx] = r;
+              data[idx + 1] = g;
+              data[idx + 2] = b;
+              data[idx + 3] = a;
+            }
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+
+      wignerAnimId = requestAnimationFrame(renderWignerCanvas);
+    }
+
+    // -------------------------------------------------------------
+    // Poisson Photon Number Distribution Modal
+    // -------------------------------------------------------------
+    function openPoissonModal() {
+      document.getElementById('poisson-modal').style.display = 'flex';
+      drawPoissonBars();
+    }
+    function closePoissonModal() {
+      document.getElementById('poisson-modal').style.display = 'none';
+    }
+
+    function drawPoissonBars() {
+      const canvas = document.getElementById('poisson-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      let mean_n = 0;
+      if (currentScenario === 'eig') {
+        mean_n = currentN;
+      } else if (currentScenario === 'sqz') {
+        mean_n = alphaVal * alphaVal + Math.pow(Math.sinh(sqz_r), 2);
+      } else {
+        mean_n = alphaVal * alphaVal;
+      }
+      document.getElementById('poisson-avg-n').innerText = mean_n.toFixed(2);
+
+      const maxBars = 12;
+      const barW = (w - 60) / maxBars;
+      let maxP = 0.01;
+
+      // Compute P(n)
+      const pArr = [];
+      for (let n = 0; n < maxBars; n++) {
+        let p = 0;
+        if (currentScenario === 'eig') {
+          p = (n === currentN) ? 1.0 : 0.0;
+        } else if (currentScenario === 'sqz' && alphaVal === 0.0) {
+          // Squeezed Vacuum: Only even photon pairs!
+          if (n % 2 === 0) {
+            const k = n / 2;
+            const comb = factorial(2 * k) / (Math.pow(2, 2 * k) * Math.pow(factorial(k), 2));
+            p = comb * Math.pow(Math.tanh(sqz_r), 2 * k) / Math.cosh(sqz_r);
+          } else {
+            p = 0.0;
+          }
+        } else {
+          // Poisson P(n) = exp(-mean) * mean^n / n!
+          p = Math.exp(-mean_n) * Math.pow(mean_n, n) / factorial(n);
+        }
+        pArr.push(p);
+        if (p > maxP) maxP = p;
+      }
+
+      // Draw Bars
+      for (let n = 0; n < maxBars; n++) {
+        const p = pArr[n];
+        const barH = (p / Math.max(0.4, maxP)) * (h - 60);
+        const bx = 35 + n * barW;
+        const by = (h - 30) - barH;
+
+        // Gradient
+        const grad = ctx.createLinearGradient(0, by, 0, h - 30);
+        grad.addColorStop(0, '#00f0ff');
+        grad.addColorStop(1, 'rgba(139, 92, 246, 0.4)');
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(bx + 4, by, barW - 8, barH);
+        ctx.strokeStyle = '#00f0ff';
+        ctx.strokeRect(bx + 4, by, barW - 8, barH);
+
+        // Labels
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '10px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText('n=' + n, bx + barW / 2, h - 14);
+
+        if (p > 0.02) {
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillText((p * 100).toFixed(0) + '%', bx + barW / 2, by - 6);
+        }
+      }
+
+      // Axis Line
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(25, h - 30);
+      ctx.lineTo(w - 15, h - 30);
+      ctx.stroke();
+    }
+
+    // -------------------------------------------------------------
+    // MediaPipe Hands AI Tracking
+    // -------------------------------------------------------------
+    let handInstance = null;
+    let cameraInstance = null;
+    let isHandTracking = false;
+
+    function startHandAI() {
+      const pip = document.getElementById('hand-pip-container');
+      const videoEl = document.getElementById('hand-video');
+      pip.style.display = 'block';
+
+      if (!handInstance) {
+        handInstance = new Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+        handInstance.setOptions({
+          maxNumHands: 1,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5
+        });
+        handInstance.onResults((results) => {
+          if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            const marks = results.multiHandLandmarks[0];
+            const thumb = marks[4];
+            const index = marks[8];
+            const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
+
+            // Pinch gesture controls alphaVal or omega
+            const mappedAlpha = Math.min(3.2, Math.max(0.4, pinchDist * 9.0));
+            setAlpha(parseFloat(mappedAlpha.toFixed(1)));
+
+            // Hand vertical position controls quantum number n
+            const wrist = marks[0];
+            const mappedN = Math.min(7, Math.max(0, Math.round((1.0 - wrist.y) * 8.0)));
+            if (currentScenario === 'eig') {
+              setQuantumN(mappedN);
+            }
+          }
+        });
+      }
+
+      if (!cameraInstance) {
+        cameraInstance = new Camera(videoEl, {
+          onFrame: async () => {
+            if (isHandTracking) await handInstance.send({ image: videoEl });
+          },
+          width: 320,
+          height: 240
+        });
+      }
+      isHandTracking = true;
+      cameraInstance.start();
+    }
+
+    function stopHandAI() {
+      isHandTracking = false;
+      document.getElementById('hand-pip-container').style.display = 'none';
+      if (cameraInstance && cameraInstance.stop) {
+        cameraInstance.stop();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Main Render Loop
+    // -------------------------------------------------------------
+    updatePhysics();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (isPlaying) {
+        animTime += 0.038;
+      }
+      updatePhysics();
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

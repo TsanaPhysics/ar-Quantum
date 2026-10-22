@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ห้องปฏิบัติการเสมือนจริง 3 มิติ และ WebAR ---- การทะลุผ่านอุโมงค์ควอนตัมและกล้อง STM — ผศ.ดร.ชีวะ ทัศนา</title>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  <style>
+    :root {
+      --bg-space: #030712;
+      --panel-glass: rgba(6, 12, 28, 0.42);
+      --panel-border: rgba(0, 240, 255, 0.22);
+      --accent-cyan: #00f0ff;
+      --accent-gold: #f59e0b;
+      --accent-pink: #ec4899;
+      --accent-green: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-red: #ef4444;
+      --font-th: 'Prompt', sans-serif;
+      --font-tech: 'Chakra Petch', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: var(--bg-space);
+      color: #f8fafc;
+      font-family: var(--font-th);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Top Universal Navigation Bar */
+    .top-nav {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel-glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--panel-border);
+      border-radius: 40px;
+      padding: 6px 14px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+
+    .nav-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-right: 12px;
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+      font-family: var(--font-tech);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      white-space: nowrap;
+    }
+
+    .mode-pills {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mode-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-pill:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+    }
+
+    .mode-pill.active {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(139, 92, 246, 0.3));
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
+    }
+
+    .zen-btn {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--accent-gold);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.74rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .zen-btn:hover {
+      background: rgba(245, 158, 11, 0.25);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .zen-btn.active {
+      background: var(--accent-gold);
+      color: #000000;
+      font-weight: 700;
+    }
+
+    /* Left Control HUD */
+    .hud-left {
+      position: absolute;
+      top: 76px;
+      left: 18px;
+      width: 360px;
+      max-width: calc(100vw - 36px);
+      max-height: calc(100vh - 94px);
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 240, 255, 0.3) transparent;
+      padding-bottom: 20px;
+    }
+
+    .hud-left.collapsed {
+      transform: translateX(-390px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Right Telemetry HUD */
+    .hud-right {
+      position: absolute;
+      top: 76px;
+      right: 18px;
+      width: 340px;
+      max-width: calc(100vw - 36px);
+      max-height: calc(100vh - 94px);
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 240, 255, 0.3) transparent;
+      padding-bottom: 20px;
+    }
+
+    .hud-right.collapsed {
+      transform: translateX(370px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Glass Panels */
+    .glass-card {
+      background: var(--panel-glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+      position: relative;
+    }
+
+    .card-title {
+      font-family: var(--font-tech);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card-title .tag {
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      font-family: var(--font-mono);
+    }
+
+    .author-line {
+      font-size: 0.70rem;
+      color: #94a3b8;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+    .author-name {
+      color: var(--accent-gold);
+      font-weight: 600;
+    }
+
+    /* Scenario Switcher Tabs */
+    .scenario-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .scenario-tab {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      padding: 7px 6px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .scenario-tab:hover {
+      background: rgba(0, 240, 255, 0.12);
+      color: #ffffff;
+    }
+
+    .scenario-tab.active {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(139, 92, 246, 0.25));
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+    }
+
+    /* Controls Styling */
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .ctrl-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ctrl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+      color: #cbd5e1;
+    }
+
+    .ctrl-val {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
+      outline: none;
+      transition: background 0.2s;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--accent-cyan);
+      transition: transform 0.15s ease;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .preset-btns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      padding: 5px 4px;
+      border-radius: 8px;
+      font-size: 0.70rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .preset-btn:hover {
+      background: rgba(0, 240, 255, 0.12);
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+    }
+
+    .preset-btn.active {
+      background: rgba(0, 240, 255, 0.22);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    /* Action Buttons */
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-act {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #f8fafc;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-act:hover {
+      background: rgba(0, 240, 255, 0.18);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+    }
+
+    .btn-act.primary {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(16, 185, 129, 0.25));
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    /* Wave Legend Items */
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      font-size: 0.72rem;
+      margin-top: 6px;
+      padding: 8px 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #cbd5e1;
+    }
+
+    .legend-bar {
+      width: 14px;
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    /* Telemetry Table */
+    .telem-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: 0.76rem;
+    }
+
+    .telem-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 6px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .telem-label {
+      color: #94a3b8;
+    }
+
+    .telem-value {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .telem-value.good {
+      color: var(--accent-green);
+    }
+
+    .telem-value.warn {
+      color: var(--accent-gold);
+    }
+
+    .telem-value.decay {
+      color: var(--accent-pink);
+    }
+
+    /* Dock Mini Tabs */
+    .dock-tab {
+      position: absolute;
+      top: 90px;
+      z-index: 45;
+      background: var(--panel-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      color: var(--accent-cyan);
+      padding: 10px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    .dock-tab:hover {
+      background: rgba(0, 240, 255, 0.2);
+    }
+
+    .dock-tab.left { left: 8px; }
+    .dock-tab.right { right: 8px; }
+
+    /* Modals & Overlays */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: rgba(10, 20, 42, 0.95);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 20px;
+      width: 520px;
+      max-width: 95vw;
+      box-shadow: 0 24px 60px rgba(0, 240, 255, 0.25);
+      padding: 22px;
+      position: relative;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-tech);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: #ffffff;
+    }
+
+    /* Hand AI PIP Box */
+    #hand-pip-container {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 200px;
+      height: 150px;
+      border-radius: 14px;
+      border: 2px solid var(--accent-cyan);
+      background: #000;
+      z-index: 60;
+      display: none;
+      overflow: hidden;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8);
+    }
+
+    #hand-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .hand-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      color: var(--accent-cyan);
+      font-family: var(--font-tech);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <!-- Three.js Canvas Container -->
+  <div id="webgl-canvas"></div>
+
+  <!-- Top Universal Navigation Bar -->
+  <div class="top-nav">
+    <div class="nav-title">
+      <span>⚡ LAB 04</span>
+      <span style="color:#cbd5e1; font-weight:400; font-size:0.80rem;">ควอนตัมทันเนลลิง & STM</span>
+    </div>
+    <div class="mode-pills">
+      <div class="mode-pill active" id="btn-mode-1" onclick="switchMode(1)">
+        <span>🌐</span> โหมดห้องทดลอง 3 มิติ
+      </div>
+      <div class="mode-pill" id="btn-mode-2" onclick="switchMode(2)">
+        <span>📖</span> สแกนหนังสือ AR
+      </div>
+      <div class="mode-pill" id="btn-mode-3" onclick="switchMode(3)">
+        <span>🖐️</span> สั่งการมือ AI
+      </div>
+    </div>
+    <div class="zen-btn" id="btn-zen" onclick="toggleZenMode()">
+      <span>👁️</span> <span>ย่อทุกบาร์ (H)</span>
+    </div>
+  </div>
+
+  <!-- Dock Tabs for Re-opening when collapsed -->
+  <div class="dock-tab left" id="dock-left" onclick="toggleLeftHUD(false)">
+    <span>🎛️ พารามิเตอร์ศักย์</span>
+  </div>
+  <div class="dock-tab right" id="dock-right" onclick="toggleRightHUD(false)">
+    <span>📊 ผลการคำนวณ</span>
+  </div>
+
+  <!-- Left Parameter & Physics HUD -->
+  <div class="hud-left" id="hud-left">
+    <!-- Header Card -->
+    <div class="glass-card">
+      <div class="card-title">
+        <span>การลอดผ่านแนวกั้นศักย์ควอนตัม</span>
+        <button class="modal-close" style="font-size:1.0rem;" onclick="toggleLeftHUD(true)">◀</button>
+      </div>
+      <p style="font-size:0.75rem; color:#cbd5e1; line-height:1.45;">
+        จำลองฟังก์ชันคลื่นสลายตัวแบบเอกซ์โพเนนเชียล ($e^{-\kappa x}$) ภายในแนวกั้นศักย์ และกลไกกระแสทันเนลลิงในกล้องส่องกราดแบบอุโมงค์ (STM) ระดับอะตอม
+      </p>
+      <div class="author-line">
+        โดย <span class="author-name">ผศ.ดร.ชีวะ ทัศนา</span> สาขาวิชาฟิสิกส์ มรภ.รำไพพรรณี
+      </div>
+    </div>
+
+    <!-- Controls Card -->
+    <div class="glass-card">
+      <!-- Scenario Selector -->
+      <div class="scenario-tabs">
+        <div class="scenario-tab active" id="tab-stm" onclick="setScenario('stm')">
+          <span>🔬</span> กล้อง STM นาโน
+        </div>
+        <div class="scenario-tab" id="tab-gamow" onclick="setScenario('gamow')">
+          <span>☢️</span> การสลายแอลฟา
+        </div>
+        <div class="scenario-tab" id="tab-rtd" onclick="setScenario('rtd')">
+          <span>⚡</span> ทันเนลสั่นพ้อง (RTD)
+        </div>
+      </div>
+
+      <div class="card-title">
+        <span id="title-params">พารามิเตอร์พลังงาน & แนวกั้นศักย์</span>
+        <span class="tag" id="tag-regime">TUNNELING REGIME</span>
+      </div>
+
+      <div class="ctrl-group">
+        <!-- Particle Energy E -->
+        <div class="ctrl-item">
+          <div class="ctrl-header">
+            <span>พลังงานอนุภาค E</span>
+            <span class="ctrl-val" id="val-e">4.00 eV</span>
+          </div>
+          <input type="range" id="slider-e" min="1.0" max="9.5" step="0.1" value="4.0">
+          <div class="preset-btns" id="presets-std">
+            <button class="preset-btn" onclick="setEnergy(2.5)">2.5 eV (ลึก)</button>
+            <button class="preset-btn active" onclick="setEnergy(4.0)">4.0 eV (ปานกลาง)</button>
+            <button class="preset-btn" onclick="setEnergy(5.8)">5.8 eV (เฉียดขอบ)</button>
+          </div>
+          <div class="preset-btns" id="presets-rtd" style="display:none;">
+            <button class="preset-btn" onclick="setEnergy(2.45)">2.45 eV (สั่นพ้อง n=1 100%)</button>
+            <button class="preset-btn active" onclick="setEnergy(4.00)">4.00 eV (หลุดสั่นพ้อง &lt;0.1%)</button>
+            <button class="preset-btn" onclick="setEnergy(6.15)">6.15 eV (สั่นพ้อง n=2 85%)</button>
+          </div>
+        </div>
+
+        <!-- Barrier Height V0 -->
+        <div class="ctrl-item">
+          <div class="ctrl-header">
+            <span>ความสูงกำแพงศักย์ V₀</span>
+            <span class="ctrl-val" id="val-v0">6.00 eV</span>
+          </div>
+          <input type="range" id="slider-v0" min="2.0" max="10.0" step="0.2" value="6.0">
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setBarrierHeight(4.5)">4.5 eV</button>
+            <button class="preset-btn active" onclick="setBarrierHeight(6.0)">6.0 eV</button>
+            <button class="preset-btn" onclick="setBarrierHeight(8.5)">8.5 eV (สูงมาก)</button>
+          </div>
+        </div>
+
+        <!-- Barrier Width L (Gap Distance d) -->
+        <div class="ctrl-item">
+          <div class="ctrl-header">
+            <span id="label-width">ความกว้างแนวกั้นศักย์ L (ระยะปลายเข็ม d)</span>
+            <span class="ctrl-val" id="val-l">1.00 Å</span>
+          </div>
+          <input type="range" id="slider-l" min="0.30" max="2.80" step="0.05" value="1.00">
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setBarrierWidth(0.60)">0.60 Å (ติดผิว)</button>
+            <button class="preset-btn active" onclick="setBarrierWidth(1.00)">1.00 Å (มาตรฐาน)</button>
+            <button class="preset-btn" onclick="setBarrierWidth(1.80)">1.80 Å (ห่างออก)</button>
+          </div>
+        </div>
+
+        <!-- Bias Voltage (STM Mode only) -->
+        <div class="ctrl-item" id="item-bias">
+          <div class="ctrl-header">
+            <span>ศักย์ไบแอสปลายเข็ม V_bias</span>
+            <span class="ctrl-val" id="val-bias">1.20 V</span>
+          </div>
+          <input type="range" id="slider-bias" min="0.1" max="3.0" step="0.1" value="1.2">
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-row">
+          <button class="btn-act primary" id="btn-play" onclick="togglePlayPause()">
+            <span>⏸</span> หยุดชั่วคราว
+          </button>
+          <button class="btn-act" onclick="resetView()">
+            <span>🎯</span> รีเซ็ตมุมกล้อง
+          </button>
+        </div>
+
+        <!-- Atomic Line Scan Button (STM Mode) -->
+        <button class="btn-act" id="btn-scan" onclick="toggleAtomicScan()" style="margin-top:4px; border-color:var(--accent-gold); color:var(--accent-gold);">
+          <span>🔬</span> เริ่มสแกนโครงสร้างอะตอม (Atomic Line Scan)
+        </button>
+
+        <!-- STM Topography Card -->
+        <div class="glass-card" id="card-topography" style="display:none; margin-top:6px; padding:10px;">
+          <div class="card-title" style="margin-bottom:4px;">
+            <span>โปรไฟล์สแกนผิวอะตอม Δz(x)</span>
+            <span class="tag">PID FEEDBACK</span>
+          </div>
+          <div style="width:100%; height:80px; background:#020617; border-radius:6px; border:1px solid rgba(245,158,11,0.3); overflow:hidden;">
+            <canvas id="topo-canvas" width="310" height="80" style="width:100%; height:100%; display:block;"></canvas>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:#94a3b8; margin-top:4px;">
+            <span>พิกัดปลายเข็ม x ---- <b id="topo-x" style="color:var(--accent-cyan); font-family:var(--font-mono);">0.00 Å</b></span>
+            <span>กระแสเป้าหมาย ---- <b style="color:var(--accent-green); font-family:var(--font-mono);">0.50 nA (คงที่)</b></span>
+          </div>
+        </div>
+
+        <!-- Sound Toggle -->
+        <button class="btn-act" id="btn-sound" onclick="toggleSound()" style="margin-top:4px;">
+          <span>🔊</span> เสียงความถี่ทันเนลลิง (Web Audio Synth)
+        </button>
+
+        <!-- Waveforms Legend -->
+        <div class="legend-grid">
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#00f0ff;"></div>
+            <span>คลื่นตกกระทบ & สะท้อน</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#ec4899;"></div>
+            <span>คลื่นสลายตัว e^(-κx)</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#10b981;"></div>
+            <span>คลื่นทะลุผ่าน (T)</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#f59e0b;"></div>
+            <span>ลำอิเล็กตรอนทันเนล</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Telemetry & Results HUD -->
+  <div class="hud-right" id="hud-right">
+    <div class="glass-card">
+      <div class="card-title">
+        <span>ผลการตรวจวัดควอนตัมเชิงตัวเลข</span>
+        <button class="modal-close" style="font-size:1.0rem;" onclick="toggleRightHUD(true)">▶</button>
+      </div>
+
+      <div class="telem-list">
+        <div class="telem-row">
+          <span class="telem-label">สัมประสิทธิ์การทะลุผ่าน (T)</span>
+          <span class="telem-value good" id="telem-t">18.42 %</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">สัมประสิทธิ์การสะท้อน (R)</span>
+          <span class="telem-value warn" id="telem-r">81.58 %</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">กฎอนุรักษ์ความน่าจะเป็น (T + R)</span>
+          <span class="telem-value good" id="telem-sum">100.00 %</span>
+        </div>
+
+        <div class="telem-row" style="border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px; margin-top:2px;">
+          <span class="telem-label">สัมประสิทธิ์การลดทอน (κ)</span>
+          <span class="telem-value decay" id="telem-kappa">0.724 Å⁻¹</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ความลึกทะลุผ่าน (Skin Depth δ)</span>
+          <span class="telem-value" id="telem-delta">1.381 Å</span>
+        </div>
+
+        <div class="telem-row" id="row-stm-curr">
+          <span class="telem-label">กระแสทันเนลลิง STM (I_tunnel)</span>
+          <span class="telem-value good" id="telem-istm">0.842 nA</span>
+        </div>
+
+        <div class="telem-row" id="row-half-life" style="display:none;">
+          <span class="telem-label">ครึ่งชีวิตโดยประมาณ (t_1/2)</span>
+          <span class="telem-value warn" id="telem-halflife">1.62 × 10³ yr</span>
+        </div>
+
+        <div class="telem-row" id="row-rtd-state" style="display:none;">
+          <span class="telem-label">การสั่นพ้องในบ่อควอนตัม (RTD)</span>
+          <span class="telem-value good" id="telem-rtd-status">ON RESONANCE (100%)</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">อัตราส่วนการเปลี่ยนกระแส / Å</span>
+          <span class="telem-value warn">~ 10× ต่อ 1.0 Å</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quantum Theory Helper Card -->
+    <div class="glass-card">
+      <div class="card-title">
+        <span>หลักฟิสิกส์สำคัญประจำบท</span>
+        <span class="tag">FORMULAS</span>
+      </div>
+      <div style="font-size:0.72rem; color:#cbd5e1; line-height:1.5;">
+        <p>• <strong>การลดทอนในแนวกั้นศักย์</strong> ---- $\psi(x) \propto e^{-\kappa x}$ โดยที่ $\kappa = \frac{\sqrt{2m(V_0 - E)}}{\hbar}$</p>
+        <p>• <strong>สัมประสิทธิ์การทะลุผ่าน</strong> ---- $T \approx 16 \frac{E}{V_0}\left(1 - \frac{E}{V_0}\right) e^{-2\kappa L}$</p>
+        <p>• <strong>ความไวระดับพิโคเมตรของ STM</strong> ---- กระแส $I_{\text{STM}} \propto e^{-2\kappa d}$ เปลี่ยนแปลงแบบเอกซ์โพเนนเชียลมหาศาลแม้ระยะห่างขยับเพียงขนาดอะตอม</p>
+        <p>• <strong>ทฤษฎีกามอฟ</strong> ---- นิวเคลียสแอลฟาชนกำแพงศักย์คูลอมบ์ $10^{21}$ ครั้ง/วินาที จนกว่าจะลอดผ่านสำเร็จ</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode 2: AR Marker Guide Modal -->
+  <div class="modal-overlay" id="ar-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📖 สแกนภาพมาร์กเกอร์หนังสือ AR (Hiro Marker)</span>
+        <button class="modal-close" onclick="closeARModal()">✕</button>
+      </div>
+      <div style="text-align:center; padding:10px 0;">
+        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Hiro Marker" style="width:190px; height:190px; border-radius:12px; border:4px solid var(--accent-cyan); box-shadow:0 0 20px rgba(0,240,255,0.4);">
+        <p style="font-size:0.82rem; color:#cbd5e1; margin-top:14px; line-height:1.5;">
+          ส่องกล้องมาที่มาร์กเกอร์ Hiro ในตำราฟิสิกส์ควอนตัมบทที่ 4<br>
+          โมเดลปลายเข็มกล้อง STM และคลื่นทะลุผ่านจะลอยขึ้นมาทดลองได้ทันที
+        </p>
+        <div style="margin-top:16px; display:flex; justify-content:center; gap:10px;">
+          <button class="btn-act primary" onclick="closeARModal()">เข้าใจแล้ว เริ่มการทดลอง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode 3: MediaPipe Hands PIP Video Feed -->
+  <div id="hand-pip-container">
+    <div class="hand-badge">🖐 AI Hand Tracking Active</div>
+    <video id="hand-video" playsinline autoplay muted></video>
+  </div>
+
+  <!-- ------------------------------------------------------------- -->
+  <!-- Simulation Script                                             -->
+  <!-- ------------------------------------------------------------- -->
+  <script>
+    // -------------------------------------------------------------
+    // Three.js Scene, Camera, Lighting & Optical Instrumentation
+    // -------------------------------------------------------------
+    const canvasContainer = document.getElementById('webgl-canvas');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x030712);
+    scene.fog = new THREE.FogExp2(0x030712, 0.02);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 9, 23);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    canvasContainer.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 + 0.05;
+    controls.minDistance = 6;
+    controls.maxDistance = 55;
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0x00f0ff, 0.9);
+    keyLight.position.set(10, 20, 15);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x8b5cf6, 0.6);
+    fillLight.position.set(-10, 12, -10);
+    scene.add(fillLight);
+
+    const tipGlow = new THREE.PointLight(0xf59e0b, 1.4, 25);
+    tipGlow.position.set(0, 3.5, 0);
+    scene.add(tipGlow);
+
+    // Grid Floor
+    const gridHelper = new THREE.GridHelper(36, 36, 0x00f0ff, 0x1e293b);
+    gridHelper.position.y = -0.01;
+    scene.add(gridHelper);
+
+    // Center Coordinate Axis
+    const axisMat = new THREE.LineBasicMaterial({ color: 0x475569 });
+    const axisGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-18, 0, 0), new THREE.Vector3(18, 0, 0)
+    ]);
+    const axisLine = new THREE.Line(axisGeo, axisMat);
+    scene.add(axisLine);
+
+    // -------------------------------------------------------------
+    // Physical Simulation Variables
+    // -------------------------------------------------------------
+    let currentScenario = 'stm'; // 'stm' | 'gamow'
+    let E_val = 4.0;
+    let V0_val = 6.0;
+    let L_val = 1.0; // Angstrom
+    let bias_V = 1.2;
+    let phaseTime = 0.0;
+    let isPlaying = true;
+
+    // -------------------------------------------------------------
+    // 3D Objects & Meshes: Barrier, STM Tip, Surface Atoms, Waves
+    // -------------------------------------------------------------
+
+    // 1. Potential Barrier Mesh (Glowing Violet Glass)
+    const barrierGeo = new THREE.BoxGeometry(2.0, 7.0, 5.0);
+    const barrierMat = new THREE.MeshStandardMaterial({
+      color: 0x8b5cf6,
+      transparent: true,
+      opacity: 0.38,
+      roughness: 0.15,
+      metalness: 0.35
+    });
+    const barrierMesh = new THREE.Mesh(barrierGeo, barrierMat);
+    barrierMesh.position.set(0, 3.5, 0);
+    scene.add(barrierMesh);
+
+    // Second Potential Barrier Mesh for RTD Double Barrier
+    const barrierMesh2 = new THREE.Mesh(barrierGeo, barrierMat.clone());
+    barrierMesh2.material.color.setHex(0x06b6d4);
+    barrierMesh2.visible = false;
+    scene.add(barrierMesh2);
+
+    // Energy Level Cut Plane Lines
+    const energyLevelGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-16, 0, 0), new THREE.Vector3(16, 0, 0)
+    ]);
+    const energyLevelLine = new THREE.Line(energyLevelGeo, new THREE.LineDashedMaterial({
+      color: 0x10b981,
+      dashSize: 0.4,
+      gapSize: 0.2,
+      linewidth: 2
+    }));
+    energyLevelLine.computeLineDistances();
+    scene.add(energyLevelLine);
+
+    // 2. STM Metallic Needle Assembly (Tungsten Tip)
+    const stmGroup = new THREE.Group();
+    scene.add(stmGroup);
+
+    // Conical probe tip
+    const tipGeo = new THREE.ConeGeometry(0.7, 3.2, 32);
+    const tipMat = new THREE.MeshStandardMaterial({
+      color: 0xf59e0b,
+      metalness: 0.95,
+      roughness: 0.15
+    });
+    const needleTip = new THREE.Mesh(tipGeo, tipMat);
+    needleTip.rotation.x = Math.PI; // Point downwards
+    needleTip.position.y = 1.6;
+    stmGroup.add(needleTip);
+
+    // Piezo tube shaft holder
+    const shaftGeo = new THREE.CylinderGeometry(0.3, 0.3, 4.0, 24);
+    const shaftMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      metalness: 0.8,
+      roughness: 0.3
+    });
+    const shaftMesh = new THREE.Mesh(shaftGeo, shaftMat);
+    shaftMesh.position.y = 4.8;
+    stmGroup.add(shaftMesh);
+
+    // 3. Substrate Surface Atoms (Gold/Silicon 111 Lattice)
+    const atomGroup = new THREE.Group();
+    scene.add(atomGroup);
+    const atomSpheres = [];
+    for (let x = -7; x <= 7; x += 1.4) {
+      for (let z = -2; z <= 2; z += 1.4) {
+        const atomGeo = new THREE.SphereGeometry(0.52, 20, 20);
+        const atomMat = new THREE.MeshStandardMaterial({
+          color: 0x64748b,
+          metalness: 0.6,
+          roughness: 0.35
+        });
+        const atomMesh = new THREE.Mesh(atomGeo, atomMat);
+        atomMesh.position.set(x, 0.45, z);
+        atomGroup.add(atomMesh);
+        atomSpheres.push(atomMesh);
+      }
+    }
+
+    // 4. Quantum Wave Ribbon & Projections
+    const N_POINTS = 360;
+    const waveGeom = new THREE.BufferGeometry();
+    const wavePos = new Float32Array(N_POINTS * 3);
+    const waveColors = new Float32Array(N_POINTS * 3);
+    waveGeom.setAttribute('position', new THREE.BufferAttribute(wavePos, 3));
+    waveGeom.setAttribute('color', new THREE.BufferAttribute(waveColors, 3));
+    const waveMat = new THREE.LineBasicMaterial({ vertexColors: true, linewidth: 3 });
+    const waveLine = new THREE.Line(waveGeom, waveMat);
+    scene.add(waveLine);
+
+    // Baseline Area Mesh for |Psi|^2 fill
+    const fillPlaneGeo = new THREE.PlaneGeometry(1, 1, N_POINTS - 1, 1);
+    const fillPlaneMat = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
+      transparent: true,
+      opacity: 0.22,
+      side: THREE.DoubleSide
+    });
+    const fillMesh = new THREE.Mesh(fillPlaneGeo, fillPlaneMat);
+    scene.add(fillMesh);
+
+    // 5. Particle Tunneling Sparkles (Electrons jumping across gap)
+    const sparkleCount = 45;
+    const sparkleGeo = new THREE.BufferGeometry();
+    const sparklePos = new Float32Array(sparkleCount * 3);
+    const sparkleSpeeds = new Float32Array(sparkleCount);
+    for (let i = 0; i < sparkleCount; i++) {
+      sparklePos[i * 3] = (Math.random() - 0.5) * 1.5;
+      sparklePos[i * 3 + 1] = Math.random() * 3.5;
+      sparklePos[i * 3 + 2] = (Math.random() - 0.5) * 1.5;
+      sparkleSpeeds[i] = 0.05 + Math.random() * 0.08;
+    }
+    sparkleGeo.setAttribute('position', new THREE.BufferAttribute(sparklePos, 3));
+    const sparkleMat = new THREE.PointsMaterial({
+      color: 0xf59e0b,
+      size: 0.22,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+    const sparklePoints = new THREE.Points(sparkleGeo, sparkleMat);
+    scene.add(sparklePoints);
+
+    // -------------------------------------------------------------
+    // Web Audio Synthesizer for Tunneling Current Frequency
+    // -------------------------------------------------------------
+    let audioCtx = null;
+    let audioActive = false;
+    let humOsc = null;
+    let clickOsc = null;
+    let masterGain = null;
+
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioClass();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.035, audioCtx.currentTime);
+        masterGain.connect(audioCtx.destination);
+
+        humOsc = audioCtx.createOscillator();
+        humOsc.type = 'sine';
+        humOsc.frequency.setValueAtTime(120, audioCtx.currentTime);
+        humOsc.connect(masterGain);
+        humOsc.start();
+
+        clickOsc = audioCtx.createOscillator();
+        clickOsc.type = 'sawtooth';
+        clickOsc.frequency.setValueAtTime(240, audioCtx.currentTime);
+        const clickGain = audioCtx.createGain();
+        clickGain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+        clickOsc.connect(clickGain);
+        clickGain.connect(masterGain);
+        clickOsc.start();
+        audioActive = true;
+      } catch (e) {
+        console.warn('Audio not available:', e);
+      }
+    }
+
+    function toggleSound() {
+      if (!audioCtx) initAudio();
+      audioActive = !audioActive;
+      const btn = document.getElementById('btn-sound');
+      if (audioActive) {
+        masterGain.gain.setValueAtTime(0.035, audioCtx.currentTime);
+        btn.classList.add('primary');
+        btn.innerHTML = '<span>🔊</span> เสียงความถี่ทันเนลลิง (เปิด)';
+      } else {
+        masterGain.gain.setValueAtTime(0.0, audioCtx.currentTime);
+        btn.classList.remove('primary');
+        btn.innerHTML = '<span>🔇</span> เสียงความถี่ทันเนลลิง (ปิด)';
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Scenario Switcher (STM Mode vs Gamow Alpha Decay Mode vs RTD Double Barrier)
+    // -------------------------------------------------------------
+    function setScenario(scen) {
+      currentScenario = scen;
+      document.getElementById('tab-stm').classList.toggle('active', scen === 'stm');
+      document.getElementById('tab-gamow').classList.toggle('active', scen === 'gamow');
+      document.getElementById('tab-rtd').classList.toggle('active', scen === 'rtd');
+
+      const stdPresets = document.getElementById('presets-std');
+      const rtdPresets = document.getElementById('presets-rtd');
+      const rowStm = document.getElementById('row-stm-curr');
+      const rowGamow = document.getElementById('row-half-life');
+      const rowRtd = document.getElementById('row-rtd-state');
+      const itemBias = document.getElementById('item-bias');
+      const labelWidth = document.getElementById('label-width');
+      const btnScan = document.getElementById('btn-scan');
+      const cardTopo = document.getElementById('card-topography');
+
+      if (scen === 'stm') {
+        stmGroup.visible = true;
+        atomGroup.visible = true;
+        sparklePoints.visible = true;
+        barrierMesh2.visible = false;
+        barrierMesh.position.set(0, (V0_val * 0.7) * 0.5, 0);
+        barrierMat.color.setHex(0x8b5cf6);
+        itemBias.style.display = 'flex';
+        rowStm.style.display = 'flex';
+        rowGamow.style.display = 'none';
+        rowRtd.style.display = 'none';
+        stdPresets.style.display = 'flex';
+        rtdPresets.style.display = 'none';
+        btnScan.style.display = 'flex';
+        labelWidth.innerText = 'ความกว้างแนวกั้นศักย์ L (ระยะปลายเข็ม d)';
+      } else if (scen === 'gamow') {
+        if (isScanning) toggleAtomicScan();
+        stmGroup.visible = false;
+        atomGroup.visible = false;
+        sparklePoints.visible = false;
+        barrierMesh2.visible = false;
+        barrierMesh.position.set(0, (V0_val * 0.7) * 0.5, 0);
+        barrierMat.color.setHex(0xef4444);
+        itemBias.style.display = 'none';
+        rowStm.style.display = 'none';
+        rowGamow.style.display = 'flex';
+        rowRtd.style.display = 'none';
+        stdPresets.style.display = 'flex';
+        rtdPresets.style.display = 'none';
+        btnScan.style.display = 'none';
+        cardTopo.style.display = 'none';
+        labelWidth.innerText = 'ความกว้างแนวกั้นคูลอมบ์ L_coulomb';
+      } else if (scen === 'rtd') {
+        if (isScanning) toggleAtomicScan();
+        stmGroup.visible = false;
+        atomGroup.visible = false;
+        sparklePoints.visible = false;
+        barrierMesh2.visible = true;
+        barrierMat.color.setHex(0x06b6d4);
+        barrierMesh2.material.color.setHex(0x06b6d4);
+        itemBias.style.display = 'none';
+        rowStm.style.display = 'none';
+        rowGamow.style.display = 'none';
+        rowRtd.style.display = 'flex';
+        stdPresets.style.display = 'none';
+        rtdPresets.style.display = 'flex';
+        btnScan.style.display = 'none';
+        cardTopo.style.display = 'none';
+        labelWidth.innerText = 'ความกว้างแนวกั้นคู่แต่ละข้าง L_b';
+      }
+      updatePhysics();
+    }
+
+    // -------------------------------------------------------------
+    // Analytical Quantum Tunneling Physics & Wave Evolution
+    // -------------------------------------------------------------
+    function updatePhysics() {
+      const isRTD = (currentScenario === 'rtd');
+      let barrierLeft = 0, barrierRight = 0;
+      let b1_left = 0, b1_right = 0, b2_left = 0, b2_right = 0;
+
+      if (isRTD) {
+        // Double barrier layout (resonant tunneling cavity)
+        const wb = L_val * 1.2;
+        barrierMesh.scale.set(wb, V0_val * 0.7, 5.0);
+        barrierMesh.position.set(-2.5, (V0_val * 0.7) * 0.5, 0);
+
+        barrierMesh2.visible = true;
+        barrierMesh2.scale.set(wb, V0_val * 0.7, 5.0);
+        barrierMesh2.position.set(2.5, (V0_val * 0.7) * 0.5, 0);
+
+        b1_left = -2.5 - wb * 0.5;
+        b1_right = -2.5 + wb * 0.5;
+        b2_left = 2.5 - wb * 0.5;
+        b2_right = 2.5 + wb * 0.5;
+      } else {
+        // Single barrier layout
+        const halfL = L_val * 1.5;
+        barrierMesh.scale.set(halfL, V0_val * 0.7, 5.0);
+        barrierMesh.position.set(0, (V0_val * 0.7) * 0.5, 0);
+        barrierMesh2.visible = false;
+
+        barrierLeft = -halfL * 0.5;
+        barrierRight = halfL * 0.5;
+      }
+
+      // Energy line position
+      const energyY = E_val * 0.7;
+      energyLevelLine.position.y = energyY;
+
+      // STM needle elevation
+      if (currentScenario === 'stm' && !isScanning) {
+        stmGroup.position.set(0, 1.2 + L_val * 2.0, 0);
+        tipGlow.position.y = 1.2 + L_val * 1.8;
+      }
+
+      // Exact Quantum Transmission Coefficient T(E) for single barrier
+      let T_single = 0.0;
+      let kappa = 0.0;
+      const k1 = Math.sqrt(E_val) * 1.6;
+
+      if (E_val < V0_val) {
+        document.getElementById('tag-regime').innerText = isRTD ? 'RESONANT TUNNELING' : 'TUNNELING REGIME';
+        document.getElementById('tag-regime').style.color = '#00f0ff';
+        kappa = Math.sqrt(V0_val - E_val) * 0.5123;
+        const sinhArg = kappa * L_val * 1.8;
+        const denom = 1.0 + (Math.pow(V0_val, 2) / (4.0 * E_val * (V0_val - E_val))) * Math.pow(Math.sinh(sinhArg), 2);
+        T_single = 1.0 / denom;
+      } else {
+        document.getElementById('tag-regime').innerText = 'ABOVE BARRIER';
+        document.getElementById('tag-regime').style.color = '#10b981';
+        const k2 = Math.sqrt(E_val - V0_val) * 1.6;
+        const sinArg = k2 * L_val * 1.8;
+        const denom = 1.0 + (Math.pow(V0_val, 2) / (4.0 * E_val * (E_val - V0_val))) * Math.pow(Math.sin(sinArg), 2);
+        T_single = 1.0 / denom;
+      }
+
+      let T_coeff = T_single;
+      let R_coeff = 1.0 - T_coeff;
+
+      if (isRTD) {
+        // Double Barrier Fabry-Perot Resonant Tunneling:
+        // T_double = T1^2 / [T1^2 + 4*R1*sin^2(theta)]
+        const R1 = 1.0 - T_single;
+        const theta = Math.PI * Math.sqrt(E_val / 2.45);
+        const sinTheta = Math.sin(theta);
+        const denomDouble = Math.pow(T_single, 2) + 4.0 * R1 * Math.pow(sinTheta, 2);
+        T_coeff = Math.pow(T_single, 2) / Math.max(1e-6, denomDouble);
+        T_coeff = Math.max(0.00001, Math.min(1.0, T_coeff));
+        R_coeff = 1.0 - T_coeff;
+
+        const rtdStatus = document.getElementById('telem-rtd-status');
+        if (T_coeff > 0.90) {
+          rtdStatus.innerText = 'ON RESONANCE (' + (T_coeff * 100).toFixed(1) + '%)';
+          rtdStatus.className = 'telem-value good';
+        } else if (T_coeff > 0.15) {
+          rtdStatus.innerText = 'NEAR RESONANCE (' + (T_coeff * 100).toFixed(1) + '%)';
+          rtdStatus.className = 'telem-value warn';
+        } else {
+          rtdStatus.innerText = 'OFF RESONANCE (' + (T_coeff * 100).toFixed(2) + '%)';
+          rtdStatus.className = 'telem-value decay';
+        }
+      }
+
+      T_coeff = Math.max(0.00001, Math.min(0.99999, T_coeff));
+      R_coeff = 1.0 - T_coeff;
+      const delta_skin = kappa > 0.01 ? (1.0 / kappa) : 99.9;
+
+      // STM tunneling current I_STM proportional to V_bias * exp(-2*kappa*d)
+      const i_stm = bias_V * 2.4 * Math.exp(-2.0 * kappa * (L_val * 1.2));
+
+      // Gamow alpha decay half-life approximation
+      const f_attempt = 1e21; // attempts / sec
+      const lambda_decay = f_attempt * T_coeff;
+      const t_half_sec = 0.693 / Math.max(1e-25, lambda_decay);
+      let halfLifeText = '';
+      if (t_half_sec < 1e-6) halfLifeText = (t_half_sec * 1e9).toFixed(2) + ' ns';
+      else if (t_half_sec < 1.0) halfLifeText = (t_half_sec * 1e3).toFixed(2) + ' ms';
+      else if (t_half_sec < 3600) halfLifeText = t_half_sec.toFixed(2) + ' s';
+      else if (t_half_sec < 3.15e7) halfLifeText = (t_half_sec / 86400).toFixed(1) + ' days';
+      else halfLifeText = (t_half_sec / 3.15e7).toExponential(2) + ' yr';
+
+      // Update HUD Telemetry
+      document.getElementById('telem-t').innerText = (T_coeff * 100).toFixed(2) + ' %';
+      document.getElementById('telem-r').innerText = (R_coeff * 100).toFixed(2) + ' %';
+      document.getElementById('telem-kappa').innerText = kappa.toFixed(3) + ' Å⁻¹';
+      document.getElementById('telem-delta').innerText = delta_skin.toFixed(3) + ' Å';
+      document.getElementById('telem-istm').innerText = i_stm.toFixed(3) + ' nA';
+      document.getElementById('telem-halflife').innerText = halfLifeText;
+
+      // Audio synth modulation
+      if (audioActive && humOsc) {
+        humOsc.frequency.setTargetAtTime(90 + E_val * 25, audioCtx.currentTime, 0.05);
+        masterGain.gain.setTargetAtTime(0.01 + Math.min(0.06, i_stm * 0.04), audioCtx.currentTime, 0.05);
+      }
+
+      // Wave Geometry & Color Mapping
+      const pos = waveGeom.attributes.position.array;
+      const col = waveGeom.attributes.color.array;
+      const meshPos = fillMesh.geometry.attributes.position.array;
+
+      for (let i = 0; i < N_POINTS; i++) {
+        const x = -14.0 + (28.0 / (N_POINTS - 1)) * i;
+        const idx3 = i * 3;
+        let y = 0.0;
+        let rColor = 0.0, gColor = 0.94, bColor = 1.0;
+
+        if (isRTD) {
+          // Double Barrier 5-Region Solution
+          if (x < b1_left) {
+            // Region 1: Before barrier 1 (Incident + Reflected)
+            const y_inc = Math.cos(k1 * (x - b1_left) - phaseTime);
+            const y_ref = Math.sqrt(R_coeff) * Math.cos(-k1 * (x - b1_left) - phaseTime + Math.PI / 2);
+            y = (y_inc + y_ref) * 1.15;
+            rColor = 0.0; gColor = 0.94; bColor = 1.0; // Cyan
+          } else if (x <= b1_right) {
+            // Region 2: Inside Barrier 1 (Decay)
+            const dX1 = x - b1_left;
+            const decayAmp1 = Math.exp(-kappa * dX1 * 1.5);
+            y = decayAmp1 * 1.15 * Math.cos(-phaseTime);
+            rColor = 0.93; gColor = 0.28; bColor = 0.60; // Pink
+          } else if (x < b2_left) {
+            // Region 3: Resonant Quantum Well (Standing cavity wave with resonant amplification)
+            const resBoost = (T_coeff > 0.5) ? (1.0 + (T_coeff - 0.5) * 2.0) : 1.0;
+            y = 1.15 * resBoost * Math.cos(k1 * x) * Math.cos(phaseTime * 1.2);
+            rColor = 0.96; gColor = 0.62; bColor = 0.04; // Amber resonant well!
+          } else if (x <= b2_right) {
+            // Region 4: Inside Barrier 2 (Decay into transmitted)
+            const dX2 = b2_right - x;
+            const decayAmp2 = Math.sqrt(T_coeff) * Math.exp(-kappa * dX2 * 1.5);
+            y = decayAmp2 * 1.15 * Math.cos(phaseTime);
+            rColor = 0.93; gColor = 0.28; bColor = 0.60; // Pink
+          } else {
+            // Region 5: Transmitted Wave
+            const ampTrans = Math.sqrt(T_coeff);
+            y = ampTrans * 1.15 * Math.cos(k1 * (x - b2_right) - phaseTime);
+            rColor = 0.06; gColor = 0.73; bColor = 0.51; // Emerald Green
+          }
+        } else {
+          // Single Barrier 3-Region Solution
+          if (x < barrierLeft) {
+            const y_inc = Math.cos(k1 * (x - barrierLeft) - phaseTime);
+            const y_ref = Math.sqrt(R_coeff) * Math.cos(-k1 * (x - barrierLeft) - phaseTime + Math.PI / 2);
+            y = (y_inc + y_ref) * 1.15;
+            rColor = 0.0; gColor = 0.94; bColor = 1.0; // Cyan
+          } else if (x <= barrierRight) {
+            const dX = x - barrierLeft;
+            const decayAmp = Math.exp(-kappa * dX * 1.8);
+            y = decayAmp * 1.15 * Math.cos(-phaseTime);
+            rColor = 0.93; gColor = 0.28; bColor = 0.60; // Pink
+          } else {
+            const ampTrans = Math.sqrt(T_coeff);
+            y = ampTrans * 1.15 * Math.cos(k1 * (x - barrierRight) - phaseTime);
+            rColor = 0.06; gColor = 0.73; bColor = 0.51; // Emerald Green
+          }
+        }
+
+        const totalY = energyY + y;
+        pos[idx3] = x;
+        pos[idx3 + 1] = totalY;
+        pos[idx3 + 2] = 0;
+
+        col[idx3] = rColor;
+        col[idx3 + 1] = gColor;
+        col[idx3 + 2] = bColor;
+
+        // Base Plane Mesh
+        meshPos[i * 6] = x;
+        meshPos[i * 6 + 1] = totalY;
+        meshPos[i * 6 + 2] = 0;
+        meshPos[i * 6 + 3] = x;
+        meshPos[i * 6 + 4] = 0;
+        meshPos[i * 6 + 5] = 0;
+      }
+
+      waveGeom.attributes.position.needsUpdate = true;
+      waveGeom.attributes.color.needsUpdate = true;
+      fillMesh.geometry.attributes.position.needsUpdate = true;
+
+      // Animate Sparkles (Electron Flow in STM Gap)
+      if (currentScenario === 'stm') {
+        const sPos = sparkleGeo.attributes.position.array;
+        for (let j = 0; j < sparkleCount; j++) {
+          sPos[j * 3 + 1] -= sparkleSpeeds[j] * (i_stm * 0.8 + 0.2);
+          if (sPos[j * 3 + 1] < 0.5) {
+            sPos[j * 3 + 1] = 1.2 + L_val * 2.0;
+            sPos[j * 3] = (Math.random() - 0.5) * 0.8;
+            sPos[j * 3 + 2] = (Math.random() - 0.5) * 0.8;
+          }
+        }
+        sparkleGeo.attributes.position.needsUpdate = true;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // STM Topographic Atomic Line Scan (Constant Current Feedback)
+    // -------------------------------------------------------------
+    let isScanning = false;
+    let scanX = -5.8;
+    let scanDir = 1;
+    const scanSpeed = 0.042;
+
+    function toggleAtomicScan() {
+      isScanning = !isScanning;
+      const btn = document.getElementById('btn-scan');
+      const card = document.getElementById('card-topography');
+      if (isScanning) {
+        btn.innerHTML = '<span>⏹</span> หยุดสแกนผิวอะตอม';
+        btn.style.background = 'rgba(245,158,11,0.2)';
+        card.style.display = 'block';
+      } else {
+        btn.innerHTML = '<span>🔬</span> เริ่มสแกนโครงสร้างอะตอม (Atomic Line Scan)';
+        btn.style.background = '';
+        stmGroup.position.set(0, 1.2 + L_val * 2.0, 0);
+        tipGlow.position.set(0, 1.2 + L_val * 1.8, 0);
+      }
+    }
+
+    function updateAtomicScan() {
+      if (!isScanning || currentScenario !== 'stm') return;
+
+      scanX += scanSpeed * scanDir;
+      if (scanX > 5.8) {
+        scanX = 5.8;
+        scanDir = -1;
+      } else if (scanX < -5.8) {
+        scanX = -5.8;
+        scanDir = 1;
+      }
+
+      // Calculate atomic surface corrugation h(x) from gold atoms
+      const atomXPositions = [-5.6, -4.2, -2.8, -1.4, 0.0, 1.4, 2.8, 4.2, 5.6];
+      let h_atom = 0.0;
+      for (let ax of atomXPositions) {
+        const dist = scanX - ax;
+        h_atom += 0.42 * Math.exp(-(dist * dist) / (2.0 * 0.32 * 0.32));
+      }
+
+      // Constant-current PID feedback lifts needle: z_tip = z_base + h_atom
+      stmGroup.position.x = scanX;
+      stmGroup.position.y = 1.2 + L_val * 2.0 + h_atom;
+      tipGlow.position.x = scanX;
+      tipGlow.position.y = stmGroup.position.y - 0.2;
+
+      // Update telemetry readout
+      document.getElementById('topo-x').innerText = scanX.toFixed(2) + ' Å';
+
+      // Draw 2D Line Profile on topo-canvas
+      drawTopographyProfile(scanX, h_atom);
+    }
+
+    function drawTopographyProfile(currentTipX, currentH) {
+      const canvas = document.getElementById('topo-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Background Grid Lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
+      for (let gx = 0; gx < w; gx += 30) {
+        ctx.beginPath();
+        ctx.moveTo(gx, 0);
+        ctx.lineTo(gx, h);
+        ctx.stroke();
+      }
+      for (let gy = 0; gy < h; gy += 20) {
+        ctx.beginPath();
+        ctx.moveTo(0, gy);
+        ctx.lineTo(w, gy);
+        ctx.stroke();
+      }
+
+      // Draw Full Atomic Surface Profile Curve
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2.0;
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+
+      const atomXPositions = [-5.6, -4.2, -2.8, -1.4, 0.0, 1.4, 2.8, 4.2, 5.6];
+      for (let px = 0; px < w; px++) {
+        const xCoord = -6.0 + (12.0 / w) * px;
+        let corrugation = 0.0;
+        for (let ax of atomXPositions) {
+          const d = xCoord - ax;
+          corrugation += 0.42 * Math.exp(-(d * d) / (2.0 * 0.32 * 0.32));
+        }
+        const py = (h - 14) - corrugation * (h * 1.1);
+        if (px === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Fill under curve
+      ctx.lineTo(w, h);
+      ctx.lineTo(0, h);
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.12)';
+      ctx.fill();
+
+      // Draw Current Tip Marker Dot
+      const tipPx = ((currentTipX - (-6.0)) / 12.0) * w;
+      const tipPy = (h - 14) - currentH * (h * 1.1);
+      ctx.beginPath();
+      ctx.arc(tipPx, tipPy, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#00f0ff';
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Draw Vertical Guide Line from tip to bottom
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.4)';
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      ctx.moveTo(tipPx, 0);
+      ctx.lineTo(tipPx, h);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // -------------------------------------------------------------
+    // Slider & Preset Listeners
+    // -------------------------------------------------------------
+    const sliderE = document.getElementById('slider-e');
+    sliderE.addEventListener('input', (e) => {
+      E_val = parseFloat(e.target.value);
+      document.getElementById('val-e').innerText = E_val.toFixed(2) + ' eV';
+      updatePhysics();
+    });
+    function setEnergy(val) {
+      E_val = val;
+      sliderE.value = val;
+      document.getElementById('val-e').innerText = E_val.toFixed(2) + ' eV';
+      document.querySelectorAll('#slider-e ~ .preset-btns .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes(val.toFixed(1) + ' eV'));
+      });
+      updatePhysics();
+    }
+
+    const sliderV0 = document.getElementById('slider-v0');
+    sliderV0.addEventListener('input', (e) => {
+      V0_val = parseFloat(e.target.value);
+      document.getElementById('val-v0').innerText = V0_val.toFixed(2) + ' eV';
+      updatePhysics();
+    });
+    function setBarrierHeight(val) {
+      V0_val = val;
+      sliderV0.value = val;
+      document.getElementById('val-v0').innerText = V0_val.toFixed(2) + ' eV';
+      document.querySelectorAll('#slider-v0 ~ .preset-btns .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes(val.toFixed(1) + ' eV'));
+      });
+      updatePhysics();
+    }
+
+    const sliderL = document.getElementById('slider-l');
+    sliderL.addEventListener('input', (e) => {
+      L_val = parseFloat(e.target.value);
+      document.getElementById('val-l').innerText = L_val.toFixed(2) + ' Å';
+      updatePhysics();
+    });
+    function setBarrierWidth(val) {
+      L_val = val;
+      sliderL.value = val;
+      document.getElementById('val-l').innerText = L_val.toFixed(2) + ' Å';
+      document.querySelectorAll('#slider-l ~ .preset-btns .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes(val.toFixed(2) + ' Å'));
+      });
+      updatePhysics();
+    }
+
+    const sliderBias = document.getElementById('slider-bias');
+    sliderBias.addEventListener('input', (e) => {
+      bias_V = parseFloat(e.target.value);
+      document.getElementById('val-bias').innerText = bias_V.toFixed(2) + ' V';
+      updatePhysics();
+    });
+
+    function togglePlayPause() {
+      isPlaying = !isPlaying;
+      const btn = document.getElementById('btn-play');
+      btn.innerHTML = isPlaying ? '<span>⏸</span> หยุดชั่วคราว' : '<span>▶️</span> เล่นต่อ';
+      btn.classList.toggle('primary', isPlaying);
+    }
+
+    function resetView() {
+      camera.position.set(0, 9, 23);
+      controls.target.set(0, 3, 0);
+      controls.update();
+    }
+
+    // -------------------------------------------------------------
+    // HUD Collapsible Dock & Zen Mode Controls
+    // -------------------------------------------------------------
+    let leftCollapsed = false;
+    let rightCollapsed = false;
+    let zenModeActive = false;
+
+    function toggleLeftHUD(collapse) {
+      leftCollapsed = collapse !== undefined ? collapse : !leftCollapsed;
+      document.getElementById('hud-left').classList.toggle('collapsed', leftCollapsed);
+      document.getElementById('dock-left').style.display = leftCollapsed ? 'flex' : 'none';
+    }
+
+    function toggleRightHUD(collapse) {
+      rightCollapsed = collapse !== undefined ? collapse : !rightCollapsed;
+      document.getElementById('hud-right').classList.toggle('collapsed', rightCollapsed);
+      document.getElementById('dock-right').style.display = rightCollapsed ? 'flex' : 'none';
+    }
+
+    function toggleZenMode() {
+      zenModeActive = !zenModeActive;
+      toggleLeftHUD(zenModeActive);
+      toggleRightHUD(zenModeActive);
+      const zenBtn = document.getElementById('btn-zen');
+      zenBtn.classList.toggle('active', zenModeActive);
+      zenBtn.querySelector('span:last-child').innerText = zenModeActive ? 'แสดงบาร์' : 'ย่อทุกบาร์ (H)';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'h' || e.key === 'H') toggleZenMode();
+      if (e.key === ' ') { e.preventDefault(); togglePlayPause(); }
+    });
+
+    // -------------------------------------------------------------
+    // Mode Switching: 3D Lab / Marker AR / Touchless Hand AI
+    // -------------------------------------------------------------
+    function switchMode(modeIndex) {
+      document.querySelectorAll('.mode-pill').forEach((pill, idx) => {
+        pill.classList.toggle('active', idx === modeIndex - 1);
+      });
+
+      if (modeIndex === 1) {
+        closeARModal();
+        stopHandAI();
+      } else if (modeIndex === 2) {
+        openARModal();
+        stopHandAI();
+      } else if (modeIndex === 3) {
+        closeARModal();
+        startHandAI();
+      }
+    }
+
+    function openARModal() {
+      document.getElementById('ar-modal').style.display = 'flex';
+    }
+    function closeARModal() {
+      document.getElementById('ar-modal').style.display = 'none';
+    }
+
+    // -------------------------------------------------------------
+    // Mode 3: MediaPipe Hands AI Tracking
+    // -------------------------------------------------------------
+    let handInstance = null;
+    let cameraInstance = null;
+    let isHandTracking = false;
+
+    function startHandAI() {
+      const pip = document.getElementById('hand-pip-container');
+      const videoEl = document.getElementById('hand-video');
+      pip.style.display = 'block';
+
+      if (!handInstance) {
+        handInstance = new Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+        handInstance.setOptions({
+          maxNumHands: 1,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5
+        });
+        handInstance.onResults((results) => {
+          if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            const marks = results.multiHandLandmarks[0];
+            const thumb = marks[4];
+            const index = marks[8];
+            const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
+
+            // Pinch gesture controls gap width L (distance d)
+            const mappedL = Math.min(2.5, Math.max(0.4, pinchDist * 7.0));
+            setBarrierWidth(parseFloat(mappedL.toFixed(2)));
+
+            // Hand vertical position controls Particle Energy E
+            const wrist = marks[0];
+            const mappedE = Math.min(9.0, Math.max(1.5, (1.0 - wrist.y) * 9.5));
+            setEnergy(parseFloat(mappedE.toFixed(1)));
+          }
+        });
+      }
+
+      if (!cameraInstance) {
+        cameraInstance = new Camera(videoEl, {
+          onFrame: async () => {
+            if (isHandTracking) await handInstance.send({ image: videoEl });
+          },
+          width: 320,
+          height: 240
+        });
+      }
+      isHandTracking = true;
+      cameraInstance.start();
+    }
+
+    function stopHandAI() {
+      isHandTracking = false;
+      document.getElementById('hand-pip-container').style.display = 'none';
+      if (cameraInstance && cameraInstance.stop) {
+        cameraInstance.stop();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Main Render Loop
+    // -------------------------------------------------------------
+    updatePhysics();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (isPlaying) {
+        phaseTime += 0.085;
+      }
+      updateAtomicScan();
+      updatePhysics();
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

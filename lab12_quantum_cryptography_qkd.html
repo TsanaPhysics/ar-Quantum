@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>LAB 12 ---- การแจกจ่ายกุญแจรหัสลับควอนตัมและเครือข่ายความปลอดภัยควอนตัม — ผศ.ดร.ชีวะ ทัศนา</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- KaTeX for High-Fidelity Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <!-- Three.js (r128) & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- MediaPipe Hands for Touchless AI Gesture Control -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+  <style>
+    :root {
+      --bg-space: #030712;
+      --panel-glass: rgba(10, 16, 36, 0.88);
+      --panel-border: rgba(0, 240, 255, 0.28);
+      --accent-cyan: #00f0ff;
+      --accent-magenta: #ec4899;
+      --accent-purple: #8b5cf6;
+      --accent-gold: #f59e0b;
+      --accent-green: #10b981;
+      --accent-crimson: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-thai: 'Sarabun', sans-serif;
+      --font-tech: 'Chakra Petch', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-thai);
+      font-size: 14px;
+      line-height: 1.5;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Top Glass Navbar */
+    .top-nav {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      right: 12px;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .nav-brand {
+      pointer-events: auto;
+      background: var(--panel-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+    }
+
+    .brand-icon {
+      font-size: 1.3rem;
+      filter: drop-shadow(0 0 8px var(--accent-cyan));
+    }
+
+    .brand-title {
+      font-family: var(--font-tech);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .brand-subtitle {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .nav-tools {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-pill-bar {
+      background: var(--panel-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 3px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+    }
+
+    .mode-pill {
+      background: transparent;
+      border: none;
+      font-family: var(--font-tech);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 38px;
+    }
+
+    .mode-pill:hover, .mode-pill:active {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .mode-pill.active {
+      background: var(--accent-cyan);
+      color: #030712;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
+    }
+
+    .btn-zen {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--text-muted);
+      padding: 6px 11px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: var(--font-tech);
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 38px;
+      transition: all 0.2s;
+    }
+
+    .btn-zen:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .btn-zen.active {
+      background: var(--accent-gold);
+      color: #030712;
+      font-weight: 700;
+    }
+
+    /* Floating Left HUD Control Dock (Desktop) */
+    .hud-dock-left {
+      position: absolute;
+      top: 66px;
+      left: 14px;
+      bottom: 14px;
+      width: 390px;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    }
+
+    /* Floating Right HUD Telemetry Dock (Desktop) */
+    .hud-dock-right {
+      position: absolute;
+      top: 66px;
+      right: 14px;
+      bottom: 14px;
+      width: 350px;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    }
+
+    .glass-card {
+      pointer-events: auto;
+      background: var(--panel-glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 13px 15px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75), inset 0 0 20px rgba(0, 240, 255, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent-cyan) rgba(255, 255, 255, 0.05);
+    }
+
+    .glass-card::-webkit-scrollbar {
+      width: 4px;
+    }
+    .glass-card::-webkit-scrollbar-thumb {
+      background: var(--accent-cyan);
+      border-radius: 4px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+      padding-bottom: 8px;
+    }
+
+    .card-title {
+      font-family: var(--font-tech);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .badge-tag {
+      font-size: 0.65rem;
+      font-family: var(--font-tech);
+      padding: 2px 7px;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      background: rgba(0, 240, 255, 0.1);
+      color: var(--accent-cyan);
+    }
+
+    /* Scenario Tabs Strip */
+    .scenario-tabs {
+      display: flex;
+      background: rgba(0, 0, 0, 0.55);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow-x: auto;
+    }
+
+    .scenario-tab {
+      flex: 1;
+      text-align: center;
+      font-family: var(--font-tech);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 6px 4px;
+      border-radius: 7px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      white-space: nowrap;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scenario-tab.active {
+      background: rgba(0, 240, 255, 0.22);
+      color: var(--accent-cyan);
+      border: 1px solid var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    /* Control Items */
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ctrl-item {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 11px;
+      padding: 9px 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ctrl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    .ctrl-val {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .range-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.15);
+      outline: none;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      box-shadow: 0 0 12px var(--accent-cyan);
+      border: 2px solid #020617;
+    }
+
+    .btn-act {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #fff;
+      font-family: var(--font-tech);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 42px;
+      transition: all 0.2s;
+    }
+
+    .btn-act:hover, .btn-act:active {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+    }
+
+    .btn-act.primary {
+      background: linear-gradient(135deg, #00f0ff, #8b5cf6);
+      color: #020617;
+      font-weight: 700;
+      border: none;
+      box-shadow: 0 4px 18px rgba(0, 240, 255, 0.4);
+    }
+
+    .btn-act.danger {
+      background: linear-gradient(135deg, #ef4444, #f59e0b);
+      color: #020617;
+      font-weight: 700;
+      border: none;
+      box-shadow: 0 4px 18px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Polarizer Selector Buttons */
+    .pol-btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+    }
+
+    .pol-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      font-family: var(--font-tech);
+      font-size: 0.75rem;
+      padding: 7px 4px;
+      border-radius: 7px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      min-height: 40px;
+    }
+
+    .pol-btn.active {
+      background: rgba(0, 240, 255, 0.25);
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+    }
+
+    /* Telemetry Items */
+    .telem-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .telem-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      padding: 6px 8px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .telem-label {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .telem-val {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    /* Key Stream Display Box */
+    .stream-box {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      background: rgba(0, 0, 0, 0.55);
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      max-height: 95px;
+      overflow-y: auto;
+      word-break: break-all;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+
+    /* Highlighting Status Banner */
+    .status-banner {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(139, 92, 246, 0.12));
+      border: 1px solid var(--accent-cyan);
+      border-radius: 12px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .status-sub {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .status-val {
+      font-family: var(--font-tech);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 120;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: rgba(10, 16, 36, 0.96);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 18px;
+      padding: 16px 20px;
+      max-width: 700px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+      animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      font-family: var(--font-tech);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px 8px;
+    }
+
+    .modal-close:hover {
+      color: #fff;
+    }
+
+    /* MediaPipe PiP */
+    #hand-pip-container {
+      position: absolute;
+      top: 66px;
+      right: 14px;
+      width: 160px;
+      height: 120px;
+      border-radius: 12px;
+      border: 2px solid var(--accent-cyan);
+      overflow: hidden;
+      z-index: 60;
+      display: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+      background: #000;
+    }
+
+    #hand-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    /* ========================================================= */
+    /* Mobile-First Responsive Styles (iOS & Android)             */
+    /* ========================================================= */
+    .mobile-bottom-bar {
+      display: none;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 70;
+      background: rgba(10, 16, 36, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--panel-border);
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.7);
+    }
+
+    .mobile-btn-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-tech);
+      font-size: 0.72rem;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      min-width: 65px;
+      min-height: 48px;
+      justify-content: center;
+    }
+
+    .mobile-btn-tab.active {
+      color: var(--accent-cyan);
+    }
+
+    .mobile-btn-tab span.icon {
+      font-size: 1.25rem;
+    }
+
+    /* Mobile Sheet / Backdrop */
+    .drawer-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.65);
+      z-index: 60;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      transition: opacity 0.25s ease;
+    }
+    .drawer-backdrop.active {
+      display: block;
+    }
+
+    .mobile-drawer-handle-bar {
+      display: none;
+      width: 100%;
+      text-align: center;
+      cursor: pointer;
+      padding: 6px 0 10px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .drawer-handle {
+      width: 44px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+      margin: 0 auto 6px;
+    }
+
+    .drawer-close-hint {
+      font-size: 0.7rem;
+      color: var(--accent-cyan);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Screen Queries for Mobile Devices (iOS & Android) */
+    @media (max-width: 960px) {
+      .hud-dock-left, .hud-dock-right {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: auto;
+        bottom: 64px;
+        width: 100%;
+        max-height: 72vh;
+        z-index: 65;
+        transform: translateY(125%);
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+      }
+
+      .hud-dock-left.mobile-open, .hud-dock-right.mobile-open {
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .hud-dock-left .glass-card, .hud-dock-right .glass-card {
+        border-radius: 20px 20px 0 0;
+        border-bottom: none;
+        max-height: 72vh;
+        box-shadow: 0 -15px 40px rgba(0,0,0,0.85);
+      }
+
+      .mobile-drawer-handle-bar {
+        display: block;
+      }
+
+      .mobile-bottom-bar {
+        display: flex;
+      }
+
+      .brand-title {
+        font-size: 0.85rem;
+      }
+      .brand-subtitle {
+        display: none;
+      }
+
+      .mode-pill-bar {
+        display: none; /* In mobile, mode toggling is handled through the drawer */
+      }
+
+      .top-nav {
+        top: calc(8px + env(safe-area-inset-top));
+      }
+
+      .modal-card {
+        max-width: 95vw;
+        padding: 12px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- WebGL Render Canvas -->
+  <div id="webgl-canvas"></div>
+
+  <!-- Top Glass Navbar -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <div class="brand-icon">🔐</div>
+      <div>
+        <div class="brand-title">LAB 12 ---- การแจกจ่ายกุญแจรหัสลับควอนตัมและเครือข่ายความปลอดภัยควอนตัม</div>
+        <div class="brand-subtitle">Quantum Key Distribution (QKD: BB84 & B92), Eve Eavesdropping & QBER, Decoy States</div>
+      </div>
+    </div>
+
+    <div class="nav-tools">
+      <div class="mode-pill-bar">
+        <button class="mode-pill active" id="btn-mode-3d" onclick="setSimMode('3d')">
+          <span>🌐</span> 3D Virtual Lab
+        </button>
+        <button class="mode-pill" id="btn-mode-ar" onclick="openARModal()">
+          <span>📖</span> สแกนภาพ AR
+        </button>
+        <button class="mode-pill" id="btn-mode-ai" onclick="toggleHandTracking()">
+          <span>✋</span> ท่าทางมือ AI
+        </button>
+      </div>
+
+      <button class="btn-zen" id="btn-zen" onclick="toggleZenMode()">
+        <span>🔳</span> ย่อทุกบาร์ [H]
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- Desktop Layout: Left Controls Dock                         -->
+  <!-- ========================================================= -->
+  <aside class="hud-dock-left" id="hud-left">
+    <div class="glass-card" style="flex:1;">
+      <div class="mobile-drawer-handle-bar" onclick="closeAllMobileDrawers()">
+        <div class="drawer-handle"></div>
+        <div class="drawer-close-hint">✕ แตะที่นี่เพื่อพับเก็บลงล่าง</div>
+      </div>
+      <div class="card-header">
+        <div class="card-title">
+          <span>⚙️</span> โหมดจำลอง QKD และการดักฟัง
+        </div>
+        <span class="badge-tag">ผศ.ดร.ชีวะ ทัศนา</span>
+      </div>
+
+      <!-- 5 Scenarios Tabs -->
+      <div class="scenario-tabs">
+        <div class="scenario-tab active" id="tab-bb84" onclick="setScenario('bb84')">
+          <span>🔑</span> BB84
+        </div>
+        <div class="scenario-tab" id="tab-eve" onclick="setScenario('eve')">
+          <span>🕵️</span> อีฟดักฟัง
+        </div>
+        <div class="scenario-tab" id="tab-b92" onclick="setScenario('b92')">
+          <span>📐</span> B92
+        </div>
+        <div class="scenario-tab" id="tab-decoy" onclick="setScenario('decoy')">
+          <span>🛡️</span> Decoy
+        </div>
+        <div class="scenario-tab" id="tab-network" onclick="setScenario('network')">
+          <span>🛰️</span> โครงข่าย
+        </div>
+      </div>
+
+      <!-- Controls Group Container -->
+      <div class="ctrl-group">
+        <!-- Scenario 1: BB84 Protocol Controls -->
+        <div id="group-bb84" class="ctrl-group">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>ฐานโพลาไรเซชันของอลิซ (Alice's Basis)</span>
+              <span class="ctrl-val" id="val-alice-basis">+ (Rectilinear)</span>
+            </div>
+            <div class="pol-btn-grid">
+              <button class="pol-btn active" id="btn-pol-0" onclick="setAlicePolarization(0, '+')">|0°⟩ [0+]</button>
+              <button class="pol-btn" id="btn-pol-90" onclick="setAlicePolarization(90, '+')">|90°⟩ [1+]</button>
+              <button class="pol-btn" id="btn-pol-45" onclick="setAlicePolarization(45, 'x')">|45°⟩ [0x]</button>
+              <button class="pol-btn" id="btn-pol-135" onclick="setAlicePolarization(135, 'x')">|135°⟩ [1x]</button>
+            </div>
+          </div>
+
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>ฐานการวัดของบ็อบ (Bob's Measurement Basis)</span>
+              <span class="ctrl-val" id="val-bob-basis">+ (Rectilinear)</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-act active" id="btn-bob-plus" onclick="setBobBasis('+')" style="flex:1;">
+                <span>➕</span> ฐานบวก (+) 0°/90°
+              </button>
+              <button class="btn-act" id="btn-bob-diag" onclick="setBobBasis('x')" style="flex:1;">
+                <span>✖️</span> ฐานทแยง (×) 45°/135°
+              </button>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:6px;">
+            <button class="btn-act primary" onclick="sendSinglePhoton()" style="flex:1;">
+              <span>⚡</span> ยิงโฟตอนเดี่ยว
+            </button>
+            <button class="btn-act" onclick="autoGenerateKeyStream(16)" style="flex:1.2;">
+              <span>🚀</span> สร้างกุญแจ 16 บิตอัตโนมัติ
+            </button>
+          </div>
+        </div>
+
+        <!-- Scenario 2: Eve's Eavesdropping Controls -->
+        <div id="group-eve" class="ctrl-group" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>การดักฟังและส่งต่อของอีฟ (Intercept-Resend Attack)</span>
+              <span class="ctrl-val" id="val-eve-active" style="color:var(--accent-crimson);">ปิดการดักฟัง</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-act danger" id="btn-toggle-eve" onclick="toggleEve()" style="flex:1;">
+                <span>🕵️</span> สลับสถานะอีฟดักฟัง
+              </button>
+            </div>
+          </div>
+
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>อัตราส่วนโฟตอนที่ถูกอีฟดักฟัง (Interception Rate)</span>
+              <span class="ctrl-val" id="val-eve-rate">100%</span>
+            </div>
+            <input type="range" class="range-slider" id="slide-eve-rate" min="0" max="100" value="100" oninput="updateEveRate(this.value)">
+            <div style="font-size:0.7rem; color:var(--text-muted); line-height:1.4;">
+              หากอีฟดักฟัง 100% ค่า QBER เชิงทฤษฎีในบิตที่กรองแล้วจะพุ่งสูงถึง 25% (ทะลุขอบเขตความปลอดภัย 11%)
+            </div>
+          </div>
+
+          <button class="btn-act primary" onclick="autoGenerateKeyStream(24)">
+            <span>🔬</span> ยิงทดสอบตรวจจับอีฟ (24 โฟตอน)
+          </button>
+        </div>
+
+        <!-- Scenario 3: B92 Protocol Controls -->
+        <div id="group-b92" class="ctrl-group" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>โพรโทคอล B92 (Bennett 1992 ---- 2 สถานะไม่ตั้งฉาก)</span>
+            </div>
+            <div style="font-size:0.72rem; color:#cbd5e1; line-height:1.45;">
+              อลิซส่งเพียง 2 สถานะที่ไม่ตั้งฉากกันคือ $|0^\circ\rangle$ แทนบิต 0 และ $|45^\circ\rangle$ แทนบิต 1 โดยบ็อบใช้ตัวตรวจวัดปฏิเสธสถานะ (Unambiguous State Discrimination)
+            </div>
+            <div style="display:flex; gap:6px; margin-top:6px;">
+              <button class="pol-btn active" id="btn-b92-0" onclick="setB92State(0)" style="flex:1;">บิต 0: |0°⟩</button>
+              <button class="pol-btn" id="btn-b92-1" onclick="setB92State(1)" style="flex:1;">บิต 1: |45°⟩</button>
+            </div>
+          </div>
+
+          <button class="btn-act primary" onclick="sendB92Photon()">
+            <span>⚡</span> ยิงโฟตอน B92
+          </button>
+        </div>
+
+        <!-- Scenario 4: Decoy-State Protocol Controls -->
+        <div id="group-decoy" class="ctrl-group" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>พัลส์สอดคล้องอย่างอ่อนและโฟตอนลวง (Decoy States)</span>
+            </div>
+            <div style="font-size:0.72rem; color:#cbd5e1; line-height:1.45;">
+              ป้องกันการโจมตีแยกจำนวนโฟตอน (Photon Number Splitting ---- PNS Attack) โดยอลิซสุ่มปรับความเข้มแสงระหว่าง Signal State ($\mu = 0.6$) และ Decoy State ($\nu = 0.1$)
+            </div>
+            <div class="ctrl-header" style="margin-top:8px;">
+              <span>จำนวนโฟตอนเฉลี่ยต่อพัลส์ ($\mu$)</span>
+              <span class="ctrl-val" id="val-photon-mu">0.60</span>
+            </div>
+            <input type="range" class="range-slider" id="slide-photon-mu" min="10" max="200" value="60" oninput="updateDecoyMu(this.value)">
+          </div>
+
+          <button class="btn-act primary" onclick="autoGenerateKeyStream(20)">
+            <span>🛡️</span> ตรวจวัดอัตราได้ผล Decoy (20 พัลส์)
+          </button>
+        </div>
+
+        <!-- Scenario 5: Satellite & Fiber Network Controls -->
+        <div id="group-network" class="ctrl-group" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>ทอพอโลยีเครือข่ายควอนตัม (Quantum Network Topology)</span>
+            </div>
+            <div style="display:flex; gap:6px; margin-top:4px;">
+              <button class="btn-act active" id="btn-top-sat" onclick="setNetworkTopology('satellite')" style="flex:1;">
+                <span>🛰️</span> ดาวเทียมสู่อวกาศ
+              </button>
+              <button class="btn-act" id="btn-top-fiber" onclick="setNetworkTopology('fiber')" style="flex:1;">
+                <span>🌐</span> โครงข่ายใยแก้ว 3 โหนด
+              </button>
+            </div>
+            <div style="font-size:0.7rem; color:var(--text-muted); line-height:1.4; margin-top:6px;">
+              จำลองดาวเทียมควอนตัม Micius ส่งกุญแจลับระยะทาง $1,200\text{ km}$ ข้ามสถานีภาคพื้นดิน หรือระบบทวนสัญญาณควอนตัมรีพีตเตอร์
+            </div>
+          </div>
+
+          <button class="btn-act primary" onclick="distributeNetworkKey()">
+            <span>🚀</span> แจกจ่ายกุญแจข้ามสถานีเครือข่าย
+          </button>
+        </div>
+
+        <!-- Common Quick Actions -->
+        <div style="display:flex; gap:6px;">
+          <button class="btn-act" onclick="reset3DCamera()" style="flex:1;">
+            <span>🎯</span> รีเซ็ตมุมมอง 3D
+          </button>
+          <button class="btn-act" id="btn-sound-toggle" onclick="toggleAudio()" style="flex:1;">
+            <span>🔊</span> เสียงสังเคราะห์ (เปิด)
+          </button>
+        </div>
+
+        <!-- High-Level Analysis Modals -->
+        <button class="btn-act" id="btn-open-sifting-modal" onclick="openSiftingModal()" style="border-color:var(--accent-cyan); color:var(--accent-cyan);">
+          <span>📊</span> ตารางเปรียบเทียบฐานและการกรองกุญแจ (Sifting Matrix)
+        </button>
+
+        <button class="btn-act" id="btn-open-security-modal" onclick="openSecurityModal()" style="border-color:var(--accent-magenta); color:var(--accent-magenta);">
+          <span>📈</span> กราฟ QBER และขีดจำกัดความปลอดภัย (Shor-Preskill Threshold)
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================= -->
+  <!-- Desktop Layout: Right Telemetry Dock                      -->
+  <!-- ========================================================= -->
+  <aside class="hud-dock-right" id="hud-right">
+    <div class="glass-card" style="flex:1;">
+      <div class="mobile-drawer-handle-bar" onclick="closeAllMobileDrawers()">
+        <div class="drawer-handle"></div>
+        <div class="drawer-close-hint">✕ แตะที่นี่เพื่อพับเก็บลงล่าง</div>
+      </div>
+      <div class="card-header">
+        <div class="card-title">
+          <span>📡</span> โทรมาตรความปลอดภัยควอนตัม
+        </div>
+        <span class="badge-tag" id="tag-qber-status" style="border-color:var(--accent-green); color:var(--accent-green);">SECURE</span>
+      </div>
+
+      <!-- Live QBER Highlight Banner -->
+      <div class="status-banner" id="banner-security">
+        <div class="status-sub">อัตราความผิดพลาดควอนตัมบิต (Quantum Bit Error Rate)</div>
+        <div class="status-val" id="val-qber-display">0.00 %</div>
+        <div style="font-size:0.68rem; color:#cbd5e1; margin-top:2px;" id="val-qber-verdict">
+          ปลอดภัยสมบูรณ์ทางสารสนเทศศาสตร์ (QBER &lt; 11%)
+        </div>
+      </div>
+
+      <div class="telem-list">
+        <div class="telem-row">
+          <span class="telem-label"><span>📤</span> โฟตอนที่ส่งทั้งหมด (Transmitted)</span>
+          <span class="telem-val" id="val-total-sent">0 พัลส์</span>
+        </div>
+        <div class="telem-row">
+          <span class="telem-label"><span>🎯</span> ฐานตรงกัน (Sifted Key Length)</span>
+          <span class="telem-val" id="val-sifted-len">0 บิต</span>
+        </div>
+        <div class="telem-row">
+          <span class="telem-label"><span>❌</span> บิตที่เกิดความคลาดเคลื่อน (Errors)</span>
+          <span class="telem-val" id="val-error-bits" style="color:var(--accent-crimson);">0 บิต</span>
+        </div>
+        <div class="telem-row">
+          <span class="telem-label"><span>🕵️</span> สถานะการตรวจพบอีฟ (Eve Detected)</span>
+          <span class="telem-val" id="val-eve-detect" style="color:var(--accent-green);">ไม่พบผู้ดักฟัง</span>
+        </div>
+        <div class="telem-row">
+          <span class="telem-label"><span>🛡️</span> โหมดการเข้ารหัสลับ (Encryption)</span>
+          <span class="telem-val" style="color:var(--accent-gold);">One-Time Pad (OTP)</span>
+        </div>
+      </div>
+
+      <!-- Sifted Secret Key Box -->
+      <div style="margin-top:2px;">
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#cbd5e1; margin-bottom:4px;">
+          <span>กุญแจลับที่สกัดได้ (Sifted Secret Key)</span>
+          <span id="val-key-entropy" style="color:var(--accent-cyan); font-family:var(--font-mono);">0 bits</span>
+        </div>
+        <div class="stream-box" id="box-sifted-key">
+          -- ยังไม่มีการสร้างกุญแจ --
+        </div>
+      </div>
+
+      <!-- Plaintext & Ciphertext Encryption Box -->
+      <div>
+        <div style="font-size:0.75rem; color:#cbd5e1; margin-bottom:4px;">
+          ทดสอบส่งข้อความลับด้วย OTP (Vernam Cipher)
+        </div>
+        <div style="display:flex; gap:6px; margin-bottom:4px;">
+          <input type="text" id="input-secret-msg" value="QUANTUM RBRU 2026" style="flex:1; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.15); border-radius:7px; color:#fff; font-family:var(--font-mono); font-size:0.72rem; padding:4px 8px;">
+          <button class="btn-act primary" onclick="encryptMessageOTP()" style="padding:4px 10px; min-height:30px; font-size:0.7rem;">
+            เข้ารหัส
+          </button>
+        </div>
+        <div class="stream-box" id="box-cipher-res" style="max-height:60px; font-size:0.7rem; color:var(--accent-magenta);">
+          Ciphertext: --
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================= -->
+  <!-- Mobile Bottom Navigation Bar & Expandable Drawer           -->
+  <!-- ========================================================= -->
+  <nav class="mobile-bottom-bar" id="mobile-bar">
+    <button class="mobile-btn-tab" id="m-btn-controls" onclick="openMobileDrawer('controls')">
+      <span class="icon">🎛️</span>
+      <span>ควบคุม</span>
+    </button>
+    <button class="mobile-btn-tab" id="m-btn-telemetry" onclick="openMobileDrawer('telemetry')">
+      <span class="icon">📡</span>
+      <span>โทรมาตร</span>
+    </button>
+    <button class="mobile-btn-tab" id="m-btn-sift" onclick="openSiftingModal()">
+      <span class="icon">📊</span>
+      <span>ตารางกุญแจ</span>
+    </button>
+    <button class="mobile-btn-tab" id="m-btn-sec" onclick="openSecurityModal()">
+      <span class="icon">📈</span>
+      <span>QBER</span>
+    </button>
+    <button class="mobile-btn-tab" id="m-btn-cam" onclick="reset3DCamera()">
+      <span class="icon">🎯</span>
+      <span>รีเซ็ต 3D</span>
+    </button>
+  </nav>
+
+  <!-- Backdrop for mobile drawer touch dismissal -->
+  <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeAllMobileDrawers()"></div>
+
+  <!-- ========================================================= -->
+  <!-- 2D Canvas Modal 1: Sifting Matrix Table                    -->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" id="sifting-modal" onclick="if(event.target === this) closeSiftingModal()">
+    <div class="modal-card" style="max-width:760px;">
+      <div class="modal-head">
+        <span>📊 ตารางเปรียบเทียบฐานและการกรองกุญแจ (QKD Sifting Matrix)</span>
+        <button class="modal-close" id="btn-close-sifting-modal" onclick="closeSiftingModal()">✕</button>
+      </div>
+      <div>
+        <div style="width:100%; height:280px; background:#020617; border-radius:12px; border:1px solid rgba(0,240,255,0.3); overflow:hidden; position:relative;">
+          <canvas id="sifting-canvas" width="720" height="280" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8; margin-top:8px;">
+          <span>การกรองฐาน (Basis Reconciliation) ---- <strong style="color:var(--accent-cyan);">บิตจะถูกเก็บเฉพาะเมื่อฐานของ Alice และ Bob ตรงกัน</strong></span>
+          <span>ความน่าจะเป็นที่ฐานตรงกันสุ่ม ---- <strong style="color:var(--accent-gold);">50%</strong></span>
+        </div>
+        <p style="font-size:0.74rem; color:#cbd5e1; margin-top:6px; line-height:1.45;">
+          ตามโพรโทคอล BB84 อลิซและบ็อบจะสื่อสารเปิดเผย "ฐานการวัด" ผ่านช่องทางคลาสสิกที่พิสูจน์ตัวตนแล้วโดยไม่เปิดเผยค่าบิต หากฐานตรงกันจะบันทึกเป็น Sifted Key จากนั้นสุ่มเปรียบเทียบตัวอย่างบิตเพื่อคำนวณ QBER หากตรวจไม่พบการดักฟัง จะดำเนินการแก้ไขข้อผิดพลาด (Information Reconciliation) และขยายภาวะส่วนบุคคล (Privacy Amplification) เป็นกุญแจสุดท้าย
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 2D Canvas Modal 2: QBER & Information Theory Security      -->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" id="security-modal" onclick="if(event.target === this) closeSecurityModal()">
+    <div class="modal-card" style="max-width:720px;">
+      <div class="modal-head">
+        <span>📈 กราฟความปลอดภัยเชิงทฤษฎีสารสนเทศและขีดจำกัด QBER (Shor-Preskill Bound)</span>
+        <button class="modal-close" id="btn-close-security-modal" onclick="closeSecurityModal()">✕</button>
+      </div>
+      <div>
+        <div style="width:100%; height:270px; background:#020617; border-radius:12px; border:1px solid rgba(236,72,153,0.3); overflow:hidden; position:relative;">
+          <canvas id="security-canvas" width="680" height="270" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8; margin-top:8px;">
+          <span>อัตรากุญแจลับบริสุทธิ์ ---- <strong style="color:var(--accent-cyan);">$r \ge 1 - 2 h(e)$</strong></span>
+          <span>ขีดจำกัดความปลอดภัยวิกฤต ---- <strong style="color:var(--accent-crimson);">$\text{QBER}_{\text{thresh}} \approx 11.0\%$</strong></span>
+        </div>
+        <p style="font-size:0.74rem; color:#cbd5e1; margin-top:6px; line-height:1.45;">
+          กราฟแสดงความสัมพันธ์ระหว่างสารสนเทศร่วมระหว่าง Alice-Bob $I(A;B)$ เทียบกับสารสนเทศที่รั่วไหลไปถึง Eve $I(A;E)$ เมื่อ QBER เกิน 11% ข้อมูลที่อีฟรู้จะมากกว่าสารสนเทศร่วมระหว่างคู่สนทนา ทำให้ไม่สามารถกลั่นกุญแจลับสมบูรณ์ได้ และระบบจะสั่งยกเลิกการแจกจ่ายกุญแจทันที
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- AR Hiro Marker Modal                                      -->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" id="ar-modal" onclick="if(event.target === this) closeARModal()">
+    <div class="modal-card" style="max-width:440px; text-align:center;">
+      <div class="modal-head">
+        <span>📖 สแกนภาพมาร์กเกอร์หนังสือ AR (Hiro Marker)</span>
+        <button class="modal-close" onclick="closeARModal()">✕</button>
+      </div>
+      <div>
+        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Hiro Marker" style="width:220px; height:220px; border-radius:10px; border:3px solid var(--accent-cyan); margin:10px auto; display:block;">
+        <p style="font-size:0.76rem; color:#cbd5e1; margin-top:10px; line-height:1.45;">
+          ส่องกล้องสมาร์ทโฟนของท่านมายังภาพมาร์กเกอร์นี้ เพื่อแสดงระบบส่งโฟตอนควอนตัม 3 มิติ และสถานีดักฟังของอีฟลอยอยู่บนหน้ากระดาษตำราเรียน
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MediaPipe Video Element (PiP) -->
+  <div id="hand-pip-container">
+    <video id="hand-video" autoplay playsinline muted></video>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- JavaScript Application Logic & Quantum Physics Engine      -->
+  <!-- ========================================================= -->
+  <script>
+    // -------------------------------------------------------------
+    // Physical Constants & Global QKD State
+    // -------------------------------------------------------------
+    let currentScenario = 'bb84'; // 'bb84', 'eve', 'b92', 'decoy', 'network'
+    let alicePolarizationAngle = 0; // 0 (0+), 90 (1+), 45 (0x), 135 (1x)
+    let aliceBasis = '+'; // '+' or 'x'
+    let aliceBit = 0; // 0 or 1
+    let bobBasis = '+'; // '+' or 'x'
+    let bobMeasuredBit = 0;
+    let bobMeasuredAngle = 0;
+    
+    // Eve State
+    let eveActive = false;
+    let eveInterceptionRate = 1.0; // 0 to 1
+    let eveBasis = '+';
+    let eveMeasuredBit = 0;
+
+    // Decoy State Params
+    let decoyMu = 0.6; // Mean photon number
+
+    // Network Topology
+    let networkTopology = 'satellite'; // 'satellite', 'fiber'
+
+    // History and Telemetry
+    let transmittedHistory = [];
+    let totalSentCount = 0;
+    let siftedKeyString = '';
+    let totalErrorCount = 0;
+    let liveQBER = 0.0;
+
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    // Three.js 3D Objects
+    let scene, camera, renderer, controls;
+    let aliceGroup, bobGroup, eveGroup, channelGroup, networkGroup;
+    let photonParticles = [];
+    let photonStreamGroup;
+
+    // -------------------------------------------------------------
+    // Initialization on Page Load
+    // -------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      initThreeScene();
+      initAudio();
+      initMobileDrawerSync();
+      updatePhysics();
+      drawSiftingMatrixCanvas();
+      drawSecurityCurveCanvas();
+
+      window.addEventListener('resize', onWindowResize);
+
+      // Keyboard Shortcut [H] for Zen Mode
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'h' || e.key === 'H') toggleZenMode();
+      });
+
+      // Touch listener for iOS Web Audio context unlock
+      document.body.addEventListener('touchstart', () => {
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      }, { once: true });
+    });
+
+    // -------------------------------------------------------------
+    // Three.js 3D Virtual Lab Setup
+    // -------------------------------------------------------------
+    function initThreeScene() {
+      const container = document.getElementById('webgl-canvas');
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x030712);
+      scene.fog = new THREE.FogExp2(0x030712, 0.028);
+
+      camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+      camera.position.set(0, 5.0, 16.0);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(w, h);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.25;
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxPolarAngle = Math.PI / 2 + 0.05;
+      controls.minDistance = 3.5;
+      controls.maxDistance = 38;
+      controls.target.set(0, 0.8, 0);
+
+      // Ambient & Directional Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0x00f0ff, 1.2);
+      dirLight.position.set(10, 20, 15);
+      scene.add(dirLight);
+
+      const purpleLight = new THREE.PointLight(0x8b5cf6, 1.8, 40);
+      purpleLight.position.set(-8, 5, -5);
+      scene.add(purpleLight);
+
+      // Floor Grid & Horizon Glow
+      const gridHelper = new THREE.GridHelper(40, 40, 0x00f0ff, 0x1e293b);
+      gridHelper.position.y = -1.2;
+      scene.add(gridHelper);
+
+      // Groups
+      aliceGroup = new THREE.Group();
+      bobGroup = new THREE.Group();
+      eveGroup = new THREE.Group();
+      channelGroup = new THREE.Group();
+      photonStreamGroup = new THREE.Group();
+      networkGroup = new THREE.Group();
+
+      scene.add(aliceGroup);
+      scene.add(bobGroup);
+      scene.add(eveGroup);
+      scene.add(channelGroup);
+      scene.add(photonStreamGroup);
+      scene.add(networkGroup);
+
+      // Build 3D Stations
+      buildAliceStation();
+      buildBobStation();
+      buildEveStation();
+      buildOpticalChannel();
+      buildNetworkTopologyMesh();
+
+      animate();
+    }
+
+    // Build Alice Station (Laser Emitter + Polarizing Modulator)
+    function buildAliceStation() {
+      aliceGroup.position.set(-7.5, 0, 0);
+
+      // Base Platform
+      const baseGeo = new THREE.CylinderGeometry(1.4, 1.6, 0.35, 32);
+      const baseMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8, roughness: 0.3 });
+      const base = new THREE.Mesh(baseGeo, baseMat);
+      base.position.y = -1.0;
+      aliceGroup.add(base);
+
+      // Optical Laser Housing
+      const laserGeo = new THREE.BoxGeometry(1.8, 1.0, 1.0);
+      const laserMat = new THREE.MeshStandardMaterial({
+        color: 0x0284c7,
+        metalness: 0.7,
+        roughness: 0.2,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.2
+      });
+      const laser = new THREE.Mesh(laserGeo, laserMat);
+      laser.position.set(0, 0.2, 0);
+      aliceGroup.add(laser);
+
+      // Polarizer Dial Ring
+      const ringGeo = new THREE.TorusGeometry(0.7, 0.08, 16, 48);
+      const ringMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x00f0ff, emissiveIntensity: 0.5 });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.name = 'aliceRing';
+      ring.position.set(1.1, 0.2, 0);
+      ring.rotation.y = Math.PI / 2;
+      aliceGroup.add(ring);
+
+      // Polarization Angle Indicator Needle
+      const needleGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.2, 12);
+      const needleMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+      const needle = new THREE.Mesh(needleGeo, needleMat);
+      needle.name = 'aliceNeedle';
+      needle.position.set(1.12, 0.2, 0);
+      aliceGroup.add(needle);
+
+      // Label Marker
+      addFloatingLabel(aliceGroup, 'ALICE (ผู้ส่ง)', new THREE.Vector3(0, 1.8, 0), '#00f0ff');
+    }
+
+    // Build Bob Station (Polarizing Beam Splitter + Detectors)
+    function buildBobStation() {
+      bobGroup.position.set(7.5, 0, 0);
+
+      // Base Platform
+      const baseGeo = new THREE.CylinderGeometry(1.4, 1.6, 0.35, 32);
+      const baseMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8, roughness: 0.3 });
+      const base = new THREE.Mesh(baseGeo, baseMat);
+      base.position.y = -1.0;
+      bobGroup.add(base);
+
+      // PBS Cube (Polarization Beam Splitter)
+      const pbsGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+      const pbsMat = new THREE.MeshPhysicalMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.65,
+        roughness: 0.1,
+        transmission: 0.8,
+        ior: 1.5
+      });
+      const pbs = new THREE.Mesh(pbsGeo, pbsMat);
+      pbs.position.set(0, 0.2, 0);
+      bobGroup.add(pbs);
+
+      // Detectors D0 and D1 (SPAD)
+      const spdGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.6, 24);
+      const spdMat = new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x10b981, emissiveIntensity: 0.4 });
+
+      const d0 = new THREE.Mesh(spdGeo, spdMat);
+      d0.name = 'bobD0';
+      d0.rotation.z = Math.PI / 2;
+      d0.position.set(1.0, 0.2, 0);
+      bobGroup.add(d0);
+
+      const d1 = new THREE.Mesh(spdGeo, spdMat);
+      d1.name = 'bobD1';
+      d1.position.set(0, 1.2, 0);
+      bobGroup.add(d1);
+
+      addFloatingLabel(bobGroup, 'BOB (ผู้รับ)', new THREE.Vector3(0, 1.8, 0), '#10b981');
+    }
+
+    // Build Eve Station (Eavesdropper Intercept Module)
+    function buildEveStation() {
+      eveGroup.position.set(0, 0, 0);
+
+      const podGeo = new THREE.OctahedronGeometry(0.9, 2);
+      const podMat = new THREE.MeshStandardMaterial({
+        color: 0xef4444,
+        emissive: 0xef4444,
+        emissiveIntensity: 0.6,
+        wireframe: true
+      });
+      const pod = new THREE.Mesh(podGeo, podMat);
+      pod.name = 'evePod';
+      pod.position.set(0, 0.2, 0);
+      eveGroup.add(pod);
+
+      // Rotating Aura Ring
+      const auraGeo = new THREE.TorusGeometry(1.4, 0.04, 16, 48);
+      const auraMat = new THREE.MeshBasicMaterial({ color: 0xec4899, transparent: true, opacity: 0.5 });
+      const aura = new THREE.Mesh(auraGeo, auraMat);
+      aura.name = 'eveAura';
+      aura.rotation.x = Math.PI / 2;
+      aura.position.set(0, 0.2, 0);
+      eveGroup.add(aura);
+
+      addFloatingLabel(eveGroup, 'EVE (ผู้ดักฟัง)', new THREE.Vector3(0, 1.6, 0), '#ef4444');
+      eveGroup.visible = false; // Initially hidden until active
+    }
+
+    // Build Quantum Optical Channel (Fiber Glass Beam)
+    function buildOpticalChannel() {
+      const channelGeo = new THREE.CylinderGeometry(0.12, 0.12, 15.0, 24);
+      const channelMat = new THREE.MeshPhysicalMaterial({
+        color: 0x00f0ff,
+        transparent: true,
+        opacity: 0.35,
+        roughness: 0.1,
+        transmission: 0.9,
+        emissive: 0x00f0ff,
+        emissiveIntensity: 0.15
+      });
+      const channel = new THREE.Mesh(channelGeo, channelMat);
+      channel.rotation.z = Math.PI / 2;
+      channel.position.set(0, 0.2, 0);
+      channelGroup.add(channel);
+    }
+
+    // Build Satellite & Fiber Network Topology 3D Mesh
+    function buildNetworkTopologyMesh() {
+      networkGroup.position.set(0, 3.5, 0);
+
+      // Satellite Body
+      const satBodyGeo = new THREE.BoxGeometry(1.2, 0.8, 0.8);
+      const satMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8, roughness: 0.3 });
+      const satBody = new THREE.Mesh(satBodyGeo, satMat);
+      networkGroup.add(satBody);
+
+      // Solar Panels
+      const panelGeo = new THREE.BoxGeometry(2.2, 0.05, 0.9);
+      const panelMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.9, roughness: 0.1 });
+      const panelL = new THREE.Mesh(panelGeo, panelMat);
+      panelL.position.set(-1.8, 0, 0);
+      networkGroup.add(panelL);
+
+      const panelR = new THREE.Mesh(panelGeo, panelMat);
+      panelR.position.set(1.8, 0, 0);
+      networkGroup.add(panelR);
+
+      // Laser Downlink Cones to Alice and Bob
+      const downlinkMat = new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.25, wireframe: true });
+      const coneLGeo = new THREE.ConeGeometry(0.8, 4.5, 16);
+      const coneL = new THREE.Mesh(coneLGeo, downlinkMat);
+      coneL.position.set(-3.5, -2.0, 0);
+      coneL.rotation.z = -0.65;
+      networkGroup.add(coneL);
+
+      const coneRGeo = new THREE.ConeGeometry(0.8, 4.5, 16);
+      const coneR = new THREE.Mesh(coneRGeo, downlinkMat);
+      coneR.position.set(3.5, -2.0, 0);
+      coneR.rotation.z = 0.65;
+      networkGroup.add(coneR);
+
+      addFloatingLabel(networkGroup, 'ดาวเทียมควอนตัม MICIUS (1,200 km Link)', new THREE.Vector3(0, 1.4, 0), '#f59e0b');
+      networkGroup.visible = false;
+    }
+
+    // Helper: Add Floating 3D Sprite Text Label
+    function addFloatingLabel(parent, text, position, color) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.roundRect(0, 0, 256, 64, 12);
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.font = 'bold 24px Chakra Petch, Sarabun, sans-serif';
+      ctx.fillStyle = color;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, 128, 32);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.position.copy(position);
+      sprite.scale.set(2.4, 0.6, 1);
+      parent.add(sprite);
+    }
+
+    // -------------------------------------------------------------
+    // Animation Loop
+    // -------------------------------------------------------------
+    let clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // Rotate Alice needle smoothly
+      const needle = aliceGroup.getObjectByName('aliceNeedle');
+      if (needle) {
+        const rad = (alicePolarizationAngle * Math.PI) / 180;
+        needle.rotation.x = rad;
+      }
+
+      // Rotate Eve pod and aura if active
+      if (eveActive && eveGroup.visible) {
+        const pod = eveGroup.getObjectByName('evePod');
+        const aura = eveGroup.getObjectByName('eveAura');
+        if (pod) {
+          pod.rotation.x += dt * 1.5;
+          pod.rotation.y += dt * 2.0;
+        }
+        if (aura) {
+          aura.rotation.z += dt * 0.8;
+          aura.scale.setScalar(1.0 + 0.15 * Math.sin(time * 6.0));
+        }
+      }
+
+      // Update Flying Photons
+      for (let i = photonParticles.length - 1; i >= 0; i--) {
+        const p = photonParticles[i];
+        p.mesh.position.x += p.vx * dt;
+
+        // Wave oscillations
+        p.mesh.position.y = 0.2 + 0.25 * Math.sin(p.mesh.position.x * 6.0 + time * 10.0);
+
+        // Check if reaches Eve
+        if (eveActive && !p.intercepted && p.mesh.position.x >= -0.2 && p.mesh.position.x <= 0.2) {
+          p.intercepted = true;
+          // Eve measures and collapses photon
+          if (Math.random() < eveInterceptionRate) {
+            eveBasis = (Math.random() < 0.5) ? '+' : 'x';
+            if (eveBasis === p.basis) {
+              eveMeasuredBit = p.bit;
+            } else {
+              eveMeasuredBit = (Math.random() < 0.5) ? 0 : 1;
+            }
+            // Eve resends photon in her measured basis
+            p.bit = eveMeasuredBit;
+            p.basis = eveBasis;
+            p.angle = (eveBasis === '+') ? (p.bit === 0 ? 0 : 90) : (p.bit === 0 ? 45 : 135);
+            p.mesh.material.color.setHex(0xef4444); // Glow red for eavesdropped
+            playTone(280, 0.08, 'sawtooth');
+          }
+        }
+
+        // Check if reaches Bob
+        if (p.mesh.position.x >= 7.2) {
+          // Detection at Bob's station
+          onPhotonArrivedAtBob(p);
+          photonStreamGroup.remove(p.mesh);
+          photonParticles.splice(i, 1);
+        }
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // -------------------------------------------------------------
+    // Quantum Key Distribution (QKD) Physics Engine
+    // -------------------------------------------------------------
+    function setAlicePolarization(angle, basis) {
+      alicePolarizationAngle = angle;
+      aliceBasis = basis;
+      aliceBit = (angle === 90 || angle === 135) ? 1 : 0;
+
+      // Update UI button active states
+      document.querySelectorAll('.pol-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`btn-pol-${angle}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.getElementById('val-alice-basis').innerText = `${basis === '+' ? '+ (Rectilinear)' : '× (Diagonal)'} |${angle}°⟩ [บิต ${aliceBit}]`;
+      playTone(440 + angle * 2, 0.1);
+    }
+
+    function setBobBasis(basis) {
+      bobBasis = basis;
+      document.getElementById('btn-bob-plus').classList.toggle('active', basis === '+');
+      document.getElementById('btn-bob-diag').classList.toggle('active', basis === 'x');
+      document.getElementById('val-bob-basis').innerText = `${basis === '+' ? '+ (Rectilinear) 0°/90°' : '× (Diagonal) 45°/135°'}`;
+      playTone(520, 0.1);
+    }
+
+    function toggleEve() {
+      eveActive = !eveActive;
+      eveGroup.visible = eveActive;
+      const btn = document.getElementById('btn-toggle-eve');
+      const val = document.getElementById('val-eve-active');
+      if (eveActive) {
+        btn.innerText = '🛑 ปิดการดักฟังของอีฟ';
+        btn.classList.add('danger');
+        val.innerText = 'เปิดใช้งานดักฟัง (ACTIVE)';
+        val.style.color = 'var(--accent-crimson)';
+        playTone(300, 0.35, 'sawtooth');
+      } else {
+        btn.innerText = '🕵️ สลับสถานะอีฟดักฟัง';
+        btn.classList.remove('danger');
+        val.innerText = 'ปิดการดักฟัง';
+        val.style.color = 'var(--accent-green)';
+        playTone(600, 0.2, 'sine');
+      }
+    }
+
+    function updateEveRate(val) {
+      eveInterceptionRate = val / 100.0;
+      document.getElementById('val-eve-rate').innerText = `${val} %`;
+    }
+
+    function updateDecoyMu(val) {
+      decoyMu = val / 100.0;
+      document.getElementById('val-photon-mu').innerText = decoyMu.toFixed(2);
+    }
+
+    // Launch Single Flying Polarized Photon
+    function sendSinglePhoton() {
+      const photonGeo = new THREE.SphereGeometry(0.24, 16, 16);
+      const color = (aliceBasis === '+') ? 0x00f0ff : 0xf59e0b;
+      const photonMat = new THREE.MeshBasicMaterial({ color: color });
+      const mesh = new THREE.Mesh(photonGeo, photonMat);
+      mesh.position.set(-6.5, 0.2, 0);
+
+      // Polarization Vector Indicator inside photon
+      const arrowGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.6, 8);
+      const arrowMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const arrow = new THREE.Mesh(arrowGeo, arrowMat);
+      arrow.rotation.x = (alicePolarizationAngle * Math.PI) / 180;
+      mesh.add(arrow);
+
+      photonStreamGroup.add(mesh);
+      photonParticles.push({
+        mesh: mesh,
+        vx: 18.0, // Speed
+        bit: aliceBit,
+        basis: aliceBasis,
+        angle: alicePolarizationAngle,
+        intercepted: false
+      });
+
+      playTone(680, 0.12, 'triangle');
+    }
+
+    // Callback when photon reaches Bob's PBS detector
+    function onPhotonArrivedAtBob(photon) {
+      totalSentCount++;
+
+      // Quantum Measurement Projection:
+      // If Bob's basis matches photon's basis -> deterministic bit
+      // If Bob's basis is orthogonal (mismatched) -> 50% random bit
+      let measuredBit = 0;
+      if (bobBasis === photon.basis) {
+        measuredBit = photon.bit;
+      } else {
+        measuredBit = (Math.random() < 0.5) ? 0 : 1;
+      }
+
+      bobMeasuredBit = measuredBit;
+      const basisMatch = (aliceBasis === bobBasis);
+
+      // Trigger detector flash
+      const det = (measuredBit === 0) ? bobGroup.getObjectByName('bobD0') : bobGroup.getObjectByName('bobD1');
+      if (det) {
+        det.material.emissiveIntensity = 2.0;
+        setTimeout(() => { if (det) det.material.emissiveIntensity = 0.4; }, 180);
+      }
+
+      // Check Error in Sifted Key:
+      // If basis matched but measuredBit != aliceBit, an error was caused by Eve's interception!
+      let isError = false;
+      if (basisMatch) {
+        if (measuredBit !== photon.bit) {
+          isError = true;
+          totalErrorCount++;
+        }
+        siftedKeyString += measuredBit;
+      }
+
+      // Record Transmission History
+      transmittedHistory.unshift({
+        id: totalSentCount,
+        aliceBit: photon.bit,
+        aliceBasis: aliceBasis,
+        eveIntercepted: photon.intercepted,
+        bobBasis: bobBasis,
+        bobBit: measuredBit,
+        basisMatch: basisMatch,
+        isError: isError
+      });
+      if (transmittedHistory.length > 50) transmittedHistory.pop();
+
+      // Recalculate QBER
+      const siftedCount = siftedKeyString.length;
+      liveQBER = (siftedCount > 0) ? (totalErrorCount / siftedCount) * 100.0 : 0.0;
+
+      updateTelemetryUI();
+      drawSiftingMatrixCanvas();
+      drawSecurityCurveCanvas();
+
+      if (basisMatch) {
+        if (isError) {
+          playTone(220, 0.2, 'sawtooth');
+        } else {
+          playTone(880, 0.1, 'sine');
+        }
+      }
+    }
+
+    // Auto Key Stream Generator
+    function autoGenerateKeyStream(count) {
+      let i = 0;
+      const interval = setInterval(() => {
+        // Randomize Alice's bit and basis
+        const randBasis = (Math.random() < 0.5) ? '+' : 'x';
+        const randBit = (Math.random() < 0.5) ? 0 : 1;
+        const angle = (randBasis === '+') ? (randBit === 0 ? 0 : 90) : (randBit === 0 ? 45 : 135);
+        setAlicePolarization(angle, randBasis);
+
+        // Randomize Bob's basis
+        const bBasis = (Math.random() < 0.5) ? '+' : 'x';
+        setBobBasis(bBasis);
+
+        sendSinglePhoton();
+        i++;
+        if (i >= count) clearInterval(interval);
+      }, 140);
+    }
+
+    // B92 Single Photon Transmission
+    function setB92State(bit) {
+      aliceBit = bit;
+      alicePolarizationAngle = (bit === 0) ? 0 : 45;
+      aliceBasis = (bit === 0) ? '+' : 'x';
+      document.getElementById('btn-b92-0').classList.toggle('active', bit === 0);
+      document.getElementById('btn-b92-1').classList.toggle('active', bit === 1);
+      playTone(480 + bit * 120, 0.12);
+    }
+
+    function sendB92Photon() {
+      // In B92, Bob randomly tests with 90° or 135°
+      bobBasis = (Math.random() < 0.5) ? '+' : 'x';
+      sendSinglePhoton();
+    }
+
+    // Satellite Network Distribution Demo
+    function setNetworkTopology(top) {
+      networkTopology = top;
+      document.getElementById('btn-top-sat').classList.toggle('active', top === 'satellite');
+      document.getElementById('btn-top-fiber').classList.toggle('active', top === 'fiber');
+      networkGroup.visible = (top === 'satellite');
+      playTone(720, 0.15);
+    }
+
+    function distributeNetworkKey() {
+      autoGenerateKeyStream(20);
+      alert('เริ่มการแจกจ่ายกุญแจควอนตัมข้ามสถานีเครือข่ายดาวเทียม MICIUS ---- บันทึกสถานะโฟตอนพัวพันและกรองกุญแจสำเร็จ!');
+    }
+
+    // One-Time Pad Encryption Demo
+    function encryptMessageOTP() {
+      const text = document.getElementById('input-secret-msg').value;
+      if (!siftedKeyString || siftedKeyString.length < 8) {
+        alert('กรุณายิงสร้างกุญแจลับ (Sifted Key) ให้มีอย่างน้อย 8 บิตก่อนทำการเข้ารหัส!');
+        return;
+      }
+
+      let cipher = '';
+      for (let i = 0; i < text.length; i++) {
+        const charCode = text.charCodeAt(i);
+        const keyBit = parseInt(siftedKeyString[i % siftedKeyString.length]);
+        const encCode = charCode ^ keyBit;
+        cipher += encCode.toString(16).padStart(2, '0') + ' ';
+      }
+
+      document.getElementById('box-cipher-res').innerText = `Ciphertext (Hex): ${cipher.toUpperCase()}`;
+      playChord(520, [0, 4, 7, 11], 0.35);
+    }
+
+    // -------------------------------------------------------------
+    // UI Telemetry Update
+    // -------------------------------------------------------------
+    function updateTelemetryUI() {
+      document.getElementById('val-total-sent').innerText = `${totalSentCount} พัลส์`;
+      document.getElementById('val-sifted-len').innerText = `${siftedKeyString.length} บิต`;
+      document.getElementById('val-error-bits').innerText = `${totalErrorCount} บิต`;
+      document.getElementById('val-qber-display').innerText = `${liveQBER.toFixed(2)} %`;
+
+      const qberTag = document.getElementById('tag-qber-status');
+      const bannerVerdict = document.getElementById('val-qber-verdict');
+      const eveDetect = document.getElementById('val-eve-detect');
+
+      // Security Threshold Check (11% Shor-Preskill Bound)
+      if (liveQBER > 11.0) {
+        qberTag.innerText = 'COMPROMISED';
+        qberTag.style.borderColor = 'var(--accent-crimson)';
+        qberTag.style.color = 'var(--accent-crimson)';
+        bannerVerdict.innerText = 'อันตราย ---- ตรวจพบผู้ดักฟัง QBER > 11% (ยกเลิกกุญแจ!)';
+        bannerVerdict.style.color = 'var(--accent-crimson)';
+        eveDetect.innerText = 'ตรวจพบอีฟดักฟัง!';
+        eveDetect.style.color = 'var(--accent-crimson)';
+      } else {
+        qberTag.innerText = 'SECURE';
+        qberTag.style.borderColor = 'var(--accent-green)';
+        qberTag.style.color = 'var(--accent-green)';
+        bannerVerdict.innerText = 'ปลอดภัยสมบูรณ์ทางสารสนเทศศาสตร์ (QBER < 11%)';
+        bannerVerdict.style.color = 'var(--accent-green)';
+        eveDetect.innerText = 'ไม่พบผู้ดักฟัง';
+        eveDetect.style.color = 'var(--accent-green)';
+      }
+
+      // Update Key Box
+      document.getElementById('box-sifted-key').innerText = siftedKeyString || '-- ยังไม่มีการสร้างกุญแจ --';
+      document.getElementById('val-key-entropy').innerText = `${siftedKeyString.length} bits`;
+    }
+
+    // -------------------------------------------------------------
+    // Scenario Switcher
+    // -------------------------------------------------------------
+    function setScenario(scen) {
+      currentScenario = scen;
+      document.getElementById('tab-bb84').classList.toggle('active', scen === 'bb84');
+      document.getElementById('tab-eve').classList.toggle('active', scen === 'eve');
+      document.getElementById('tab-b92').classList.toggle('active', scen === 'b92');
+      document.getElementById('tab-decoy').classList.toggle('active', scen === 'decoy');
+      document.getElementById('tab-network').classList.toggle('active', scen === 'network');
+
+      document.getElementById('group-bb84').style.display = (scen === 'bb84') ? 'flex' : 'none';
+      document.getElementById('group-eve').style.display = (scen === 'eve') ? 'flex' : 'none';
+      document.getElementById('group-b92').style.display = (scen === 'b92') ? 'flex' : 'none';
+      document.getElementById('group-decoy').style.display = (scen === 'decoy') ? 'flex' : 'none';
+      document.getElementById('group-network').style.display = (scen === 'network') ? 'flex' : 'none';
+
+      // Tune 3D camera and visibility
+      if (scen === 'network') {
+        networkGroup.visible = true;
+        camera.position.set(0, 7.0, 22.0);
+        controls.target.set(0, 1.5, 0);
+      } else {
+        networkGroup.visible = false;
+        camera.position.set(0, 5.0, 16.0);
+        controls.target.set(0, 0.8, 0);
+      }
+
+      if (scen === 'eve') {
+        if (!eveActive) toggleEve();
+      }
+
+      playTone(550, 0.15);
+    }
+
+    // -------------------------------------------------------------
+    // Mobile Drawer Synchronization (iOS & Android)
+    // -------------------------------------------------------------
+    function openMobileDrawer(mode) {
+      const leftDock = document.getElementById('hud-left');
+      const rightDock = document.getElementById('hud-right');
+      const btnCtrl = document.getElementById('m-btn-controls');
+      const btnTelem = document.getElementById('m-btn-telemetry');
+      const backdrop = document.getElementById('drawer-backdrop');
+
+      if (mode === 'controls') {
+        const isOpen = leftDock.classList.contains('mobile-open');
+        leftDock.classList.toggle('mobile-open', !isOpen);
+        rightDock.classList.remove('mobile-open');
+        btnCtrl.classList.toggle('active', !isOpen);
+        btnTelem.classList.remove('active');
+      } else if (mode === 'telemetry') {
+        const isOpen = rightDock.classList.contains('mobile-open');
+        rightDock.classList.toggle('mobile-open', !isOpen);
+        leftDock.classList.remove('mobile-open');
+        btnTelem.classList.toggle('active', !isOpen);
+        btnCtrl.classList.remove('active');
+      }
+
+      const anyOpen = (leftDock && leftDock.classList.contains('mobile-open')) || 
+                      (rightDock && rightDock.classList.contains('mobile-open'));
+      if (backdrop) backdrop.classList.toggle('active', anyOpen);
+      playTone(500, 0.1);
+    }
+
+    function closeAllMobileDrawers() {
+      const leftDock = document.getElementById('hud-left');
+      const rightDock = document.getElementById('hud-right');
+      const backdrop = document.getElementById('drawer-backdrop');
+      if (leftDock) leftDock.classList.remove('mobile-open');
+      if (rightDock) rightDock.classList.remove('mobile-open');
+      if (backdrop) backdrop.classList.remove('active');
+      const btnCtrl = document.getElementById('m-btn-controls');
+      const btnTelem = document.getElementById('m-btn-telemetry');
+      if (btnCtrl) btnCtrl.classList.remove('active');
+      if (btnTelem) btnTelem.classList.remove('active');
+    }
+
+    window.closeMobileDrawer = closeAllMobileDrawers;
+    window.toggleMobileDrawer = openMobileDrawer;
+    window.syncMobileDrawerContent = function() {};
+
+    function setSimMode(mode) {
+      const btn3D = document.getElementById('btn-mode-3d');
+      const btnAR = document.getElementById('btn-mode-ar');
+      const btnAI = document.getElementById('btn-mode-ai');
+
+      if (mode === '3d') {
+        if (btn3D) btn3D.classList.add('active');
+        if (btnAR) btnAR.classList.remove('active');
+        closeARModal();
+        playTone(600, 0.1);
+      } else if (mode === 'ar') {
+        if (btn3D) btn3D.classList.remove('active');
+        if (btnAR) btnAR.classList.add('active');
+        openARModal();
+      } else if (mode === 'ai') {
+        toggleHandTracking();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 2D Canvas Modal 1: Sifting Matrix Rendering
+    // -------------------------------------------------------------
+    function openSiftingModal() {
+      document.getElementById('sifting-modal').style.display = 'flex';
+      drawSiftingMatrixCanvas();
+    }
+    function closeSiftingModal() {
+      document.getElementById('sifting-modal').style.display = 'none';
+    }
+
+    function drawSiftingMatrixCanvas() {
+      const canvas = document.getElementById('sifting-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Header Row
+      const cols = ['ลำดับ', 'Alice Bit', 'Alice ฐาน', 'Eve ดักฟัง', 'Bob ฐาน', 'Bob ผลวัด', 'ฐานตรงกัน', 'สถานะบิต'];
+      const colX = [30, 100, 180, 270, 360, 450, 550, 650];
+
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.15)';
+      ctx.fillRect(10, 10, w - 20, 28);
+
+      ctx.font = 'bold 12px Chakra Petch, Sarabun, sans-serif';
+      ctx.fillStyle = '#00f0ff';
+      ctx.textAlign = 'center';
+      cols.forEach((col, idx) => {
+        ctx.fillText(col, colX[idx], 28);
+      });
+
+      // Data Rows from transmittedHistory
+      const rowsToShow = Math.min(transmittedHistory.length, 7);
+      ctx.font = '12px JetBrains Mono, monospace';
+
+      for (let r = 0; r < rowsToShow; r++) {
+        const item = transmittedHistory[r];
+        const y = 62 + r * 30;
+
+        ctx.fillStyle = (r % 2 === 0) ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.06)';
+        ctx.fillRect(10, y - 18, w - 20, 26);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText(`#${item.id}`, colX[0], y);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillText(item.aliceBit, colX[1], y);
+
+        ctx.fillStyle = (item.aliceBasis === '+') ? '#00f0ff' : '#f59e0b';
+        ctx.fillText(item.aliceBasis, colX[2], y);
+
+        ctx.fillStyle = item.eveIntercepted ? '#ef4444' : '#64748b';
+        ctx.fillText(item.eveIntercepted ? 'แทรกแซง' : 'ผ่านฉลุย', colX[3], y);
+
+        ctx.fillStyle = (item.bobBasis === '+') ? '#00f0ff' : '#f59e0b';
+        ctx.fillText(item.bobBasis, colX[4], y);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillText(item.bobBit, colX[5], y);
+
+        ctx.fillStyle = item.basisMatch ? '#10b981' : '#ef4444';
+        ctx.fillText(item.basisMatch ? '✓ ตรง' : '✗ ข้าม', colX[6], y);
+
+        if (item.basisMatch) {
+          ctx.fillStyle = item.isError ? '#ef4444' : '#10b981';
+          ctx.fillText(item.isError ? 'ERROR (Eve)' : 'SIFTED KEY', colX[7], y);
+        } else {
+          ctx.fillStyle = '#64748b';
+          ctx.fillText('DISCARD', colX[7], y);
+        }
+      }
+
+      if (transmittedHistory.length === 0) {
+        ctx.fillStyle = '#64748b';
+        ctx.textAlign = 'center';
+        ctx.fillText('-- ยิงโฟตอนเพื่อเริ่มการบันทึกตารางการกรองกุญแจ --', w / 2, h / 2);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 2D Canvas Modal 2: QBER & Information Theory Security
+    // -------------------------------------------------------------
+    function openSecurityModal() {
+      document.getElementById('security-modal').style.display = 'flex';
+      drawSecurityCurveCanvas();
+    }
+    function closeSecurityModal() {
+      document.getElementById('security-modal').style.display = 'none';
+    }
+
+    function drawSecurityCurveCanvas() {
+      const canvas = document.getElementById('security-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Axes setup
+      const padL = 60, padR = 40, padT = 30, padB = 45;
+      const plotW = w - padL - padR;
+      const plotH = h - padT - padB;
+
+      // Draw Grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= 1.0; x += 0.2) {
+        const px = padL + x * plotW;
+        ctx.beginPath();
+        ctx.moveTo(px, padT);
+        ctx.lineTo(px, h - padB);
+        ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText((x * 100).toFixed(0) + '%', px, h - padB + 16);
+      }
+
+      for (let y = 0; y <= 1.0; y += 0.25) {
+        const py = padT + (1 - y) * plotH;
+        ctx.beginPath();
+        ctx.moveTo(padL, py);
+        ctx.lineTo(w - padR, py);
+        ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px JetBrains Mono';
+        ctx.textAlign = 'right';
+        ctx.fillText(y.toFixed(2), padL - 8, py + 3);
+      }
+
+      // Axis Titles
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = 'bold 11px Chakra Petch';
+      ctx.textAlign = 'center';
+      ctx.fillText('อัตราการดักฟังของอีฟ (Eve Interception Fraction p_eve)', padL + plotW / 2, h - 10);
+
+      ctx.save();
+      ctx.translate(18, padT + plotH / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('สารสนเทศร่วม (Mutual Information) / QBER', 0, 0);
+      ctx.restore();
+
+      // Curve 1: QBER theoretical = 0.25 * p_eve
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let p = 0; p <= 1.0; p += 0.02) {
+        const qber = 0.25 * p;
+        const px = padL + p * plotW;
+        const py = padT + (1 - qber * 2) * plotH;
+        if (p === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      // Curve 2: Secret Key Fraction r = 1 - 2*h(QBER)
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let p = 0; p <= 1.0; p += 0.02) {
+        const qber = 0.25 * p;
+        let r_rate = 0;
+        if (qber < 0.11) {
+          const h2 = - (qber * Math.log2(qber + 1e-9) + (1 - qber) * Math.log2(1 - qber + 1e-9));
+          r_rate = Math.max(0, 1 - 2 * h2);
+        }
+        const px = padL + p * plotW;
+        const py = padT + (1 - r_rate) * plotH;
+        if (p === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      // Threshold Line: QBER = 11% (p_eve = 44%)
+      const threshX = padL + 0.44 * plotW;
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(threshX, padT);
+      ctx.lineTo(threshX, h - padB);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 10px JetBrains Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText('Threshold: QBER ≈ 11% (Eve = 44%)', threshX, padT - 8);
+
+      // Legend
+      ctx.fillStyle = '#00f0ff';
+      ctx.fillText('— อัตรากุญแจลับบริสุทธิ์ r', padL + 100, padT + 20);
+      ctx.fillStyle = '#ef4444';
+      ctx.fillText('— ค่า QBER ที่วัดได้', padL + 240, padT + 20);
+    }
+
+    // -------------------------------------------------------------
+    // Web Audio Synthesizer
+    // -------------------------------------------------------------
+    function initAudio() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioCtx();
+      } catch (e) {
+        console.warn('Web Audio not supported');
+      }
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('btn-sound-toggle');
+      if (audioEnabled) {
+        btn.innerText = '🔊 เสียงสังเคราะห์ (เปิด)';
+        btn.style.color = '#fff';
+      } else {
+        btn.innerText = '🔇 เสียงสังเคราะห์ (ปิด)';
+        btn.style.color = 'var(--text-muted)';
+      }
+    }
+
+    function playTone(freq, dur = 0.15, type = 'sine') {
+      if (!audioEnabled || !audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+      } catch (err) {}
+    }
+
+    function playChord(baseFreq, semitones, dur = 0.3) {
+      if (!audioEnabled || !audioCtx) return;
+      semitones.forEach((st) => {
+        const freq = baseFreq * Math.pow(2, st / 12);
+        playTone(freq, dur, 'sine');
+      });
+    }
+
+    // -------------------------------------------------------------
+    // Window Resize & Utilities
+    // -------------------------------------------------------------
+    function onWindowResize() {
+      if (!camera || !renderer) return;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    }
+
+    function reset3DCamera() {
+      camera.position.set(0, 5.0, 16.0);
+      controls.target.set(0, 0.8, 0);
+      controls.update();
+      closeAllMobileDrawers();
+      playTone(600, 0.12);
+    }
+
+    function toggleZenMode() {
+      const left = document.getElementById('hud-left');
+      const right = document.getElementById('hud-right');
+      const btn = document.getElementById('btn-zen');
+      const hidden = (left.style.opacity === '0');
+
+      left.style.opacity = hidden ? '1' : '0';
+      left.style.pointerEvents = hidden ? 'auto' : 'none';
+      right.style.opacity = hidden ? '1' : '0';
+      right.style.pointerEvents = hidden ? 'auto' : 'none';
+
+      btn.classList.toggle('active', !hidden);
+      playTone(hidden ? 700 : 400, 0.1);
+    }
+
+    function openARModal() {
+      document.getElementById('ar-modal').style.display = 'flex';
+      playTone(650, 0.15);
+    }
+    function closeARModal() {
+      document.getElementById('ar-modal').style.display = 'none';
+    }
+
+    function toggleHandTracking() {
+      const pip = document.getElementById('hand-pip-container');
+      const btn = document.getElementById('btn-mode-ai');
+      const isVisible = (pip.style.display === 'block');
+
+      if (!isVisible) {
+        pip.style.display = 'block';
+        btn.classList.add('active');
+        initMediaPipeHands();
+      } else {
+        pip.style.display = 'none';
+        btn.classList.remove('active');
+      }
+    }
+
+    function initMediaPipeHands() {
+      const videoElement = document.getElementById('hand-video');
+      const hands = new Hands({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+      });
+      hands.setOptions({
+        maxNumHands: 1,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+      });
+
+      hands.onResults((results) => {
+        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+          const landmarks = results.multiHandLandmarks[0];
+          // Use index finger tip (landmark 8) for touchless laser trigger
+          const indexTip = landmarks[8];
+          const thumbTip = landmarks[4];
+          const dist = Math.hypot(indexTip.x - thumbTip.x, indexTip.y - thumbTip.y);
+          if (dist < 0.05) {
+            sendSinglePhoton(); // Pinch gesture triggers single photon
+          }
+        }
+      });
+
+      const cameraMedia = new Camera(videoElement, {
+        onFrame: async () => {
+          await hands.send({ image: videoElement });
+        },
+        width: 320,
+        height: 240
+      });
+      cameraMedia.start();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ห้องปฏิบัติการเสมือนจริง 3 มิติ และ WebAR ---- วิวัฒนาการเวลาของซองคลื่นชเรอดิงเงอร์ — ผศ.ดร.ชีวะ ทัศนา</title>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  <style>
+    :root {
+      --bg-space: #030712;
+      --panel-glass: rgba(6, 12, 28, 0.42);
+      --panel-border: rgba(0, 240, 255, 0.22);
+      --accent-cyan: #00f0ff;
+      --accent-gold: #f59e0b;
+      --accent-pink: #ec4899;
+      --accent-green: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-red: #ef4444;
+      --font-th: 'Prompt', sans-serif;
+      --font-tech: 'Chakra Petch', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: var(--bg-space);
+      color: #f8fafc;
+      font-family: var(--font-th);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Top Navigation & Mode Switcher Bar */
+    .top-nav {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel-glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--panel-border);
+      border-radius: 40px;
+      padding: 6px 14px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+
+    .nav-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-right: 12px;
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+      font-family: var(--font-tech);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      white-space: nowrap;
+    }
+
+    .mode-pills {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mode-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-pill:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+    }
+
+    .mode-pill.active {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(139, 92, 246, 0.3));
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
+    }
+
+    .zen-btn {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--accent-gold);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.74rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .zen-btn:hover {
+      background: rgba(245, 158, 11, 0.25);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .zen-btn.active {
+      background: var(--accent-gold);
+      color: #000000;
+      font-weight: 700;
+    }
+
+    /* Left Control HUD */
+    .hud-left {
+      position: absolute;
+      top: 76px;
+      left: 18px;
+      width: 360px;
+      max-width: calc(100vw - 36px);
+      max-height: calc(100vh - 94px);
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 240, 255, 0.3) transparent;
+      padding-bottom: 20px;
+    }
+
+    .hud-left.collapsed {
+      transform: translateX(-390px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Right Telemetry HUD */
+    .hud-right {
+      position: absolute;
+      top: 76px;
+      right: 18px;
+      width: 340px;
+      max-width: calc(100vw - 36px);
+      max-height: calc(100vh - 94px);
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 240, 255, 0.3) transparent;
+      padding-bottom: 20px;
+    }
+
+    .hud-right.collapsed {
+      transform: translateX(370px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Glass Panels */
+    .glass-card {
+      background: var(--panel-glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+      position: relative;
+    }
+
+    .card-title {
+      font-family: var(--font-tech);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card-title .tag {
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      font-family: var(--font-mono);
+    }
+
+    /* Author Footer Badge */
+    .author-line {
+      font-size: 0.70rem;
+      color: #94a3b8;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+    .author-name {
+      color: var(--accent-gold);
+      font-weight: 600;
+    }
+
+    /* Controls Styling */
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .ctrl-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ctrl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+      color: #cbd5e1;
+    }
+
+    .ctrl-val {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
+      outline: none;
+      transition: background 0.2s;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--accent-cyan);
+      transition: transform 0.15s ease;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .preset-btns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      padding: 5px 4px;
+      border-radius: 8px;
+      font-size: 0.70rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .preset-btn:hover {
+      background: rgba(0, 240, 255, 0.12);
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+    }
+
+    .preset-btn.active {
+      background: rgba(0, 240, 255, 0.22);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    /* Action Buttons */
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-act {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #f8fafc;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-act:hover {
+      background: rgba(0, 240, 255, 0.18);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+    }
+
+    .btn-act.primary {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(16, 185, 129, 0.25));
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .btn-act.danger {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(245, 158, 11, 0.25));
+      border-color: var(--accent-red);
+      color: #fca5a5;
+    }
+    .btn-act.danger:hover {
+      background: rgba(239, 68, 68, 0.4);
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.5);
+    }
+
+    .btn-collapse-wave {
+      grid-column: span 2;
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.28), rgba(139, 92, 246, 0.35));
+      border: 1px solid var(--accent-pink);
+      color: #ffffff;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 0.80rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 18px rgba(236, 72, 153, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .btn-collapse-wave:hover {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.5), rgba(139, 92, 246, 0.6));
+      box-shadow: 0 0 24px rgba(236, 72, 153, 0.6);
+      transform: translateY(-1px);
+    }
+
+    /* Wave Legend Items */
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      font-size: 0.72rem;
+      margin-top: 6px;
+      padding: 8px 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #cbd5e1;
+    }
+
+    .legend-bar {
+      width: 14px;
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    /* Telemetry Table */
+    .telem-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: 0.76rem;
+    }
+
+    .telem-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 6px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .telem-label {
+      color: #94a3b8;
+    }
+
+    .telem-value {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .telem-value.good {
+      color: var(--accent-green);
+    }
+
+    .telem-value.warn {
+      color: var(--accent-gold);
+    }
+
+    .telem-value.phase {
+      color: var(--accent-pink);
+    }
+
+    /* Dock Mini Tabs (When Hud is Collapsed) */
+    .dock-tab {
+      position: absolute;
+      top: 90px;
+      z-index: 45;
+      background: var(--panel-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      color: var(--accent-cyan);
+      padding: 10px 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    .dock-tab:hover {
+      background: rgba(0, 240, 255, 0.2);
+    }
+
+    .dock-tab.left { left: 8px; }
+    .dock-tab.right { right: 8px; }
+
+    /* Modals & Overlays */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: rgba(10, 20, 42, 0.95);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 20px;
+      width: 520px;
+      max-width: 95vw;
+      box-shadow: 0 24px 60px rgba(0, 240, 255, 0.25);
+      padding: 22px;
+      position: relative;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-tech);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: #ffffff;
+    }
+
+    /* Hand AI PIP Box */
+    #hand-pip-container {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 200px;
+      height: 150px;
+      border-radius: 14px;
+      border: 2px solid var(--accent-cyan);
+      background: #000;
+      z-index: 60;
+      display: none;
+      overflow: hidden;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8);
+    }
+
+    #hand-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .hand-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      color: var(--accent-cyan);
+      font-family: var(--font-tech);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    /* Measurement Flash Overlay */
+    #flash-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(236, 72, 153, 0.35);
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.08s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <!-- Three.js Canvas Container -->
+  <div id="webgl-canvas"></div>
+  <div id="flash-overlay"></div>
+
+  <!-- Top Universal Navigation Bar -->
+  <div class="top-nav">
+    <div class="nav-title">
+      <span>🌊 LAB 03</span>
+      <span style="color:#cbd5e1; font-weight:400; font-size:0.80rem;">ซองคลื่นชเรอดิงเงอร์</span>
+    </div>
+    <div class="mode-pills">
+      <div class="mode-pill active" id="btn-mode-1" onclick="switchMode(1)">
+        <span>🌐</span> โหมดห้องทดลอง 3 มิติ
+      </div>
+      <div class="mode-pill" id="btn-mode-2" onclick="switchMode(2)">
+        <span>📖</span> สแกนหนังสือ AR
+      </div>
+      <div class="mode-pill" id="btn-mode-3" onclick="switchMode(3)">
+        <span>🖐️</span> สั่งการมือ AI
+      </div>
+    </div>
+    <div class="zen-btn" id="btn-zen" onclick="toggleZenMode()">
+      <span>👁️</span> <span>ย่อทุกบาร์ (H)</span>
+    </div>
+  </div>
+
+  <!-- Dock Tabs for Re-opening when collapsed -->
+  <div class="dock-tab left" id="dock-left" onclick="toggleLeftHUD(false)">
+    <span>🎛️ พารามิเตอร์คลื่น</span>
+  </div>
+  <div class="dock-tab right" id="dock-right" onclick="toggleRightHUD(false)">
+    <span>📊 เทเลเมตรี</span>
+  </div>
+
+  <!-- Left Parameter & Physics HUD -->
+  <div class="hud-left" id="hud-left">
+    <!-- Header Card -->
+    <div class="glass-card">
+      <div class="card-title">
+        <span>วิวัฒนาการเวลาของซองคลื่นชเรอดิงเงอร์</span>
+        <button class="modal-close" style="font-size:1.0rem;" onclick="toggleLeftHUD(true)">◀</button>
+      </div>
+      <p style="font-size:0.75rem; color:#cbd5e1; line-height:1.45;">
+        จำลองพลวัตกลุ่มคลื่นเกาส์เซียน การแผ่กว้างตามเวลา (Dispersion Spreading) และความสัมพันธ์ระหว่างความเร็วกลุ่มกับความเร็วเฟส ตามสมการชเรอดิงเงอร์ขึ้นกับเวลา (TDSE)
+      </p>
+      <div class="author-line">
+        โดย <span class="author-name">ผศ.ดร.ชีวะ ทัศนา</span> สาขาวิชาฟิสิกส์ มรภ.รำไพพรรณี
+      </div>
+    </div>
+
+    <!-- Wave Controls Card -->
+    <div class="glass-card">
+      <div class="card-title">
+        <span>ควบคุมคลื่นควอนตัม & ศักย์ไฟฟ้า</span>
+        <span class="tag">TDSE SOLVER</span>
+      </div>
+
+      <div class="ctrl-group">
+        <!-- Momentum p0 -->
+        <div class="ctrl-item">
+          <div class="ctrl-header">
+            <span>โมเมนตัมเริ่มต้น p₀</span>
+            <span class="ctrl-val" id="val-p0">2.50 ℏ</span>
+          </div>
+          <input type="range" id="slider-p0" min="0.0" max="6.0" step="0.1" value="2.5">
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setMomentum(1.2)">1.2 ℏ (ช้า)</button>
+            <button class="preset-btn active" onclick="setMomentum(2.5)">2.5 ℏ (กลาง)</button>
+            <button class="preset-btn" onclick="setMomentum(4.5)">4.5 ℏ (เร็ว)</button>
+          </div>
+        </div>
+
+        <!-- Initial Width sigma0 -->
+        <div class="ctrl-item">
+          <div class="ctrl-header">
+            <span>ความกว้างซองคลื่นเริ่มต้น σ₀</span>
+            <span class="ctrl-val" id="val-sig">1.00 nm</span>
+          </div>
+          <input type="range" id="slider-sig" min="0.4" max="2.4" step="0.1" value="1.0">
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setWidth(0.5)">0.5 nm (แผ่เร็วจัด)</button>
+            <button class="preset-btn active" onclick="setWidth(1.0)">1.0 nm (สมดุล)</button>
+            <button class="preset-btn" onclick="setWidth(1.8)">1.8 nm (แผ่ช้า)</button>
+          </div>
+        </div>
+
+        <!-- Potential Type & Height -->
+        <div class="ctrl-item" style="margin-top:4px;">
+          <div class="ctrl-header">
+            <span>สภาวะแนวกั้นศักย์ V(x)</span>
+            <span class="ctrl-val" id="val-v0">0.00 E₀</span>
+          </div>
+          <input type="range" id="slider-v0" min="0.0" max="6.0" step="0.2" value="0.0">
+          <div class="preset-btns">
+            <button class="preset-btn active" onclick="setPotentialPreset('free')">อนุภาคอิสระ</button>
+            <button class="preset-btn" onclick="setPotentialPreset('step')">กำแพงศักย์</button>
+            <button class="preset-btn" onclick="setPotentialPreset('trap')">หลุมฮาร์มอนิก</button>
+          </div>
+        </div>
+
+        <!-- Time speed -->
+        <div class="ctrl-item">
+          <div class="ctrl-header">
+            <span>ความเร็วการไหลของเวลา dt</span>
+            <span class="ctrl-val" id="val-dt">1.00x</span>
+          </div>
+          <input type="range" id="slider-dt" min="0.2" max="2.0" step="0.1" value="1.0">
+        </div>
+
+        <!-- Measurement & Action Buttons -->
+        <div class="action-row">
+          <button class="btn-collapse-wave" id="btn-measure" onclick="performCopenhagenMeasurement()">
+            <span>💥</span> ทำการวัดตำแหน่ง (Wavefunction Collapse)
+          </button>
+          <button class="btn-act primary" id="btn-play" onclick="togglePlayPause()">
+            <span>⏸</span> หยุดชั่วคราว
+          </button>
+          <button class="btn-act" onclick="resetWavepacket()">
+            <span>🔄</span> รีเซ็ตคลื่น (t=0)
+          </button>
+        </div>
+
+        <!-- Advanced Quantum Features: Wigner & Bohmian -->
+        <button class="btn-act" id="btn-wigner" onclick="openWignerModal()" style="margin-top:4px; border-color:var(--accent-purple); color:#c084fc;">
+          <span>🌌</span> ไดอะแกรมวิกเนอร์ W(x, p) ในปริภูมิเฟส
+        </button>
+
+        <button class="btn-act primary" id="btn-bohmian" onclick="toggleBohmianTrajectories()" style="margin-top:4px;">
+          <span>✨</span> เส้นทางอนุภาคโบห์เมียน (Bohmian Streamlines)
+        </button>
+
+        <!-- Sound toggle -->
+        <button class="btn-act" id="btn-sound" onclick="toggleQuantumSound()" style="margin-top:4px;">
+          <span>🔊</span> เสียงควอนตัมสังเคราะห์ (Web Audio Synth)
+        </button>
+
+        <!-- Waveforms Legend -->
+        <div class="legend-grid">
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#f59e0b;"></div>
+            <span>|Ψ|² ความน่าจะเป็น</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:linear-gradient(90deg, #00f0ff, #ec4899);"></div>
+            <span>ริบบิ้นเกลียว 3D เชิงซ้อน</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#00f0ff;"></div>
+            <span>Re(Ψ) แกนตั้ง (Y)</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#ec4899;"></div>
+            <span>Im(Ψ) แกนลึก (Z)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Telemetry & Quantum State Readout HUD -->
+  <div class="hud-right" id="hud-right">
+    <div class="glass-card">
+      <div class="card-title">
+        <span>การตรวจวัดควอนตัมเรียลไทม์</span>
+        <button class="modal-close" style="font-size:1.0rem;" onclick="toggleRightHUD(true)">▶</button>
+      </div>
+
+      <div class="telem-list">
+        <div class="telem-row">
+          <span class="telem-label">เวลาคลื่นควอนตัม (t)</span>
+          <span class="telem-value" id="telem-t">0.000 fs</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ตำแหน่งเฉลี่ย ⟨x⟩</span>
+          <span class="telem-value" id="telem-x">-5.000 nm</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ความกว้างซองคลื่น Δx(t)</span>
+          <span class="telem-value" id="telem-dx">1.000 nm</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ความไม่แน่นอนโมเมนตัม Δp</span>
+          <span class="telem-value" id="telem-dp">0.500 ℏ/nm</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ผลคูณไฮเซนแบร์ก Δx·Δp</span>
+          <span class="telem-value good" id="telem-heisenberg">0.500 ℏ (ขั้นต่ำ)</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ความเร็วกลุ่ม (Envelope) v_g</span>
+          <span class="telem-value" id="telem-vg">2.500 nm/fs</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ความเร็วเฟส (Ripples) v_p</span>
+          <span class="telem-value warn" id="telem-vp">1.250 nm/fs (ครึ่งหนึ่ง)</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">กระแสความน่าจะเป็นสูงสุด j_max</span>
+          <span class="telem-value" id="telem-j">0.000</span>
+        </div>
+
+        <div class="telem-row" style="border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px; margin-top:2px;">
+          <span class="telem-label">อนุรักษ์ความน่าจะเป็น ∫|Ψ|² dx</span>
+          <span class="telem-value good" id="telem-norm">1.000000</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">สมการความต่อเนื่อง (Continuity)</span>
+          <span class="telem-value good" style="font-size:0.70rem;">∂ρ/∂t + ∂j/∂x = 0</span>
+        </div>
+
+        <div class="telem-row" id="row-barrier-telemetry" style="display:none;">
+          <span class="telem-label">สัมประสิทธิ์การสะท้อน R / ทะลุผ่าน T</span>
+          <span class="telem-value phase" id="telem-rt">R: 0.0% | T: 100.0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quantum Theory Helper Card -->
+    <div class="glass-card">
+      <div class="card-title">
+        <span>หลักฟิสิกส์สำคัญประจำบท</span>
+        <span class="tag">TDSE FORMULA</span>
+      </div>
+      <div style="font-size:0.72rem; color:#cbd5e1; line-height:1.5;">
+        <p>• <strong>สมการชเรอดิงเงอร์ขึ้นกับเวลา</strong> ---- $i\hbar \frac{\partial \Psi}{\partial t} = \hat{H}\Psi$</p>
+        <p>• <strong>การแผ่กว้างของเกาส์เซียน</strong> ---- $\sigma(t) = \sigma_0 \sqrt{1 + \left(\frac{\hbar t}{2m\sigma_0^2}\right)^2}$</p>
+        <p>• <strong>ความเร็วกลุ่มเทียบเฟส</strong> ---- $v_g = \frac{p_0}{m} = 2 v_p$ ระลอกคลื่นด้านในวิ่งช้ากว่าซองคลื่นครึ่งหนึ่ง</p>
+        <p>• <strong>การยุบตัวของฟังก์ชันคลื่น</strong> ---- การวัดตำแหน่งทำลายความต่อเนื่องของเฟส บังคับให้คลื่นยุบตัวเป็นจุดยอดแหลมคมชัด</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode 2: AR Marker Guide Modal -->
+  <div class="modal-overlay" id="ar-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📖 สแกนภาพมาร์กเกอร์หนังสือ AR (Hiro Marker)</span>
+        <button class="modal-close" onclick="closeARModal()">✕</button>
+      </div>
+      <div style="text-align:center; padding:10px 0;">
+        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Hiro Marker" style="width:190px; height:190px; border-radius:12px; border:4px solid var(--accent-cyan); box-shadow:0 0 20px rgba(0,240,255,0.4);">
+        <p style="font-size:0.82rem; color:#cbd5e1; margin-top:14px; line-height:1.5;">
+          ส่องกล้องของสมาร์ตโฟนหรือแท็บเล็ตมาที่ภาพมาร์กเกอร์ Hiro ในตำราวิชาการบทที่ 3<br>
+          กลุ่มคลื่นเกาส์เซียนและริบบิ้นเฟส 3 มิติ จะลอยขึ้นเหนือหน้าหนังสือทันที
+        </p>
+        <div style="margin-top:16px; display:flex; justify-content:center; gap:10px;">
+          <button class="btn-act primary" onclick="closeARModal()">เข้าใจแล้ว เริ่มการทดลอง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wigner Phase Space Modal -->
+  <div class="modal-overlay" id="wigner-modal">
+    <div class="modal-card" style="width: 580px;">
+      <div class="modal-head">
+        <span>🌌 ปริภูมิเฟสวิกเนอร์ Wigner Quasi-Probability W(x, p)</span>
+        <button class="modal-close" onclick="closeWignerModal()">✕</button>
+      </div>
+      <div style="position:relative; width:100%; height:300px; background:#020617; border-radius:12px; border:1px solid rgba(139,92,246,0.35); overflow:hidden;">
+        <canvas id="wigner-canvas" width="540" height="300" style="width:100%; height:100%; display:block;"></canvas>
+      </div>
+      <div style="margin-top:12px; display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:0.75rem;">
+        <div class="telem-row"><span class="telem-label">จุดศูนย์กลาง ⟨x⟩, ⟨p⟩</span><span class="telem-value" id="wig-center">0.0, 2.5</span></div>
+        <div class="telem-row"><span class="telem-label">พื้นที่วงรีความไม่แน่นอน</span><span class="telem-value good">π ℏ / 2 (คงที่เสมอ)</span></div>
+        <div class="telem-row"><span class="telem-label">มุมการเฉือน (Shear Angle)</span><span class="telem-value warn" id="wig-shear">0.0°</span></div>
+        <div class="telem-row"><span class="telem-label">ทฤษฎีบทการอนุรักษ์</span><span class="telem-value good">Liouville Symplectic Flow</span></div>
+      </div>
+      <p style="font-size:0.72rem; color:#cbd5e1; margin-top:10px; line-height:1.45;">
+        วงรีในปริภูมิเฟส $(x, p)$ แสดงความไม่แน่นอนของไฮเซนแบร์ก เมื่อเวลาผ่านไป กลุ่มคลื่นจะเกิดการบิดเฉือน (Phase Space Shearing) แต่พื้นที่ทั้งหมดของวงรีจะไม่เปลี่ยนแปลง แสดงการอนุรักษ์สารสนเทศควอนตัม (Unitary Evolution)
+      </p>
+    </div>
+  </div>
+
+  <!-- Mode 3: MediaPipe Hands PIP Video Feed -->
+  <div id="hand-pip-container">
+    <div class="hand-badge">🖐 AI Hand Tracking Active</div>
+    <video id="hand-video" playsinline autoplay muted></video>
+  </div>
+
+  <!-- ------------------------------------------------------------- -->
+  <!-- Simulation Script                                             -->
+  <!-- ------------------------------------------------------------- -->
+  <script>
+    // -------------------------------------------------------------
+    // Three.js Scene, Camera, Lighting & Coordinate System
+    // -------------------------------------------------------------
+    const canvasContainer = document.getElementById('webgl-canvas');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x030712);
+    scene.fog = new THREE.FogExp2(0x030712, 0.02);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 10, 24);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    canvasContainer.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 + 0.05;
+    controls.minDistance = 6;
+    controls.maxDistance = 60;
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0x00f0ff, 0.85);
+    keyLight.position.set(12, 22, 16);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x8b5cf6, 0.6);
+    fillLight.position.set(-12, 10, -10);
+    scene.add(fillLight);
+
+    const centerGlow = new THREE.PointLight(0xf59e0b, 1.2, 45);
+    centerGlow.position.set(0, 4, 0);
+    scene.add(centerGlow);
+
+    // Floor Grid and Measuring Ruler
+    const gridHelper = new THREE.GridHelper(36, 36, 0x00f0ff, 0x1e293b);
+    gridHelper.position.y = -0.01;
+    scene.add(gridHelper);
+
+    // Coordinate Axes
+    const axisMat = new THREE.LineBasicMaterial({ color: 0x475569 });
+    const axisGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-18, 0, 0), new THREE.Vector3(18, 0, 0)
+    ]);
+    const axisLine = new THREE.Line(axisGeo, axisMat);
+    scene.add(axisLine);
+
+    // Vertical Y Axis (Re(Psi))
+    const yAxisGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, -4, 0), new THREE.Vector3(0, 7, 0)
+    ]);
+    const yAxisLine = new THREE.Line(yAxisGeo, new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.4 }));
+    scene.add(yAxisLine);
+
+    // Depth Z Axis (Im(Psi))
+    const zAxisGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 0, -5), new THREE.Vector3(0, 0, 5)
+    ]);
+    const zAxisLine = new THREE.Line(zAxisGeo, new THREE.LineBasicMaterial({ color: 0xec4899, transparent: true, opacity: 0.4 }));
+    scene.add(zAxisLine);
+
+    // -------------------------------------------------------------
+    // Quantum Simulation Parameters & Data Structures
+    // -------------------------------------------------------------
+    const N_POINTS = 380;
+    const X_MIN = -16.0;
+    const X_MAX = 16.0;
+    const dx = (X_MAX - X_MIN) / (N_POINTS - 1);
+
+    let p0 = 2.5;
+    let sigma0 = 1.0;
+    let V0 = 0.0;
+    let potentialType = 'free'; // 'free' | 'step' | 'trap'
+    let timeSpeed = 1.0;
+    let t = 0.0;
+    let isPlaying = true;
+    const dtBase = 0.022;
+    let x0 = -5.0;
+
+    // Measurement Collapse State
+    let isCollapsed = false;
+    let collapseTimer = 0.0;
+    let collapseX = 0.0;
+
+    // -------------------------------------------------------------
+    // Visual Meshes: Ribbon, Curves, Base Prob Area, and Barrier
+    // -------------------------------------------------------------
+
+    // 1. Glowing Baseline Probability Density Area (|Psi|^2)
+    const probPlaneGeo = new THREE.PlaneGeometry(1, 1, N_POINTS - 1, 1);
+    const probPlaneMat = new THREE.MeshBasicMaterial({
+      color: 0xf59e0b,
+      transparent: true,
+      opacity: 0.28,
+      side: THREE.DoubleSide
+    });
+    const probMesh = new THREE.Mesh(probPlaneGeo, probPlaneMat);
+    scene.add(probMesh);
+
+    // 2. Probability Envelope Line (|Psi|^2 curve)
+    const probLineGeo = new THREE.BufferGeometry();
+    const probLineVertices = new Float32Array(N_POINTS * 3);
+    probLineGeo.setAttribute('position', new THREE.BufferAttribute(probLineVertices, 3));
+    const probLineMat = new THREE.LineBasicMaterial({ color: 0xf59e0b, linewidth: 3 });
+    const probLine = new THREE.Line(probLineGeo, probLineMat);
+    scene.add(probLine);
+
+    // 3. 3D Complex Phase Helical Ribbon (x, Re(Psi), Im(Psi))
+    // Created as a strip of quads with vertex colors mapped to quantum phase arg(Psi)
+    const ribbonGeo = new THREE.BufferGeometry();
+    const ribbonPos = new Float32Array(N_POINTS * 2 * 3);
+    const ribbonColors = new Float32Array(N_POINTS * 2 * 3);
+    const ribbonIndices = [];
+    for (let i = 0; i < N_POINTS - 1; i++) {
+      const top1 = i * 2;
+      const bot1 = i * 2 + 1;
+      const top2 = (i + 1) * 2;
+      const bot2 = (i + 1) * 2 + 1;
+      ribbonIndices.push(top1, bot1, top2);
+      ribbonIndices.push(bot1, bot2, top2);
+    }
+    ribbonGeo.setAttribute('position', new THREE.BufferAttribute(ribbonPos, 3));
+    ribbonGeo.setAttribute('color', new THREE.BufferAttribute(ribbonColors, 3));
+    ribbonGeo.setIndex(ribbonIndices);
+    const ribbonMat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.85
+    });
+    const ribbonMesh = new THREE.Mesh(ribbonGeo, ribbonMat);
+    scene.add(ribbonMesh);
+
+    // 4. Individual 2D Projections: Re(Psi) in Cyan on XY plane, Im(Psi) in Pink on XZ plane
+    const reLineGeo = new THREE.BufferGeometry();
+    const reVertices = new Float32Array(N_POINTS * 3);
+    reLineGeo.setAttribute('position', new THREE.BufferAttribute(reVertices, 3));
+    const reMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.45 });
+    const reLine = new THREE.Line(reLineGeo, reMat);
+    scene.add(reLine);
+
+    const imLineGeo = new THREE.BufferGeometry();
+    const imVertices = new Float32Array(N_POINTS * 3);
+    imLineGeo.setAttribute('position', new THREE.BufferAttribute(imVertices, 3));
+    const imMat = new THREE.LineBasicMaterial({ color: 0xec4899, transparent: true, opacity: 0.45 });
+    const imLine = new THREE.Line(imLineGeo, imMat);
+    scene.add(imLine);
+
+    // 5. Potential Barrier & Trap Visual 3D Meshes
+    // Step Barrier
+    const barrierGroup = new THREE.Group();
+    scene.add(barrierGroup);
+
+    const barrierMeshGeo = new THREE.BoxGeometry(2.0, 7.0, 6.0);
+    const barrierMat = new THREE.MeshStandardMaterial({
+      color: 0x8b5cf6,
+      transparent: true,
+      opacity: 0.4,
+      roughness: 0.2,
+      metalness: 0.3
+    });
+    const stepBarrierMesh = new THREE.Mesh(barrierMeshGeo, barrierMat);
+    stepBarrierMesh.position.set(3.5, 3.5, 0);
+    barrierGroup.add(stepBarrierMesh);
+
+    // Harmonic Trap Parabola Curve
+    const trapPoints = [];
+    for (let i = 0; i <= 60; i++) {
+      const tx = -9.0 + (18.0 / 60) * i;
+      const ty = 0.06 * tx * tx;
+      trapPoints.push(new THREE.Vector3(tx, ty, 0));
+    }
+    const trapGeo = new THREE.BufferGeometry().setFromPoints(trapPoints);
+    const trapMat = new THREE.LineBasicMaterial({ color: 0xa855f7, linewidth: 2 });
+    const trapCurve = new THREE.Line(trapGeo, trapMat);
+    trapCurve.visible = false;
+    scene.add(trapCurve);
+
+    // 6. Probability Current Vectors (Arrows along x)
+    const arrowGroup = new THREE.Group();
+    scene.add(arrowGroup);
+    const nArrows = 30;
+    const arrows = [];
+    for (let i = 0; i < nArrows; i++) {
+      const dir = new THREE.Vector3(1, 0, 0);
+      const origin = new THREE.Vector3(X_MIN + ( (X_MAX - X_MIN) / nArrows ) * i, 0.05, 0);
+      const arrow = new THREE.ArrowHelper(dir, origin, 1.0, 0x10b981, 0.22, 0.12);
+      arrowGroup.add(arrow);
+      arrows.push(arrow);
+    }
+
+    // 7. De Broglie-Bohm Quantum Streamlines & Particles
+    const bohmianGroup = new THREE.Group();
+    scene.add(bohmianGroup);
+    let bohmianActive = true;
+    const N_BOHM = 22;
+    const bohmParticles = [];
+
+    for (let b = 0; b < N_BOHM; b++) {
+      const q = (b + 0.5) / N_BOHM;
+      const u = q < 0.5 ? q : 1.0 - q;
+      const t_val = Math.sqrt(-2.0 * Math.log(u));
+      let z_val = t_val - ((2.515517 + 0.802853 * t_val + 0.010328 * t_val * t_val) /
+                  (1.0 + 1.432788 * t_val + 0.189269 * t_val * t_val + 0.001308 * t_val * t_val * t_val));
+      if (q < 0.5) z_val = -z_val;
+
+      const pMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(0.14, 16, 16),
+        new THREE.MeshStandardMaterial({
+          color: 0x10b981,
+          emissive: 0x059669,
+          emissiveIntensity: 0.8
+        })
+      );
+      bohmianGroup.add(pMesh);
+
+      // Trajectory Tail Line
+      const maxTrail = 40;
+      const trailPositions = new Float32Array(maxTrail * 3);
+      const trailGeo = new THREE.BufferGeometry();
+      trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+      const trailMat = new THREE.LineBasicMaterial({
+        color: 0x10b981,
+        transparent: true,
+        opacity: 0.55
+      });
+      const trailLine = new THREE.Line(trailGeo, trailMat);
+      bohmianGroup.add(trailLine);
+
+      bohmParticles.push({
+        zOffset: z_val,
+        mesh: pMesh,
+        line: trailLine,
+        trailPositions: trailPositions,
+        trailCount: 0
+      });
+    }
+
+    function toggleBohmianTrajectories() {
+      bohmianActive = !bohmianActive;
+      bohmianGroup.visible = bohmianActive;
+      const btn = document.getElementById('btn-bohmian');
+      btn.classList.toggle('primary', bohmianActive);
+      btn.innerHTML = bohmianActive ? '<span>✨</span> เส้นทางอนุภาคโบห์เมียน (เปิดอยู่)' : '<span>✨</span> เส้นทางอนุภาคโบห์เมียน (ปิด)';
+    }
+
+    // -------------------------------------------------------------
+    // Web Audio Synthesizer for Quantum Phase and Collapse Sound
+    // -------------------------------------------------------------
+    let audioCtx = null;
+    let audioActive = false;
+    let osc1 = null;
+    let osc2 = null;
+    let gainNode = null;
+
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+        gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gainNode.connect(audioCtx.destination);
+
+        osc1 = audioCtx.createOscillator();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(220, audioCtx.currentTime);
+        osc1.connect(gainNode);
+        osc1.start();
+
+        osc2 = audioCtx.createOscillator();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(440, audioCtx.currentTime);
+        osc2.connect(gainNode);
+        osc2.start();
+        audioActive = true;
+      } catch (err) {
+        console.warn('Audio not available:', err);
+      }
+    }
+
+    function toggleQuantumSound() {
+      if (!audioCtx) initAudio();
+      audioActive = !audioActive;
+      const btn = document.getElementById('btn-sound');
+      if (audioActive) {
+        gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        btn.classList.add('primary');
+        btn.innerHTML = '<span>🔊</span> เสียงควอนตัม (เปิดอยู่)';
+      } else {
+        gainNode.gain.setValueAtTime(0.0, audioCtx.currentTime);
+        btn.classList.remove('primary');
+        btn.innerHTML = '<span>🔇</span> เสียงควอนตัม (ปิดอยู่)';
+      }
+    }
+
+    function playCollapseChime() {
+      if (!audioCtx) return;
+      try {
+        const snapOsc = audioCtx.createOscillator();
+        const snapGain = audioCtx.createGain();
+        snapOsc.type = 'sawtooth';
+        snapOsc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        snapOsc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.35);
+        snapGain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        snapGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+        snapOsc.connect(snapGain);
+        snapGain.connect(audioCtx.destination);
+        snapOsc.start();
+        snapOsc.stop(audioCtx.currentTime + 0.36);
+      } catch (e) {}
+    }
+
+    // -------------------------------------------------------------
+    // Phase to Color Helper (Continuous Cyclic Phase Map)
+    // -------------------------------------------------------------
+    const tempColor = new THREE.Color();
+    function phaseToColor(phase) {
+      // Normalize phase from [-PI, PI] to [0, 1]
+      let u = (phase + Math.PI) / (2 * Math.PI);
+      u = u - Math.floor(u); // Wrap
+      // HSL mapping with rich vibrance
+      tempColor.setHSL(u, 0.95, 0.52);
+      return tempColor;
+    }
+
+    // -------------------------------------------------------------
+    // Analytical Wave Packet Dynamics with Dispersion & Potentials
+    // -------------------------------------------------------------
+    function updateWavePhysics() {
+      const m = 1.0;
+      const hbar = 1.0;
+
+      // Group velocity and phase velocity
+      const v_group = p0 / m;
+      const v_phase = v_group * 0.5;
+
+      // Potential Barrier handling
+      let R_coeff = 0.0;
+      let T_coeff = 1.0;
+
+      if (potentialType === 'step' && V0 > 0.01) {
+        stepBarrierMesh.visible = true;
+        trapCurve.visible = false;
+        stepBarrierMesh.scale.y = Math.max(0.2, V0 / 2.0);
+        stepBarrierMesh.position.y = stepBarrierMesh.scale.y * 3.5;
+        const E_kin = (p0 * p0) / (2 * m);
+        if (E_kin > V0) {
+          const k1 = p0;
+          const k2 = Math.sqrt(2 * m * (E_kin - V0));
+          R_coeff = Math.pow((k1 - k2) / (k1 + k2), 2);
+          T_coeff = 1.0 - R_coeff;
+        } else {
+          R_coeff = 1.0;
+          T_coeff = 0.0;
+        }
+        document.getElementById('row-barrier-telemetry').style.display = 'flex';
+        document.getElementById('telem-rt').innerText = `R: ${(R_coeff*100).toFixed(1)}% | T: ${(T_coeff*100).toFixed(1)}%`;
+      } else if (potentialType === 'trap') {
+        stepBarrierMesh.visible = false;
+        trapCurve.visible = true;
+        document.getElementById('row-barrier-telemetry').style.display = 'none';
+      } else {
+        stepBarrierMesh.visible = false;
+        trapCurve.visible = false;
+        document.getElementById('row-barrier-telemetry').style.display = 'none';
+      }
+
+      // Spreading factor s(t)
+      // When measurement collapse occurs, sigma starts from collapsed spike
+      let effectiveSig0 = sigma0;
+      let effectiveT = t;
+      let currentX0 = x0;
+
+      if (isCollapsed) {
+        effectiveSig0 = 0.18; // Sharp Dirac-like spike
+        effectiveT = collapseTimer;
+        currentX0 = collapseX;
+      }
+
+      const sig_t = effectiveSig0 * Math.sqrt(1 + Math.pow((hbar * effectiveT) / (2 * m * effectiveSig0 * effectiveSig0), 2));
+      
+      let x_center = currentX0 + v_group * effectiveT;
+      if (potentialType === 'trap') {
+        // Harmonic oscillator coherent state oscillation x(t) = x0 * cos(omega * t)
+        const omega = 0.6;
+        x_center = x0 * Math.cos(omega * t);
+      } else if (potentialType === 'step' && V0 > 0.01 && x_center > 3.0) {
+        // Partial reflection boundary behavior
+        if (E_kin_val < V0) {
+          // Total reflection turnaround
+          x_center = 3.0 - (x_center - 3.0);
+        }
+      }
+
+      // Buffer Pointers
+      const pLinePos = probLineGeo.attributes.position.array;
+      const meshPos = probMesh.geometry.attributes.position.array;
+      const rPos = ribbonGeo.attributes.position.array;
+      const rCol = ribbonGeo.attributes.color.array;
+      const rePos = reLineGeo.attributes.position.array;
+      const imPos = imLineGeo.attributes.position.array;
+
+      let normSum = 0.0;
+      let expectX = 0.0;
+      let maxCurrent = 0.0;
+
+      // Audio synth update
+      if (audioActive && osc1) {
+        osc1.frequency.setTargetAtTime(180 + Math.abs(p0) * 45, audioCtx.currentTime, 0.05);
+        osc2.frequency.setTargetAtTime(360 + (1.0 / sig_t) * 80, audioCtx.currentTime, 0.05);
+      }
+
+      for (let i = 0; i < N_POINTS; i++) {
+        const x = X_MIN + i * dx;
+        const idx3 = i * 3;
+
+        // Gaussian Envelope
+        const envelope = Math.exp(-Math.pow(x - x_center, 2) / (4 * sig_t * sig_t)) / Math.pow(2 * Math.PI * sig_t * sig_t, 0.25);
+        
+        // Quadratic chirp & phase propagation
+        const chirp = (hbar * effectiveT * Math.pow(x - x_center, 2)) / (8 * m * Math.pow(effectiveSig0, 4) * (1 + Math.pow((hbar * effectiveT) / (2 * m * effectiveSig0 * effectiveSig0), 2)));
+        const phase = p0 * (x - x_center / 2) - chirp;
+
+        const re = envelope * Math.cos(phase);
+        const im = envelope * Math.sin(phase);
+        const probDensity = (re * re + im * im) * 3.8;
+
+        // 1. Probability Envelope Line
+        pLinePos[idx3] = x;
+        pLinePos[idx3 + 1] = probDensity;
+        pLinePos[idx3 + 2] = 0;
+
+        // 2. Base Plane Mesh for |Psi|^2 fill
+        meshPos[i * 6] = x;
+        meshPos[i * 6 + 1] = probDensity;
+        meshPos[i * 6 + 2] = 0;
+        meshPos[i * 6 + 3] = x;
+        meshPos[i * 6 + 4] = 0;
+        meshPos[i * 6 + 5] = 0;
+
+        // 3. 3D Complex Phase Helical Ribbon (x, Re, Im)
+        // Upper vertex at (x, Re*2.8, Im*2.8), lower vertex slightly offset towards center
+        const vTopIdx = (i * 2) * 3;
+        const vBotIdx = (i * 2 + 1) * 3;
+        const ampScale = 2.8;
+
+        rPos[vTopIdx] = x;
+        rPos[vTopIdx + 1] = re * ampScale;
+        rPos[vTopIdx + 2] = im * ampScale;
+
+        rPos[vBotIdx] = x;
+        rPos[vBotIdx + 1] = re * ampScale * 0.45;
+        rPos[vBotIdx + 2] = im * ampScale * 0.45;
+
+        // Vertex Colors based on phase
+        const col = phaseToColor(phase);
+        rCol[vTopIdx] = col.r;
+        rCol[vTopIdx + 1] = col.g;
+        rCol[vTopIdx + 2] = col.b;
+
+        rCol[vBotIdx] = col.r * 0.65;
+        rCol[vBotIdx + 1] = col.g * 0.65;
+        rCol[vBotIdx + 2] = col.b * 0.65;
+
+        // 4. Individual 2D projections
+        rePos[idx3] = x;
+        rePos[idx3 + 1] = re * ampScale;
+        rePos[idx3 + 2] = 0;
+
+        imPos[idx3] = x;
+        imPos[idx3 + 1] = 0;
+        imPos[idx3 + 2] = im * ampScale;
+
+        normSum += (probDensity / 3.8) * dx;
+        expectX += x * (probDensity / 3.8) * dx;
+      }
+
+      probLineGeo.attributes.position.needsUpdate = true;
+      probMesh.geometry.attributes.position.needsUpdate = true;
+      ribbonGeo.attributes.position.needsUpdate = true;
+      ribbonGeo.attributes.color.needsUpdate = true;
+      reLineGeo.attributes.position.needsUpdate = true;
+      imLineGeo.attributes.position.needsUpdate = true;
+
+      // Update Probability Current Arrows j(x) ~ (p0/m) * |Psi|^2
+      for (let k = 0; k < nArrows; k++) {
+        const ax = X_MIN + ((X_MAX - X_MIN) / nArrows) * k;
+        const g = Math.exp(-Math.pow(ax - x_center, 2) / (2 * sig_t * sig_t));
+        const currentMag = (p0 / m) * g * 1.6;
+        arrows[k].setLength(Math.max(0.08, currentMag), 0.22, 0.10);
+        arrows[k].position.x = ax;
+        if (currentMag > maxCurrent) maxCurrent = currentMag;
+      }
+
+      // Update Bohmian Streamlines
+      if (bohmianActive) {
+        for (let b = 0; b < N_BOHM; b++) {
+          const bp = bohmParticles[b];
+          // Exact analytical Bohmian trajectory: x_k(t) = x_center(t) + z_offset * (sig_t / sqrt(2))
+          const x_bohm = x_center + bp.zOffset * (sig_t / Math.SQRT2);
+          const localEnv = Math.exp(-Math.pow(x_bohm - x_center, 2) / (4 * sig_t * sig_t)) / Math.pow(2 * Math.PI * sig_t * sig_t, 0.25);
+          const y_bohm = Math.max(0.08, (localEnv * localEnv) * 3.8);
+
+          bp.mesh.position.set(x_bohm, y_bohm + 0.12, 0);
+
+          // Update trail line buffer
+          const tPos = bp.trailPositions;
+          const maxT = 40;
+          for (let ti = maxT - 1; ti > 0; ti--) {
+            tPos[ti * 3] = tPos[(ti - 1) * 3];
+            tPos[ti * 3 + 1] = tPos[(ti - 1) * 3 + 1];
+            tPos[ti * 3 + 2] = tPos[(ti - 1) * 3 + 2];
+          }
+          tPos[0] = x_bohm;
+          tPos[1] = y_bohm;
+          tPos[2] = 0;
+          bp.line.geometry.attributes.position.needsUpdate = true;
+        }
+      }
+
+      // Live Wigner Phase Space rendering if modal is open
+      if (wignerModalOpen) {
+        renderWignerDistribution();
+      }
+
+      // Heisenberg uncertainty values
+      const delta_p = hbar / (2 * sig_t);
+      const heisenbergProduct = sig_t * delta_p;
+
+      // Update Telemetry Displays
+      document.getElementById('telem-t').innerText = (t * 1.35).toFixed(3) + ' fs';
+      document.getElementById('telem-x').innerText = expectX.toFixed(3) + ' nm';
+      document.getElementById('telem-dx').innerText = sig_t.toFixed(3) + ' nm';
+      document.getElementById('telem-dp').innerText = delta_p.toFixed(3) + ' ℏ/nm';
+      document.getElementById('telem-heisenberg').innerText = `${heisenbergProduct.toFixed(3)} ℏ (≥ 0.5 ℏ)`;
+      document.getElementById('telem-vg').innerText = v_group.toFixed(3) + ' nm/fs';
+      document.getElementById('telem-vp').innerText = `${v_phase.toFixed(3)} nm/fs (v_g / 2)`;
+      document.getElementById('telem-j').innerText = maxCurrent.toFixed(3);
+      document.getElementById('telem-norm').innerText = normSum.toFixed(6);
+
+      // Advance Time
+      if (isPlaying) {
+        const step = dtBase * timeSpeed;
+        t += step;
+        if (isCollapsed) collapseTimer += step;
+
+        // Loop wavepacket if it leaves view
+        if (x_center > 15.0 || (potentialType === 'step' && x_center < -15.0)) {
+          resetWavepacket();
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Wigner Phase Space Canvas Visualizer W(x, p)
+    // -------------------------------------------------------------
+    let wignerModalOpen = false;
+    const wignerCanvas = document.getElementById('wigner-canvas');
+    const wCtx = wignerCanvas ? wignerCanvas.getContext('2d') : null;
+
+    function openWignerModal() {
+      const modal = document.getElementById('wigner-modal');
+      if (modal) modal.style.display = 'flex';
+      wignerModalOpen = true;
+      renderWignerDistribution();
+    }
+
+    function closeWignerModal() {
+      const modal = document.getElementById('wigner-modal');
+      if (modal) modal.style.display = 'none';
+      wignerModalOpen = false;
+    }
+
+    function renderWignerDistribution() {
+      if (!wCtx || !wignerCanvas) return;
+      const W = wignerCanvas.width;
+      const H = wignerCanvas.height;
+
+      wCtx.fillStyle = '#020617';
+      wCtx.fillRect(0, 0, W, H);
+
+      // Coordinate mapping: x in [-12, 12], p in [0, 6]
+      const toScreenX = (x) => ((x + 12.0) / 24.0) * W;
+      const toScreenY = (p) => H - ((p / 6.0) * H);
+
+      // Draw Grid & Axes
+      wCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      wCtx.lineWidth = 1;
+      for (let gx = -10; gx <= 10; gx += 2) {
+        wCtx.beginPath();
+        wCtx.moveTo(toScreenX(gx), 0);
+        wCtx.lineTo(toScreenX(gx), H);
+        wCtx.stroke();
+      }
+      for (let gp = 1; gp <= 5; gp += 1) {
+        wCtx.beginPath();
+        wCtx.moveTo(0, toScreenY(gp));
+        wCtx.lineTo(W, toScreenY(gp));
+        wCtx.stroke();
+      }
+
+      // Zero and Mean Reference Lines
+      wCtx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+      wCtx.lineWidth = 1.5;
+      wCtx.beginPath();
+      wCtx.moveTo(toScreenX(0), 0);
+      wCtx.lineTo(toScreenX(0), H);
+      wCtx.stroke();
+
+      // Axis labels
+      wCtx.fillStyle = '#94a3b8';
+      wCtx.font = '11px JetBrains Mono';
+      wCtx.fillText('x (nm)', W - 48, H - 10);
+      wCtx.fillText('p (ℏ/nm)', 10, 16);
+
+      // Current Quantum Parameters
+      const sig_t_val = sigma0 * Math.sqrt(1 + Math.pow((t) / (2 * sigma0 * sigma0), 2));
+      const v_group_val = p0 / 1.0;
+      const curCenterX = x0 + v_group_val * t;
+      const curCenterP = p0;
+
+      // Shear factor alpha(t) = hbar * t / (4 * m * sigma0^2 * sig_t^2)
+      const shearFactor = (1.0 * t) / (4.0 * Math.pow(sigma0, 2) * Math.pow(sig_t_val, 2));
+      const shearDeg = (Math.atan(shearFactor) * 180 / Math.PI);
+
+      const cEl = document.getElementById('wig-center');
+      const sEl = document.getElementById('wig-shear');
+      if (cEl) cEl.innerText = `${curCenterX.toFixed(2)}, ${curCenterP.toFixed(2)}`;
+      if (sEl) sEl.innerText = `${shearDeg.toFixed(1)}° (บิดตามเวลา)`;
+
+      // Draw Wigner Gaussian Ellipse Contours
+      const cX = toScreenX(curCenterX);
+      const cY = toScreenY(curCenterP);
+
+      // Scale factors to screen
+      const rX_base = (sig_t_val / 24.0) * W;
+      const rP_base = ((1.0 / (2 * sigma0)) / 6.0) * H;
+
+      wCtx.save();
+      wCtx.translate(cX, cY);
+      // Shearing transformation in canvas: [1, -shear, 0, 1, 0, 0]
+      wCtx.transform(1, -shearFactor * 0.45, 0, 1, 0, 0);
+
+      // Outer 2-sigma contour glow
+      const grad2 = wCtx.createRadialGradient(0, 0, 0, 0, 0, Math.max(10, rX_base * 2.2));
+      grad2.addColorStop(0, 'rgba(139, 92, 246, 0.45)');
+      grad2.addColorStop(0.5, 'rgba(236, 72, 153, 0.25)');
+      grad2.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
+      wCtx.fillStyle = grad2;
+      wCtx.beginPath();
+      wCtx.ellipse(0, 0, Math.max(5, rX_base * 2.0), Math.max(5, rP_base * 2.0), 0, 0, Math.PI * 2);
+      wCtx.fill();
+
+      // 1-sigma uncertainty ellipse line
+      wCtx.strokeStyle = '#00f0ff';
+      wCtx.lineWidth = 2;
+      wCtx.beginPath();
+      wCtx.ellipse(0, 0, Math.max(3, rX_base), Math.max(3, rP_base), 0, 0, Math.PI * 2);
+      wCtx.stroke();
+
+      // Center crosshair
+      wCtx.strokeStyle = '#f59e0b';
+      wCtx.lineWidth = 2;
+      wCtx.beginPath();
+      wCtx.arc(0, 0, 3, 0, Math.PI * 2);
+      wCtx.stroke();
+
+      wCtx.restore();
+    }
+
+    const E_kin_val = (p0 * p0) / 2.0;
+
+    // -------------------------------------------------------------
+    // Interactive Wavefunction Collapse (Born Rule & Dirac Spike)
+    // -------------------------------------------------------------
+    function performCopenhagenMeasurement() {
+      // 1. Flash effect
+      const flash = document.getElementById('flash-overlay');
+      flash.style.opacity = '1';
+      setTimeout(() => { flash.style.opacity = '0'; }, 120);
+
+      // 2. Play acoustic snap chime
+      playCollapseChime();
+
+      // 3. Sample eigenvalue x from Gaussian distribution centered at expectX
+      const sig_t = sigma0 * Math.sqrt(1 + Math.pow((t) / (2 * sigma0 * sigma0), 2));
+      const u1 = Math.random();
+      const u2 = Math.random();
+      const randNormal = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+      
+      const v_group = p0 / 1.0;
+      const currentCenterX = x0 + v_group * t;
+      collapseX = currentCenterX + randNormal * sig_t * 0.6;
+      collapseX = Math.max(-12, Math.min(12, collapseX));
+
+      isCollapsed = true;
+      collapseTimer = 0.001;
+
+      // Animate center glow to collapse point
+      centerGlow.position.x = collapseX;
+      centerGlow.intensity = 3.5;
+      setTimeout(() => { centerGlow.intensity = 1.2; }, 400);
+    }
+
+    function resetWavepacket() {
+      t = 0.0;
+      isCollapsed = false;
+      collapseTimer = 0.0;
+      centerGlow.position.x = 0;
+    }
+
+    function togglePlayPause() {
+      isPlaying = !isPlaying;
+      const btn = document.getElementById('btn-play');
+      btn.innerHTML = isPlaying ? '<span>⏸</span> หยุดชั่วคราว' : '<span>▶️</span> เล่นต่อ';
+      btn.classList.toggle('primary', isPlaying);
+    }
+
+    // -------------------------------------------------------------
+    // Slider & Preset Listeners
+    // -------------------------------------------------------------
+    const sliderP0 = document.getElementById('slider-p0');
+    sliderP0.addEventListener('input', (e) => {
+      p0 = parseFloat(e.target.value);
+      document.getElementById('val-p0').innerText = p0.toFixed(2) + ' ℏ';
+    });
+    function setMomentum(pVal) {
+      p0 = pVal;
+      sliderP0.value = pVal;
+      document.getElementById('val-p0').innerText = p0.toFixed(2) + ' ℏ';
+      document.querySelectorAll('#slider-p0 ~ .preset-btns .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes(pVal + ' ℏ'));
+      });
+    }
+
+    const sliderSig = document.getElementById('slider-sig');
+    sliderSig.addEventListener('input', (e) => {
+      sigma0 = parseFloat(e.target.value);
+      document.getElementById('val-sig').innerText = sigma0.toFixed(2) + ' nm';
+    });
+    function setWidth(sVal) {
+      sigma0 = sVal;
+      sliderSig.value = sVal;
+      document.getElementById('val-sig').innerText = sigma0.toFixed(2) + ' nm';
+      document.querySelectorAll('#slider-sig ~ .preset-btns .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes(sVal + ' nm'));
+      });
+      resetWavepacket();
+    }
+
+    const sliderV0 = document.getElementById('slider-v0');
+    sliderV0.addEventListener('input', (e) => {
+      V0 = parseFloat(e.target.value);
+      document.getElementById('val-v0').innerText = V0.toFixed(2) + ' E₀';
+      if (V0 > 0.05 && potentialType === 'free') {
+        setPotentialPreset('step');
+      }
+    });
+
+    function setPotentialPreset(type) {
+      potentialType = type;
+      if (type === 'free') {
+        V0 = 0.0;
+      } else if (type === 'step') {
+        if (V0 < 0.2) V0 = 3.0;
+      } else if (type === 'trap') {
+        V0 = 2.5;
+      }
+      sliderV0.value = V0;
+      document.getElementById('val-v0').innerText = V0.toFixed(2) + ' E₀';
+      document.querySelectorAll('#slider-v0 ~ .preset-btns .preset-btn').forEach(b => {
+        if (type === 'free' && b.innerText.includes('อิสระ')) b.classList.add('active');
+        else if (type === 'step' && b.innerText.includes('กำแพง')) b.classList.add('active');
+        else if (type === 'trap' && b.innerText.includes('ฮาร์มอนิก')) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+      resetWavepacket();
+    }
+
+    const sliderDt = document.getElementById('slider-dt');
+    sliderDt.addEventListener('input', (e) => {
+      timeSpeed = parseFloat(e.target.value);
+      document.getElementById('val-dt').innerText = timeSpeed.toFixed(2) + 'x';
+    });
+
+    // -------------------------------------------------------------
+    // HUD Collapsible Dock & Zen Mode Controls
+    // -------------------------------------------------------------
+    let leftCollapsed = false;
+    let rightCollapsed = false;
+    let zenModeActive = false;
+
+    function toggleLeftHUD(collapse) {
+      leftCollapsed = collapse !== undefined ? collapse : !leftCollapsed;
+      document.getElementById('hud-left').classList.toggle('collapsed', leftCollapsed);
+      document.getElementById('dock-left').style.display = leftCollapsed ? 'flex' : 'none';
+    }
+
+    function toggleRightHUD(collapse) {
+      rightCollapsed = collapse !== undefined ? collapse : !rightCollapsed;
+      document.getElementById('hud-right').classList.toggle('collapsed', rightCollapsed);
+      document.getElementById('dock-right').style.display = rightCollapsed ? 'flex' : 'none';
+    }
+
+    function toggleZenMode() {
+      zenModeActive = !zenModeActive;
+      toggleLeftHUD(zenModeActive);
+      toggleRightHUD(zenModeActive);
+      const zenBtn = document.getElementById('btn-zen');
+      zenBtn.classList.toggle('active', zenModeActive);
+      zenBtn.querySelector('span:last-child').innerText = zenModeActive ? 'แสดงบาร์' : 'ย่อทุกบาร์ (H)';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'h' || e.key === 'H') toggleZenMode();
+      if (e.key === ' ') { e.preventDefault(); togglePlayPause(); }
+      if (e.key === 'm' || e.key === 'M') performCopenhagenMeasurement();
+    });
+
+    // -------------------------------------------------------------
+    // Mode Switching: 3D Lab / Marker AR / Touchless Hand AI
+    // -------------------------------------------------------------
+    function switchMode(modeIndex) {
+      document.querySelectorAll('.mode-pill').forEach((pill, idx) => {
+        pill.classList.toggle('active', idx === modeIndex - 1);
+      });
+
+      if (modeIndex === 1) {
+        // Mode 1: 3D Lab
+        closeARModal();
+        stopHandAI();
+      } else if (modeIndex === 2) {
+        // Mode 2: AR Marker Book
+        openARModal();
+        stopHandAI();
+      } else if (modeIndex === 3) {
+        // Mode 3: Hand AI
+        closeARModal();
+        startHandAI();
+      }
+    }
+
+    function openARModal() {
+      document.getElementById('ar-modal').style.display = 'flex';
+    }
+    function closeARModal() {
+      document.getElementById('ar-modal').style.display = 'none';
+    }
+
+    // -------------------------------------------------------------
+    // Mode 3: MediaPipe Hands AI Tracking
+    // -------------------------------------------------------------
+    let handInstance = null;
+    let cameraInstance = null;
+    let isHandTracking = false;
+
+    function startHandAI() {
+      const pip = document.getElementById('hand-pip-container');
+      const videoEl = document.getElementById('hand-video');
+      pip.style.display = 'block';
+
+      if (!handInstance) {
+        handInstance = new Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+        handInstance.setOptions({
+          maxNumHands: 1,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5
+        });
+        handInstance.onResults((results) => {
+          if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            const marks = results.multiHandLandmarks[0];
+            const thumb = marks[4];
+            const index = marks[8];
+            const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
+
+            // Pinch gesture triggers measurement collapse!
+            if (pinchDist < 0.05) {
+              performCopenhagenMeasurement();
+            }
+
+            // Hand horizontal position controls momentum p0
+            const wrist = marks[0];
+            const mappedP0 = Math.min(6.0, Math.max(0.5, (1.0 - wrist.x) * 6.0));
+            setMomentum(parseFloat(mappedP0.toFixed(1)));
+          }
+        });
+      }
+
+      if (!cameraInstance) {
+        cameraInstance = new Camera(videoEl, {
+          onFrame: async () => {
+            if (isHandTracking) await handInstance.send({ image: videoEl });
+          },
+          width: 320,
+          height: 240
+        });
+      }
+      isHandTracking = true;
+      cameraInstance.start();
+    }
+
+    function stopHandAI() {
+      isHandTracking = false;
+      document.getElementById('hand-pip-container').style.display = 'none';
+      if (cameraInstance && cameraInstance.stop) {
+        cameraInstance.stop();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Main Render Loop
+    // -------------------------------------------------------------
+    function animate() {
+      requestAnimationFrame(animate);
+      updateWavePhysics();
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

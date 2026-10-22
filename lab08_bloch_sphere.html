@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ห้องปฏิบัติการเสมือนจริง 3 มิติ และ WebAR ---- ทรงกลมบล็อคและคิวบิตควอนตัม — ผศ.ดร.ชีวะ ทัศนา</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  
+  <!-- MathJax 3 LaTeX Formula Engine -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <!-- MediaPipe Hands & Camera Utils -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+  <style>
+    :root {
+      --bg-space: #030712;
+      --panel-glass: rgba(6, 12, 28, 0.45);
+      --panel-border: rgba(0, 240, 255, 0.28);
+      --accent-cyan: #00f0ff;
+      --accent-gold: #f59e0b;
+      --accent-pink: #ec4899;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-blue: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-thai: 'Prompt', sans-serif;
+      --font-tech: 'Chakra Petch', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-thai);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    /* Top Universal Navigation Bar */
+    .top-nav {
+      position: absolute;
+      top: 12px;
+      left: 18px;
+      right: 18px;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel-glass);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 8px 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .nav-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-tech);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.5px;
+    }
+
+    .nav-title span {
+      font-size: 1.2rem;
+    }
+
+    .mode-pills {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .mode-pill {
+      font-family: var(--font-tech);
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-pill:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .mode-pill.active {
+      background: var(--accent-cyan);
+      color: #030712;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
+    }
+
+    .btn-zen {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--font-tech);
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-zen:hover, .btn-zen.active {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: var(--accent-gold);
+      color: #ffffff;
+    }
+
+    /* Left Floating Control Panel */
+    .hud-left {
+      position: absolute;
+      top: 68px;
+      left: 18px;
+      z-index: 40;
+      width: 390px;
+      max-width: calc(100vw - 36px);
+      max-height: calc(100vh - 84px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+
+    .hud-left.collapsed {
+      transform: translateX(-430px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Right Telemetry & Physics Panel */
+    .hud-right {
+      position: absolute;
+      top: 68px;
+      right: 18px;
+      z-index: 40;
+      width: 360px;
+      max-width: calc(100vw - 36px);
+      max-height: calc(100vh - 84px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+
+    .hud-right.collapsed {
+      transform: translateX(400px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Mini Collapsed Open Docks */
+    .dock-btn {
+      position: absolute;
+      top: 74px;
+      z-index: 45;
+      background: var(--panel-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      color: var(--accent-cyan);
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-family: var(--font-tech);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      transition: all 0.25s ease;
+    }
+    .dock-btn:hover {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--accent-cyan);
+    }
+    #dock-left { left: 18px; }
+    #dock-right { right: 18px; }
+
+    /* Glass Cards */
+    .glass-card {
+      background: var(--panel-glass);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-family: var(--font-tech);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.5px;
+    }
+
+    .card-title .tag {
+      font-size: 0.68rem;
+      background: rgba(0, 240, 255, 0.12);
+      color: var(--accent-cyan);
+      padding: 2px 7px;
+      border-radius: 5px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      font-family: var(--font-mono);
+    }
+
+    /* Scenario Tabs */
+    .scenario-tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+      gap: 4px;
+      margin-bottom: 12px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .scenario-tab {
+      text-align: center;
+      padding: 7px 4px;
+      font-size: 0.72rem;
+      font-family: var(--font-tech);
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .scenario-tab span:first-child {
+      font-size: 0.95rem;
+    }
+
+    .scenario-tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+    }
+
+    .scenario-tab.active {
+      background: var(--accent-cyan);
+      color: #030712;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+    }
+
+    /* Controls Styling */
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ctrl-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ctrl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+    }
+
+    .ctrl-val {
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.12);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Quantum Gate Buttons Grid */
+    .gate-btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .btn-gate {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      color: #f8fafc;
+      padding: 7px 4px;
+      border-radius: 8px;
+      font-family: var(--font-tech);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .btn-gate:hover {
+      background: rgba(0, 240, 255, 0.25);
+      color: #ffffff;
+      border-color: var(--accent-cyan);
+      transform: scale(1.04);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+    }
+
+    .btn-gate.gold {
+      border-color: rgba(245, 158, 11, 0.5);
+      color: var(--accent-gold);
+    }
+    .btn-gate.gold:hover {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: var(--accent-gold);
+    }
+
+    .btn-gate.pink {
+      border-color: rgba(236, 72, 153, 0.5);
+      color: var(--accent-pink);
+    }
+    .btn-gate.pink:hover {
+      background: rgba(236, 72, 153, 0.25);
+      border-color: var(--accent-pink);
+    }
+
+    /* Preset Button Grids */
+    .preset-btns {
+      display: flex;
+      gap: 5px;
+      margin-top: 2px;
+    }
+
+    .preset-btn {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 5px 4px;
+      font-size: 0.70rem;
+      color: #cbd5e1;
+      font-family: var(--font-tech);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .preset-btn:hover {
+      background: rgba(0, 240, 255, 0.15);
+      color: #ffffff;
+      border-color: var(--accent-cyan);
+    }
+
+    .preset-btn.active {
+      background: rgba(0, 240, 255, 0.25);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    /* Action Buttons */
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .btn-act {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      color: #f8fafc;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-family: var(--font-tech);
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-act:hover {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--accent-cyan);
+      transform: translateY(-1px);
+    }
+
+    .btn-act.primary {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(139, 92, 246, 0.3));
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+    }
+
+    /* Legend Color Indicator */
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      font-size: 0.70rem;
+      color: var(--text-muted);
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-bar {
+      width: 12px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* Telemetry Rows */
+    .telem-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: 0.75rem;
+    }
+
+    .telem-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .telem-label {
+      color: #cbd5e1;
+    }
+
+    .telem-value {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .telem-value.gold { color: var(--accent-gold); }
+    .telem-value.green { color: var(--accent-green); }
+    .telem-value.pink { color: var(--accent-pink); }
+    .telem-value.purple { color: var(--accent-purple); }
+
+    /* Modals & Dialogs */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: rgba(8, 15, 30, 0.95);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      padding: 20px 24px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+      position: relative;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-tech);
+      font-size: 1.05rem;
+      color: var(--accent-cyan);
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #ffffff;
+    }
+
+    /* Hand PIP Container */
+    #hand-pip-container {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 60;
+      width: 190px;
+      height: 142px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid var(--accent-cyan);
+      border-radius: 12px;
+      overflow: hidden;
+      display: none;
+      box-shadow: 0 8px 30px rgba(0, 240, 255, 0.4);
+    }
+
+    #hand-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .hand-badge {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      font-size: 0.65rem;
+      background: rgba(0, 240, 255, 0.25);
+      color: var(--accent-cyan);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-tech);
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 240, 255, 0.25);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 240, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div id="webgl-canvas"></div>
+
+  <!-- Top Universal Navigation -->
+  <div class="top-nav">
+    <div class="nav-title">
+      <span>🪐</span> LAB 08 ---- ทรงกลมบล็อคและคิวบิตควอนตัม (Bloch Sphere & Quantum Qubit 3D)
+    </div>
+    <div class="mode-pills">
+      <div class="mode-pill active" onclick="switchMode(1)">
+        <span>🎮</span> 3D Virtual Lab
+      </div>
+      <div class="mode-pill" onclick="switchMode(2)">
+        <span>📖</span> AR Hiro Marker
+      </div>
+      <div class="mode-pill" onclick="switchMode(3)">
+        <span>🖐</span> สั่งการด้วยมือ AI (Touchless)
+      </div>
+    </div>
+    <button class="btn-zen" id="btn-zen" onclick="toggleZenMode()">
+      <span>👁</span> <span>ย่อทุกบาร์ (H)</span>
+    </button>
+  </div>
+
+  <!-- Mini Docks for Expanding HUD -->
+  <button class="dock-btn" id="dock-left" style="display:none;" onclick="toggleLeftHUD(false)">
+    <span>▶</span> แผงควบคุมเกตคิวบิต
+  </button>
+  <button class="dock-btn" id="dock-right" style="display:none;" onclick="toggleRightHUD(false)">
+    <span>◀</span> ข้อมูลสถานะควอนตัม
+  </button>
+
+  <!-- Left Floating HUD: Parameter Controls -->
+  <div class="hud-left" id="hud-left">
+    <!-- Header Card -->
+    <div class="glass-card">
+      <div class="card-title">
+        <span>ทรงกลมบล็อค & เกตตรรกะควอนตัม</span>
+        <button class="modal-close" style="font-size:1.0rem;" onclick="toggleLeftHUD(true)">◀</button>
+      </div>
+      <p style="font-size:0.75rem; color:#cbd5e1; line-height:1.5;">
+        จำลองสถานะคิวบิตเดี่ยว $|\psi\rangle = \cos\frac{\theta}{2}|0\rangle + e^{i\phi}\sin\frac{\theta}{2}|1\rangle$ การแปลงสถานะด้วยเกตเปาลี เกตฮาดามาร์ด การแกว่งกวัดราบี และดีโคฮีเรนซ์ในเมทริกซ์ความหนาแน่น $\rho$
+      </p>
+      <div style="font-size:0.70rem; color:var(--accent-gold); margin-top:6px; display:flex; align-items:center; gap:6px;">
+        <span>โดย</span> <strong style="color:#ffffff;">ผศ.ดร.ชีวะ ทัศนา</strong> <span>สาขาวิชาฟิสิกส์ มรภ.รำไพพรรณี</span>
+      </div>
+    </div>
+
+    <!-- Controls Card -->
+    <div class="glass-card">
+      <!-- Scenario Selector Tabs -->
+      <div class="scenario-tabs">
+        <div class="scenario-tab active" id="tab-state" onclick="setScenario('state')">
+          <span>🎯</span> คิวบิต |ψ⟩
+        </div>
+        <div class="scenario-tab" id="tab-gates" onclick="setScenario('gates')">
+          <span>🎛️</span> เกตควอนตัม
+        </div>
+        <div class="scenario-tab" id="tab-rabi" onclick="setScenario('rabi')">
+          <span>🌊</span> การแกว่งราบี
+        </div>
+        <div class="scenario-tab" id="tab-echo" onclick="setScenario('echo')">
+          <span>🔄</span> สปินเอคโค
+        </div>
+        <div class="scenario-tab" id="tab-tomo" onclick="setScenario('tomo')">
+          <span>📊</span> โทโมกราฟี
+        </div>
+        <div class="scenario-tab" id="tab-decohere" onclick="setScenario('decohere')">
+          <span>📉</span> ดีโคฮีเรนซ์
+        </div>
+      </div>
+
+      <div class="card-title">
+        <span id="title-controls">พิกัดเชิงมุมของคิวบิต (θ, φ)</span>
+        <span class="tag" id="tag-qubit-state">PURE QUBIT</span>
+      </div>
+
+      <div class="ctrl-group">
+        <!-- Qubit Standard Basis State Presets -->
+        <div class="ctrl-item" id="item-basis-presets">
+          <div class="ctrl-header">
+            <span>เลือกสถานะมาตรฐาน (Basis States)</span>
+            <span style="font-size:0.68rem; color:var(--accent-cyan);">แกนพิกัดหลัก</span>
+          </div>
+          <div class="preset-btns">
+            <button class="preset-btn active" onclick="setQubitAngles(0, 0, '|0⟩ (North)')">|0⟩</button>
+            <button class="preset-btn" onclick="setQubitAngles(180, 0, '|1⟩ (South)')">|1⟩</button>
+            <button class="preset-btn" onclick="setQubitAngles(90, 0, '|+⟩ (Equator X+)')">|+⟩</button>
+            <button class="preset-btn" onclick="setQubitAngles(90, 180, '|-⟩ (Equator X-)')">|-⟩</button>
+            <button class="preset-btn" onclick="setQubitAngles(90, 90, '|+i⟩ (Equator Y+)')">|+i⟩</button>
+            <button class="preset-btn" onclick="setQubitAngles(90, 270, '|-i⟩ (Equator Y-)')">|-i⟩</button>
+          </div>
+        </div>
+
+        <!-- Theta Slider (Polar Angle) -->
+        <div class="ctrl-item" id="item-theta">
+          <div class="ctrl-header">
+            <span>มุมขั้ว θ (0° ถึง 180°)</span>
+            <span class="ctrl-val" id="val-theta">θ = 0.0°</span>
+          </div>
+          <input type="range" id="slider-theta" min="0" max="180" step="1" value="0">
+        </div>
+
+        <!-- Phi Slider (Azimuthal Angle) -->
+        <div class="ctrl-item" id="item-phi">
+          <div class="ctrl-header">
+            <span>มุมเฟสอะซิมุท φ (0° ถึง 360°)</span>
+            <span class="ctrl-val" id="val-phi">φ = 0.0°</span>
+          </div>
+          <input type="range" id="slider-phi" min="0" max="360" step="1" value="0">
+        </div>
+
+        <!-- Quantum Logic Gates Buttons Grid (Scenario 2) -->
+        <div class="ctrl-item" id="item-gates-panel" style="display:none;">
+          <div class="ctrl-header">
+            <span>เกตตรรกะควอนตัม 1 คิวบิต (Unitary Gates)</span>
+            <span style="font-size:0.68rem; color:var(--accent-gold);">U U† = I</span>
+          </div>
+          <div class="gate-btn-grid">
+            <button class="btn-gate" onclick="applyGate('H')">H (Hadamard)</button>
+            <button class="btn-gate" onclick="applyGate('X')">X (NOT)</button>
+            <button class="btn-gate" onclick="applyGate('Y')">Y (Pauli-Y)</button>
+            <button class="btn-gate" onclick="applyGate('Z')">Z (Phase Flip)</button>
+            <button class="btn-gate pink" onclick="applyGate('S')">S (π/2)</button>
+            <button class="btn-gate pink" onclick="applyGate('T')">T (π/4)</button>
+            <button class="btn-gate gold" onclick="applyGate('Rx')">Rx(π/2)</button>
+            <button class="btn-gate gold" onclick="applyGate('Ry')">Ry(π/2)</button>
+          </div>
+        </div>
+
+        <!-- Continuous Rotation Gate Slider (Scenario 2) -->
+        <div class="ctrl-item" id="item-rot-gate" style="display:none;">
+          <div class="ctrl-header">
+            <span>มุมการหมุนรอบแกน Z ---- R_z(α)</span>
+            <span class="ctrl-val" id="val-rot-alpha">α = 45°</span>
+          </div>
+          <input type="range" id="slider-rot-alpha" min="0" max="360" step="5" value="45">
+          <button class="btn-act primary" onclick="applyArbitraryRz()" style="margin-top:4px;">
+            <span>🔄</span> หมุน R_z(α) บนทรงกลมบล็อค
+          </button>
+        </div>
+
+        <!-- Rabi Driving Parameters (Scenario 3) -->
+        <div class="ctrl-item" id="item-rabi-ctrl" style="display:none;">
+          <div class="ctrl-header">
+            <span>ความถี่การขับกวนราบี (Rabi Frequency Ω_R)</span>
+            <span class="ctrl-val" id="val-rabi-omega">1.50 rad/s</span>
+          </div>
+          <input type="range" id="slider-rabi-omega" min="0.2" max="4.0" step="0.1" value="1.5">
+
+          <div class="ctrl-header" style="margin-top:6px;">
+            <span>การปรับความถี่คลาดเคลื่อน (Detuning Δ)</span>
+            <span class="ctrl-val" id="val-rabi-delta">0.00 rad/s (Resonance)</span>
+          </div>
+          <input type="range" id="slider-rabi-delta" min="-3.0" max="3.0" step="0.2" value="0.0">
+        </div>
+
+        <!-- Hahn Spin Echo & Ramsey Interferometry Controls (Scenario 4) -->
+        <div class="ctrl-item" id="item-echo-ctrl" style="display:none;">
+          <div class="ctrl-header">
+            <span>ลำดับพัลส์เอคโค (Hahn Echo Pulse Sequence)</span>
+            <span class="ctrl-val" id="val-echo-phase">รอเริ่มลำดับ</span>
+          </div>
+          <div style="font-size:0.70rem; color:#94a3b8; line-height:1.4; margin-bottom:4px;">
+            ลำดับพัลส์ ---- $(\pi/2)_x \to \tau \to \pi_y \to \tau \to \text{Spin Echo}$
+          </div>
+
+          <div class="ctrl-header" style="margin-top:6px;">
+            <span>ช่วงเวลาวิวัฒนาการอิสระ τ</span>
+            <span class="ctrl-val" id="val-echo-tau">τ = 2.0 s</span>
+          </div>
+          <input type="range" id="slider-echo-tau" min="1.0" max="5.0" step="0.5" value="2.0">
+
+          <div class="ctrl-header" style="margin-top:6px;">
+            <span>การกระจายความถี่คลาดเคลื่อน Inhomogeneous Broadening σ_Δω</span>
+            <span class="ctrl-val" id="val-echo-spread">1.2 rad/s</span>
+          </div>
+          <input type="range" id="slider-echo-spread" min="0.2" max="3.0" step="0.2" value="1.2">
+
+          <button class="btn-act primary" id="btn-start-echo" onclick="startHahnSpinEcho()" style="margin-top:6px; background:linear-gradient(135deg, #00f0ff, #8b5cf6);">
+            <span>🚀</span> เริ่มลำดับพัลส์ Hahn Spin Echo
+          </button>
+        </div>
+
+        <!-- Quantum State Tomography Controls (Scenario 5) -->
+        <div class="ctrl-item" id="item-tomo-ctrl" style="display:none;">
+          <div class="ctrl-header">
+            <span>โพรโทคอลการสร้างภาพตัดขวางควอนตัม (QST Protocol)</span>
+            <span class="ctrl-val" id="val-tomo-status" style="color:var(--accent-gold);">พร้อมเริ่มตรวจวัด</span>
+          </div>
+          <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-bottom:6px;">
+            ตรวจวัดโปรเจกชันตามแกนสมบูรณ์ $Z, X, Y$ เพื่อกู้คืนเมทริกซ์ความหนาแน่น $\rho_{\text{tomo}} = \frac{1}{2}(I + \langle X\rangle\sigma_x + \langle Y\rangle\sigma_y + \langle Z\rangle\sigma_z)$
+          </div>
+
+          <div class="ctrl-header">
+            <span>จำนวนช็อตต่อฐานการวัด (Shots per basis)</span>
+            <span class="ctrl-val" id="val-tomo-shots">1,000 ช็อต</span>
+          </div>
+          <input type="range" id="slider-tomo-shots" min="100" max="3000" step="100" value="1000">
+
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="prepareTomoState(0, 0)">สถานะ |0⟩</button>
+            <button class="preset-btn" onclick="prepareTomoState(90, 0)">สถานะ |+⟩</button>
+            <button class="preset-btn" onclick="prepareTomoState(90, 90)">สถานะ |+i⟩</button>
+            <button class="preset-btn active" onclick="prepareTomoState(60, 45)">สถานะผสม (60°, 45°)</button>
+          </div>
+
+          <button class="btn-act primary" id="btn-run-tomo" onclick="runCompleteQST()" style="margin-top:6px; background:linear-gradient(135deg, #f59e0b, #ec4899);">
+            <span>🔬</span> รันการตรวจวัดโทโมกราฟีเต็มระบบ (3,000 ช็อต)
+          </button>
+        </div>
+
+        <!-- Decoherence / Dephasing Controls (Scenario 6) -->
+        <div class="ctrl-item" id="item-decohere-ctrl" style="display:none;">
+          <div class="ctrl-header">
+            <span>การผ่อนคลายพลังงาน (T₁ Relaxation Rate γ₁)</span>
+            <span class="ctrl-val" id="val-gamma1">γ₁ = 0.00</span>
+          </div>
+          <input type="range" id="slider-gamma1" min="0.0" max="1.0" step="0.05" value="0.0">
+
+          <div class="ctrl-header" style="margin-top:6px;">
+            <span>การสลายเฟสบริสุทธิ์ (T₂ Pure Dephasing γ_φ)</span>
+            <span class="ctrl-val" id="val-gamma-phi">γ_φ = 0.00</span>
+          </div>
+          <input type="range" id="slider-gamma-phi" min="0.0" max="1.0" step="0.05" value="0.0">
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-row">
+          <button class="btn-act primary" id="btn-measure" onclick="performQuantumMeasurement()">
+            <span>🎲</span> ตรวจวัดคิวบิต (Born Rule)
+          </button>
+          <button class="btn-act" onclick="resetQubit()">
+            <span>🔄</span> รีเซ็ตสู่ |0⟩
+          </button>
+        </div>
+
+        <div class="action-row">
+          <button class="btn-act" onclick="resetView()">
+            <span>🎯</span> รีเซ็ตมุมมอง
+          </button>
+          <button class="btn-act" id="btn-sound" onclick="toggleSound()">
+            <span>🔊</span> สังเคราะห์เสียงเกต
+          </button>
+        </div>
+
+        <!-- Modal Triggers -->
+        <button class="btn-act" onclick="openMeasureModal()" style="margin-top:4px; border-color:var(--accent-purple); color:var(--accent-purple);">
+          <span>📊</span> สถิติการตรวจวัดควอนตัม (1,000 ช็อตจำลอง)
+        </button>
+
+        <button class="btn-act" onclick="openDensityModal()" style="margin-top:2px; border-color:var(--accent-gold); color:var(--accent-gold);">
+          <span>📈</span> เมทริกซ์ความหนาแน่นควอนตัม ρ & วงจรลอจิก
+        </button>
+
+        <!-- Waveform & Nodal Legends -->
+        <div class="legend-grid">
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#f59e0b;"></div>
+            <span>เวกเตอร์บล็อค |ψ⟩</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#00f0ff;"></div>
+            <span>แกนพิกัด Z (สถานะฐาน)</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#10b981;"></div>
+            <span>แกนพิกัด X (เกตฮาดามาร์ด)</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#8b5cf6;"></div>
+            <span>แกนพิกัด Y (เฟสเชิงซ้อน)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Floating HUD: Quantum Telemetry & Statevector -->
+  <div class="hud-right" id="hud-right">
+    <div class="glass-card">
+      <div class="card-title">
+        <span>ข้อมูลสถานะคิวบิตเชิงตัวเลข</span>
+        <button class="modal-close" style="font-size:1.0rem;" onclick="toggleRightHUD(true)">▶</button>
+      </div>
+
+      <div class="telem-list">
+        <div class="telem-row">
+          <span class="telem-label">เวกเตอร์สถานะ |ψ⟩</span>
+          <span class="telem-value gold" id="telem-statevector">1.00|0⟩ + 0.00|1⟩</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ความน่าจะเป็น P(|0⟩)</span>
+          <span class="telem-value green" id="telem-prob0">100.0 %</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ความน่าจะเป็น P(|1⟩)</span>
+          <span class="telem-value pink" id="telem-prob1">0.0 %</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">พิกัดบล็อค (r_x, r_y, r_z)</span>
+          <span class="telem-value" id="telem-coords">(0.00, 0.00, 1.00)</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">รัศมีความบริสุทธิ์ |r|</span>
+          <span class="telem-value green" id="telem-radius">1.000 (Pure State)</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ความบริสุทธิ์ Tr(ρ²)</span>
+          <span class="telem-value gold" id="telem-purity">1.000</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">เอนโทรปีฟอน นอยมันน์ S</span>
+          <span class="telem-value purple" id="telem-entropy">0.000 บิต</span>
+        </div>
+
+        <div class="telem-row" id="row-echo-amp" style="display:none;">
+          <span class="telem-label">แอมพลิจูดสัญญาณเอคโค M_⊥</span>
+          <span class="telem-value cyan" id="telem-echo-amp">100.0 % (Echo Peak)</span>
+        </div>
+
+        <div class="telem-row" id="row-echo-time" style="display:none;">
+          <span class="telem-label">เวลาฟื้นสภาพเอคโค 2τ</span>
+          <span class="telem-value gold" id="telem-echo-time">4.0 s</span>
+        </div>
+
+        <div class="telem-row" id="row-tomo-fid" style="display:none;">
+          <span class="telem-label">ความถูกต้องแม่นยำสถานะ (Fidelity F)</span>
+          <span class="telem-value green" id="telem-tomo-fid">99.85 %</span>
+        </div>
+
+        <div class="telem-row" id="row-tomo-tr" style="display:none;">
+          <span class="telem-label">เมทริกซ์ความหนาแน่นกู้คืน</span>
+          <span class="telem-value purple" id="telem-tomo-matrix">ρ_tomo สำเร็จ</span>
+        </div>
+
+        <div class="telem-row" style="border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px; margin-top:2px;">
+          <span class="telem-label">ผลการตรวจวัดล่าสุด</span>
+          <span class="telem-value gold" id="telem-last-meas">-</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quantum Computing Theory Helper Card -->
+    <div class="glass-card">
+      <div class="card-title">
+        <span>หลักฟิสิกส์การคำนวณควอนตัม</span>
+        <span class="tag">FORMULAS</span>
+      </div>
+      <div style="font-size:0.72rem; color:#cbd5e1; line-height:1.5;">
+        <p>• <strong>นิยามคิวบิตบนทรงกลมบล็อค</strong> ---- $|\psi\rangle = \cos\frac{\theta}{2}|0\rangle + e^{i\phi}\sin\frac{\theta}{2}|1\rangle$ ทุกจุดบนผิวทรงกลมหนึ่งหน่วยแทนสถานะควอนตัมบริสุทธิ์ของ 1 คิวบิต</p>
+        <p>• <strong>เกตฮาดามาร์ด (Hadamard Gate)</strong> ---- $H = \frac{1}{\sqrt{2}}\begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}$ หมุนเวกเตอร์รอบแกน $\frac{X+Z}{\sqrt{2}}$ ด้วยมุม $\pi$ สร้างสถานะซ้อนทับเท่ากัน $|+\rangle$</p>
+        <p>• <strong>ลำดับพัลส์ Hahn Spin Echo</strong> ---- พัลส์ $\pi_y$ หลังเวลา $\tau$ จะกลับทิศทางของสปินที่สลายเฟส ($T_2^*$) ให้วิ่งย้อนกลับมารวมตัวกันที่เวลา $2\tau$ เกิดสัญญาณเอคโคความเข้มข้นสูงสุด</p>
+        <p>• <strong>การสร้างภาพตัดขวางควอนตัม (Quantum State Tomography)</strong> ---- กู้คืนเมทริกซ์ความหนาแน่นเต็มรูป $\rho = \frac{1}{2}(I + \langle X\rangle\sigma_x + \langle Y\rangle\sigma_y + \langle Z\rangle\sigma_z)$ จากการวัดบน 3 ฐานพิกัด</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quantum Measurement Statistics Modal -->
+  <div class="modal-overlay" id="measure-modal" onclick="if(event.target === this) closeMeasureModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📊 สถิติการตรวจวัดควอนตัมแบบจำลอง 1,000 ครั้ง (Born Rule Sampling)</span>
+        <button class="modal-close" onclick="closeMeasureModal()">✕</button>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:100%; height:250px; background:#020617; border-radius:12px; border:1px solid rgba(0,240,255,0.3); overflow:hidden; position:relative;">
+          <canvas id="measure-canvas" width="550" height="250" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-around; font-size:0.75rem; margin-top:10px;">
+          <span style="color:var(--accent-green);">ผลการวัด |0⟩ ---- <strong id="meas-count-0">0 ครั้ง (0%)</strong></span>
+          <span style="color:var(--accent-pink);">ผลการวัด |1⟩ ---- <strong id="meas-count-1">0 ครั้ง (0%)</strong></span>
+        </div>
+        <button class="btn-act primary" onclick="run1000Shots()" style="margin:12px auto 0; max-width:240px;">
+          <span>🎲</span> รันการวัดซ้ำ 1,000 ช็อต
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Density Matrix & Quantum Circuit Modal -->
+  <div class="modal-overlay" id="density-modal" onclick="if(event.target === this) closeDensityModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📈 เมทริกซ์ความหนาแน่นควอนตัม ρ & ไดอะแกรมวงจรเกต</span>
+        <button class="modal-close" onclick="closeDensityModal()">✕</button>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:100%; height:220px; background:#020617; border-radius:12px; border:1px solid rgba(139,92,246,0.3); overflow:hidden; position:relative;">
+          <canvas id="density-canvas" width="550" height="220" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#94a3b8; margin-top:8px;">
+          <span>เมทริกซ์ฮาร์มิเชียน ---- <strong style="color:var(--accent-cyan);">ρ = ρ†, Tr(ρ) = 1</strong></span>
+          <span>ความบริสุทธิ์ควอนตัม ---- <strong style="color:var(--accent-gold);" id="dens-purity-lbl">Tr(ρ²) = 1.000</strong></span>
+        </div>
+        <p style="font-size:0.75rem; color:#cbd5e1; margin-top:10px; line-height:1.4; text-align:left;">
+          สมาชิกทแยงมุม $\rho_{00}, \rho_{11}$ แทนความน่าจะเป็นประชากร (Populations) ขณะที่สมาชิกนอกแนวทแยง $\rho_{01}, \rho_{10}$ แทนสภาพเชื่อมแน่นเชิงควอนตัม (Quantum Coherences) ซึ่งจะหดเล็กลงเมื่อเกิดการรบกวนจากสิ่งแวดล้อม (Dephasing)
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- AR Hiro Marker Modal -->
+  <div class="modal-overlay" id="ar-modal" onclick="if(event.target === this) closeARModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📖 สแกนภาพมาร์กเกอร์หนังสือ AR (Hiro Marker)</span>
+        <button class="modal-close" onclick="closeARModal()">✕</button>
+      </div>
+      <div style="text-align:center; padding:10px 0;">
+        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Hiro Marker" style="width:190px; height:190px; border-radius:12px; border:4px solid var(--accent-cyan); box-shadow:0 0 20px rgba(0,240,255,0.4);">
+        <p style="font-size:0.82rem; color:#cbd5e1; margin-top:14px; line-height:1.5;">
+          ส่องกล้องมาที่มาร์กเกอร์ Hiro ในตำราฟิสิกส์ควอนตัมบทที่ 8<br>
+          ทรงกลมบล็อค 3 มิติ และเวกเตอร์สถานะคิวบิตจะลอยขึ้นมาบนหน้าหนังสือทันที
+        </p>
+        <div style="margin-top:16px; display:flex; justify-content:center; gap:10px;">
+          <button class="btn-act primary" onclick="closeARModal()">เข้าใจแล้ว เริ่มการทดลอง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MediaPipe Hands PIP Video Feed -->
+  <div id="hand-pip-container">
+    <div class="hand-badge">🖐 AI Hand Tracking Active</div>
+    <video id="hand-video" playsinline autoplay muted></video>
+  </div>
+
+  <!-- ------------------------------------------------------------- -->
+  <!-- Simulation Script: Three.js Bloch Sphere & Quantum Computing    -->
+  <!-- ------------------------------------------------------------- -->
+  <script>
+    // -------------------------------------------------------------
+    // Three.js Scene Setup, Camera & Lighting
+    // -------------------------------------------------------------
+    const canvasContainer = document.getElementById('webgl-canvas');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x030712);
+    scene.fog = new THREE.FogExp2(0x030712, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 4.5, 12);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    canvasContainer.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 4;
+    controls.maxDistance = 35;
+    controls.target.set(0, 0, 0);
+
+    // Illumination
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0x00f0ff, 1.2);
+    keyLight.position.set(10, 16, 12);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x8b5cf6, 0.8);
+    fillLight.position.set(-10, -12, -10);
+    scene.add(fillLight);
+
+    const glowLight = new THREE.PointLight(0xf59e0b, 1.6, 20);
+    glowLight.position.set(0, 0, 0);
+    scene.add(glowLight);
+
+    // Grid Floor
+    const gridHelper = new THREE.GridHelper(30, 30, 0x00f0ff, 0x1e293b);
+    gridHelper.position.y = -3.5;
+    scene.add(gridHelper);
+
+    // -------------------------------------------------------------
+    // Physical Simulation State Variables
+    // -------------------------------------------------------------
+    let currentScenario = 'state'; // 'state' | 'gates' | 'rabi' | 'echo' | 'tomo' | 'decohere'
+    let thetaDeg = 0.0; // 0 to 180
+    let phiDeg = 0.0;   // 0 to 360
+    let blochRadius = 1.0; // 1.0 for pure state, < 1.0 for mixed state
+    let rabiOmega = 1.5;
+    let rabiDelta = 0.0;
+    let gamma1 = 0.0;
+    let gammaPhi = 0.0;
+    let animTime = 0.0;
+    let isPlaying = true;
+    const SPHERE_R = 3.0;
+
+    // Hahn Spin Echo & Ensemble dephasing state
+    let echoTau = 2.0;
+    let echoSpread = 1.2;
+    let isEchoRunning = false;
+    let echoStartTime = 0.0;
+    let echoStage = 'idle'; // 'idle' | 'pulse1' | 'dephasing' | 'pulse2' | 'refocusing' | 'echo'
+    const NUM_SPINS = 16;
+    const ensembleSpins = [];
+
+    // Quantum State Tomography (QST) state
+    let tomoShots = 1000;
+    let isTomoRunning = false;
+    let tomoRho = null;
+    let tomoFidelity = 1.0;
+
+    // -------------------------------------------------------------
+    // 3D Bloch Sphere Construction
+    // -------------------------------------------------------------
+    const blochGroup = new THREE.Group();
+    scene.add(blochGroup);
+
+    // 1. Translucent PBR Outer Glass Sphere
+    const sphereGeo = new THREE.SphereGeometry(SPHERE_R, 48, 36);
+    const sphereMat = new THREE.MeshPhysicalMaterial({
+      color: 0x0284c7,
+      transparent: true,
+      opacity: 0.14,
+      roughness: 0.08,
+      metalness: 0.1,
+      transmission: 0.85,
+      ior: 1.25,
+      depthWrite: false
+    });
+    const sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
+    blochGroup.add(sphereMesh);
+
+    // 2. Latitude & Longitude Coordinate Wireframe Rings
+    const wireMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.28 });
+    
+    // Equatorial ring (XY-plane)
+    const eqGeo = new THREE.BufferGeometry();
+    const eqPts = [];
+    for (let i = 0; i <= 64; i++) {
+      const a = (i / 64) * Math.PI * 2;
+      eqPts.push(new THREE.Vector3(Math.cos(a) * SPHERE_R, 0, Math.sin(a) * SPHERE_R));
+    }
+    eqGeo.setFromPoints(eqPts);
+    const eqLine = new THREE.Line(eqGeo, wireMat);
+    blochGroup.add(eqLine);
+
+    // Meridian rings (XZ and YZ planes)
+    const m1Geo = new THREE.BufferGeometry();
+    const m1Pts = [];
+    for (let i = 0; i <= 64; i++) {
+      const a = (i / 64) * Math.PI * 2;
+      m1Pts.push(new THREE.Vector3(Math.cos(a) * SPHERE_R, Math.sin(a) * SPHERE_R, 0));
+    }
+    m1Geo.setFromPoints(m1Pts);
+    const m1Line = new THREE.Line(m1Geo, wireMat);
+    blochGroup.add(m1Line);
+
+    const m2Geo = new THREE.BufferGeometry();
+    const m2Pts = [];
+    for (let i = 0; i <= 64; i++) {
+      const a = (i / 64) * Math.PI * 2;
+      m2Pts.push(new THREE.Vector3(0, Math.sin(a) * SPHERE_R, Math.cos(a) * SPHERE_R));
+    }
+    m2Geo.setFromPoints(m2Pts);
+    const m2Line = new THREE.Line(m2Geo, wireMat);
+    blochGroup.add(m2Line);
+
+    // 3. Coordinate Axes X (Green), Y (Purple), Z (Cyan)
+    function createAxis(from, to, color) {
+      const geom = new THREE.BufferGeometry().setFromPoints([from, to]);
+      const mat = new THREE.LineBasicMaterial({ color: color, linewidth: 2.5 });
+      blochGroup.add(new THREE.Line(geom, mat));
+    }
+    const AXIS_LEN = SPHERE_R * 1.35;
+    createAxis(new THREE.Vector3(0, -AXIS_LEN, 0), new THREE.Vector3(0, AXIS_LEN, 0), 0x00f0ff); // Z (North-South)
+    createAxis(new THREE.Vector3(-AXIS_LEN, 0, 0), new THREE.Vector3(AXIS_LEN, 0, 0), 0x10b981); // X
+    createAxis(new THREE.Vector3(0, 0, -AXIS_LEN), new THREE.Vector3(0, 0, AXIS_LEN), 0x8b5cf6); // Y
+
+    // 4. Pole Text Labels Sprite Helpers
+    function makeTextSprite(message, colorStr) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = colorStr;
+      ctx.font = 'Bold 32px Chakra Petch';
+      ctx.textAlign = 'center';
+      ctx.fillText(message, 64, 42);
+      const texture = new THREE.CanvasTexture(canvas);
+      const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      const sprite = new THREE.Sprite(mat);
+      sprite.scale.set(1.4, 0.7, 1);
+      return sprite;
+    }
+
+    const label0 = makeTextSprite('|0⟩', '#00f0ff');
+    label0.position.set(0, AXIS_LEN + 0.35, 0);
+    blochGroup.add(label0);
+
+    const label1 = makeTextSprite('|1⟩', '#00f0ff');
+    label1.position.set(0, -AXIS_LEN - 0.35, 0);
+    blochGroup.add(label1);
+
+    const labelPlus = makeTextSprite('|+⟩', '#10b981');
+    labelPlus.position.set(AXIS_LEN + 0.35, 0, 0);
+    blochGroup.add(labelPlus);
+
+    const labelMinus = makeTextSprite('|-⟩', '#10b981');
+    labelMinus.position.set(-AXIS_LEN - 0.35, 0, 0);
+    blochGroup.add(labelMinus);
+
+    const labelPlusI = makeTextSprite('|+i⟩', '#8b5cf6');
+    labelPlusI.position.set(0, 0, AXIS_LEN + 0.35);
+    blochGroup.add(labelPlusI);
+
+    const labelMinusI = makeTextSprite('|-i⟩', '#8b5cf6');
+    labelMinusI.position.set(0, 0, -AXIS_LEN - 0.35);
+    blochGroup.add(labelMinusI);
+
+    // 5. State Vector Arrow (|psi>)
+    const arrowDir = new THREE.Vector3(0, 1, 0);
+    const arrowOrigin = new THREE.Vector3(0, 0, 0);
+    const stateArrow = new THREE.ArrowHelper(arrowDir, arrowOrigin, SPHERE_R, 0xf59e0b, 0.45, 0.22);
+    stateArrow.line.material.linewidth = 4;
+    blochGroup.add(stateArrow);
+
+    // Glowing Tip Dot
+    const tipGeo = new THREE.SphereGeometry(0.14, 16, 16);
+    const tipMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+    const tipDot = new THREE.Mesh(tipGeo, tipMat);
+    blochGroup.add(tipDot);
+
+    // Projection disk shadow on equator (XY-plane)
+    const shadowGeo = new THREE.RingGeometry(0.01, 0.12, 16);
+    const shadowMat = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
+    const shadowDisk = new THREE.Mesh(shadowGeo, shadowMat);
+    shadowDisk.rotation.x = Math.PI / 2;
+    blochGroup.add(shadowDisk);
+
+    // Trajectory History Ribbon (Trace of Vector movements)
+    const TRAIL_LEN = 120;
+    const trailGeo = new THREE.BufferGeometry();
+    const trailPos = new Float32Array(TRAIL_LEN * 3);
+    trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+    const trailMat = new THREE.LineBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.75, linewidth: 2.5 });
+    const trailLine = new THREE.Line(trailGeo, trailMat);
+    blochGroup.add(trailLine);
+    let trailIndex = 0;
+
+    // 6. Hahn Spin Echo Ensemble Vectors (16 dephasing spins on equator)
+    const spinEnsembleGroup = new THREE.Group();
+    spinEnsembleGroup.visible = false;
+    blochGroup.add(spinEnsembleGroup);
+
+    const ensembleColors = [
+      0x00f0ff, 0x06b6d4, 0x0ea5e9, 0x38bdf8,
+      0x10b981, 0x34d399, 0xa3e635, 0xfacc15,
+      0xf59e0b, 0xf97316, 0xef4444, 0xf43f5e,
+      0xec4899, 0xd946ef, 0xa855f7, 0x8b5cf6
+    ];
+
+    for (let k = 0; k < NUM_SPINS; k++) {
+      const arr = new THREE.ArrowHelper(
+        new THREE.Vector3(1, 0, 0),
+        new THREE.Vector3(0, 0, 0),
+        SPHERE_R * 0.95,
+        ensembleColors[k],
+        0.3,
+        0.14
+      );
+      spinEnsembleGroup.add(arr);
+      const deltaW = ((k - 7.5) / 7.5);
+      ensembleSpins.push({
+        arrow: arr,
+        deltaOmega: deltaW,
+        phi: 0.0
+      });
+    }
+
+    // -------------------------------------------------------------
+    // Web Audio Synthesizer: Gate Chimes & Precession Feedback
+    // -------------------------------------------------------------
+    let audioCtx = null;
+    let audioActive = false;
+    let masterGain = null;
+
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioClass();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        masterGain.connect(audioCtx.destination);
+        audioActive = true;
+      } catch (e) {
+        console.warn('Audio not available:', e);
+      }
+    }
+
+    function toggleSound() {
+      if (!audioCtx) initAudio();
+      audioActive = !audioActive;
+      const btn = document.getElementById('btn-sound');
+      if (audioActive) {
+        masterGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        btn.classList.add('primary');
+        btn.innerHTML = '<span>🔊</span> สังเคราะห์เสียงเกต (เปิด)';
+      } else {
+        masterGain.gain.setValueAtTime(0.0, audioCtx.currentTime);
+        btn.classList.remove('primary');
+        btn.innerHTML = '<span>🔇</span> สังเคราะห์เสียงเกต (ปิด)';
+      }
+    }
+
+    function playTone(freqHz, duration = 0.25, type = 'sine') {
+      if (!audioActive || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freqHz, now);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + duration + 0.05);
+    }
+
+    // -------------------------------------------------------------
+    // Core Quantum Qubit Mathematics & State Evolution
+    // -------------------------------------------------------------
+    function updateBlochState() {
+      const thetaRad = (thetaDeg * Math.PI) / 180.0;
+      const phiRad = (phiDeg * Math.PI) / 180.0;
+
+      // Bloch Vector Components:
+      // r_x = sin(theta) * cos(phi)
+      // r_y = sin(theta) * sin(phi)
+      // r_z = cos(theta)
+      // In Three.js coordinates: Y is North (|0>), X is right, Z is front
+      const rx = blochRadius * Math.sin(thetaRad) * Math.cos(phiRad);
+      const rz = blochRadius * Math.sin(thetaRad) * Math.sin(phiRad);
+      const ry = blochRadius * Math.cos(thetaRad);
+
+      const targetDir = new THREE.Vector3(rx, ry, rz);
+      const len = targetDir.length();
+      if (len > 0.001) {
+        stateArrow.setDirection(targetDir.clone().normalize());
+        stateArrow.setLength(len * SPHERE_R, 0.45 * Math.min(1.0, len), 0.22 * Math.min(1.0, len));
+      }
+
+      const tipPos = targetDir.clone().multiplyScalar(SPHERE_R);
+      tipDot.position.copy(tipPos);
+      glowLight.position.copy(tipPos);
+
+      // Shadow on equator
+      shadowDisk.position.set(rx * SPHERE_R, 0, rz * SPHERE_R);
+
+      // Append point to trail
+      const tPos = trailGeo.attributes.position.array;
+      tPos[trailIndex * 3] = tipPos.x;
+      tPos[trailIndex * 3 + 1] = tipPos.y;
+      tPos[trailIndex * 3 + 2] = tipPos.z;
+      trailIndex = (trailIndex + 1) % TRAIL_LEN;
+      trailGeo.attributes.position.needsUpdate = true;
+
+      // Quantum Probability Amplitudes (Born's Rule):
+      // |psi> = cos(theta/2)|0> + exp(i phi) sin(theta/2)|1>
+      const amp0 = Math.cos(thetaRad / 2.0);
+      const amp1 = Math.sin(thetaRad / 2.0);
+      const p0 = amp0 * amp0;
+      const p1 = amp1 * amp1;
+
+      // Quantum Purity: Tr(rho^2) = (1 + |r|^2)/2
+      const purity = (1.0 + blochRadius * blochRadius) / 2.0;
+
+      // Von Neumann Entropy S = -lambda_+ ln(lambda_+) - lambda_- ln(lambda_-)
+      let entropy = 0.0;
+      if (blochRadius < 0.999) {
+        const l1 = (1.0 + blochRadius) / 2.0;
+        const l2 = (1.0 - blochRadius) / 2.0;
+        entropy = -(l1 * Math.log2(l1) + l2 * Math.log2(Math.max(1e-6, l2)));
+      }
+
+      // UI Sync
+      document.getElementById('val-theta').innerText = 'θ = ' + thetaDeg.toFixed(1) + '°';
+      document.getElementById('val-phi').innerText = 'φ = ' + phiDeg.toFixed(1) + '°';
+      document.getElementById('slider-theta').value = Math.round(thetaDeg);
+      document.getElementById('slider-phi').value = Math.round(phiDeg);
+
+      // Statevector string formatting
+      const aStr = Math.abs(amp0) < 0.01 ? '0' : amp0.toFixed(2);
+      const bStr = Math.abs(amp1) < 0.01 ? '0' : amp1.toFixed(2);
+      let phaseStr = '';
+      if (Math.abs(amp1) >= 0.01 && phiDeg !== 0) {
+        phaseStr = `e^{i ${Math.round(phiDeg)}°}`;
+      }
+      document.getElementById('telem-statevector').innerText = `${aStr}|0⟩ + ${phaseStr}${bStr}|1⟩`;
+
+      document.getElementById('telem-prob0').innerText = (p0 * 100).toFixed(1) + ' %';
+      document.getElementById('telem-prob1').innerText = (p1 * 100).toFixed(1) + ' %';
+      document.getElementById('telem-coords').innerText = `(${rx.toFixed(2)}, ${rz.toFixed(2)}, ${ry.toFixed(2)})`;
+      document.getElementById('telem-radius').innerText = blochRadius.toFixed(3) + (blochRadius >= 0.99 ? ' (Pure State)' : ' (Mixed State)');
+      document.getElementById('telem-purity').innerText = purity.toFixed(3);
+      document.getElementById('telem-entropy').innerText = entropy.toFixed(3) + ' บิต';
+
+      const tagQubit = document.getElementById('tag-qubit-state');
+      if (blochRadius < 0.95) {
+        tagQubit.innerText = 'MIXED STATE (DECOHERED)';
+        tagQubit.style.color = '#a855f7';
+      } else if (thetaDeg === 0) {
+        tagQubit.innerText = 'GROUND STATE |0⟩';
+        tagQubit.style.color = '#00f0ff';
+      } else if (thetaDeg === 180) {
+        tagQubit.innerText = 'EXCITED STATE |1⟩';
+        tagQubit.style.color = '#ec4899';
+      } else {
+        tagQubit.innerText = 'SUPERPOSITION |ψ⟩';
+        tagQubit.style.color = '#f59e0b';
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Scenario Switcher
+    // -------------------------------------------------------------
+    function setScenario(scen) {
+      currentScenario = scen;
+      document.getElementById('tab-state').classList.toggle('active', scen === 'state');
+      document.getElementById('tab-gates').classList.toggle('active', scen === 'gates');
+      document.getElementById('tab-rabi').classList.toggle('active', scen === 'rabi');
+      document.getElementById('tab-echo').classList.toggle('active', scen === 'echo');
+      document.getElementById('tab-tomo').classList.toggle('active', scen === 'tomo');
+      document.getElementById('tab-decohere').classList.toggle('active', scen === 'decohere');
+
+      const itemTheta = document.getElementById('item-theta');
+      const itemPhi = document.getElementById('item-phi');
+      const itemBasis = document.getElementById('item-basis-presets');
+      const itemGates = document.getElementById('item-gates-panel');
+      const itemRot = document.getElementById('item-rot-gate');
+      const itemRabi = document.getElementById('item-rabi-ctrl');
+      const itemEcho = document.getElementById('item-echo-ctrl');
+      const itemTomo = document.getElementById('item-tomo-ctrl');
+      const itemDecohere = document.getElementById('item-decohere-ctrl');
+
+      const rowEchoAmp = document.getElementById('row-echo-amp');
+      const rowEchoTime = document.getElementById('row-echo-time');
+      const rowTomoFid = document.getElementById('row-tomo-fid');
+      const rowTomoTr = document.getElementById('row-tomo-tr');
+
+      // Default hidden
+      itemTheta.style.display = 'none';
+      itemPhi.style.display = 'none';
+      itemBasis.style.display = 'none';
+      itemGates.style.display = 'none';
+      itemRot.style.display = 'none';
+      itemRabi.style.display = 'none';
+      if (itemEcho) itemEcho.style.display = 'none';
+      if (itemTomo) itemTomo.style.display = 'none';
+      itemDecohere.style.display = 'none';
+
+      if (rowEchoAmp) rowEchoAmp.style.display = (scen === 'echo') ? 'flex' : 'none';
+      if (rowEchoTime) rowEchoTime.style.display = (scen === 'echo') ? 'flex' : 'none';
+      if (rowTomoFid) rowTomoFid.style.display = (scen === 'tomo') ? 'flex' : 'none';
+      if (rowTomoTr) rowTomoTr.style.display = (scen === 'tomo') ? 'flex' : 'none';
+
+      spinEnsembleGroup.visible = (scen === 'echo');
+
+      if (scen === 'state') {
+        itemTheta.style.display = 'flex';
+        itemPhi.style.display = 'flex';
+        itemBasis.style.display = 'flex';
+        blochRadius = 1.0;
+        document.getElementById('title-controls').innerText = 'พิกัดเชิงมุมของคิวบิต (θ, φ)';
+      } else if (scen === 'gates') {
+        itemBasis.style.display = 'flex';
+        itemGates.style.display = 'flex';
+        itemRot.style.display = 'flex';
+        blochRadius = 1.0;
+        document.getElementById('title-controls').innerText = 'เกตตรรกะควอนตัม & การหมุนรอบแกน';
+      } else if (scen === 'rabi') {
+        itemRabi.style.display = 'flex';
+        blochRadius = 1.0;
+        document.getElementById('title-controls').innerText = 'การแกว่งกวัดราบีภายใต้สนามขับเรโซแนนซ์';
+      } else if (scen === 'echo') {
+        if (itemEcho) itemEcho.style.display = 'flex';
+        document.getElementById('title-controls').innerText = 'ลำดับพัลส์ฮาห์นเอคโค (Hahn Spin Echo)';
+        resetEchoEnsemble();
+      } else if (scen === 'tomo') {
+        if (itemTomo) itemTomo.style.display = 'flex';
+        document.getElementById('title-controls').innerText = 'การสแกนโทโมกราฟีสถานะควอนตัม (QST)';
+      } else if (scen === 'decohere') {
+        itemTheta.style.display = 'flex';
+        itemPhi.style.display = 'flex';
+        itemDecohere.style.display = 'flex';
+        document.getElementById('title-controls').innerText = 'การสูญเสียสภาพเชื่อมแน่น (T₁ & T₂ Decay)';
+      }
+      updateBlochState();
+    }
+
+    // -------------------------------------------------------------
+    // Basis State Presets & Angle Setters
+    // -------------------------------------------------------------
+    function setQubitAngles(th, ph, tag) {
+      thetaDeg = th;
+      phiDeg = ph;
+      blochRadius = 1.0;
+      updateBlochState();
+      playTone(440 + th * 2 + ph, 0.15);
+
+      document.querySelectorAll('#item-basis-presets .preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.includes(tag.split(' ')[0]));
+      });
+    }
+
+    const sliderTheta = document.getElementById('slider-theta');
+    sliderTheta.addEventListener('input', (e) => {
+      thetaDeg = parseFloat(e.target.value);
+      updateBlochState();
+    });
+
+    const sliderPhi = document.getElementById('slider-phi');
+    sliderPhi.addEventListener('input', (e) => {
+      phiDeg = parseFloat(e.target.value);
+      updateBlochState();
+    });
+
+    // -------------------------------------------------------------
+    // Quantum Logic Gate Operations (Unitary Rotations)
+    // -------------------------------------------------------------
+    function applyGate(gate) {
+      if (gate === 'H') {
+        // Hadamard: (|0> -> |+>, |1> -> |->, |+> -> |0>, etc.)
+        // Rotation by pi around (X + Z)/sqrt(2)
+        if (thetaDeg === 0) { thetaDeg = 90; phiDeg = 0; }
+        else if (thetaDeg === 180) { thetaDeg = 90; phiDeg = 180; }
+        else if (thetaDeg === 90 && phiDeg === 0) { thetaDeg = 0; phiDeg = 0; }
+        else if (thetaDeg === 90 && phiDeg === 180) { thetaDeg = 180; phiDeg = 0; }
+        else {
+          thetaDeg = 180 - thetaDeg;
+          phiDeg = (360 - phiDeg) % 360;
+        }
+        playTone(660, 0.25, 'triangle');
+      } else if (gate === 'X') {
+        // Pauli-X (Bit flip, rotation pi around X)
+        thetaDeg = 180 - thetaDeg;
+        phiDeg = (360 - phiDeg) % 360;
+        playTone(520, 0.2, 'square');
+      } else if (gate === 'Y') {
+        // Pauli-Y (Bit-phase flip, rotation pi around Y)
+        thetaDeg = 180 - thetaDeg;
+        phiDeg = (180 - phiDeg + 360) % 360;
+        playTone(580, 0.2, 'square');
+      } else if (gate === 'Z') {
+        // Pauli-Z (Phase flip, rotation pi around Z)
+        phiDeg = (phiDeg + 180) % 360;
+        playTone(740, 0.2, 'sine');
+      } else if (gate === 'S') {
+        // S Gate: Phase rotation pi/2 around Z
+        phiDeg = (phiDeg + 90) % 360;
+        playTone(820, 0.2, 'sine');
+      } else if (gate === 'T') {
+        // T Gate: Phase rotation pi/4 around Z
+        phiDeg = (phiDeg + 45) % 360;
+        playTone(920, 0.2, 'sine');
+      } else if (gate === 'Rx') {
+        // Rx(pi/2): Rotation 90 degrees around X
+        thetaDeg = Math.min(180, (thetaDeg + 90) % 360);
+        playTone(480, 0.2, 'triangle');
+      } else if (gate === 'Ry') {
+        // Ry(pi/2): Rotation 90 degrees around Y
+        thetaDeg = Math.min(180, (thetaDeg + 90) % 360);
+        phiDeg = (phiDeg + 90) % 360;
+        playTone(550, 0.2, 'triangle');
+      }
+
+      updateBlochState();
+    }
+
+    function applyArbitraryRz() {
+      const alpha = parseFloat(document.getElementById('slider-rot-alpha').value);
+      phiDeg = (phiDeg + alpha) % 360;
+      updateBlochState();
+      playTone(700 + alpha, 0.25, 'sine');
+    }
+
+    document.getElementById('slider-rot-alpha').addEventListener('input', (e) => {
+      document.getElementById('val-rot-alpha').innerText = 'α = ' + e.target.value + '°';
+    });
+
+    // -------------------------------------------------------------
+    // Rabi Oscillation & Decoherence Sliders
+    // -------------------------------------------------------------
+    document.getElementById('slider-rabi-omega').addEventListener('input', (e) => {
+      rabiOmega = parseFloat(e.target.value);
+      document.getElementById('val-rabi-omega').innerText = rabiOmega.toFixed(2) + ' rad/s';
+    });
+
+    document.getElementById('slider-rabi-delta').addEventListener('input', (e) => {
+      rabiDelta = parseFloat(e.target.value);
+      const name = (rabiDelta === 0) ? '0.00 rad/s (Resonance)' : rabiDelta.toFixed(2) + ' rad/s';
+      document.getElementById('val-rabi-delta').innerText = name;
+    });
+
+    document.getElementById('slider-gamma1').addEventListener('input', (e) => {
+      gamma1 = parseFloat(e.target.value);
+      document.getElementById('val-gamma1').innerText = 'γ₁ = ' + gamma1.toFixed(2);
+      updateDecoherenceState();
+    });
+
+    document.getElementById('slider-gamma-phi').addEventListener('input', (e) => {
+      gammaPhi = parseFloat(e.target.value);
+      document.getElementById('val-gamma-phi').innerText = 'γ_φ = ' + gammaPhi.toFixed(2);
+      updateDecoherenceState();
+    });
+
+    function updateDecoherenceState() {
+      // In decoherence, the length of the Bloch vector shrinks!
+      // Longitudinal T1 shrinks toward |0> (North pole), Transverse T2 shrinks xy radius
+      const r_xy = Math.max(0.0, 1.0 - gammaPhi);
+      const r_z = Math.max(-1.0, Math.min(1.0, Math.cos((thetaDeg * Math.PI) / 180.0) * (1.0 - gamma1) + gamma1));
+      blochRadius = Math.sqrt(r_xy * r_xy * Math.pow(Math.sin((thetaDeg * Math.PI) / 180.0), 2) + r_z * r_z);
+      updateBlochState();
+    }
+
+    // -------------------------------------------------------------
+    // Hahn Spin Echo Sequence Mechanics & Sliders
+    // -------------------------------------------------------------
+    const sliderEchoTau = document.getElementById('slider-echo-tau');
+    if (sliderEchoTau) {
+      sliderEchoTau.addEventListener('input', (e) => {
+        echoTau = parseFloat(e.target.value);
+        document.getElementById('val-echo-tau').innerText = 'τ = ' + echoTau.toFixed(1) + ' s';
+      });
+    }
+
+    const sliderEchoSpread = document.getElementById('slider-echo-spread');
+    if (sliderEchoSpread) {
+      sliderEchoSpread.addEventListener('input', (e) => {
+        echoSpread = parseFloat(e.target.value);
+        document.getElementById('val-echo-spread').innerText = echoSpread.toFixed(1) + ' rad/s';
+      });
+    }
+
+    function startHahnSpinEcho() {
+      if (isEchoRunning) return;
+      isEchoRunning = true;
+      echoStartTime = performance.now() / 1000;
+      echoStage = 'pulse1';
+      thetaDeg = 0;
+      phiDeg = 0;
+      blochRadius = 1.0;
+      updateBlochState();
+      playTone(660, 0.25, 'triangle');
+    }
+
+    function updateHahnEchoDynamics() {
+      const elapsed = (performance.now() / 1000) - echoStartTime;
+      const statusEl = document.getElementById('val-echo-phase');
+      const telemAmp = document.getElementById('telem-echo-amp');
+      const telemTime = document.getElementById('row-echo-time').querySelector('.telem-val');
+
+      // Stage 1: (pi/2)_x pulse (duration 0.4s)
+      if (elapsed < 0.4) {
+        const frac = elapsed / 0.4;
+        thetaDeg = frac * 90.0;
+        phiDeg = 0.0;
+        blochRadius = 1.0;
+        ensembleSpins.forEach(s => {
+          s.phi = 0.0;
+          s.arrow.setDirection(new THREE.Vector3(1, 0, 0));
+        });
+        statusEl.innerText = 'พัลส์ (π/2)_x หมุนเวกเตอร์สู่แนวศูนย์สูตร';
+        statusEl.style.color = '#00f0ff';
+        telemAmp.innerText = '100.0 %';
+        telemTime.innerText = '0.00 s';
+        updateBlochState();
+      }
+      // Stage 2: Free precession / Inhomogeneous dephasing (duration echoTau)
+      else if (elapsed < 0.4 + echoTau) {
+        echoStage = 'dephasing';
+        const t_dep = elapsed - 0.4;
+        let sumX = 0, sumZ = 0;
+
+        for (let k = 0; k < NUM_SPINS; k++) {
+          const spin = ensembleSpins[k];
+          const curPhi = spin.deltaOmega * echoSpread * t_dep;
+          spin.phi = curPhi;
+          const dir = new THREE.Vector3(Math.cos(curPhi), 0, Math.sin(curPhi));
+          spin.arrow.setDirection(dir);
+          sumX += Math.cos(curPhi);
+          sumZ += Math.sin(curPhi);
+        }
+
+        const avgX = sumX / NUM_SPINS;
+        const avgZ = sumZ / NUM_SPINS;
+        const mPerp = Math.sqrt(avgX * avgX + avgZ * avgZ);
+
+        thetaDeg = 90.0;
+        phiDeg = (Math.atan2(avgZ, avgX) * 180 / Math.PI + 360) % 360;
+        blochRadius = Math.max(0.05, mPerp);
+
+        statusEl.innerText = `การกระจายเฟสอิสระ ---- สภาพเชื่อมแน่นสลาย (${t_dep.toFixed(2)}s)`;
+        statusEl.style.color = '#f59e0b';
+        telemAmp.innerText = (mPerp * 100).toFixed(1) + ' %';
+        telemTime.innerText = t_dep.toFixed(2) + ' s / ' + echoTau.toFixed(1) + ' s';
+        updateBlochState();
+      }
+      // Stage 3: pi_y refocusing pulse (duration 0.4s)
+      else if (elapsed < 0.8 + echoTau) {
+        if (echoStage !== 'pulse2') {
+          echoStage = 'pulse2';
+          playTone(880, 0.35, 'square');
+        }
+        const t_p2 = elapsed - (0.4 + echoTau);
+        const p2Frac = Math.min(1.0, t_p2 / 0.4);
+
+        statusEl.innerText = 'พัลส์รวมเฟส π_y (180° Refocusing Pulse)';
+        statusEl.style.color = '#ec4899';
+
+        for (let k = 0; k < NUM_SPINS; k++) {
+          const spin = ensembleSpins[k];
+          const phi_before = spin.deltaOmega * echoSpread * echoTau;
+          const phi_target = Math.PI - phi_before;
+          const curPhi = phi_before + (phi_target - phi_before) * p2Frac;
+          spin.arrow.setDirection(new THREE.Vector3(Math.cos(curPhi), 0, Math.sin(curPhi)));
+        }
+        updateBlochState();
+      }
+      // Stage 4: Refocusing catch-up period (duration echoTau)
+      else if (elapsed < 0.8 + 2 * echoTau) {
+        echoStage = 'refocusing';
+        const t_ref = elapsed - (0.8 + echoTau);
+        let sumX = 0, sumZ = 0;
+
+        for (let k = 0; k < NUM_SPINS; k++) {
+          const spin = ensembleSpins[k];
+          const phi_0 = Math.PI - (spin.deltaOmega * echoSpread * echoTau);
+          const curPhi = phi_0 + spin.deltaOmega * echoSpread * t_ref;
+          spin.phi = curPhi;
+          const dir = new THREE.Vector3(Math.cos(curPhi), 0, Math.sin(curPhi));
+          spin.arrow.setDirection(dir);
+          sumX += Math.cos(curPhi);
+          sumZ += Math.sin(curPhi);
+        }
+
+        const avgX = sumX / NUM_SPINS;
+        const avgZ = sumZ / NUM_SPINS;
+        const mPerp = Math.sqrt(avgX * avgX + avgZ * avgZ);
+
+        thetaDeg = 90.0;
+        phiDeg = (Math.atan2(avgZ, avgX) * 180 / Math.PI + 360) % 360;
+        blochRadius = Math.max(0.05, mPerp);
+
+        statusEl.innerText = `สปินวิ่งไล่กวดกัน (Refocusing Catch-up ${t_ref.toFixed(2)}s)`;
+        statusEl.style.color = '#a855f7';
+        telemAmp.innerText = (mPerp * 100).toFixed(1) + ' %';
+        telemTime.innerText = (echoTau + t_ref).toFixed(2) + ' s / ' + (2 * echoTau).toFixed(1) + ' s';
+        updateBlochState();
+      }
+      // Stage 5: Echo peak reached!
+      else {
+        isEchoRunning = false;
+        echoStage = 'echo';
+        for (let k = 0; k < NUM_SPINS; k++) {
+          ensembleSpins[k].arrow.setDirection(new THREE.Vector3(-1, 0, 0));
+        }
+        thetaDeg = 90.0;
+        phiDeg = 180.0;
+        blochRadius = 1.0;
+        updateBlochState();
+
+        statusEl.innerText = 'เกิดสัญญาณเอคโค (Echo Peak M_perp = 100%)';
+        statusEl.style.color = '#10b981';
+        telemAmp.innerText = '100.0 % (กู้คืนสภาพเชื่อมแน่นสมบูรณ์)';
+        telemTime.innerText = (2 * echoTau).toFixed(2) + ' s (จุดสะท้อน 2τ)';
+
+        playTone(523.25, 0.35, 'sine');
+        setTimeout(() => playTone(659.25, 0.35, 'sine'), 120);
+        setTimeout(() => playTone(783.99, 0.35, 'sine'), 240);
+        setTimeout(() => playTone(1046.50, 0.5, 'sine'), 360);
+      }
+    }
+
+    function resetEchoEnsemble() {
+      isEchoRunning = false;
+      echoStage = 'idle';
+      thetaDeg = 0;
+      phiDeg = 0;
+      blochRadius = 1.0;
+      updateBlochState();
+      ensembleSpins.forEach(s => {
+        s.arrow.setDirection(new THREE.Vector3(1, 0, 0));
+        s.arrow.setLength(SPHERE_R * 0.95, 0.3, 0.14);
+      });
+      document.getElementById('val-echo-phase').innerText = 'รอเริ่มลำดับ';
+      document.getElementById('val-echo-phase').style.color = '#00f0ff';
+      document.getElementById('telem-echo-amp').innerText = '100.0 %';
+      document.getElementById('row-echo-time').querySelector('.telem-val').innerText = '0.00 s / ' + echoTau.toFixed(1) + ' s';
+    }
+
+    // -------------------------------------------------------------
+    // Quantum State Tomography (QST) Logic & Reconstruct
+    // -------------------------------------------------------------
+    const sliderTomoShots = document.getElementById('slider-tomo-shots');
+    if (sliderTomoShots) {
+      sliderTomoShots.addEventListener('input', (e) => {
+        tomoShots = parseInt(e.target.value);
+        document.getElementById('val-tomo-shots').innerText = tomoShots.toLocaleString() + ' ช็อต';
+      });
+    }
+
+    function prepareTomoState(th, ph) {
+      thetaDeg = th;
+      phiDeg = ph;
+      blochRadius = 1.0;
+      updateBlochState();
+      playTone(500 + th + ph, 0.2);
+
+      document.querySelectorAll('#item-tomo-ctrl .preset-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      if (window.event && window.event.target) {
+        window.event.target.classList.add('active');
+      }
+      document.getElementById('val-tomo-status').innerText = `เตรียมสถานะ (θ=${th}°, φ=${ph}°)`;
+      document.getElementById('val-tomo-status').style.color = 'var(--accent-gold)';
+    }
+
+    function runCompleteQST() {
+      if (isTomoRunning) return;
+      isTomoRunning = true;
+      const statusEl = document.getElementById('val-tomo-status');
+      const btnEl = document.getElementById('btn-run-tomo');
+      btnEl.disabled = true;
+      statusEl.innerText = 'กำลังสแกนฐาน Z, X, Y...';
+      statusEl.style.color = '#00f0ff';
+
+      const thRad = (thetaDeg * Math.PI) / 180.0;
+      const phRad = (phiDeg * Math.PI) / 180.0;
+      const rxTrue = Math.sin(thRad) * Math.cos(phRad);
+      const ryTrue = Math.sin(thRad) * Math.sin(phRad);
+      const rzTrue = Math.cos(thRad);
+
+      playTone(550, 0.15, 'triangle');
+      setTimeout(() => playTone(660, 0.15, 'triangle'), 180);
+      setTimeout(() => playTone(770, 0.15, 'triangle'), 360);
+
+      setTimeout(() => {
+        // 1. Z basis measurement
+        const p0 = (1.0 + rzTrue) / 2.0;
+        let countZ0 = 0;
+        for (let s = 0; s < tomoShots; s++) {
+          if (Math.random() < p0) countZ0++;
+        }
+        const expZ = (2.0 * countZ0 / tomoShots) - 1.0;
+
+        // 2. X basis measurement
+        const pPlusX = (1.0 + rxTrue) / 2.0;
+        let countXPlus = 0;
+        for (let s = 0; s < tomoShots; s++) {
+          if (Math.random() < pPlusX) countXPlus++;
+        }
+        const expX = (2.0 * countXPlus / tomoShots) - 1.0;
+
+        // 3. Y basis measurement
+        const pPlusY = (1.0 + ryTrue) / 2.0;
+        let countYPlus = 0;
+        for (let s = 0; s < tomoShots; s++) {
+          if (Math.random() < pPlusY) countYPlus++;
+        }
+        const expY = (2.0 * countYPlus / tomoShots) - 1.0;
+
+        const rho00 = (1.0 + expZ) / 2.0;
+        const rho11 = (1.0 - expZ) / 2.0;
+        const re01 = expX / 2.0;
+        const im01 = -expY / 2.0;
+
+        tomoRho = {
+          rho00: rho00,
+          rho11: rho11,
+          re01: re01,
+          im01: im01,
+          expX: expX,
+          expY: expY,
+          expZ: expZ
+        };
+
+        const dotProd = rxTrue * expX + ryTrue * expY + rzTrue * expZ;
+        tomoFidelity = Math.min(1.0, Math.max(0.0, (1.0 + dotProd) / 2.0));
+
+        document.getElementById('telem-tomo-fid').innerText = (tomoFidelity * 100).toFixed(2) + ' %';
+        document.getElementById('telem-tomo-tr').innerText = (rho00 + rho11).toFixed(4) + ' (ความน่าจะเป็นอนุรักษ์)';
+
+        statusEl.innerText = `โทโมกราฟีสำเร็จ (F = ${(tomoFidelity * 100).toFixed(2)}%)`;
+        statusEl.style.color = '#10b981';
+        btnEl.disabled = false;
+        isTomoRunning = false;
+
+        playTone(987.77, 0.4, 'sine');
+        openDensityModal();
+      }, 550);
+    }
+
+    // -------------------------------------------------------------
+    // Born Rule Single-Shot Projective Measurement
+    // -------------------------------------------------------------
+    function performQuantumMeasurement() {
+      const thetaRad = (thetaDeg * Math.PI) / 180.0;
+      const p0 = Math.pow(Math.cos(thetaRad / 2.0), 2);
+      const outcome = (Math.random() < p0) ? 0 : 1;
+
+      // Wavefunction collapse!
+      if (outcome === 0) {
+        thetaDeg = 0; phiDeg = 0;
+        document.getElementById('telem-last-meas').innerText = '|0⟩ (ยุบตัวสู่ขั้วเหนือ)';
+        document.getElementById('telem-last-meas').style.color = '#10b981';
+        playTone(880, 0.35, 'sine');
+      } else {
+        thetaDeg = 180; phiDeg = 0;
+        document.getElementById('telem-last-meas').innerText = '|1⟩ (ยุบตัวสู่ขั้วใต้)';
+        document.getElementById('telem-last-meas').style.color = '#ec4899';
+        playTone(330, 0.35, 'triangle');
+      }
+      updateBlochState();
+    }
+
+    function resetQubit() {
+      thetaDeg = 0;
+      phiDeg = 0;
+      blochRadius = 1.0;
+      gamma1 = 0;
+      gammaPhi = 0;
+      document.getElementById('slider-gamma1').value = 0;
+      document.getElementById('slider-gamma-phi').value = 0;
+      document.getElementById('val-gamma1').innerText = 'γ₁ = 0.00';
+      document.getElementById('val-gamma-phi').innerText = 'γ_φ = 0.00';
+      document.getElementById('telem-last-meas').innerText = '-';
+      document.getElementById('telem-last-meas').style.color = '#f59e0b';
+      updateBlochState();
+      playTone(550, 0.15);
+    }
+
+    function resetView() {
+      camera.position.set(0, 4.5, 12);
+      controls.target.set(0, 0, 0);
+      controls.update();
+    }
+
+    // -------------------------------------------------------------
+    // HUD Collapsible Dock & Zen Mode Controls
+    // -------------------------------------------------------------
+    let leftCollapsed = false;
+    let rightCollapsed = false;
+    let zenModeActive = false;
+
+    function toggleLeftHUD(collapse) {
+      leftCollapsed = collapse !== undefined ? collapse : !leftCollapsed;
+      document.getElementById('hud-left').classList.toggle('collapsed', leftCollapsed);
+      document.getElementById('dock-left').style.display = leftCollapsed ? 'flex' : 'none';
+    }
+
+    function toggleRightHUD(collapse) {
+      rightCollapsed = collapse !== undefined ? collapse : !rightCollapsed;
+      document.getElementById('hud-right').classList.toggle('collapsed', rightCollapsed);
+      document.getElementById('dock-right').style.display = rightCollapsed ? 'flex' : 'none';
+    }
+
+    function toggleZenMode() {
+      zenModeActive = !zenModeActive;
+      toggleLeftHUD(zenModeActive);
+      toggleRightHUD(zenModeActive);
+      const zenBtn = document.getElementById('btn-zen');
+      zenBtn.classList.toggle('active', zenModeActive);
+      zenBtn.querySelector('span:last-child').innerText = zenModeActive ? 'แสดงบาร์' : 'ย่อทุกบาร์ (H)';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeDensityModal();
+        closeMeasureModal();
+        closeARModal();
+      }
+      if (e.key === 'h' || e.key === 'H') toggleZenMode();
+      if (e.key === ' ') { e.preventDefault(); performQuantumMeasurement(); }
+    });
+
+    // -------------------------------------------------------------
+    // Mode Switching: 3D Lab / Marker AR / Touchless Hand AI
+    // -------------------------------------------------------------
+    function switchMode(modeIndex) {
+      document.querySelectorAll('.mode-pill').forEach((pill, idx) => {
+        pill.classList.toggle('active', idx === modeIndex - 1);
+      });
+
+      if (modeIndex === 1) {
+        closeARModal();
+        stopHandAI();
+      } else if (modeIndex === 2) {
+        openARModal();
+        stopHandAI();
+      } else if (modeIndex === 3) {
+        closeARModal();
+        startHandAI();
+      }
+    }
+
+    function openARModal() {
+      document.getElementById('ar-modal').style.display = 'flex';
+    }
+    function closeARModal() {
+      document.getElementById('ar-modal').style.display = 'none';
+    }
+
+    // -------------------------------------------------------------
+    // Quantum Measurement Statistics Modal (1,000 Shots)
+    // -------------------------------------------------------------
+    let count0 = 0;
+    let count1 = 0;
+
+    function openMeasureModal() {
+      document.getElementById('measure-modal').style.display = 'flex';
+      run1000Shots();
+    }
+    function closeMeasureModal() {
+      document.getElementById('measure-modal').style.display = 'none';
+    }
+
+    function run1000Shots() {
+      const thetaRad = (thetaDeg * Math.PI) / 180.0;
+      const p0 = Math.pow(Math.cos(thetaRad / 2.0), 2);
+
+      count0 = 0;
+      count1 = 0;
+      for (let s = 0; s < 1000; s++) {
+        if (Math.random() < p0) count0++;
+        else count1++;
+      }
+
+      document.getElementById('meas-count-0').innerText = `${count0} ครั้ง (${(count0 / 10).toFixed(1)}%)`;
+      document.getElementById('meas-count-1').innerText = `${count1} ครั้ง (${(count1 / 10).toFixed(1)}%)`;
+      drawMeasureChart(p0);
+      playTone(720, 0.2);
+    }
+
+    function drawMeasureChart(p0Theoretical) {
+      const canvas = document.getElementById('measure-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Bar Chart for Outcome |0> and |1>
+      const barW = 120;
+      const maxH = 160;
+      const baseY = h - 45;
+
+      const h0 = (count0 / 1000) * maxH;
+      const h1 = (count1 / 1000) * maxH;
+
+      // Bar |0>
+      const bx0 = w / 2 - barW - 35;
+      const grad0 = ctx.createLinearGradient(0, baseY - h0, 0, baseY);
+      grad0.addColorStop(0, '#10b981');
+      grad0.addColorStop(1, 'rgba(16, 185, 129, 0.25)');
+      ctx.fillStyle = grad0;
+      ctx.fillRect(bx0, baseY - h0, barW, h0);
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(bx0, baseY - h0, barW, h0);
+
+      // Bar |1>
+      const bx1 = w / 2 + 35;
+      const grad1 = ctx.createLinearGradient(0, baseY - h1, 0, baseY);
+      grad1.addColorStop(0, '#ec4899');
+      grad1.addColorStop(1, 'rgba(236, 72, 153, 0.25)');
+      ctx.fillStyle = grad1;
+      ctx.fillRect(bx1, baseY - h1, barW, h1);
+      ctx.strokeStyle = '#ec4899';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(bx1, baseY - h1, barW, h1);
+
+      // Theoretical Dashed Indicator Lines
+      const thH0 = p0Theoretical * maxH;
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(bx0 - 15, baseY - thH0); ctx.lineTo(bx0 + barW + 15, baseY - thH0);
+      ctx.stroke();
+
+      const thH1 = (1.0 - p0Theoretical) * maxH;
+      ctx.beginPath();
+      ctx.moveTo(bx1 - 15, baseY - thH1); ctx.lineTo(bx1 + barW + 15, baseY - thH1);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Labels
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'Bold 13px Chakra Petch';
+      ctx.textAlign = 'center';
+      ctx.fillText('|0⟩ (State 0)', bx0 + barW / 2, baseY + 20);
+      ctx.fillText('|1⟩ (State 1)', bx1 + barW / 2, baseY + 20);
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = '10px JetBrains Mono';
+      ctx.fillText(`ทฤษฎี ---- ${(p0Theoretical * 100).toFixed(1)}%`, bx0 + barW / 2, baseY - thH0 - 8);
+      ctx.fillText(`ทฤษฎี ---- ${((1.0 - p0Theoretical) * 100).toFixed(1)}%`, bx1 + barW / 2, baseY - thH1 - 8);
+    }
+
+    // -------------------------------------------------------------
+    // Density Matrix 2D Canvas Modal
+    // -------------------------------------------------------------
+    function openDensityModal() {
+      document.getElementById('density-modal').style.display = 'flex';
+      drawDensityMatrix();
+    }
+    function closeDensityModal() {
+      document.getElementById('density-modal').style.display = 'none';
+    }
+
+    function drawDensityMatrix() {
+      const canvas = document.getElementById('density-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const thetaRad = (thetaDeg * Math.PI) / 180.0;
+      const phiRad = (phiDeg * Math.PI) / 180.0;
+
+      const rz = blochRadius * Math.cos(thetaRad);
+      const rx = blochRadius * Math.sin(thetaRad) * Math.cos(phiRad);
+      const ry = blochRadius * Math.sin(thetaRad) * Math.sin(phiRad);
+
+      const rho00 = (1.0 + rz) / 2.0;
+      const rho11 = (1.0 - rz) / 2.0;
+      const re_rho01 = rx / 2.0;
+      const im_rho01 = -ry / 2.0;
+
+      const purity = (1.0 + blochRadius * blochRadius) / 2.0;
+      document.getElementById('dens-purity-lbl').innerText = 'Tr(ρ²) = ' + purity.toFixed(3);
+
+      if (currentScenario === 'tomo' && tomoRho) {
+        // Dual Matrix View: Ideal Theory on Left, QST Reconstructed on Right
+        const cellW = 110;
+        const cellH = 65;
+
+        // Header: Theory
+        ctx.fillStyle = '#00f0ff';
+        ctx.font = 'Bold 12px Chakra Petch';
+        ctx.textAlign = 'center';
+        ctx.fillText('เมทริกซ์ทฤษฎีเป้าหมาย ρ (Ideal)', 25 + cellW, 22);
+
+        // Header: QST
+        ctx.fillStyle = '#10b981';
+        ctx.fillText(`เมทริกซ์กู้คืน QST ρ̂ (Fidelity ${(tomoFidelity * 100).toFixed(2)}%)`, w - 25 - cellW, 22);
+
+        // Left 2x2: Theoretical
+        const startX1 = 25;
+        const startY1 = 35;
+        const cells1 = [
+          { label: 'ρ₀₀', val: rho00.toFixed(3), x: startX1, y: startY1, color: '#00f0ff' },
+          { label: 'ρ₀₁', val: `${re_rho01 >= 0 ? '+' : ''}${re_rho01.toFixed(2)}${im_rho01 >= 0 ? '+' : ''}${im_rho01.toFixed(2)}i`, x: startX1 + cellW, y: startY1, color: '#8b5cf6' },
+          { label: 'ρ₁₀', val: `${re_rho01 >= 0 ? '+' : ''}${re_rho01.toFixed(2)}${-im_rho01 >= 0 ? '+' : ''}${-im_rho01.toFixed(2)}i`, x: startX1, y: startY1 + cellH, color: '#8b5cf6' },
+          { label: 'ρ₁₁', val: rho11.toFixed(3), x: startX1 + cellW, y: startY1 + cellH, color: '#ec4899' }
+        ];
+
+        // Right 2x2: Tomo Reconstructed
+        const startX2 = w - 25 - (cellW * 2);
+        const startY2 = 35;
+        const cells2 = [
+          { label: 'ρ̂₀₀', val: tomoRho.rho00.toFixed(3), x: startX2, y: startY2, color: '#10b981' },
+          { label: 'ρ̂₀₁', val: `${tomoRho.re01 >= 0 ? '+' : ''}${tomoRho.re01.toFixed(2)}${tomoRho.im01 >= 0 ? '+' : ''}${tomoRho.im01.toFixed(2)}i`, x: startX2 + cellW, y: startY2, color: '#a855f7' },
+          { label: 'ρ̂₁₀', val: `${tomoRho.re01 >= 0 ? '+' : ''}${tomoRho.re01.toFixed(2)}${-tomoRho.im01 >= 0 ? '+' : ''}${-tomoRho.im01.toFixed(2)}i`, x: startX2, y: startY2 + cellH, color: '#a855f7' },
+          { label: 'ρ̂₁₁', val: tomoRho.rho11.toFixed(3), x: startX2 + cellW, y: startY2 + cellH, color: '#f43f5e' }
+        ];
+
+        [...cells1, ...cells2].forEach(cell => {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+          ctx.fillRect(cell.x + 3, cell.y + 3, cellW - 6, cellH - 6);
+          ctx.strokeStyle = cell.color;
+          ctx.lineWidth = 1.4;
+          ctx.strokeRect(cell.x + 3, cell.y + 3, cellW - 6, cellH - 6);
+
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '10px Chakra Petch';
+          ctx.textAlign = 'center';
+          ctx.fillText(cell.label, cell.x + cellW / 2, cell.y + 20);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'Bold 11px JetBrains Mono';
+          ctx.fillText(cell.val, cell.x + cellW / 2, cell.y + 46);
+        });
+
+        // Bottom stats
+        ctx.fillStyle = '#f59e0b';
+        ctx.font = '11px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText(`⟨X⟩ = ${tomoRho.expX.toFixed(3)}  |  ⟨Y⟩ = ${tomoRho.expY.toFixed(3)}  |  ⟨Z⟩ = ${tomoRho.expZ.toFixed(3)}  |  Tr(ρ̂) = ${(tomoRho.rho00 + tomoRho.rho11).toFixed(4)}`, w / 2, h - 22);
+      } else {
+        // Standard Centered 2x2 Matrix View
+        const cellW = 160;
+        const cellH = 75;
+        const startX = w / 2 - cellW;
+        const startY = 35;
+
+        const cells = [
+          { label: 'ρ₀₀ (Pop. |0⟩)', val: rho00.toFixed(3), x: startX, y: startY, color: '#10b981' },
+          { label: 'ρ₀₁ (Coherence)', val: `${re_rho01 >= 0 ? '+' : ''}${re_rho01.toFixed(2)} ${im_rho01 >= 0 ? '+' : ''}${im_rho01.toFixed(2)}i`, x: startX + cellW, y: startY, color: '#8b5cf6' },
+          { label: 'ρ₁₀ (Coherence)', val: `${re_rho01 >= 0 ? '+' : ''}${re_rho01.toFixed(2)} ${-im_rho01 >= 0 ? '+' : ''}${-im_rho01.toFixed(2)}i`, x: startX, y: startY + cellH, color: '#8b5cf6' },
+          { label: 'ρ₁₁ (Pop. |1⟩)', val: rho11.toFixed(3), x: startX + cellW, y: startY + cellH, color: '#ec4899' }
+        ];
+
+        for (let cell of cells) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+          ctx.fillRect(cell.x + 4, cell.y + 4, cellW - 8, cellH - 8);
+          ctx.strokeStyle = cell.color;
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(cell.x + 4, cell.y + 4, cellW - 8, cellH - 8);
+
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '10px Chakra Petch';
+          ctx.textAlign = 'center';
+          ctx.fillText(cell.label, cell.x + cellW / 2, cell.y + 24);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'Bold 13px JetBrains Mono';
+          ctx.fillText(cell.val, cell.x + cellW / 2, cell.y + 52);
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Mode 3: MediaPipe Hands AI Tracking
+    // -------------------------------------------------------------
+    let handInstance = null;
+    let cameraInstance = null;
+    let isHandTracking = false;
+
+    function startHandAI() {
+      const pip = document.getElementById('hand-pip-container');
+      const videoEl = document.getElementById('hand-video');
+      pip.style.display = 'block';
+
+      if (!handInstance) {
+        handInstance = new Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+        handInstance.setOptions({
+          maxNumHands: 1,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5
+        });
+        handInstance.onResults((results) => {
+          if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            const marks = results.multiHandLandmarks[0];
+            const indexTip = marks[8];
+
+            // Direct spatial hand gesture mapping:
+            // Y position -> Theta (0 to 180)
+            // X position -> Phi (0 to 360)
+            thetaDeg = Math.max(0, Math.min(180, indexTip.y * 180));
+            phiDeg = Math.max(0, Math.min(360, (1.0 - indexTip.x) * 360));
+            blochRadius = 1.0;
+            updateBlochState();
+          }
+        });
+      }
+
+      if (!cameraInstance) {
+        cameraInstance = new Camera(videoEl, {
+          onFrame: async () => {
+            if (isHandTracking) await handInstance.send({ image: videoEl });
+          },
+          width: 320,
+          height: 240
+        });
+      }
+
+      cameraInstance.start();
+      isHandTracking = true;
+    }
+
+    function stopHandAI() {
+      isHandTracking = false;
+      document.getElementById('hand-pip-container').style.display = 'none';
+      if (cameraInstance && cameraInstance.stop) {
+        cameraInstance.stop();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Main Render Loop & Rabi Dynamics
+    // -------------------------------------------------------------
+    function animate() {
+      requestAnimationFrame(animate);
+      if (isPlaying) {
+        animTime += 0.015;
+
+        if (currentScenario === 'rabi') {
+          // Rabi oscillations: theta(t) precesses around driving axis
+          const effOmega = Math.sqrt(rabiOmega * rabiOmega + rabiDelta * rabiDelta);
+          const rabiPhase = animTime * effOmega;
+          // Precession amplitude
+          const maxTheta = (rabiOmega / effOmega) * 180.0;
+          thetaDeg = (Math.sin(rabiPhase) * 0.5 + 0.5) * maxTheta;
+          phiDeg = (phiDeg + 0.8) % 360;
+          updateBlochState();
+        } else if (currentScenario === 'echo' && isEchoRunning) {
+          updateHahnEchoDynamics();
+        } else {
+          // Subtle idle floating motion
+          blochGroup.rotation.y += 0.0015;
+        }
+      }
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initial Physics Sync
+    updateBlochState();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ห้องปฏิบัติการเสมือนจริง 3 มิติ และ WebAR ---- อัลกอริทึมโกรเวอร์และฮาร์ดแวร์ควอนตัมตัวนำยิ่งยวด — ผศ.ดร.ชีวะ ทัศนา</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  
+  <!-- MathJax 3 LaTeX Formula Engine -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <!-- MediaPipe Hands & Camera Utils -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+  <style>
+    :root {
+      --bg-space: #030712;
+      --panel-glass: rgba(6, 12, 28, 0.45);
+      --panel-border: rgba(0, 240, 255, 0.28);
+      --accent-cyan: #00f0ff;
+      --accent-gold: #f59e0b;
+      --accent-pink: #ec4899;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-blue: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-thai: 'Prompt', sans-serif;
+      --font-tech: 'Chakra Petch', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-thai);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    /* Top Universal Navigation Bar */
+    .top-nav {
+      position: absolute;
+      top: 12px;
+      left: 18px;
+      right: 18px;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel-glass);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 8px 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .nav-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-tech);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.5px;
+    }
+
+    .nav-title span {
+      font-size: 1.2rem;
+    }
+
+    .mode-pills {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .mode-pill {
+      font-family: var(--font-tech);
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-pill:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .mode-pill.active {
+      background: var(--accent-cyan);
+      color: #030712;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
+    }
+
+    .btn-zen {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--font-tech);
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .btn-zen:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .btn-zen.active {
+      background: var(--accent-gold);
+      color: #030712;
+      font-weight: 700;
+    }
+
+    /* Floating Left HUD Control Dock */
+    .hud-dock-left {
+      position: absolute;
+      top: 68px;
+      left: 18px;
+      bottom: 18px;
+      width: 385px;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    }
+
+    .hud-dock-left.collapsed {
+      transform: translateX(-415px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .glass-card {
+      background: var(--panel-glass);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+      pointer-events: auto;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .card-title {
+      font-family: var(--font-tech);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .author-badge {
+      font-size: 0.68rem;
+      color: var(--accent-gold);
+      background: rgba(245, 158, 11, 0.1);
+      padding: 2px 7px;
+      border-radius: 6px;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    /* Scenario Tabs Grid */
+    .scenario-tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .scenario-tab {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 6px 2px;
+      font-family: var(--font-tech);
+      font-size: 0.68rem;
+      text-align: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .scenario-tab span {
+      font-size: 0.95rem;
+    }
+
+    .scenario-tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .scenario-tab.active {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(245, 158, 11, 0.2));
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+      font-weight: 700;
+    }
+
+    /* Scrollable Control Container */
+    .ctrl-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ctrl-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .ctrl-scroll::-webkit-scrollbar-thumb {
+      background: rgba(0, 240, 255, 0.4);
+      border-radius: 4px;
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ctrl-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 9px 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .ctrl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .ctrl-val {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 8px var(--accent-cyan);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .preset-btns {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+    }
+
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 5px 6px;
+      font-family: var(--font-tech);
+      font-size: 0.70rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .preset-btn:hover {
+      background: rgba(0, 240, 255, 0.2);
+      color: #fff;
+      border-color: var(--accent-cyan);
+    }
+
+    .preset-btn.active {
+      background: var(--accent-cyan);
+      color: #030712;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
+    .btn-act {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-family: var(--font-tech);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-act:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .btn-act.primary {
+      background: linear-gradient(135deg, var(--accent-cyan), #0284c7);
+      border: none;
+      color: #030712;
+      font-weight: 700;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
+    }
+
+    .btn-act.primary:hover {
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.7);
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    /* Floating Right HUD Telemetry Dock */
+    .hud-dock-right {
+      position: absolute;
+      top: 68px;
+      right: 18px;
+      bottom: 18px;
+      width: 340px;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    }
+
+    .hud-dock-right.collapsed {
+      transform: translateX(370px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .telem-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .telem-row {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 7px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+    }
+
+    .telem-lbl {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .telem-val {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #ffffff;
+      font-size: 0.78rem;
+    }
+
+    .prob-banner {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(0, 240, 255, 0.15));
+      border: 1px solid var(--accent-green);
+      border-radius: 10px;
+      padding: 10px 12px;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    .prob-val {
+      font-family: var(--font-mono);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--accent-green);
+      text-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+      margin: 2px 0;
+    }
+
+    .prob-sub {
+      font-size: 0.68rem;
+      color: #cbd5e1;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.78);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #080f24;
+      border: 1px solid var(--accent-cyan);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 240, 255, 0.35);
+      border-radius: 18px;
+      max-width: 680px;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: modalPop 0.25s ease-out;
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+      font-family: var(--font-tech);
+      font-size: 1.0rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #fff;
+    }
+
+    /* Expand Floating Buttons */
+    .dock-expand-btn {
+      position: absolute;
+      top: 68px;
+      z-index: 45;
+      background: var(--panel-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      color: var(--accent-cyan);
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: none;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    }
+
+    .dock-expand-btn:hover {
+      background: rgba(0, 240, 255, 0.25);
+    }
+
+    #dock-left { left: 18px; }
+    #dock-right { right: 18px; }
+
+    /* MediaPipe PiP */
+    #hand-pip-container {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 200px;
+      height: 150px;
+      border-radius: 12px;
+      border: 2px solid var(--accent-cyan);
+      overflow: hidden;
+      z-index: 60;
+      display: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+      background: #000;
+    }
+
+    #hand-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- WebGL Render Canvas Container -->
+  <div id="webgl-canvas"></div>
+
+  <!-- Top Universal Navigation Bar -->
+  <div class="top-nav">
+    <div class="nav-title">
+      <span>🔮</span>
+      <div>
+        <div>LAB 10 ---- อัลกอริทึมโกรเวอร์และฮาร์ดแวร์ควอนตัมตัวนำยิ่งยวด</div>
+        <div style="font-size:0.68rem; color:var(--text-muted); font-family:var(--font-thai); font-weight:400;">
+          Grover's Search Algorithm, Amplitude Amplification & Superconducting Qubits
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode Selector Pills -->
+    <div class="mode-pills">
+      <div class="mode-pill active" onclick="switchMode(1)">
+        <span>🌐</span> 3D Virtual Lab
+      </div>
+      <div class="mode-pill" onclick="switchMode(2)">
+        <span>📖</span> สแกนภาพ AR
+      </div>
+      <div class="mode-pill" onclick="switchMode(3)">
+        <span>🖐️</span> ท่าทางมือ AI
+      </div>
+    </div>
+
+    <!-- Zen Mode / Toggle HUD -->
+    <button class="btn-zen" id="btn-zen" onclick="toggleZenMode()">
+      <span>🔲</span>
+      <span>ย่อทุกบาร์ (H)</span>
+    </button>
+  </div>
+
+  <!-- Expand Buttons for Collapsed Docks -->
+  <button class="dock-expand-btn" id="dock-left" onclick="toggleLeftHUD(false)">▶ แผงควบคุม</button>
+  <button class="dock-expand-btn" id="dock-right" onclick="toggleRightHUD(false)">◀ ข้อมูลโทรมาตร</button>
+
+  <!-- Floating Left HUD Control Dock -->
+  <div class="hud-dock-left" id="hud-left">
+    <div class="glass-card" style="flex:1;">
+      <div class="card-header">
+        <div class="card-title">
+          <span>⚙️</span> โหมดจำลองโกรเวอร์และฮาร์ดแวร์
+        </div>
+        <div class="author-badge">ผศ.ดร.ชีวะ ทัศนา</div>
+      </div>
+
+      <!-- Scenario Tabs -->
+      <div class="scenario-tabs">
+        <div class="scenario-tab active" id="tab-search" onclick="setScenario('search')">
+          <span>🔍</span> ค้นหาโกรเวอร์
+        </div>
+        <div class="scenario-tab" id="tab-cryo" onclick="setScenario('cryo')">
+          <span>❄️</span> ตู้แช่เจือจาง
+        </div>
+        <div class="scenario-tab" id="tab-transmon" onclick="setScenario('transmon')">
+          <span>⚡</span> ทรานสมอน
+        </div>
+        <div class="scenario-tab" id="tab-speedup" onclick="setScenario('speedup')">
+          <span>🏎️</span> ความเร็ว O(√N)
+        </div>
+        <div class="scenario-tab" id="tab-noise" onclick="setScenario('noise')">
+          <span>📉</span> สัญญาณรบกวน
+        </div>
+      </div>
+
+      <div class="ctrl-scroll">
+        <!-- Scenario 1: Grover Search Controls -->
+        <div class="ctrl-group" id="group-search">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>จำนวนคิวบิตในระบบ (n Qubits)</span>
+              <span class="ctrl-val" id="val-qubits">n = 3 (N = 8)</span>
+            </div>
+            <input type="range" id="slider-qubits" min="2" max="5" step="1" value="3">
+          </div>
+
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>เลือกสถานะเป้าหมาย (คลิกเปิด-ปิดหลายเป้าหมาย M ≥ 1)</span>
+              <span class="ctrl-val" id="val-target-str" style="color:var(--accent-gold);">M = 1 เป้าหมาย</span>
+            </div>
+            <div class="preset-btns" id="target-preset-container">
+              <!-- Dynamically populated target buttons with multi-select support -->
+            </div>
+            <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-top:4px;">
+              เมื่อมีเป้าหมาย $M$ รายการ ---- $k_{\text{opt}} \approx \left\lfloor\frac{\pi}{4}\sqrt{\frac{N}{M}}\right\rfloor$ และมุมหมุนจะกว้างขึ้นเป็น $\sin(\theta/2) = \sqrt{M/N}$
+            </div>
+          </div>
+
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>จำนวนรอบการทำซ้ำโกรเวอร์ (Grover Iterations k)</span>
+              <span class="ctrl-val" id="val-k-iter">k = 2 รอบ (Optimal)</span>
+            </div>
+            <input type="range" id="slider-k-iter" min="0" max="6" step="1" value="2">
+            <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-top:4px;">
+              รอบที่เหมาะสมที่สุด ---- $k_{\text{opt}} \approx \frac{\pi}{4}\sqrt{N/M}$ หากทำซ้ำเกินกว่านี้ ความน่าจะเป็นจะหมุนเลยและลดลง (Over-rotation)
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn-act primary" id="btn-step-iter" onclick="stepGroverIteration()">
+              <span>⏩</span> ก้าวทีละรอบ (k + 1)
+            </button>
+            <button class="btn-act" onclick="resetGroverSearch()">
+              <span>🔄</span> รีเซ็ต (k = 0)
+            </button>
+          </div>
+
+          <button class="btn-act" onclick="runQuantumCounting()" style="border-color:var(--accent-blue); color:var(--accent-blue); margin-top:4px;">
+            <span>🔢</span> อัลกอริทึมนับควอนตัม BBHT (Quantum Counting QPE)
+          </button>
+        </div>
+
+        <!-- Scenario 2: Cryostat Dilution Refrigerator Controls -->
+        <div class="ctrl-group" id="group-cryo" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>อุณหภูมิแผ่นทำความเย็น 5 ระดับ (Dilution Stages)</span>
+            </div>
+            <div class="preset-btns">
+              <button class="preset-btn" onclick="focusCryoStage(1)">ขั้นที่ 1 (50 K)</button>
+              <button class="preset-btn" onclick="focusCryoStage(2)">ขั้นที่ 2 (4 K)</button>
+              <button class="preset-btn" onclick="focusCryoStage(3)">Still (800 mK)</button>
+              <button class="preset-btn active" onclick="focusCryoStage(4)">Mixing (15 mK)</button>
+            </div>
+            <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-top:4px;">
+              ตู้แช่แข็งเจือจางใช้ไอโซโทปผสมฮีเลียม-3 และฮีเลียม-4 เพื่อลดอุณหภูมิลงสู่ 15 mK ขจัดสัญญาณรบกวนความร้อนต่ำกว่าช่องว่างพลังงานตัวนำยิ่งยวด
+            </div>
+          </div>
+        </div>
+
+        <!-- Scenario 3: Transmon Physics Controls -->
+        <div class="ctrl-group" id="group-transmon" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>อัตราส่วนพลังงานโจเซฟสันต่อประจุ (E_J / E_C)</span>
+              <span class="ctrl-val" id="val-ej-ec">E_J / E_C = 50</span>
+            </div>
+            <input type="range" id="slider-ej-ec" min="10" max="100" step="5" value="50">
+            <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-top:4px;">
+              ทรานสมอนออกแบบให้ $E_J / E_C \gg 1$ เพื่อลดความไวต่อสัญญาณรบกวนประจุ (Charge Noise Insensitive) โดยยังคงความไม่เป็นฮาร์มอนิก $\alpha \approx -E_C$ ไว้แยกแยะระดับพลังงาน $|0\rangle \to |1\rangle$
+            </div>
+          </div>
+
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>ความถี่ไมโครเวฟขับกวนคิวบิต (Qubit Drive Frequency)</span>
+              <span class="ctrl-val" id="val-drive-freq">5.120 GHz (Resonance)</span>
+            </div>
+            <input type="range" id="slider-drive-freq" min="4.5" max="5.5" step="0.05" value="5.12">
+          </div>
+
+          <button class="btn-act primary" onclick="openIQModal()" style="background:linear-gradient(135deg, #0284c7, #00f0ff); margin-top:4px;">
+            <span>📡</span> เปิดระนาบ IQ & สเปกตรัมการอ่านค่าเชิงกระจาย cQED
+          </button>
+        </div>
+
+        <!-- Scenario 4: Quantum Speedup Simulation Controls -->
+        <div class="ctrl-group" id="group-speedup" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>ขนาดฐานข้อมูลไร้การจัดเรียง (Database Size N)</span>
+              <span class="ctrl-val" id="val-speedup-n">N = 1,000,000</span>
+            </div>
+            <input type="range" id="slider-speedup-n" min="2" max="8" step="1" value="6">
+            <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-top:4px;">
+              คลาสสิกสุ่มค้นหาต้องใช้เฉลี่ย $N/2$ ครั้ง ขณะที่อัลกอริทึมโกรเวอร์ใช้เพียง $\frac{\pi}{4}\sqrt{N}$ ครั้ง แสดงความได้เปรียบเชิงควอนตัมแบบยกกำลังสอง (Quadratic Speedup)
+            </div>
+          </div>
+
+          <button class="btn-act primary" onclick="runSpeedupRace()">
+            <span>🏁</span> แข่งขันความเร็วประมวลผล (Classical vs Grover)
+          </button>
+        </div>
+
+        <!-- Scenario 5: Hardware Noise & Gate Fidelity Controls -->
+        <div class="ctrl-group" id="group-noise" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>ความแม่นยำของเกตควอนตัม (Quantum Gate Fidelity)</span>
+              <span class="ctrl-val" id="val-gate-fid">99.8 %</span>
+            </div>
+            <input type="range" id="slider-gate-fid" min="90.0" max="100.0" step="0.2" value="99.8">
+            <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-top:4px;">
+              เมื่อเกิดการสลายเฟสและการผ่อนคลายพลังงาน แอมพลิจูดเป้าหมายจะถูกหน่วงและมีความน่าจะเป็นกระจายไปยังสถานะอื่น
+            </div>
+          </div>
+
+          <div class="ctrl-item" style="border-color:rgba(16,185,129,0.4); margin-top:4px;">
+            <div class="ctrl-header">
+              <span>การขยายสเกลสัญญาณรบกวน (Noise Scale Factor λ)</span>
+              <span class="ctrl-val" id="val-zne-lambda">λ = 1.0 (Unscaled)</span>
+            </div>
+            <div class="preset-btns">
+              <button class="preset-btn active" id="btn-lambda-1" onclick="setZNELambda(1.0)">λ = 1 (ฐาน)</button>
+              <button class="preset-btn" id="btn-lambda-2" onclick="setZNELambda(2.0)">λ = 2 (CNOT Fold)</button>
+              <button class="preset-btn" id="btn-lambda-3" onclick="setZNELambda(3.0)">λ = 3 (ยืดพัลส์)</button>
+            </div>
+            <button class="btn-act primary" onclick="runZNEExtrapolation()" style="background:linear-gradient(135deg, #10b981, #0284c7); margin-top:6px;">
+              <span>🛡️</span> รันการลดทอนความผิดพลาด ZNE (Zero-Noise Extrapolation)
+            </button>
+            <div id="zne-result-box" style="display:none; font-size:0.72rem; color:#cbd5e1; background:rgba(0,0,0,0.4); padding:6px 8px; border-radius:6px; border:1px solid rgba(16,185,129,0.3); margin-top:6px;">
+              <!-- ZNE results injected dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Row -->
+        <div class="action-row">
+          <button class="btn-act" onclick="resetViews()">
+            <span>🎯</span> รีเซ็ตมุมมอง 3D
+          </button>
+          <button class="btn-act" id="btn-sound" onclick="toggleSound()">
+            <span>🔊</span> เสียงสังเคราะห์ (เปิด)
+          </button>
+        </div>
+
+        <!-- Modal Triggers -->
+        <button class="btn-act" onclick="openGroverModal()" style="border-color:var(--accent-gold); color:var(--accent-gold);">
+          <span>📈</span> กราฟการสะท้อนรอบค่าเฉลี่ย (Inversion About Average)
+        </button>
+
+        <button class="btn-act" onclick="openCircuitModal()" style="border-color:var(--accent-purple); color:var(--accent-purple);">
+          <span>🔬</span> ไดอะแกรมวงจรเกตโกรเวอร์ & โอราเคิล
+        </button>
+
+        <button class="btn-act" onclick="openIQModal()" style="border-color:var(--accent-cyan); color:var(--accent-cyan);">
+          <span>📡</span> ระนาบ IQ & การอ่านค่าสถานะคิวบิต cQED
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Right HUD Telemetry Dock -->
+  <div class="hud-dock-right" id="hud-right">
+    <div class="glass-card" style="flex:1;">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📊</span> โทรมาตรการขยายแอมพลิจูด
+        </div>
+        <span class="author-badge" id="badge-grover-status">AMPLIFIED</span>
+      </div>
+
+      <div class="telem-list">
+        <div class="telem-row">
+          <span class="telem-lbl"><span>📦</span> มิติปริภูมิฮิลเบิร์ต (N = 2ⁿ)</span>
+          <span class="telem-val" id="telem-n-states">8 สถานะ</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>🎯</span> สถานะเป้าหมาย (|ω⟩)</span>
+          <span class="telem-val" id="telem-target-bin" style="color:var(--accent-gold);">|101⟩ (State 5)</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>📐</span> มุมการหมุนสะท้อน (2θ)</span>
+          <span class="telem-val" id="telem-rot-angle">41.8° ต่อรอบ</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>🌀</span> จำนวนรอบที่เหมาะสม (k_opt)</span>
+          <span class="telem-val" id="telem-k-opt" style="color:var(--accent-cyan);">2 รอบ</span>
+        </div>
+
+        <!-- Success Probability Banner -->
+        <div class="prob-banner">
+          <div class="prob-sub">ความน่าจะเป็นที่วัดพบเป้าหมาย P(Target)</div>
+          <div class="prob-val" id="telem-prob-target">94.5 %</div>
+          <div class="prob-sub" id="telem-prob-note" style="color:var(--accent-green);">ความสำเร็จระดับสูงใกล้ขอบเขตจำกัด</div>
+        </div>
+
+        <div class="telem-row" style="margin-top:4px;">
+          <span class="telem-lbl"><span>⚡</span> แอมพลิจูดเป้าหมาย (α_target)</span>
+          <span class="telem-val" id="telem-amp-target" style="color:var(--accent-green);">+0.9723</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>🌊</span> แอมพลิจูดสถานะอื่น (α_other)</span>
+          <span class="telem-val" id="telem-amp-other" style="color:var(--text-muted);">+0.0884</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>❄️</span> อุณหภูมิการทำงาน QPU</span>
+          <span class="telem-val" id="telem-qpu-temp" style="color:var(--accent-cyan);">15 mK (-273.135 °C)</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>⏱️</span> อัตราความได้เปรียบความเร็ว</span>
+          <span class="telem-val" id="telem-speedup-factor" style="color:var(--accent-gold);">2.8 เท่า (N = 8)</span>
+        </div>
+      </div>
+
+      <!-- Histogram of Quantum Probabilities -->
+      <div class="ctrl-item" style="margin-top:8px;">
+        <div style="font-size:0.72rem; color:var(--text-muted); font-weight:700; margin-bottom:4px;">
+          ฮิสโตแกรมความน่าจะเป็นจำลอง (Probability Distribution)
+        </div>
+        <div id="prob-mini-bars" style="display:flex; align-items:flex-end; gap:3px; height:60px; background:rgba(0,0,0,0.4); padding:4px; border-radius:6px; border:1px solid rgba(255,255,255,0.08);">
+          <!-- Mini bars generated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grover Amplitude Transformation Modal -->
+  <div class="modal-overlay" id="grover-modal" onclick="if(event.target === this) closeGroverModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📈 การสะท้อนรอบค่าเฉลี่ยในอัลกอริทึมโกรเวอร์ (Inversion About Average)</span>
+        <button class="modal-close" onclick="closeGroverModal()">✕</button>
+      </div>
+      <div>
+        <div style="width:100%; height:260px; background:#020617; border-radius:12px; border:1px solid rgba(0,240,255,0.3); overflow:hidden; position:relative;">
+          <canvas id="grover-canvas" width="620" height="260" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8; margin-top:8px;">
+          <span>โอราเคิลกลับเฟส ---- <strong style="color:var(--accent-pink);">$R_\omega = I - 2|\omega\rangle\langle\omega|$</strong></span>
+          <span>โอเปอเรเตอร์ดิฟฟิวชัน ---- <strong style="color:var(--accent-cyan);">$R_s = 2|s\rangle\langle s| - I$</strong></span>
+        </div>
+        <p style="font-size:0.75rem; color:#cbd5e1; margin-top:8px; line-height:1.4;">
+          การทำงานของโกรเวอร์ประกอบด้วย 2 ขั้นตอนสลับกัน ---- ขั้นแรก โอราเคิลกลับเครื่องหมายแอมพลิจูดของเป้าหมาย $\alpha_\omega \to -\alpha_\omega$ ทำให้ค่าเฉลี่ย $\bar{\alpha}$ ลดลงต่ำกว่าเดิม ขั้นที่สอง โอเปอเรเตอร์การแพร่กระจายสะท้อนแอมพลิจูดทุกตัวรอบค่าเฉลี่ยใหม่ ($\alpha_i' = 2\bar{\alpha} - \alpha_i$) ส่งผลให้แอมพลิจูดเป้าหมายเด้งสูงขึ้นอย่างก้าวกระโดด
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quantum Circuit Diagram Modal -->
+  <div class="modal-overlay" id="circuit-modal" onclick="if(event.target === this) closeCircuitModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>🔬 ไดอะแกรมวงจรควอนตัมของอัลกอริทึมโกรเวอร์ (Grover Circuit Architecture)</span>
+        <button class="modal-close" onclick="closeCircuitModal()">✕</button>
+      </div>
+      <div>
+        <div style="width:100%; height:250px; background:#020617; border-radius:12px; border:1px solid rgba(168,85,247,0.3); overflow:hidden; position:relative;">
+          <canvas id="circuit-canvas" width="620" height="250" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8; margin-top:8px;">
+          <span>การเตรียมสถานะซูเปอร์โพซิชัน ---- <strong style="color:var(--accent-cyan);">$H^{\otimes n}|0\rangle^{\otimes n}$</strong></span>
+          <span>การทำซ้ำโกรเวอร์ ---- <strong style="color:var(--accent-gold);">$(U_s \cdot U_\omega)^k$</strong></span>
+        </div>
+        <p style="font-size:0.75rem; color:#cbd5e1; margin-top:8px; line-height:1.4;">
+          คิวบิตเริ่มต้นที่สถานะ $|0\rangle^{\otimes n}$ ผ่านเกต Hadamard ครบทุกเส้นเพื่อสร้างซูเปอร์โพซิชันเท่าเทียมกันทุกสถานะ จากนั้นเข้าสู่ลูปการทำซ้ำ $k_{\text{opt}}$ รอบของโอราเคิลควอนตัมและเกตดิฟฟิวชัน ก่อนจะวัดผลด้วยตัวตรวจวัดเพื่อให้ฟังก์ชันคลื่นยุบตัวสู่คำตอบที่ต้องการด้วยความน่าจะเป็นสูงสุด
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- cQED Dispersive Readout & IQ Constellation Modal -->
+  <div class="modal-overlay" id="iq-modal" onclick="if(event.target === this) closeIQModal()">
+    <div class="modal-card" style="max-width:660px;">
+      <div class="modal-head">
+        <span>📡 การอ่านค่าสถานะคิวบิตเชิงกระจายใน cQED (Dispersive Readout & IQ Plane)</span>
+        <button class="modal-close" onclick="closeIQModal()">✕</button>
+      </div>
+      <div>
+        <div style="width:100%; height:270px; background:#020617; border-radius:12px; border:1px solid rgba(0,240,255,0.3); overflow:hidden; position:relative;">
+          <canvas id="iq-canvas" width="620" height="270" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8; margin-top:8px;">
+          <span>ฮามิลโทเนียนเชิงกระจาย ---- <strong style="color:var(--accent-cyan);">$H_{\text{disp}} \approx \hbar(\omega_r + \chi \sigma_z) a^\dagger a$</strong></span>
+          <span>ความแม่นยำการวัด ---- <strong style="color:var(--accent-green);" id="iq-fidelity-val">$\mathcal{F}_{\text{ro}} \ge 98.7\%$</strong></span>
+        </div>
+        <p style="font-size:0.75rem; color:#cbd5e1; margin-top:8px; line-height:1.4;">
+          เมื่อคิวบิตอยู่ในสถานะ $|0\rangle$ หรือ $|1\rangle$ เรโซเนเตอร์ไมโครเวฟจะเกิดการเลื่อนความถี่เรโซแนนซ์เป็น $\omega_r \pm \chi$ ส่งผลให้สัญญาณสะท้อนในระนาบ In-phase (I) และ Quadrature (Q) แยกออกจากกันเป็น 2 กลุ่มก้อน (Blobs) โดยมีระยะห่าง $2\chi$ สามารถตัดสินสถานะควอนตัมของคิวบิตได้โดยไม่ทำลายสถานะพลังงาน (QND Measurement)
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- AR Hiro Marker Modal -->
+  <div class="modal-overlay" id="ar-modal" onclick="if(event.target === this) closeARModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📖 สแกนภาพมาร์กเกอร์หนังสือ AR (Hiro Marker)</span>
+        <button class="modal-close" onclick="closeARModal()">✕</button>
+      </div>
+      <div style="text-align:center; padding:10px 0;">
+        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Hiro Marker" style="width:190px; height:190px; border-radius:12px; border:4px solid var(--accent-cyan); box-shadow:0 0 20px rgba(0,240,255,0.4);">
+        <p style="font-size:0.82rem; color:#cbd5e1; margin-top:14px; line-height:1.5;">
+          ส่องกล้องมาที่มาร์กเกอร์ Hiro ในตำราฟิสิกส์ควอนตัมบทที่ 10<br>
+          ตู้แช่แข็งเจือจางสีทองพร้อมเวกเตอร์การหมุนในปริภูมิฮิลเบิร์ต 3 มิติ จะปรากฏลอยขึ้นเหนือหน้าหนังสือทันที
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Camera PiP for MediaPipe Hands Tracking -->
+  <div id="hand-pip-container">
+    <video id="hand-video" playsinline></video>
+    <div style="position:absolute; top:4px; left:8px; font-size:0.65rem; color:var(--accent-cyan); background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:4px; font-weight:700;">
+      🖐️ ท่าทางมือ AI ปรับรอบ k
+    </div>
+  </div>
+
+  <!-- JavaScript Simulator Engine -->
+  <script>
+    // -------------------------------------------------------------
+    // Web Audio Synthesizer: Microwave Pulses, Inversions & Chimes
+    // -------------------------------------------------------------
+    let audioCtx = null;
+    let audioActive = true;
+    let masterGain = null;
+
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioClass();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        masterGain.connect(audioCtx.destination);
+      } catch (e) {
+        console.warn('AudioContext not available', e);
+      }
+    }
+
+    function toggleSound() {
+      if (!audioCtx) initAudio();
+      audioActive = !audioActive;
+      const btn = document.getElementById('btn-sound');
+      if (audioActive) {
+        masterGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        btn.classList.add('primary');
+        btn.innerHTML = '<span>🔊</span> เสียงสังเคราะห์ (เปิด)';
+      } else {
+        masterGain.gain.setValueAtTime(0.0, audioCtx.currentTime);
+        btn.classList.remove('primary');
+        btn.innerHTML = '<span>🔇</span> เสียงสังเคราะห์ (ปิด)';
+      }
+    }
+
+    function playTone(freqHz, duration = 0.15, type = 'sine') {
+      if (!audioActive || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freqHz, now);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + duration + 0.05);
+    }
+
+    // -------------------------------------------------------------
+    // Physical Simulation State Variables
+    // -------------------------------------------------------------
+    let currentScenario = 'search'; // 'search' | 'cryo' | 'transmon' | 'speedup' | 'noise'
+    let nQubits = 3;
+    let targetIndices = [5]; // Multi-target selection (M = targetIndices.length >= 1)
+    let kIteration = 2;
+    let gateFidelity = 0.998;
+    let zneLambda = 1.0; // Noise scaling factor for Zero-Noise Extrapolation
+    let ejEcRatio = 50.0;
+    let driveFrequency = 5.12;
+
+    // -------------------------------------------------------------
+    // Three.js 3D PBR Quantum Hardware & Grover Scene Setup
+    // -------------------------------------------------------------
+    const container = document.getElementById('webgl-canvas');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x030712, 0.03);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 5.5, 14.5);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxDistance = 28;
+    controls.minDistance = 2;
+
+    // Floor Grid
+    const grid = new THREE.GridHelper(30, 30, 0x00f0ff, 0x1e293b);
+    grid.position.y = -2.5;
+    scene.add(grid);
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight.position.set(6, 15, 10);
+    scene.add(dirLight);
+
+    const cyanPointLight = new THREE.PointLight(0x00f0ff, 2.5, 12);
+    cyanPointLight.position.set(-4, 4, 3);
+    scene.add(cyanPointLight);
+
+    const goldPointLight = new THREE.PointLight(0xf59e0b, 2.5, 12);
+    goldPointLight.position.set(4, 3, 3);
+    scene.add(goldPointLight);
+
+    // -------------------------------------------------------------
+    // 1. Dilution Refrigerator 3D Gold Chandelier Model
+    // -------------------------------------------------------------
+    const cryoGroup = new THREE.Group();
+    scene.add(cryoGroup);
+    cryoGroup.position.set(-4.5, 0.5, -1.0);
+
+    const goldMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xf59e0b,
+      metalness: 0.92,
+      roughness: 0.18,
+      clearcoat: 0.8,
+      clearcoatRoughness: 0.1
+    });
+
+    const copperMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xb45309,
+      metalness: 0.85,
+      roughness: 0.25
+    });
+
+    const plateHeights = [3.2, 2.2, 1.3, 0.4, -0.6];
+    const plateRadii = [1.8, 1.5, 1.25, 1.0, 0.75];
+    const cryoPlates = [];
+
+    for (let i = 0; i < 5; i++) {
+      const pGeo = new THREE.CylinderGeometry(plateRadii[i], plateRadii[i], 0.08, 32);
+      const plate = new THREE.Mesh(pGeo, i % 2 === 0 ? goldMaterial : copperMaterial);
+      plate.position.y = plateHeights[i];
+      cryoGroup.add(plate);
+      cryoPlates.push(plate);
+
+      // Support rods
+      if (i < 4) {
+        for (let r = 0; r < 3; r++) {
+          const ang = (r / 3) * Math.PI * 2;
+          const rodGeo = new THREE.CylinderGeometry(0.03, 0.03, plateHeights[i] - plateHeights[i+1], 12);
+          const rod = new THREE.Mesh(rodGeo, goldMaterial);
+          rod.position.set(
+            Math.cos(ang) * (plateRadii[i] * 0.75),
+            (plateHeights[i] + plateHeights[i+1]) / 2,
+            Math.sin(ang) * (plateRadii[i] * 0.75)
+          );
+          cryoGroup.add(rod);
+        }
+      }
+    }
+
+    // Coaxial Microwave Cables running down
+    for (let c = 0; c < 8; c++) {
+      const cAng = (c / 8) * Math.PI * 2;
+      const cCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(Math.cos(cAng) * 1.5, 3.2, Math.sin(cAng) * 1.5),
+        new THREE.Vector3(Math.cos(cAng + 0.3) * 1.1, 1.8, Math.sin(cAng + 0.3) * 1.1),
+        new THREE.Vector3(Math.cos(cAng) * 0.8, 0.4, Math.sin(cAng) * 0.8),
+        new THREE.Vector3(Math.cos(cAng - 0.2) * 0.5, -0.6, Math.sin(cAng - 0.2) * 0.5)
+      ]);
+      const cGeo = new THREE.TubeGeometry(cCurve, 32, 0.02, 8, false);
+      const cMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.8, roughness: 0.2 });
+      cryoGroup.add(new THREE.Mesh(cGeo, cMat));
+    }
+
+    // QPU Chip Shielding Can (Bottom 15 mK)
+    const canGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.5, 24);
+    const canMat = new THREE.MeshPhysicalMaterial({ color: 0x0284c7, metalness: 0.9, roughness: 0.1, transmission: 0.5, transparent: true, opacity: 0.85 });
+    const can = new THREE.Mesh(canGeo, canMat);
+    can.position.y = -0.9;
+    cryoGroup.add(can);
+
+    // Glowing Transmon Silicon QPU inside can
+    const chipGeo = new THREE.BoxGeometry(0.3, 0.04, 0.3);
+    const chipMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+    const chip = new THREE.Mesh(chipGeo, chipMat);
+    chip.position.y = -0.9;
+    cryoGroup.add(chip);
+
+    // -------------------------------------------------------------
+    // 2. Grover 3D Hilbert Space Rotation Subspace & Bars
+    // -------------------------------------------------------------
+    const groverGroup = new THREE.Group();
+    scene.add(groverGroup);
+    groverGroup.position.set(3.2, 0, 0);
+
+    // Hilbert Space Circle Guide
+    const SUB_R = 4.0;
+    const ringGeo = new THREE.RingGeometry(SUB_R - 0.04, SUB_R + 0.04, 64);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x334155, side: THREE.DoubleSide, transparent: true, opacity: 0.8 });
+    const subspaceRing = new THREE.Mesh(ringGeo, ringMat);
+    subspaceRing.rotation.x = Math.PI / 2;
+    subspaceRing.position.y = -0.5;
+    groverGroup.add(subspaceRing);
+
+    // Subspace Axes: |w_perp> (X-axis) and |w> Target (Z-axis)
+    const axisX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, -0.48, 0), SUB_R * 1.25, 0x64748b, 0.35, 0.16);
+    const axisZ = new THREE.ArrowHelper(new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, -0.48, 0), SUB_R * 1.25, 0xf59e0b, 0.35, 0.16);
+    groverGroup.add(axisX);
+    groverGroup.add(axisZ);
+
+    // State Vector Arrow (Glowing Cyan-Gold)
+    const groverStateArrow = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, -0.45, 0), SUB_R, 0x00f0ff, 0.45, 0.22);
+    groverGroup.add(groverStateArrow);
+
+    // Text Sprites for Axes
+    function makeTextSprite(message, color) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128; canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = color;
+      ctx.font = 'Bold 32px Chakra Petch';
+      ctx.textAlign = 'center';
+      ctx.fillText(message, 64, 42);
+      const texture = new THREE.CanvasTexture(canvas);
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true }));
+      sprite.scale.set(1.4, 0.7, 1);
+      return sprite;
+    }
+
+    const labelW = makeTextSprite('|ω⟩ Target', '#f59e0b');
+    labelW.position.set(0, -0.48, -SUB_R * 1.35);
+    groverGroup.add(labelW);
+
+    const labelWPerp = makeTextSprite('|ω_⟂⟩', '#94a3b8');
+    labelWPerp.position.set(SUB_R * 1.35, -0.48, 0);
+    groverGroup.add(labelWPerp);
+
+    // 3D Quantum Probability Bars (Histogram in 3D Space)
+    const barContainer = new THREE.Group();
+    scene.add(barContainer);
+    barContainer.position.set(0, -2.5, 3.8);
+
+    let bars3D = [];
+
+    function rebuildBars3D() {
+      while (barContainer.children.length > 0) {
+        barContainer.remove(barContainer.children[0]);
+      }
+      bars3D = [];
+
+      const N = Math.pow(2, nQubits);
+      const totalWidth = 9.0;
+      const barW = Math.min(0.65, totalWidth / N);
+      const gap = totalWidth / N;
+
+      for (let i = 0; i < N; i++) {
+        const bGeo = new THREE.BoxGeometry(barW * 0.85, 1, barW * 0.85);
+        const bMat = new THREE.MeshStandardMaterial({
+          color: (i === targetIndex) ? 0xf59e0b : 0x0284c7,
+          metalness: 0.6,
+          roughness: 0.2
+        });
+        const mesh = new THREE.Mesh(bGeo, bMat);
+        const xPos = -totalWidth / 2 + gap * (i + 0.5);
+        mesh.position.set(xPos, 0.5, 0);
+        barContainer.add(mesh);
+        bars3D.push(mesh);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Core Grover Physics & Multi-Target Mathematical Evolution
+    // -------------------------------------------------------------
+    function updatePhysics() {
+      const N = Math.pow(2, nQubits);
+      const M = Math.max(1, targetIndices.length);
+      document.getElementById('val-qubits').innerText = `n = ${nQubits} (N = ${N})`;
+      document.getElementById('telem-n-states').innerText = `${N} สถานะ`;
+
+      // Multi-target angle: sin(theta/2) = sqrt(M / N)
+      const halfTheta = Math.asin(Math.min(1.0, Math.sqrt(M / N)));
+      const theta = 2.0 * halfTheta;
+      const kOpt = Math.max(1, Math.round((Math.PI / 4.0) * Math.sqrt(N / M) - 0.5));
+      document.getElementById('telem-k-opt').innerText = `${kOpt} รอบ`;
+      document.getElementById('telem-rot-angle').innerText = `${(theta * 180 / Math.PI).toFixed(1)}° ต่อรอบ`;
+
+      // Angle of state vector after k iterations: (2k + 1) * theta / 2
+      const angle = (2.0 * kIteration + 1.0) * halfTheta;
+
+      // Amplitudes per target and per non-target state
+      let ampTarget = Math.sin(angle) / Math.sqrt(M);
+      let ampOther = (N > M) ? (Math.cos(angle) / Math.sqrt(N - M)) : 0.0;
+
+      // Apply Hardware Noise & Gate Fidelity Dampening with ZNE Lambda scaling
+      const effFidelity = Math.pow(gateFidelity, zneLambda);
+      const noiseLoss = Math.pow(effFidelity, kIteration * 2);
+      ampTarget *= noiseLoss;
+      ampOther *= noiseLoss;
+
+      const totalProbTarget = Math.min(1.0, Math.max(0.0, Math.pow(Math.sin(angle) * noiseLoss, 2)));
+
+      // Telemetry UI Updates
+      document.getElementById('val-k-iter').innerText = `k = ${kIteration} รอบ ${kIteration === kOpt ? '(Optimal)' : kIteration > kOpt ? '(Over-rotated)' : ''}`;
+      document.getElementById('slider-k-iter').value = kIteration;
+
+      document.getElementById('telem-prob-target').innerText = (totalProbTarget * 100).toFixed(1) + ' %';
+      document.getElementById('telem-amp-target').innerText = (ampTarget >= 0 ? '+' : '') + ampTarget.toFixed(4) + (M > 1 ? ` (×${M})` : '');
+      document.getElementById('telem-amp-other').innerText = (ampOther >= 0 ? '+' : '') + ampOther.toFixed(4);
+
+      const targetLabels = targetIndices.map(idx => `|${idx.toString(2).padStart(nQubits, '0')}⟩`).join(', ');
+      const shortStr = (M === 1) ? `|${targetIndices[0].toString(2).padStart(nQubits, '0')}⟩ (State ${targetIndices[0]})` : `${M} เป้าหมาย (${targetLabels})`;
+      document.getElementById('val-target-str').innerText = shortStr;
+      document.getElementById('telem-target-bin').innerText = (M === 1) ? `|${targetIndices[0].toString(2).padStart(nQubits, '0')}⟩ (State ${targetIndices[0]})` : `${M} เป้าหมาย ---- ${targetLabels}`;
+
+      const badge = document.getElementById('badge-grover-status');
+      const note = document.getElementById('telem-prob-note');
+      if (kIteration === kOpt && totalProbTarget > 0.85) {
+        badge.innerText = 'OPTIMAL MAXIMUM';
+        badge.style.color = 'var(--accent-green)';
+        note.innerText = 'ความสำเร็จสูงสุด (Grover Speedup O(√(N/M)))';
+        note.style.color = 'var(--accent-green)';
+      } else if (kIteration > kOpt) {
+        badge.innerText = 'OVER-ROTATED';
+        badge.style.color = 'var(--accent-pink)';
+        note.innerText = 'หมุนเลยจุดสูงสุด ---- ความน่าจะเป็นลดลง';
+        note.style.color = 'var(--accent-pink)';
+      } else {
+        badge.innerText = 'AMPLIFYING';
+        badge.style.color = 'var(--accent-gold)';
+        note.innerText = 'กำลังเพิ่มแอมพลิจูดในแต่ละรอบ';
+        note.style.color = 'var(--accent-gold)';
+      }
+
+      // Update 3D State Vector Arrow in Subspace
+      const dirX = Math.cos(angle);
+      const dirZ = -Math.sin(angle);
+      groverStateArrow.setDirection(new THREE.Vector3(dirX, 0, dirZ).normalize());
+      groverStateArrow.setColor((kIteration === kOpt) ? 0x10b981 : 0x00f0ff);
+
+      // Update 3D Histogram Bars
+      const maxHeight = 3.6;
+      bars3D.forEach((bar, idx) => {
+        const isTarget = targetIndices.includes(idx);
+        const amp = isTarget ? ampTarget : ampOther;
+        const p = Math.max(0.02, amp * amp);
+        const h = p * maxHeight + 0.08;
+        bar.scale.y = h;
+        bar.position.y = -2.5 + h / 2.0;
+        if (isTarget) {
+          bar.material.color.setHex((kIteration === kOpt) ? 0x10b981 : 0xf59e0b);
+        } else {
+          bar.material.color.setHex(0x0284c7);
+        }
+      });
+
+      // Update Right Dock Mini Bars
+      updateMiniBars(N, totalProbTarget);
+    }
+
+    function updateMiniBars(N, pTotalTarget) {
+      const container = document.getElementById('prob-mini-bars');
+      if (!container) return;
+      container.innerHTML = '';
+      const M = Math.max(1, targetIndices.length);
+      const pTargetEach = pTotalTarget / M;
+      const pOtherEach = (N > M) ? Math.max(0, (1.0 - pTotalTarget) / (N - M)) : 0;
+
+      for (let i = 0; i < N; i++) {
+        const bar = document.createElement('div');
+        const isTarget = targetIndices.includes(i);
+        const p = isTarget ? pTargetEach : pOtherEach;
+        bar.style.flex = '1';
+        bar.style.height = `${Math.max(4, p * 52)}px`;
+        bar.style.background = isTarget ? 'var(--accent-green)' : 'rgba(0, 240, 255, 0.4)';
+        bar.style.borderRadius = '2px';
+        bar.title = `State |${i.toString(2).padStart(nQubits, '0')}⟩: ${(p * 100).toFixed(1)}%`;
+        container.appendChild(bar);
+      }
+    }
+
+    function populateTargetButtons() {
+      const cont = document.getElementById('target-preset-container');
+      if (!cont) return;
+      cont.innerHTML = '';
+      const N = Math.pow(2, nQubits);
+      for (let i = 0; i < Math.min(8, N); i++) {
+        const btn = document.createElement('button');
+        const bin = i.toString(2).padStart(nQubits, '0');
+        const isSel = targetIndices.includes(i);
+        btn.className = `preset-btn ${isSel ? 'active' : ''}`;
+        btn.innerText = `|${bin}⟩ (${i}) ${isSel ? '✓' : ''}`;
+        btn.onclick = () => {
+          if (targetIndices.includes(i)) {
+            if (targetIndices.length > 1) {
+              targetIndices = targetIndices.filter(idx => idx !== i);
+            }
+          } else {
+            targetIndices.push(i);
+          }
+          rebuildBars3D();
+          updatePhysics();
+          playTone(480 + i * 40, 0.15);
+          populateTargetButtons();
+        };
+        cont.appendChild(btn);
+      }
+    }
+
+    function runQuantumCounting() {
+      const N = Math.pow(2, nQubits);
+      const M = targetIndices.length;
+      const exactTheta = 2.0 * Math.asin(Math.sqrt(M / N));
+      const noise = (Math.random() - 0.5) * 0.02;
+      const measuredTheta = Math.max(0.01, exactTheta + noise);
+      const mEst = Math.max(1, Math.round(N * Math.pow(Math.sin(measuredTheta / 2.0), 2)));
+
+      const msg = `ผลการนับจำนวนควอนตัม BBHT (Quantum Phase Estimation) ----\n• มิติของปริภูมิฮิลเบิร์ต N = ${N} สถานะ\n• มุมเฟสไอเกนของโกรเวอร์ (Grover Eigenphase) θ̃ = ${(measuredTheta * 180 / Math.PI).toFixed(2)}°\n• ประมาณการจำนวนเป้าหมาย M̃ = ${mEst} รายการ (จำนวนเป้าหมายจริง M = ${M} รายการ)\n• ความแม่นยำ QPE ---- สอดคล้องทฤษฎีควอนตัม 100% สามารถตรวจหาจำนวนคำตอบได้ล่วงหน้าโดยไม่ต้องค้นหา`;
+      alert(msg);
+      playTone(830.61, 0.3, 'triangle');
+    }
+
+    function setZNELambda(lambda) {
+      zneLambda = lambda;
+      document.getElementById('val-zne-lambda').innerText = `λ = ${lambda.toFixed(1)} ${lambda === 1 ? '(Unscaled)' : lambda === 2 ? '(CNOT Fold)' : '(Pulse Stretch)'}`;
+      document.querySelectorAll('#group-noise .preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.includes(`λ = ${lambda.toFixed(0)}`));
+      });
+      updatePhysics();
+      playTone(500 + lambda * 100, 0.15);
+    }
+
+    function runZNEExtrapolation() {
+      const N = Math.pow(2, nQubits);
+      const M = targetIndices.length;
+      const halfTheta = Math.asin(Math.min(1.0, Math.sqrt(M / N)));
+      const kOpt = Math.max(1, Math.round((Math.PI / 4.0) * Math.sqrt(N / M) - 0.5));
+      const idealProb = Math.pow(Math.sin((2.0 * kOpt + 1.0) * halfTheta), 2);
+
+      const p1 = idealProb * Math.pow(Math.pow(gateFidelity, 1.0), kOpt * 4);
+      const p2 = idealProb * Math.pow(Math.pow(gateFidelity, 2.0), kOpt * 4);
+      const p3 = idealProb * Math.pow(Math.pow(gateFidelity, 3.0), kOpt * 4);
+
+      // Richardson extrapolation: P_mitigated = 2 * P(1) - P(2)
+      const pMitigated = Math.min(1.0, 2.0 * p1 - p2);
+
+      const box = document.getElementById('zne-result-box');
+      box.style.display = 'block';
+      box.innerHTML = `
+        <div style="font-weight:700; color:var(--accent-green); margin-bottom:4px;">
+          🛡️ ผลการลดทอนความผิดพลาด ZNE (Richardson Extrapolation)
+        </div>
+        <div>• สเกล λ=1 (ดิบ) ---- ${(p1 * 100).toFixed(2)} %</div>
+        <div>• สเกล λ=2 (CNOT Fold) ---- ${(p2 * 100).toFixed(2)} %</div>
+        <div>• สเกล λ=3 (Pulse Stretch) ---- ${(p3 * 100).toFixed(2)} %</div>
+        <div style="margin-top:4px; font-weight:700; color:var(--accent-cyan);">
+          ★ ค่าคาดหมายไร้สัญญาณรบกวน (λ → 0) ---- ${(pMitigated * 100).toFixed(2)} % (+${((pMitigated - p1) * 100).toFixed(2)} %)
+        </div>
+      `;
+
+      playTone(987.77, 0.35, 'triangle');
+    }
+
+    // -------------------------------------------------------------
+    // Slider Listeners & Controls
+    // -------------------------------------------------------------
+    document.getElementById('slider-qubits').addEventListener('input', (e) => {
+      nQubits = parseInt(e.target.value);
+      targetIndex = Math.min(targetIndex, Math.pow(2, nQubits) - 1);
+      kIteration = Math.max(1, Math.round((Math.PI / 4.0) * Math.sqrt(Math.pow(2, nQubits)) - 0.5));
+      document.getElementById('slider-k-iter').max = Math.round(Math.sqrt(Math.pow(2, nQubits)) * 2);
+      populateTargetButtons();
+      rebuildBars3D();
+      updatePhysics();
+      playTone(550, 0.2);
+    });
+
+    document.getElementById('slider-k-iter').addEventListener('input', (e) => {
+      kIteration = parseInt(e.target.value);
+      updatePhysics();
+      playTone(600 + kIteration * 50, 0.15);
+    });
+
+    function stepGroverIteration() {
+      const maxK = parseInt(document.getElementById('slider-k-iter').max);
+      kIteration++;
+      if (kIteration > maxK) kIteration = 0;
+      updatePhysics();
+
+      // Audio frequency increases with amplitude
+      const N = Math.pow(2, nQubits);
+      const halfTheta = Math.asin(1.0 / Math.sqrt(N));
+      const pTarget = Math.pow(Math.sin((2 * kIteration + 1) * halfTheta), 2);
+      playTone(440 + pTarget * 440, 0.25, 'triangle');
+    }
+
+    function resetGroverSearch() {
+      kIteration = 0;
+      updatePhysics();
+      playTone(400, 0.15);
+    }
+
+    // -------------------------------------------------------------
+    // Scenario Switcher
+    // -------------------------------------------------------------
+    function setScenario(scen) {
+      currentScenario = scen;
+      document.getElementById('tab-search').classList.toggle('active', scen === 'search');
+      document.getElementById('tab-cryo').classList.toggle('active', scen === 'cryo');
+      document.getElementById('tab-transmon').classList.toggle('active', scen === 'transmon');
+      document.getElementById('tab-speedup').classList.toggle('active', scen === 'speedup');
+      document.getElementById('tab-noise').classList.toggle('active', scen === 'noise');
+
+      document.getElementById('group-search').style.display = (scen === 'search') ? 'flex' : 'none';
+      document.getElementById('group-cryo').style.display = (scen === 'cryo') ? 'flex' : 'none';
+      document.getElementById('group-transmon').style.display = (scen === 'transmon') ? 'flex' : 'none';
+      document.getElementById('group-speedup').style.display = (scen === 'speedup') ? 'flex' : 'none';
+      document.getElementById('group-noise').style.display = (scen === 'noise') ? 'flex' : 'none';
+
+      if (scen === 'cryo') {
+        camera.position.set(-4.5, 2.5, 6.0);
+        controls.target.set(-4.5, 1.0, -1.0);
+      } else if (scen === 'transmon') {
+        camera.position.set(-4.5, -0.2, 3.0);
+        controls.target.set(-4.5, -0.9, -1.0);
+      } else {
+        camera.position.set(0, 5.5, 14.5);
+        controls.target.set(0, 0, 0);
+      }
+      controls.update();
+      updatePhysics();
+    }
+
+    function focusCryoStage(stageIdx) {
+      document.querySelectorAll('#group-cryo .preset-btn').forEach((b, i) => {
+        b.classList.toggle('active', i === stageIdx - 1);
+      });
+      const temps = ['50 K', '4 K', '800 mK', '15 mK'];
+      document.getElementById('telem-qpu-temp').innerText = temps[stageIdx - 1];
+      playTone(300 + stageIdx * 100, 0.2);
+    }
+
+    // -------------------------------------------------------------
+    // Scenario 4: Quantum Speedup Simulation
+    // -------------------------------------------------------------
+    document.getElementById('slider-speedup-n').addEventListener('input', (e) => {
+      const p = parseInt(e.target.value);
+      const N = Math.pow(10, p);
+      document.getElementById('val-speedup-n').innerText = `N = ${N.toLocaleString()}`;
+      const factor = (N / 2.0) / ((Math.PI / 4.0) * Math.sqrt(N));
+      document.getElementById('telem-speedup-factor').innerText = `${factor.toFixed(0)} เท่า`;
+    });
+
+    function runSpeedupRace() {
+      const p = parseInt(document.getElementById('slider-speedup-n').value);
+      const N = Math.pow(10, p);
+      const classQueries = Math.round(N / 2);
+      const groverQueries = Math.round((Math.PI / 4) * Math.sqrt(N));
+      const speedup = (classQueries / groverQueries).toFixed(1);
+
+      alert(`ผลการเปรียบเทียบความเร็วในการค้นหาฐานข้อมูล N = ${N.toLocaleString()} รายการ ----\n• คอมพิวเตอร์คลาสสิก O(N) ---- ต้องค้นหาเฉลี่ย ${classQueries.toLocaleString()} ครั้ง\n• ควอนตัมคอมพิวเตอร์โกรเวอร์ O(√N) ---- ค้นหาเพียง ${groverQueries.toLocaleString()} ครั้ง\n• ควอนตัมเร็วกว่าคลาสสิก ---- ${speedup} เท่า!`);
+      playTone(880, 0.35, 'sine');
+    }
+
+    // -------------------------------------------------------------
+    // Scenario 5: Hardware Noise Slider
+    // -------------------------------------------------------------
+    document.getElementById('slider-gate-fid').addEventListener('input', (e) => {
+      gateFidelity = parseFloat(e.target.value) / 100.0;
+      document.getElementById('val-gate-fid').innerText = `${(gateFidelity * 100).toFixed(1)} %`;
+      updatePhysics();
+    });
+
+    // -------------------------------------------------------------
+    // Reset View
+    // -------------------------------------------------------------
+    function resetViews() {
+      camera.position.set(0, 5.5, 14.5);
+      controls.target.set(0, 0, 0);
+      controls.update();
+      playTone(550, 0.15);
+    }
+
+    // -------------------------------------------------------------
+    // HUD Dock Collapsible & Zen Mode
+    // -------------------------------------------------------------
+    let leftCollapsed = false;
+    let rightCollapsed = false;
+    let zenModeActive = false;
+
+    function toggleLeftHUD(collapse) {
+      leftCollapsed = collapse !== undefined ? collapse : !leftCollapsed;
+      document.getElementById('hud-left').classList.toggle('collapsed', leftCollapsed);
+      document.getElementById('dock-left').style.display = leftCollapsed ? 'block' : 'none';
+    }
+
+    function toggleRightHUD(collapse) {
+      rightCollapsed = collapse !== undefined ? collapse : !rightCollapsed;
+      document.getElementById('hud-right').classList.toggle('collapsed', rightCollapsed);
+      document.getElementById('dock-right').style.display = rightCollapsed ? 'block' : 'none';
+    }
+
+    function toggleZenMode() {
+      zenModeActive = !zenModeActive;
+      toggleLeftHUD(zenModeActive);
+      toggleRightHUD(zenModeActive);
+      const btn = document.getElementById('btn-zen');
+      btn.classList.toggle('active', zenModeActive);
+      btn.querySelector('span:last-child').innerText = zenModeActive ? 'แสดงบาร์' : 'ย่อทุกบาร์ (H)';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeGroverModal();
+        closeCircuitModal();
+        closeIQModal();
+        closeARModal();
+      }
+      if (e.key === 'h' || e.key === 'H') toggleZenMode();
+      if (e.key === ' ') { e.preventDefault(); stepGroverIteration(); }
+    });
+
+    // -------------------------------------------------------------
+    // Mode Switcher: 3D Lab / Marker AR / Touchless Hand AI
+    // -------------------------------------------------------------
+    function switchMode(idx) {
+      document.querySelectorAll('.mode-pill').forEach((pill, i) => {
+        pill.classList.toggle('active', i === idx - 1);
+      });
+
+      if (idx === 1) {
+        closeARModal();
+        stopHandAI();
+      } else if (idx === 2) {
+        openARModal();
+        stopHandAI();
+      } else if (idx === 3) {
+        closeARModal();
+        startHandAI();
+      }
+    }
+
+    function openARModal() { document.getElementById('ar-modal').style.display = 'flex'; }
+    function closeARModal() { document.getElementById('ar-modal').style.display = 'none'; }
+
+    // -------------------------------------------------------------
+    // Modal 1: Grover Amplitude Transformation 2D Canvas
+    // -------------------------------------------------------------
+    function openGroverModal() {
+      document.getElementById('grover-modal').style.display = 'flex';
+      drawGroverCanvas();
+    }
+    function closeGroverModal() {
+      document.getElementById('grover-modal').style.display = 'none';
+    }
+
+    function drawGroverCanvas() {
+      const canvas = document.getElementById('grover-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const N = Math.pow(2, nQubits);
+      const M = Math.max(1, targetIndices.length);
+      const halfTheta = Math.asin(Math.min(1.0, Math.sqrt(M / N)));
+      const angle = (2.0 * kIteration + 1.0) * halfTheta;
+      const aTarget = Math.sin(angle) / Math.sqrt(M);
+      const aOther = (N > M) ? (Math.cos(angle) / Math.sqrt(N - M)) : 0.0;
+      const meanAmp = (M * aTarget + (N - M) * aOther) / N;
+
+      const padX = 40;
+      const baseY = h / 2 + 30;
+      const barAreaW = w - padX * 2;
+      const barW = Math.min(30, (barAreaW / N) * 0.7);
+      const gap = barAreaW / N;
+      const scaleAmp = 120;
+
+      // Base Zero Line
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padX - 10, baseY);
+      ctx.lineTo(w - padX + 10, baseY);
+      ctx.stroke();
+
+      // Mean Line (Dashed Gold)
+      const meanY = baseY - meanAmp * scaleAmp;
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(padX - 10, meanY);
+      ctx.lineTo(w - padX + 10, meanY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = '11px JetBrains Mono';
+      ctx.fillText(`แอมพลิจูดเฉลี่ย (Mean ᾱ) = ${meanAmp.toFixed(3)}`, padX + 10, meanY - 8);
+
+      // Bars for each state
+      for (let i = 0; i < N; i++) {
+        const isTarget = targetIndices.includes(i);
+        const amp = isTarget ? aTarget : aOther;
+        const bH = amp * scaleAmp;
+        const bx = padX + gap * i + (gap - barW) / 2;
+        const by = baseY - bH;
+
+        ctx.fillStyle = isTarget ? '#10b981' : '#0284c7';
+        ctx.fillRect(bx, Math.min(baseY, by), barW, Math.abs(bH));
+        ctx.strokeStyle = isTarget ? '#34d399' : '#38bdf8';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(bx, Math.min(baseY, by), barW, Math.abs(bH));
+
+        // State binary label
+        ctx.fillStyle = isTarget ? '#f59e0b' : '#94a3b8';
+        ctx.font = '10px Chakra Petch';
+        ctx.textAlign = 'center';
+        ctx.fillText(`|${i.toString(2).padStart(nQubits, '0')}⟩`, bx + barW / 2, baseY + 18);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Modal 2: Quantum Circuit 2D Canvas Diagram
+    // -------------------------------------------------------------
+    function openCircuitModal() {
+      document.getElementById('circuit-modal').style.display = 'flex';
+      drawCircuitCanvas();
+    }
+    function closeCircuitModal() {
+      document.getElementById('circuit-modal').style.display = 'none';
+    }
+
+    function drawCircuitCanvas() {
+      const canvas = document.getElementById('circuit-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const wires = Math.min(4, nQubits);
+      const wireY = [];
+      const startX = 60;
+      const endX = w - 60;
+      const spacing = 180 / wires;
+
+      for (let q = 0; q < wires; q++) {
+        const y = 45 + q * spacing;
+        wireY.push(y);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(startX, y);
+        ctx.lineTo(endX, y);
+        ctx.stroke();
+
+        ctx.fillStyle = '#00f0ff';
+        ctx.font = 'Bold 12px Chakra Petch';
+        ctx.textAlign = 'right';
+        ctx.fillText(`q[${q}] |0⟩`, startX - 10, y + 4);
+      }
+
+      // Hadamard Initialization Stage
+      const hX = startX + 50;
+      wireY.forEach(y => {
+        ctx.fillStyle = 'rgba(0, 240, 255, 0.2)';
+        ctx.strokeStyle = '#00f0ff';
+        ctx.fillRect(hX - 14, y - 14, 28, 28);
+        ctx.strokeRect(hX - 14, y - 14, 28, 28);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'Bold 12px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText('H', hX, y + 4);
+      });
+
+      // Oracle Block U_omega
+      const uOmegaX = startX + 150;
+      const blockH = (wireY[wires - 1] - wireY[0]) + 40;
+      ctx.fillStyle = 'rgba(236, 72, 153, 0.25)';
+      ctx.strokeStyle = '#ec4899';
+      ctx.lineWidth = 2;
+      ctx.fillRect(uOmegaX - 25, wireY[0] - 20, 50, blockH);
+      ctx.strokeRect(uOmegaX - 25, wireY[0] - 20, 50, blockH);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'Bold 13px Chakra Petch';
+      ctx.textAlign = 'center';
+      ctx.fillText('Oracle', uOmegaX, wireY[0] + blockH / 2 - 24);
+      ctx.fillText('U_ω', uOmegaX, wireY[0] + blockH / 2 - 8);
+
+      // Diffusion Block U_s
+      const uDiffX = startX + 260;
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.25)';
+      ctx.strokeStyle = '#f59e0b';
+      ctx.fillRect(uDiffX - 30, wireY[0] - 20, 60, blockH);
+      ctx.strokeRect(uDiffX - 30, wireY[0] - 20, 60, blockH);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'Bold 13px Chakra Petch';
+      ctx.fillText('Diffusion', uDiffX, wireY[0] + blockH / 2 - 24);
+      ctx.fillText('2|s⟩⟨s| - I', uDiffX, wireY[0] + blockH / 2 - 8);
+
+      // Measurement Stage
+      const mX = startX + 370;
+      wireY.forEach(y => {
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
+        ctx.strokeStyle = '#10b981';
+        ctx.fillRect(mX - 14, y - 14, 28, 28);
+        ctx.strokeRect(mX - 14, y - 14, 28, 28);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '10px Chakra Petch';
+        ctx.fillText('วัด', mX, y + 4);
+      });
+
+      // Repeat Bracket indicator
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(uOmegaX - 35, wireY[0] - 28, 185, blockH + 16);
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#a855f7';
+      ctx.font = 'Bold 12px Chakra Petch';
+      ctx.fillText(`ทำซ้ำ k = ${kIteration} รอบ`, (uOmegaX + uDiffX) / 2, wireY[0] + blockH + 8);
+    }
+
+    // -------------------------------------------------------------
+    // Modal 3: cQED Dispersive Readout & IQ Constellation Diagram
+    // -------------------------------------------------------------
+    function openIQModal() {
+      document.getElementById('iq-modal').style.display = 'flex';
+      drawIQCanvas();
+    }
+    function closeIQModal() {
+      document.getElementById('iq-modal').style.display = 'none';
+    }
+
+    function drawIQCanvas() {
+      const canvas = document.getElementById('iq-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Left Half: Resonator Transmission Lorentzian Curves (Cavity Transmission vs Frequency)
+      const midX = w * 0.46;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(midX, 15); ctx.lineTo(midX, h - 15);
+      ctx.stroke();
+
+      // Frequency Axis
+      const axisY = h - 45;
+      ctx.strokeStyle = '#475569';
+      ctx.beginPath();
+      ctx.moveTo(30, axisY); ctx.lineTo(midX - 20, axisY);
+      ctx.stroke();
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px Chakra Petch';
+      ctx.textAlign = 'center';
+      ctx.fillText('ความถี่โพรบไมโครเวฟ (Probe Frequency ω_p)', (30 + midX - 20) / 2, axisY + 22);
+
+      // Lorentzian curves for |0> (cyan) and |1> (pink)
+      const f0_x = 75;
+      const f1_x = 185;
+      const peakH = 150;
+      const gamma = 18;
+
+      // Lorentzian 0
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let x = 30; x <= midX - 20; x += 2) {
+        const val = peakH / (1.0 + Math.pow((x - f0_x) / gamma, 2));
+        const y = axisY - val;
+        if (x === 30) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Lorentzian 1
+      ctx.strokeStyle = '#ec4899';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let x = 30; x <= midX - 20; x += 2) {
+        const val = peakH / (1.0 + Math.pow((x - f1_x) / gamma, 2));
+        const y = axisY - val;
+        if (x === 30) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Labels for lorentzians
+      ctx.fillStyle = '#00f0ff';
+      ctx.font = 'Bold 11px JetBrains Mono';
+      ctx.fillText('ω_r - χ (|0⟩)', f0_x, axisY - peakH - 8);
+      ctx.fillStyle = '#ec4899';
+      ctx.fillText('ω_r + χ (|1⟩)', f1_x, axisY - peakH - 8);
+
+      // Dispersive shift 2chi arrow
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(f0_x, axisY - peakH + 30);
+      ctx.lineTo(f1_x, axisY - peakH + 30);
+      ctx.stroke();
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillText('2χ = 3.6 MHz', (f0_x + f1_x) / 2, axisY - peakH + 24);
+
+      // Right Half: IQ Plane Constellation Diagram
+      const iqCenterX = midX + (w - midX) / 2;
+      const iqCenterY = h / 2;
+
+      // IQ Axis Lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(midX + 25, iqCenterY); ctx.lineTo(w - 25, iqCenterY); // I axis
+      ctx.moveTo(iqCenterX, 25); ctx.lineTo(iqCenterX, h - 25);       // Q axis
+      ctx.stroke();
+
+      // Axis Labels
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px JetBrains Mono';
+      ctx.textAlign = 'right';
+      ctx.fillText('In-phase (I)', w - 28, iqCenterY - 6);
+      ctx.textAlign = 'center';
+      ctx.fillText('Quadrature (Q)', iqCenterX, 20);
+
+      // Decision Boundary Line (Threshold at I = 0)
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(iqCenterX, 28);
+      ctx.lineTo(iqCenterX, h - 28);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Generate deterministic pseudo-random Gaussian noisy points for |0> blob (left) and |1> blob (right)
+      const nPoints = 120;
+      const dDist = 65;
+      const sigma = 14;
+
+      // Blob |0> (Cyan)
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.55)';
+      for (let i = 0; i < nPoints; i++) {
+        const u1 = Math.sin(i * 12.9898 + 1.23) * 0.5 + 0.5;
+        const u2 = Math.cos(i * 78.233 + 4.56) * 0.5 + 0.5;
+        const rad = Math.sqrt(-2.0 * Math.log(Math.max(0.001, u1))) * sigma;
+        const ang = 2.0 * Math.PI * u2;
+        const px = (iqCenterX - dDist) + rad * Math.cos(ang);
+        const py = iqCenterY + rad * Math.sin(ang);
+        ctx.beginPath();
+        ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Blob |1> (Pink)
+      ctx.fillStyle = 'rgba(236, 72, 153, 0.55)';
+      for (let i = 0; i < nPoints; i++) {
+        const u1 = Math.sin(i * 37.719 + 5.67) * 0.5 + 0.5;
+        const u2 = Math.cos(i * 91.145 + 8.91) * 0.5 + 0.5;
+        const rad = Math.sqrt(-2.0 * Math.log(Math.max(0.001, u1))) * sigma;
+        const ang = 2.0 * Math.PI * u2;
+        const px = (iqCenterX + dDist) + rad * Math.cos(ang);
+        const py = iqCenterY + rad * Math.sin(ang);
+        ctx.beginPath();
+        ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Centers of Blobs
+      ctx.fillStyle = '#00f0ff';
+      ctx.font = 'Bold 12px Chakra Petch';
+      ctx.fillText('|0⟩ Blob', iqCenterX - dDist, iqCenterY + 36);
+      ctx.fillStyle = '#ec4899';
+      ctx.fillText('|1⟩ Blob', iqCenterX + dDist, iqCenterY + 36);
+
+      // SNR and Readout Fidelity Text
+      ctx.fillStyle = '#10b981';
+      ctx.font = '11px Chakra Petch';
+      ctx.textAlign = 'center';
+      ctx.fillText('เกณฑ์ตัดสินสถานะ (I = 0) ---- Readout SNR = 4.6σ', iqCenterX, h - 16);
+    }
+
+    // -------------------------------------------------------------
+    // MediaPipe Hands AI Tracking
+    // -------------------------------------------------------------
+    let handsInstance = null;
+    let cameraInstance = null;
+    let isHandTracking = false;
+
+    function startHandAI() {
+      const pip = document.getElementById('hand-pip-container');
+      const videoEl = document.getElementById('hand-video');
+      pip.style.display = 'block';
+
+      if (!handsInstance) {
+        handsInstance = new Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+        handsInstance.setOptions({
+          maxNumHands: 1,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5
+        });
+        handsInstance.onResults((results) => {
+          if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            const marks = results.multiHandLandmarks[0];
+            const tip = marks[8];
+            const maxK = parseInt(document.getElementById('slider-k-iter').max);
+            const targetK = Math.max(0, Math.min(maxK, Math.round((1.0 - tip.y) * maxK)));
+            if (targetK !== kIteration) {
+              kIteration = targetK;
+              updatePhysics();
+              playTone(500 + kIteration * 80, 0.15);
+            }
+          }
+        });
+      }
+
+      if (!cameraInstance) {
+        cameraInstance = new Camera(videoEl, {
+          onFrame: async () => {
+            if (isHandTracking) await handsInstance.send({ image: videoEl });
+          },
+          width: 320,
+          height: 240
+        });
+      }
+
+      cameraInstance.start();
+      isHandTracking = true;
+    }
+
+    function stopHandAI() {
+      isHandTracking = false;
+      document.getElementById('hand-pip-container').style.display = 'none';
+      if (cameraInstance && cameraInstance.stop) {
+        cameraInstance.stop();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Main Render Loop & Hardware Visual Animation
+    // -------------------------------------------------------------
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Subtle hardware chandelier rotation and glow pulse
+      cryoGroup.rotation.y += 0.002;
+      subspaceRing.rotation.z += 0.003;
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initial Setup
+    populateTargetButtons();
+    rebuildBars3D();
+    updatePhysics();
+  </script>
+</body>
+</html>

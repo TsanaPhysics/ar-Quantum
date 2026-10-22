@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ห้องปฏิบัติการเสมือนจริง 3 มิติ และ WebAR ---- การควบแน่นแบบโบส-ไอน์สไตน์และสถิติควอนตัม — ผศ.ดร.ชีวะ ทัศนา</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  
+  <!-- MathJax 3 LaTeX Formula Engine -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <!-- MediaPipe Hands & Camera Utils -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+  <style>
+    :root {
+      --bg-space: #030712;
+      --panel-glass: rgba(6, 12, 28, 0.45);
+      --panel-border: rgba(0, 240, 255, 0.28);
+      --accent-cyan: #00f0ff;
+      --accent-gold: #f59e0b;
+      --accent-pink: #ec4899;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-blue: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-thai: 'Prompt', sans-serif;
+      --font-tech: 'Chakra Petch', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-thai);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    /* Top Universal Navigation Bar */
+    .top-nav {
+      position: absolute;
+      top: 12px;
+      left: 18px;
+      right: 18px;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel-glass);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 8px 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .nav-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-tech);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.5px;
+    }
+
+    .nav-title span {
+      font-size: 1.2rem;
+    }
+
+    .mode-pills {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .mode-pill {
+      font-family: var(--font-tech);
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-pill:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .mode-pill.active {
+      background: var(--accent-cyan);
+      color: #030712;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
+    }
+
+    .btn-zen {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--font-tech);
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-zen:hover, .btn-zen.active {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: var(--accent-gold);
+      color: #ffffff;
+    }
+
+    /* Left Floating Control Panel */
+    .hud-left {
+      position: absolute;
+      top: 68px;
+      left: 18px;
+      z-index: 40;
+      width: 390px;
+      max-width: calc(100vw - 36px);
+      max-height: calc(100vh - 84px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+
+    .hud-left.collapsed {
+      transform: translateX(-430px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Right Telemetry & Physics Panel */
+    .hud-right {
+      position: absolute;
+      top: 68px;
+      right: 18px;
+      z-index: 40;
+      width: 360px;
+      max-width: calc(100vw - 36px);
+      max-height: calc(100vh - 84px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+
+    .hud-right.collapsed {
+      transform: translateX(400px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Mini Collapsed Open Docks */
+    .dock-btn {
+      position: absolute;
+      top: 74px;
+      z-index: 45;
+      background: var(--panel-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      color: var(--accent-cyan);
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-family: var(--font-tech);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      transition: all 0.25s ease;
+    }
+    .dock-btn:hover {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--accent-cyan);
+    }
+    #dock-left { left: 18px; }
+    #dock-right { right: 18px; }
+
+    /* Glass Cards */
+    .glass-card {
+      background: var(--panel-glass);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-family: var(--font-tech);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.5px;
+    }
+
+    .card-title .tag {
+      font-size: 0.68rem;
+      background: rgba(0, 240, 255, 0.12);
+      color: var(--accent-cyan);
+      padding: 2px 7px;
+      border-radius: 5px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      font-family: var(--font-mono);
+    }
+
+    /* Scenario Tabs */
+    .scenario-tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+      gap: 4px;
+      margin-bottom: 12px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .scenario-tab {
+      text-align: center;
+      padding: 7px 4px;
+      font-size: 0.72rem;
+      font-family: var(--font-tech);
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .scenario-tab span:first-child {
+      font-size: 0.95rem;
+    }
+
+    .scenario-tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+    }
+
+    .scenario-tab.active {
+      background: var(--accent-cyan);
+      color: #030712;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+    }
+
+    /* Controls Styling */
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ctrl-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ctrl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+    }
+
+    .ctrl-val {
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.12);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Preset Button Grids */
+    .preset-btns {
+      display: flex;
+      gap: 5px;
+      margin-top: 2px;
+    }
+
+    .preset-btn {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 5px 4px;
+      font-size: 0.70rem;
+      color: #cbd5e1;
+      font-family: var(--font-tech);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .preset-btn:hover {
+      background: rgba(0, 240, 255, 0.15);
+      color: #ffffff;
+      border-color: var(--accent-cyan);
+    }
+
+    .preset-btn.active {
+      background: rgba(0, 240, 255, 0.25);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    /* Action Buttons */
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .btn-act {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      color: #f8fafc;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-family: var(--font-tech);
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-act:hover {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--accent-cyan);
+      transform: translateY(-1px);
+    }
+
+    .btn-act.primary {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(139, 92, 246, 0.3));
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+    }
+
+    /* Legend Color Indicator */
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      font-size: 0.70rem;
+      color: var(--text-muted);
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-bar {
+      width: 12px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* Telemetry Rows */
+    .telem-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: 0.75rem;
+    }
+
+    .telem-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .telem-label {
+      color: #cbd5e1;
+    }
+
+    .telem-value {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .telem-value.gold { color: var(--accent-gold); }
+    .telem-value.green { color: var(--accent-green); }
+    .telem-value.pink { color: var(--accent-pink); }
+    .telem-value.purple { color: var(--accent-purple); }
+
+    /* Modals & Dialogs */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: rgba(8, 15, 30, 0.95);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      padding: 20px 24px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+      position: relative;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-tech);
+      font-size: 1.05rem;
+      color: var(--accent-cyan);
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #ffffff;
+    }
+
+    /* Hand PIP Container */
+    #hand-pip-container {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 60;
+      width: 190px;
+      height: 142px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid var(--accent-cyan);
+      border-radius: 12px;
+      overflow: hidden;
+      display: none;
+      box-shadow: 0 8px 30px rgba(0, 240, 255, 0.4);
+    }
+
+    #hand-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .hand-badge {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      font-size: 0.65rem;
+      background: rgba(0, 240, 255, 0.25);
+      color: var(--accent-cyan);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-tech);
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 240, 255, 0.25);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 240, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div id="webgl-canvas"></div>
+
+  <!-- Top Universal Navigation -->
+  <div class="top-nav">
+    <div class="nav-title">
+      <span>❄️</span> LAB 07 ---- การควบแน่นแบบโบส-ไอน์สไตน์และสถิติควอนตัม (Bose-Einstein Condensation 3D)
+    </div>
+    <div class="mode-pills">
+      <div class="mode-pill active" onclick="switchMode(1)">
+        <span>🎮</span> 3D Virtual Lab
+      </div>
+      <div class="mode-pill" onclick="switchMode(2)">
+        <span>📖</span> AR Hiro Marker
+      </div>
+      <div class="mode-pill" onclick="switchMode(3)">
+        <span>🖐</span> สั่งการด้วยมือ AI (Touchless)
+      </div>
+    </div>
+    <button class="btn-zen" id="btn-zen" onclick="toggleZenMode()">
+      <span>👁</span> <span>ย่อทุกบาร์ (H)</span>
+    </button>
+  </div>
+
+  <!-- Mini Docks for Expanding HUD -->
+  <button class="dock-btn" id="dock-left" style="display:none;" onclick="toggleLeftHUD(false)">
+    <span>▶</span> แผงควบคุมไครโอเจนิกส์
+  </button>
+  <button class="dock-btn" id="dock-right" style="display:none;" onclick="toggleRightHUD(false)">
+    <span>◀</span> ผลการตรวจวัดควอนตัม
+  </button>
+
+  <!-- Left Floating HUD: Parameter Controls -->
+  <div class="hud-left" id="hud-left">
+    <!-- Header Card -->
+    <div class="glass-card">
+      <div class="card-title">
+        <span>การควบแน่นโบส-ไอน์สไตน์ & สถิติควอนตัม</span>
+        <button class="modal-close" style="font-size:1.0rem;" onclick="toggleLeftHUD(true)">◀</button>
+      </div>
+      <p style="font-size:0.75rem; color:#cbd5e1; line-height:1.5;">
+        จำลองการเปลี่ยนผ่านสถานะสู่สถานะควบแน่นระดับมหภาค (Macroscopic Wavefunction $\psi$) ในบ่อดักจับเชิงแสงและแม่เหล็ก เมื่ออุณหภูมิลดลงต่ำกว่า $T_c$ พร้อมการเปรียบเทียบสถิติโบส-ไอน์สไตน์ vs เฟอร์มิ-ดิแรก
+      </p>
+      <div style="font-size:0.70rem; color:var(--accent-gold); margin-top:6px; display:flex; align-items:center; gap:6px;">
+        <span>โดย</span> <strong style="color:#ffffff;">ผศ.ดร.ชีวะ ทัศนา</strong> <span>สาขาวิชาฟิสิกส์ มรภ.รำไพพรรณี</span>
+      </div>
+    </div>
+
+    <!-- Controls Card -->
+    <div class="glass-card">
+      <!-- Scenario Selector Tabs -->
+      <div class="scenario-tabs">
+        <div class="scenario-tab active" id="tab-bec" onclick="setScenario('bec')">
+          <span>❄️</span> ควบแน่น BEC
+        </div>
+        <div class="scenario-tab" id="tab-interfere" onclick="setScenario('interfere')">
+          <span>🌊</span> คลื่นสสารแทรกสอด
+        </div>
+        <div class="scenario-tab" id="tab-landau" onclick="setScenario('landau')">
+          <span>⚡</span> ลันเดา &amp; ไหลยิ่งยวด
+        </div>
+        <div class="scenario-tab" id="tab-feshbach" onclick="setScenario('feshbach')">
+          <span>🧲</span> เฟชบัค &amp; โบเซโนวา
+        </div>
+        <div class="scenario-tab" id="tab-tof" onclick="setScenario('tof')">
+          <span>💥</span> ขยายตัว TOF
+        </div>
+        <div class="scenario-tab" id="tab-fermi" onclick="setScenario('fermi')">
+          <span>⚛️</span> ก๊าซแฟร์มี
+        </div>
+        <div class="scenario-tab" id="tab-vortex" onclick="setScenario('vortex')">
+          <span>🌪️</span> วอร์เท็กซ์หมุน
+        </div>
+      </div>
+
+      <div class="card-title">
+        <span id="title-controls">พารามิเตอร์อุณหพลศาสตร์ควอนตัม</span>
+        <span class="tag" id="tag-phase-state">CONDENSED BEC</span>
+      </div>
+
+      <div class="ctrl-group">
+        <!-- Absolute Temperature Slider -->
+        <div class="ctrl-item" id="item-temp">
+          <div class="ctrl-header">
+            <span>อุณหภูมิสัมบูรณ์ของก๊าซ T</span>
+            <span class="ctrl-val" id="val-temp">80.0 nK</span>
+          </div>
+          <input type="range" id="slider-temp" min="5" max="350" step="5" value="80">
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setTemperature(20)">20 nK (Pure BEC)</button>
+            <button class="preset-btn active" onclick="setTemperature(80)">80 nK (Bimodal)</button>
+            <button class="preset-btn" onclick="setTemperature(170)">170 nK (T = T_c)</button>
+            <button class="preset-btn" onclick="setTemperature(300)">300 nK (Thermal Gas)</button>
+          </div>
+        </div>
+
+        <!-- Atom Count N Slider -->
+        <div class="ctrl-item" id="item-natoms">
+          <div class="ctrl-header">
+            <span>จำนวนอะตอมในกับดัก N</span>
+            <span class="ctrl-val" id="val-natoms">5.0 × 10⁵ อะตอม</span>
+          </div>
+          <input type="range" id="slider-natoms" min="1.0" max="10.0" step="0.5" value="5.0">
+        </div>
+
+        <!-- Trap Anisotropy / Aspect Ratio (omega_z / omega_perp) -->
+        <div class="ctrl-item" id="item-trap-aspect">
+          <div class="ctrl-header">
+            <span>อัตราส่วนความถี่กับดักเชิงแสง λ = ω_z / ω_⊥</span>
+            <span class="ctrl-val" id="val-aspect">2.5 (Cigar-shaped)</span>
+          </div>
+          <input type="range" id="slider-aspect" min="1.0" max="5.0" step="0.5" value="2.5">
+        </div>
+
+        <!-- Interference Controls (Scenario: interfere) -->
+        <div class="ctrl-item" id="item-interfere-ctrl" style="display:none;">
+          <div class="ctrl-header">
+            <span>ระยะห่างสองบ่อกักจับ d</span>
+            <span class="ctrl-val" id="val-interfere-d">4.0 μm</span>
+          </div>
+          <input type="range" id="slider-interfere-d" min="2.0" max="8.0" step="0.5" value="4.0">
+
+          <div class="ctrl-header" style="margin-top:6px;">
+            <span>ผลต่างเฟสสัมพัทธ์ Δφ</span>
+            <span class="ctrl-val" id="val-interfere-phi">0.00 rad (0°)</span>
+          </div>
+          <input type="range" id="slider-interfere-phi" min="0.0" max="6.28" step="0.1" value="0.0">
+
+          <div class="ctrl-header" style="margin-top:6px;">
+            <span>เวลาการขยายตัว TOF (t_exp)</span>
+            <span class="ctrl-val" id="val-interfere-tof">15.0 ms</span>
+          </div>
+          <input type="range" id="slider-interfere-tof" min="5.0" max="30.0" step="1.0" value="15.0">
+
+          <div class="preset-btns">
+            <button class="preset-btn active" onclick="setInterferePreset(4.0, 0.0)">Δφ = 0 (สมมาตร)</button>
+            <button class="preset-btn" onclick="setInterferePreset(4.0, Math.PI)">Δφ = π (ปฏิสมมาตร)</button>
+            <button class="preset-btn" onclick="setInterferePreset(6.0, 0.0)">d = 6 μm (ริ้วละเอียด)</button>
+          </div>
+        </div>
+
+        <!-- Landau Superfluid Critical Velocity Controls (Scenario: landau) -->
+        <div class="ctrl-item" id="item-landau-ctrl" style="display:none;">
+          <div class="ctrl-header">
+            <span>ความเร็วแท่งแสงกวน v (Laser Obstacle)</span>
+            <span class="ctrl-val" id="val-landau-v">1.50 mm/s</span>
+          </div>
+          <input type="range" id="slider-landau-v" min="0.2" max="6.0" step="0.1" value="1.5">
+
+          <div class="preset-btns">
+            <button class="preset-btn active" onclick="setLandauVelocity(1.2)">1.2 mm/s (v &lt; c_s ไหลไร้ความหนืด)</button>
+            <button class="preset-btn" onclick="setLandauVelocity(2.45)">2.45 mm/s (v ≈ c_s เสียงความเร็ววิกฤต)</button>
+            <button class="preset-btn" onclick="setLandauVelocity(4.5)">4.5 mm/s (v &gt; c_s วอร์เท็กซ์ไดโพล)</button>
+          </div>
+        </div>
+
+        <!-- Feshbach Resonance & Bosenova Controls (Scenario: feshbach) -->
+        <div class="ctrl-item" id="item-feshbach-ctrl" style="display:none;">
+          <div class="ctrl-header">
+            <span>สนามแม่เหล็กภายนอก B</span>
+            <span class="ctrl-val" id="val-feshbach-b">162.0 G</span>
+          </div>
+          <input type="range" id="slider-feshbach-b" min="142.0" max="178.0" step="0.2" value="162.0">
+
+          <div class="ctrl-header" style="margin-top:6px;">
+            <span>ความยาวการกระเจิง s-wave a_s(B)</span>
+            <span class="ctrl-val" id="val-feshbach-as" style="color:var(--accent-gold);">+100 a₀ (ผลักกัน เสถียร)</span>
+          </div>
+
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setFeshbachB(172.0)">172 G (a_s &gt; 0 ผลักกันเสถียร)</button>
+            <button class="preset-btn" onclick="setFeshbachB(165.7)">165.7 G (a_s = 0 ก๊าซอุดมคติ)</button>
+            <button class="preset-btn" onclick="setFeshbachB(158.0)">158 G (a_s &lt; 0 ดึงดูด วิกฤต)</button>
+          </div>
+
+          <button class="btn-act primary" id="btn-bosenova" onclick="triggerBosenova()" style="margin-top:6px; background:linear-gradient(135deg, #ef4444, #f59e0b);">
+            <span>💥</span> จุดระเบิดโบเซโนวา (Bosenova Implosion &amp; Burst)
+          </button>
+        </div>
+
+        <!-- Vortex Rotation Speed (Scenario 7) -->
+        <div class="ctrl-item" id="item-vortex-omega" style="display:none;">
+          <div class="ctrl-header">
+            <span>ความเร็วการกวนหมุนด้วยเลเซอร์ Ω / ω_⊥</span>
+            <span class="ctrl-val" id="val-vortex-omega">0.70</span>
+          </div>
+          <input type="range" id="slider-vortex-omega" min="0.0" max="0.95" step="0.05" value="0.70">
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setVortexOmega(0.0)">0.0 (No Vortex)</button>
+            <button class="preset-btn" onclick="setVortexOmega(0.4)">0.4 (1 Vortex)</button>
+            <button class="preset-btn active" onclick="setVortexOmega(0.7)">0.7 (Abrikosov Lattice)</button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-row">
+          <button class="btn-act primary" id="btn-evap" onclick="triggerEvaporativeCooling()">
+            <span>❄️</span> ทำความเย็นแบบระเหย
+          </button>
+          <button class="btn-act" id="btn-tof-release" onclick="triggerTOFRelease()">
+            <span>⏱️</span> ปิดกับดักขยายตัว TOF
+          </button>
+        </div>
+
+        <div class="action-row">
+          <button class="btn-act" onclick="resetView()">
+            <span>🎯</span> รีเซ็ตมุมมอง
+          </button>
+          <button class="btn-act" id="btn-sound" onclick="toggleSound()">
+            <span>🔊</span> เสียงไครโอเจนิกส์
+          </button>
+        </div>
+
+        <!-- Modal Triggers -->
+        <button class="btn-act" onclick="openTOFModal()" style="margin-top:4px; border-color:var(--accent-purple); color:var(--accent-purple);">
+          <span>📸</span> ภาพการดูดกลืนแสง TOF (Absorption Imaging 2D)
+        </button>
+
+        <button class="btn-act" onclick="openStatsModal()" style="margin-top:2px; border-color:var(--accent-gold); color:var(--accent-gold);">
+          <span>📈</span> กราฟฟังก์ชันการแจกแจงสถิติควอนตัม (BE vs FD vs MB)
+        </button>
+
+        <!-- Waveform & Phase Legend -->
+        <div class="legend-grid">
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#f59e0b;"></div>
+            <span>แกนควบแน่น BEC (N₀)</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#00f0ff;"></div>
+            <span>กลุ่มหมอกความร้อนปกติ</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#a855f7;"></div>
+            <span>ทะเลแฟร์มี (Fermi Sea)</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-bar" style="background:#ec4899;"></div>
+            <span>ลำแสงเลเซอร์ดักจับ (Dipole)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Floating HUD: Quantum Telemetry & Theory -->
+  <div class="hud-right" id="hud-right">
+    <div class="glass-card">
+      <div class="card-title">
+        <span>ข้อมูลอุณหพลศาสตร์ควอนตัมเชิงตัวเลข</span>
+        <button class="modal-close" style="font-size:1.0rem;" onclick="toggleRightHUD(true)">▶</button>
+      </div>
+
+      <div class="telem-list">
+        <div class="telem-row">
+          <span class="telem-label">อุณหภูมิวิกฤต (Critical T_c)</span>
+          <span class="telem-value gold" id="telem-tc">170.0 nK</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">อัตราส่วนอุณหภูมิ T / T_c</span>
+          <span class="telem-value" id="telem-tratio">0.471</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">สัดส่วนการควบแน่น N₀ / N</span>
+          <span class="telem-value green" id="telem-frac">89.6 %</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ความยาวคลื่นเดอบรอยล์ความร้อน λ_th</span>
+          <span class="telem-value pink" id="telem-lambdath">0.524 μm</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ความหนาแน่นในปริภูมิเฟส n λ_th³</span>
+          <span class="telem-value gold" id="telem-psd">7.15 (PSD &gt; 2.612)</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-label">ความยาวการเชื่อมแน่นฮีลลิง (ξ)</span>
+          <span class="telem-value purple" id="telem-healing">0.245 μm</span>
+        </div>
+
+        <div class="telem-row" id="row-fermi-energy" style="display:none;">
+          <span class="telem-label">พลังงานแฟร์มี E_F</span>
+          <span class="telem-value purple" id="telem-ef">1.48 kHz ℏ</span>
+        </div>
+
+        <div class="telem-row" id="row-vortex-count" style="display:none;">
+          <span class="telem-label">จำนวนวอร์เท็กซ์ควอนไทซ์</span>
+          <span class="telem-value green" id="telem-vortex-num">7 เส้น (Lattice)</span>
+        </div>
+
+        <div class="telem-row" id="row-interfere" style="display:none;">
+          <span class="telem-label">ระยะห่างริ้วแทรกสอด Λ</span>
+          <span class="telem-value cyan" id="telem-fringe-spacing">1.18 μm (Andrews 1997)</span>
+        </div>
+
+        <div class="telem-row" id="row-landau" style="display:none;">
+          <span class="telem-label">ความเร็วเสียงซูเปอร์ฟลูอิด c_s</span>
+          <span class="telem-value green" id="telem-landau-cs">2.45 mm/s</span>
+        </div>
+
+        <div class="telem-row" id="row-landau-drag" style="display:none;">
+          <span class="telem-label">แรงต้านหนืดควอนตัม F_drag</span>
+          <span class="telem-value gold" id="telem-landau-drag">0.00 nN (ไร้แรงต้าน)</span>
+        </div>
+
+        <div class="telem-row" id="row-feshbach" style="display:none;">
+          <span class="telem-label">ความยาวกระเจิง a_s(B)</span>
+          <span class="telem-value gold" id="telem-feshbach-as">+100 a₀ (ผลักกัน)</span>
+        </div>
+
+        <div class="telem-row" id="row-feshbach-g" style="display:none;">
+          <span class="telem-label">สัมประสิทธิ์อันตรกิริยา g</span>
+          <span class="telem-value pink" id="telem-feshbach-g">+4.82 × 10⁻⁵¹ J·m³</span>
+        </div>
+
+        <div class="telem-row" style="border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px; margin-top:2px;">
+          <span class="telem-label">สถานะเฟสของระบบ</span>
+          <span class="telem-value green" id="telem-phase-name">ควบแน่นเป็น BEC (Superfluid)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quantum Theory Helper Card -->
+    <div class="glass-card">
+      <div class="card-title">
+        <span>หลักฟิสิกส์สำคัญประจำบท</span>
+        <span class="tag">THEORY</span>
+      </div>
+      <div style="font-size:0.72rem; color:#cbd5e1; line-height:1.5;">
+        <p>• <strong>เงื่อนไขการควบแน่น BEC</strong> ---- เมื่อความยาวคลื่นความร้อน $\lambda_{\text{th}} = \sqrt{\frac{2\pi\hbar^2}{m k_B T}}$ มีขนาดใหญ่เทียบเท่าระยะห่างเฉลี่ยระหว่างอนุภาค ทำให้ $n\lambda_{\text{th}}^3 \ge \zeta(3/2) \approx 2.612$ ซองคลื่นควอนตัมจะแทรกสอดทับซ้อนกันจนกลายเป็นอะตอมยักษ์สถานะเดียว</p>
+        <p>• <strong>การแทรกสอดของคลื่นสสาร (Andrews et al. 1997)</strong> ---- คลื่นสสารสองก้อนที่ขยายตัวทับซ้อนกันจะแทรกสอดเกิดริ้วความหนาแน่น $\Lambda = \frac{ht_{\text{exp}}}{md}$ ยืนยันสมบัติความเป็นอาพันธ์เชิงพื้นที่ระดับมหภาค</p>
+        <p>• <strong>เกณฑ์ลันเดา &amp; สภาพของไหลยิ่งยวด (Landau Criterion)</strong> ---- อะตอมจะไหลผ่านสิ่งกีดขวางโดยไร้แรงต้านหนืด ($F_{\text{drag}} = 0$) ตราบใดที่ $v &lt; v_c = c_s = \sqrt{\frac{gn_0}{m}}$ หาก $v &gt; c_s$ จะปลดปล่อยวอร์เท็กซ์ไดโพล</p>
+        <p>• <strong>เฟชบัคเรโซแนนซ์ &amp; โบเซโนวา</strong> ---- จูนอันตรกิริยา $a_s(B) = a_{\text{bg}}\left(1 - \frac{\Delta B}{B - B_0}\right)$ ด้วยสนามแม่เหล็ก หาก $a_s &lt; 0$ จะเกิดความไม่เสถียรยุบตัวและระเบิดออกเป็น Bosenova</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOF Absorption Imaging Modal -->
+  <div class="modal-overlay" id="tof-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📸 ภาพการดูดกลืนแสง 2 มิติ (TOF Absorption Imaging & Optical Density)</span>
+        <button class="modal-close" onclick="closeTOFModal()">✕</button>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:100%; height:260px; background:#020617; border-radius:12px; border:1px solid rgba(0,240,255,0.3); overflow:hidden; position:relative;">
+          <canvas id="tof-canvas" width="550" height="260" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#94a3b8; margin-top:8px;">
+          <span>เวลาการบิน ---- <strong style="color:var(--accent-cyan);" id="tof-time-lbl">t_exp = 15.0 ms</strong></span>
+          <span>ความหนาแน่นเชิงแสงสูงสุด ---- <strong style="color:var(--accent-gold);" id="tof-od-lbl">OD_max = 2.45</strong></span>
+        </div>
+        <p style="font-size:0.75rem; color:#cbd5e1; margin-top:10px; line-height:1.4; text-align:left;">
+          การถ่ายภาพการดูดกลืนแสงหลังปล่อยให้ก๊าซขยายตัวอย่างอิสระ (Time-of-Flight) จะบันทึกการแจกแจงโมเมนตัมของก๊าซ เมื่อ $T < T_c$ ยอดแหลมรูปพาราโบลอยด์คว่ำตรงกลางของ BEC จะปรากฏขึ้นเด่นชัดอยู่บนฐานกว้างรูปเกาส์เซียนของก๊าซความร้อน (Bimodal Distribution)
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quantum Statistics Distribution Functions Modal (BE vs FD vs MB) -->
+  <div class="modal-overlay" id="stats-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📈 ฟังก์ชันการแจกแจงสถิติควอนตัม (BE vs FD vs MB)</span>
+        <button class="modal-close" onclick="closeStatsModal()">✕</button>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:100%; height:260px; background:#020617; border-radius:12px; border:1px solid rgba(139,92,246,0.3); overflow:hidden; position:relative;">
+          <canvas id="stats-canvas" width="550" height="260" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-around; font-size:0.72rem; margin-top:8px;">
+          <span style="color:#00f0ff;">■ โบส-ไอน์สไตน์ $\bar{n} = \frac{1}{e^{(\epsilon-\mu)/k_BT} - 1}$</span>
+          <span style="color:#ec4899;">■ เฟอร์มิ-ดิแรก $\bar{n} = \frac{1}{e^{(\epsilon-\mu)/k_BT} + 1}$</span>
+          <span style="color:#94a3b8;">■ แมกซ์เวลล์-โบลต์ซมันน์ $\bar{n} = e^{-(\epsilon-\mu)/k_BT}$</span>
+        </div>
+        <p style="font-size:0.75rem; color:#cbd5e1; margin-top:10px; line-height:1.4; text-align:left;">
+          ที่พลังงานต่ำ อนุภาคโบซอนมีแนวโน้มรวมกันอยู่ในสถานะควอนตัมเดียวกันได้ไม่จำกัด ($\bar{n} \to \infty$ เมื่อ $\epsilon \to \mu$) ในขณะที่เฟอร์มิออนถูกจำกัดโดยหลักการกีดกันของเพาลี ทำให้ $\bar{n} \le 1$ เกิดเป็นทะเลแฟร์มีที่มีพลังงาน Fermi Energy $E_F$
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- AR Hiro Marker Modal -->
+  <div class="modal-overlay" id="ar-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📖 สแกนภาพมาร์กเกอร์หนังสือ AR (Hiro Marker)</span>
+        <button class="modal-close" onclick="closeARModal()">✕</button>
+      </div>
+      <div style="text-align:center; padding:10px 0;">
+        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Hiro Marker" style="width:190px; height:190px; border-radius:12px; border:4px solid var(--accent-cyan); box-shadow:0 0 20px rgba(0,240,255,0.4);">
+        <p style="font-size:0.82rem; color:#cbd5e1; margin-top:14px; line-height:1.5;">
+          ส่องกล้องมาที่มาร์กเกอร์ Hiro ในตำราฟิสิกส์ควอนตัมบทที่ 7<br>
+          กลุ่มหมอกอะตอมอัลตราโคลด์และยอดควบแน่น BEC 3 มิติ จะลอยขึ้นมาบนหน้ากระดาษทันที
+        </p>
+        <div style="margin-top:16px; display:flex; justify-content:center; gap:10px;">
+          <button class="btn-act primary" onclick="closeARModal()">เข้าใจแล้ว เริ่มการทดลอง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MediaPipe Hands PIP Video Feed -->
+  <div id="hand-pip-container">
+    <div class="hand-badge">🖐 AI Hand Tracking Active</div>
+    <video id="hand-video" playsinline autoplay muted></video>
+  </div>
+
+  <!-- ------------------------------------------------------------- -->
+  <!-- Simulation Script: Three.js Cryogenic Engine & Thermodynamics   -->
+  <!-- ------------------------------------------------------------- -->
+  <script>
+    // -------------------------------------------------------------
+    // Three.js Scene Setup, Camera & Lighting
+    // -------------------------------------------------------------
+    const canvasContainer = document.getElementById('webgl-canvas');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x030712);
+    scene.fog = new THREE.FogExp2(0x030712, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 11, 26);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    canvasContainer.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 + 0.1;
+    controls.minDistance = 6;
+    controls.maxDistance = 60;
+    controls.target.set(0, 2, 0);
+
+    // Illumination
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0x00f0ff, 1.0);
+    keyLight.position.set(12, 22, 16);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0xec4899, 0.6);
+    fillLight.position.set(-12, 14, -10);
+    scene.add(fillLight);
+
+    const glowLight = new THREE.PointLight(0xf59e0b, 1.5, 25);
+    glowLight.position.set(0, 2, 0);
+    scene.add(glowLight);
+
+    // Grid Floor
+    const gridHelper = new THREE.GridHelper(36, 36, 0x00f0ff, 0x1e293b);
+    gridHelper.position.y = -0.01;
+    scene.add(gridHelper);
+
+    // -------------------------------------------------------------
+    // Physical Simulation State Variables
+    // -------------------------------------------------------------
+    let currentScenario = 'bec'; // 'bec' | 'interfere' | 'landau' | 'feshbach' | 'tof' | 'fermi' | 'vortex'
+    let temp_nK = 80.0;
+    const Tc_base = 170.0;
+    let natoms_factor = 5.0; // 5 x 10^5
+    let trapAspect = 2.5; // omega_z / omega_perp
+    let vortexOmega = 0.70;
+    let isPlaying = true;
+    let animTime = 0.0;
+    let tofTimeMs = 0.0;
+    let isTOFRunning = false;
+
+    // Advanced Physics Parameters (Interference, Landau, Feshbach)
+    let interfereDist = 4.0; // μm
+    let interferePhi = 0.0; // rad
+    let interfereTOF = 15.0; // ms
+    let landauVelocity = 1.50; // mm/s
+    const cs_sound = 2.45; // mm/s (critical velocity)
+    let feshbachB = 162.0; // Gauss
+    const B0_res = 155.0; // Gauss
+    const deltaB_res = 10.7; // Gauss
+    const as_bg = 100.0; // a_0 Bohr radius
+    let bosenovaPhase = 'idle'; // 'idle' | 'imploding' | 'exploding'
+    let bosenovaTime = 0.0;
+
+    // -------------------------------------------------------------
+    // 3D Objects: Dipole Trap Laser Beam, Atom Clouds & Vortices
+    // -------------------------------------------------------------
+    const N_POINTS = 5000;
+    const atomGeo = new THREE.BufferGeometry();
+    const atomPositions = new Float32Array(N_POINTS * 3);
+    const atomColors = new Float32Array(N_POINTS * 3);
+    atomGeo.setAttribute('position', new THREE.BufferAttribute(atomPositions, 3));
+    atomGeo.setAttribute('color', new THREE.BufferAttribute(atomColors, 3));
+
+    const atomMat = new THREE.PointsMaterial({
+      size: 0.28,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.88,
+      blending: THREE.AdditiveBlending
+    });
+    const atomCloud = new THREE.Points(atomGeo, atomMat);
+    scene.add(atomCloud);
+
+    // Optical Dipole Trap Laser Cross
+    const trapGroup = new THREE.Group();
+    scene.add(trapGroup);
+
+    const beamGeo = new THREE.CylinderGeometry(0.35, 0.35, 22, 16);
+    const beamMat1 = new THREE.MeshBasicMaterial({
+      color: 0xec4899,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.18
+    });
+    const beamMesh1 = new THREE.Mesh(beamGeo, beamMat1);
+    beamMesh1.rotation.z = Math.PI / 2;
+    beamMesh1.position.y = 2.0;
+    trapGroup.add(beamMesh1);
+
+    const beamMesh2 = new THREE.Mesh(beamGeo, beamMat1);
+    beamMesh2.rotation.x = Math.PI / 2;
+    beamMesh2.position.y = 2.0;
+    trapGroup.add(beamMesh2);
+
+    // Optical Potential Bowl Ellipsoid
+    const potBowlGeo = new THREE.SphereGeometry(3.5, 24, 16);
+    const potBowlMat = new THREE.MeshStandardMaterial({
+      color: 0x8b5cf6,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.08
+    });
+    const potBowlMesh = new THREE.Mesh(potBowlGeo, potBowlMat);
+    potBowlMesh.position.y = 2.0;
+    trapGroup.add(potBowlMesh);
+
+    // Double-Well Beams (for Scenario: interfere)
+    const interfereGroup = new THREE.Group();
+    scene.add(interfereGroup);
+    interfereGroup.visible = false;
+
+    const beamMatInterfere = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.25
+    });
+    const beamMeshInterL = new THREE.Mesh(beamGeo, beamMatInterfere);
+    beamMeshInterL.rotation.x = Math.PI / 2;
+    beamMeshInterL.position.set(-1.6, 2.0, 0);
+    interfereGroup.add(beamMeshInterL);
+
+    const beamMeshInterR = new THREE.Mesh(beamGeo, beamMatInterfere);
+    beamMeshInterR.rotation.x = Math.PI / 2;
+    beamMeshInterR.position.set(1.6, 2.0, 0);
+    interfereGroup.add(beamMeshInterR);
+
+    // Moving Laser Spoon Obstacle (for Scenario: landau)
+    const obstacleGroup = new THREE.Group();
+    scene.add(obstacleGroup);
+    obstacleGroup.visible = false;
+
+    const obsGeo = new THREE.CylinderGeometry(0.24, 0.24, 8, 20);
+    const obsMat = new THREE.MeshStandardMaterial({
+      color: 0x00f0ff,
+      emissive: 0x00f0ff,
+      emissiveIntensity: 0.7,
+      transparent: true,
+      opacity: 0.85
+    });
+    const obstacleMesh = new THREE.Mesh(obsGeo, obsMat);
+    obstacleMesh.position.set(0, 2.0, 0);
+    obstacleGroup.add(obstacleMesh);
+
+    // Quantized Vortex Lines Group (for Scenario: vortex)
+    const vortexGroup = new THREE.Group();
+    scene.add(vortexGroup);
+
+    // -------------------------------------------------------------
+    // Web Audio Synthesizer: Cryogenic Hum, Chimes & Evaporation
+    // -------------------------------------------------------------
+    let audioCtx = null;
+    let audioActive = false;
+    let masterGain = null;
+    let humOsc = null;
+    let humGain = null;
+
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioClass();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        masterGain.connect(audioCtx.destination);
+
+        humOsc = audioCtx.createOscillator();
+        humGain = audioCtx.createGain();
+        humOsc.type = 'sawtooth';
+        humOsc.frequency.setValueAtTime(90, audioCtx.currentTime);
+        humGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+        humOsc.connect(humGain);
+        humGain.connect(masterGain);
+        humOsc.start();
+        audioActive = true;
+      } catch (e) {
+        console.warn('Audio not available:', e);
+      }
+    }
+
+    function toggleSound() {
+      if (!audioCtx) initAudio();
+      audioActive = !audioActive;
+      const btn = document.getElementById('btn-sound');
+      if (audioActive) {
+        masterGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        btn.classList.add('primary');
+        btn.innerHTML = '<span>🔊</span> เสียงไครโอเจนิกส์ (เปิด)';
+      } else {
+        masterGain.gain.setValueAtTime(0.0, audioCtx.currentTime);
+        btn.classList.remove('primary');
+        btn.innerHTML = '<span>🔇</span> เสียงไครโอเจนิกส์ (ปิด)';
+      }
+    }
+
+    function playCondensationChime() {
+      if (!audioActive || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.4);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + 0.52);
+    }
+
+    function playBosenovaBoom() {
+      if (!audioActive || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      // Implosion sweep
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.exponentialRampToValueAtTime(35, now + 0.35);
+      gain.gain.setValueAtTime(0.22, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + 0.42);
+
+      // Explosive detonate burst
+      setTimeout(() => {
+        if (!audioCtx) return;
+        const detNow = audioCtx.currentTime;
+        const blastOsc = audioCtx.createOscillator();
+        const blastGain = audioCtx.createGain();
+        blastOsc.type = 'sawtooth';
+        blastOsc.frequency.setValueAtTime(55, detNow);
+        blastOsc.frequency.exponentialRampToValueAtTime(880, detNow + 0.1);
+        blastOsc.frequency.exponentialRampToValueAtTime(40, detNow + 0.8);
+        blastGain.gain.setValueAtTime(0.35, detNow);
+        blastGain.gain.exponentialRampToValueAtTime(0.001, detNow + 0.85);
+        blastOsc.connect(blastGain);
+        blastGain.connect(masterGain);
+        blastOsc.start(detNow);
+        blastOsc.stop(detNow + 0.9);
+      }, 350);
+    }
+
+    // -------------------------------------------------------------
+    // Core Thermodynamic Calculations & Atom Cloud Sampling
+    // -------------------------------------------------------------
+    function updatePhysics() {
+      const Tc = Tc_base * Math.cbrt(natoms_factor / 5.0);
+      const T_ratio = temp_nK / Tc;
+      const frac = (currentScenario !== 'fermi' && T_ratio < 1.0) ? (1.0 - Math.pow(T_ratio, 3)) : 0.0;
+      const lambda_th = 0.524 * Math.sqrt(80.0 / Math.max(1.0, temp_nK));
+      const psd = (temp_nK < Tc) ? (2.612 + (1.0 - T_ratio) * 12.0) : (2.612 * Math.pow(1.0 / T_ratio, 1.5));
+      const healingLength = 0.245 * Math.sqrt(80.0 / Math.max(10.0, temp_nK));
+
+      // Telemetry Base Update
+      document.getElementById('telem-tc').innerText = Tc.toFixed(1) + ' nK';
+      document.getElementById('telem-tratio').innerText = T_ratio.toFixed(3);
+      document.getElementById('telem-frac').innerText = (frac * 100).toFixed(1) + ' %';
+      document.getElementById('telem-lambdath').innerText = lambda_th.toFixed(3) + ' μm';
+      document.getElementById('telem-psd').innerText = psd.toFixed(2) + (psd >= 2.612 ? ' (ควบแน่น PSD ≥ 2.612)' : ' (ก๊าซคลาสสิก)');
+      document.getElementById('telem-healing').innerText = healingLength.toFixed(3) + ' μm';
+
+      const tagPhase = document.getElementById('tag-phase-state');
+      const telemPhaseName = document.getElementById('telem-phase-name');
+      const rowFermi = document.getElementById('row-fermi-energy');
+      const rowVortex = document.getElementById('row-vortex-count');
+      const rowInterfere = document.getElementById('row-interfere');
+      const rowLandau = document.getElementById('row-landau');
+      const rowLandauDrag = document.getElementById('row-landau-drag');
+      const rowFeshbach = document.getElementById('row-feshbach');
+      const rowFeshbachG = document.getElementById('row-feshbach-g');
+
+      // Hide optional telemetry rows by default
+      rowFermi.style.display = 'none';
+      rowVortex.style.display = 'none';
+      rowInterfere.style.display = 'none';
+      rowLandau.style.display = 'none';
+      rowLandauDrag.style.display = 'none';
+      rowFeshbach.style.display = 'none';
+      rowFeshbachG.style.display = 'none';
+
+      if (currentScenario === 'fermi') {
+        tagPhase.innerText = 'FERMI SEA (DEGENERATE)';
+        tagPhase.style.color = '#a855f7';
+        telemPhaseName.innerText = 'ก๊าซแฟร์มีเสื่อม (Fermi Sea)';
+        rowFermi.style.display = 'flex';
+      } else if (currentScenario === 'vortex') {
+        tagPhase.innerText = 'QUANTIZED VORTEX LATTICE';
+        tagPhase.style.color = '#10b981';
+        telemPhaseName.innerText = 'ของไหลยิ่งยวดพร้อมวอร์เท็กซ์';
+        rowVortex.style.display = 'flex';
+      } else if (currentScenario === 'interfere') {
+        tagPhase.innerText = 'MATTER-WAVE INTERFERENCE';
+        tagPhase.style.color = '#00f0ff';
+        telemPhaseName.innerText = 'คลื่นสสารแทรกสอดสองบ่อ (Matter-Wave Fringes)';
+        rowInterfere.style.display = 'flex';
+        const lambda_fringes = (interfereTOF / interfereDist) * 0.315;
+        document.getElementById('telem-fringe-spacing').innerText = lambda_fringes.toFixed(2) + ' μm (Andrews 1997)';
+      } else if (currentScenario === 'landau') {
+        rowLandau.style.display = 'flex';
+        rowLandauDrag.style.display = 'flex';
+        document.getElementById('telem-landau-cs').innerText = cs_sound.toFixed(2) + ' mm/s';
+        if (landauVelocity <= cs_sound) {
+          tagPhase.innerText = 'SUPERFLUID FLOW (v < c_s)';
+          tagPhase.style.color = '#10b981';
+          telemPhaseName.innerText = 'การไหลยิ่งยวดไร้แรงต้าน (Laminar Flow)';
+          document.getElementById('telem-landau-drag').innerText = '0.00 nN (ไร้แรงต้านหนืด)';
+          document.getElementById('telem-landau-drag').className = 'telem-value green';
+        } else {
+          tagPhase.innerText = 'VORTEX SHEDDING (v > c_s)';
+          tagPhase.style.color = '#ef4444';
+          telemPhaseName.innerText = 'การไหลปั่นป่วนปล่อยวอร์เท็กซ์ (Turbulent Wake)';
+          const fDrag = 0.45 * Math.pow(landauVelocity * landauVelocity - cs_sound * cs_sound, 0.7);
+          document.getElementById('telem-landau-drag').innerText = fDrag.toFixed(2) + ' nN (เกิดความต้านหนืด)';
+          document.getElementById('telem-landau-drag').className = 'telem-value pink';
+        }
+      } else if (currentScenario === 'feshbach') {
+        rowFeshbach.style.display = 'flex';
+        rowFeshbachG.style.display = 'flex';
+        const as_calc = Math.max(-2500, Math.min(2500, as_bg * (1.0 - deltaB_res / (feshbachB - B0_res))));
+        const g_coupling = 4.82e-51 * (as_calc / 100.0);
+        document.getElementById('telem-feshbach-as').innerText = (as_calc >= 0 ? '+' : '') + as_calc.toFixed(0) + ' a₀';
+        document.getElementById('telem-feshbach-g').innerText = (g_coupling >= 0 ? '+' : '') + (g_coupling * 1e51).toFixed(2) + ' × 10⁻⁵¹ J·m³';
+
+        if (as_calc > 15) {
+          tagPhase.innerText = 'REPULSIVE STABLE BEC';
+          tagPhase.style.color = '#00f0ff';
+          telemPhaseName.innerText = 'BEC เสถียร (อันตรกิริยาผลักกัน a_s > 0)';
+        } else if (Math.abs(as_calc) <= 15) {
+          tagPhase.innerText = 'IDEAL BOSE GAS';
+          tagPhase.style.color = '#f59e0b';
+          telemPhaseName.innerText = 'ก๊าซโบซอนในอุดมคติ (Non-interacting a_s ≈ 0)';
+        } else {
+          tagPhase.innerText = 'ATTRACTIVE COLLAPSE (BOSENOVA)';
+          tagPhase.style.color = '#ef4444';
+          telemPhaseName.innerText = 'BEC ไม่เสถียร (ดึงดูดกัน เสี่ยงต่อการยุบตัว)';
+        }
+      } else if (currentScenario === 'tof') {
+        tagPhase.innerText = 'BALLISTIC EXPANSION (TOF)';
+        tagPhase.style.color = '#f59e0b';
+        telemPhaseName.innerText = 'ขยายตัวอิสระหลังปิดกับดัก (TOF)';
+      } else {
+        if (temp_nK < Tc) {
+          tagPhase.innerText = (frac > 0.85) ? 'PURE BEC' : 'BIMODAL CONDENSATE';
+          tagPhase.style.color = '#00f0ff';
+          telemPhaseName.innerText = (frac > 0.85) ? 'BEC บริสุทธิ์ (Superfluid)' : 'ไบโมดอล (BEC ยอดแหลม + ก๊าซความร้อน)';
+        } else {
+          tagPhase.innerText = 'THERMAL GAS (T > T_c)';
+          tagPhase.style.color = '#f59e0b';
+          telemPhaseName.innerText = 'ก๊าซโบซอนความร้อนปกติ';
+        }
+      }
+
+      // Audio frequency modulation
+      if (audioActive && humOsc) {
+        humOsc.frequency.setTargetAtTime(60 + (temp_nK / 350.0) * 120, audioCtx.currentTime, 0.08);
+      }
+
+      // Update Atom Cloud 3D Distribution
+      sampleAtomCloud(frac, T_ratio);
+
+      // Animate Trap Laser Pulsing
+      potBowlMesh.scale.set(trapAspect * 0.7, 1.0, 1.0);
+    }
+
+    function sampleAtomCloud(frac, T_ratio) {
+      const pos = atomGeo.attributes.position.array;
+      const col = atomColors.attributes.color.array;
+
+      const numCondensate = Math.floor(N_POINTS * frac);
+      const tofScale = (currentScenario === 'tof') ? (1.0 + tofTimeMs * 0.15) : 1.0;
+      const tofAspectInvert = (currentScenario === 'tof') ? Math.max(0.6, trapAspect / (1.0 + tofTimeMs * 0.25)) : trapAspect;
+
+      for (let i = 0; i < N_POINTS; i++) {
+        let x = 0, y = 2.0, z = 0;
+        let r_col = 0, g_col = 0, b_col = 0;
+
+        if (currentScenario === 'fermi') {
+          // Fermi-Dirac: Sharp Fermi sphere in momentum up to Fermi radius k_F
+          const u = Math.random();
+          const r = Math.pow(u, 1/3) * 3.4;
+          const theta = Math.acos(2.0 * Math.random() - 1.0);
+          const phi = Math.random() * 2.0 * Math.PI;
+
+          x = r * Math.sin(theta) * Math.cos(phi) * 1.4;
+          y = 2.0 + r * Math.cos(theta);
+          z = r * Math.sin(theta) * Math.sin(phi);
+
+          r_col = 0.65 + 0.25 * (r / 3.4);
+          g_col = 0.20;
+          b_col = 0.95;
+
+        } else if (currentScenario === 'vortex') {
+          // Quantized Vortex Lattice inside Condensate
+          const numVortices = Math.round(vortexOmega * 10);
+          document.getElementById('telem-vortex-num').innerText = numVortices + ' เส้น (Abrikosov Lattice)';
+
+          const r_tf = Math.sqrt(Math.max(0.0, 1.0 - Math.random())) * 3.2;
+          const theta = Math.random() * 2.0 * Math.PI;
+          x = r_tf * Math.cos(theta) * 1.5;
+          z = r_tf * Math.sin(theta);
+          y = 2.0 + (Math.random() - 0.5) * 1.6;
+
+          let inVortexHole = false;
+          if (numVortices > 0) {
+            const latticePos = [
+              [0, 0], [1.1, 0], [-1.1, 0], [0.55, 0.95],
+              [-0.55, 0.95], [0.55, -0.95], [-0.55, -0.95]
+            ];
+            for (let v = 0; v < Math.min(numVortices, latticePos.length); v++) {
+              const vx = latticePos[v][0];
+              const vz = latticePos[v][1];
+              if (Math.hypot(x - vx, z - vz) < 0.28) {
+                inVortexHole = true;
+                break;
+              }
+            }
+          }
+
+          if (inVortexHole) {
+            x += (Math.random() - 0.5) * 0.3;
+            z += (Math.random() - 0.5) * 0.3;
+          }
+
+          r_col = 0.05;
+          g_col = 0.95;
+          b_col = 0.60;
+
+        } else if (currentScenario === 'interfere') {
+          // Double-Well Matter-Wave Interference (Andrews et al. 1997)
+          const d_well = interfereDist * 0.45;
+          const whichWell = (Math.random() > 0.5) ? 1 : -1;
+          const sigma_int = 1.2 + (interfereTOF / 15.0) * 0.8;
+          const k_fringe = (2.0 * Math.PI) / Math.max(0.4, (interfereTOF / interfereDist) * 0.28);
+
+          const u1 = Math.max(0.0001, Math.random());
+          const u2 = Math.random();
+          const g1 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+          const g2 = Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2);
+          const g3 = (Math.random() + Math.random() - 1.0) * 1.2;
+
+          x = whichWell * (d_well * 0.5) + g1 * sigma_int;
+          y = 2.0 + g2 * 0.8;
+          z = g3 * 1.4;
+
+          const fringeMod = 0.5 * (1.0 + Math.cos(k_fringe * x + interferePhi));
+          if (Math.abs(x) < d_well * 1.2 && Math.random() > (0.15 + 0.85 * fringeMod)) {
+            x += (Math.PI / k_fringe) * 0.5;
+          }
+
+          r_col = 0.15 + 0.85 * fringeMod;
+          g_col = 0.75 + 0.25 * fringeMod;
+          b_col = 0.40 + 0.60 * (1.0 - fringeMod);
+
+        } else if (currentScenario === 'landau') {
+          // Landau Superfluid Critical Velocity & Moving Laser Obstacle
+          const x_obs = 3.2 * Math.sin(landauVelocity * animTime * 1.2);
+          const v_dir = Math.cos(landauVelocity * animTime * 1.2);
+          obstacleMesh.position.x = x_obs;
+
+          const u = Math.random();
+          const r_norm = Math.sqrt(1.0 - Math.pow(1.0 - u, 2/3));
+          const theta = Math.acos(2.0 * Math.random() - 1.0);
+          const phi = Math.random() * 2.0 * Math.PI;
+
+          x = r_norm * Math.sin(theta) * Math.cos(phi) * 3.8;
+          y = 2.0 + r_norm * Math.cos(theta) * 0.9;
+          z = r_norm * Math.sin(theta) * Math.sin(phi) * 1.8;
+
+          const distToObs = Math.hypot(x - x_obs, z);
+          if (distToObs < 0.38) {
+            const pushAngle = Math.atan2(z, x - x_obs);
+            x = x_obs + Math.cos(pushAngle) * 0.42;
+            z = Math.sin(pushAngle) * 0.42;
+          }
+
+          if (landauVelocity > cs_sound) {
+            const wakeOffset = -1.1 * Math.sign(v_dir);
+            const wakeX = x_obs + wakeOffset;
+            const distWakeP = Math.hypot(x - wakeX, z - 0.55);
+            const distWakeM = Math.hypot(x - wakeX, z + 0.55);
+            if (distWakeP < 0.26 || distWakeM < 0.26) {
+              x += (Math.random() - 0.5) * 0.2;
+              z += (Math.random() - 0.5) * 0.2;
+              r_col = 0.95;
+              g_col = 0.25;
+              b_col = 0.85;
+            } else {
+              r_col = 0.05;
+              g_col = 0.92;
+              b_col = 0.75;
+            }
+          } else {
+            r_col = 0.05;
+            g_col = 0.95;
+            b_col = 0.55;
+          }
+
+        } else if (currentScenario === 'feshbach') {
+          // Feshbach Resonance & Bosenova
+          const as_calc = as_bg * (1.0 - deltaB_res / (feshbachB - B0_res));
+
+          if (bosenovaPhase === 'imploding') {
+            const scaleImp = Math.max(0.12, 1.0 - bosenovaTime * 2.2);
+            const u = Math.random();
+            const r = Math.pow(u, 1/3) * scaleImp * 1.5;
+            const theta = Math.acos(2.0 * Math.random() - 1.0);
+            const phi = Math.random() * 2.0 * Math.PI;
+
+            x = r * Math.sin(theta) * Math.cos(phi);
+            y = 2.0 + r * Math.cos(theta);
+            z = r * Math.sin(theta) * Math.sin(phi);
+
+            r_col = 1.0;
+            g_col = 0.95;
+            b_col = 0.80;
+
+          } else if (bosenovaPhase === 'exploding') {
+            if (i < N_POINTS * 0.15) {
+              const r_rem = Math.random() * 0.35;
+              const theta = Math.acos(2.0 * Math.random() - 1.0);
+              const phi = Math.random() * 2.0 * Math.PI;
+              x = r_rem * Math.sin(theta) * Math.cos(phi);
+              y = 2.0 + r_rem * Math.cos(theta);
+              z = r_rem * Math.sin(theta) * Math.sin(phi);
+              r_col = 0.98;
+              g_col = 0.80;
+              b_col = 0.10;
+            } else {
+              const burstSpeed = 4.0 + (i % 20) * 0.3;
+              const r_burst = 0.4 + bosenovaTime * burstSpeed;
+              const theta = Math.acos(2.0 * Math.random() - 1.0);
+              const phi = Math.random() * 2.0 * Math.PI;
+              x = r_burst * Math.sin(theta) * Math.cos(phi);
+              y = 2.0 + r_burst * Math.cos(theta);
+              z = r_burst * Math.sin(theta) * Math.sin(phi);
+
+              r_col = 1.0;
+              g_col = Math.max(0.0, 0.8 - bosenovaTime * 0.4);
+              b_col = Math.min(1.0, 0.2 + bosenovaTime * 0.5);
+            }
+          } else {
+            let r_scale = 1.0;
+            if (as_calc > 0) {
+              r_scale = Math.pow(Math.max(0.1, as_calc / 100.0), 0.2);
+            } else {
+              r_scale = Math.max(0.35, 1.0 + as_calc / 250.0);
+            }
+
+            const u = Math.random();
+            const r_norm = Math.sqrt(1.0 - Math.pow(1.0 - u, 2/3));
+            const theta = Math.acos(2.0 * Math.random() - 1.0);
+            const phi = Math.random() * 2.0 * Math.PI;
+
+            x = r_norm * Math.sin(theta) * Math.cos(phi) * 1.8 * r_scale;
+            y = 2.0 + r_norm * Math.cos(theta) * 0.9 * r_scale;
+            z = r_norm * Math.sin(theta) * Math.sin(phi) * 1.8 * r_scale;
+
+            if (as_calc > 15) {
+              r_col = 0.98;
+              g_col = 0.78;
+              b_col = 0.08;
+            } else if (Math.abs(as_calc) <= 15) {
+              r_col = 0.0;
+              g_col = 0.90;
+              b_col = 1.0;
+            } else {
+              r_col = 0.95;
+              g_col = 0.20;
+              b_col = 0.20;
+            }
+          }
+
+        } else {
+          // Bose-Einstein Condensation & Time-of-Flight
+          if (i < numCondensate) {
+            // Condensate Peak (Sharp Thomas-Fermi Core)
+            const u = Math.random();
+            const r_norm = Math.sqrt(1.0 - Math.pow(1.0 - u, 2/3));
+            const theta = Math.acos(2.0 * Math.random() - 1.0);
+            const phi = Math.random() * 2.0 * Math.PI;
+
+            const sigma_x = 0.65 * tofAspectInvert * (currentScenario === 'tof' ? (1.0 + tofTimeMs * 0.08) : 1.0);
+            const sigma_y = 0.65 * (currentScenario === 'tof' ? (1.0 + tofTimeMs * 0.28) : 1.0);
+            const sigma_z = 0.65 * (currentScenario === 'tof' ? (1.0 + tofTimeMs * 0.28) : 1.0);
+
+            x = r_norm * Math.sin(theta) * Math.cos(phi) * sigma_x;
+            y = 2.0 + r_norm * Math.cos(theta) * sigma_y;
+            z = r_norm * Math.sin(theta) * Math.sin(phi) * sigma_z;
+
+            r_col = 0.98;
+            g_col = 0.78 + Math.random() * 0.15;
+            b_col = 0.08;
+          } else {
+            // Thermal Cloud (Broad Gaussian distribution)
+            const sigma_th = 2.4 * Math.sqrt(temp_nK / 80.0) * tofScale;
+            const u1 = Math.max(0.0001, Math.random());
+            const u2 = Math.random();
+            const g1 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+            const g2 = Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2);
+            const g3 = (Math.random() + Math.random() - 1.0) * 1.5;
+
+            x = g1 * sigma_th * (trapAspect * 0.5);
+            y = 2.0 + g2 * sigma_th;
+            z = g3 * sigma_th;
+
+            r_col = 0.0;
+            g_col = 0.65 + Math.random() * 0.3;
+            b_col = 1.0;
+          }
+        }
+
+        const idx3 = i * 3;
+        pos[idx3] = x;
+        pos[idx3 + 1] = y;
+        pos[idx3 + 2] = z;
+        col[idx3] = r_col;
+        col[idx3 + 1] = g_col;
+        col[idx3 + 2] = b_col;
+      }
+
+      atomGeo.attributes.position.needsUpdate = true;
+      atomColors.attributes.color.needsUpdate = true;
+    }
+
+    // -------------------------------------------------------------
+    // Scenario Switcher
+    // -------------------------------------------------------------
+    function setScenario(scen) {
+      currentScenario = scen;
+      document.getElementById('tab-bec').classList.toggle('active', scen === 'bec');
+      document.getElementById('tab-interfere').classList.toggle('active', scen === 'interfere');
+      document.getElementById('tab-landau').classList.toggle('active', scen === 'landau');
+      document.getElementById('tab-feshbach').classList.toggle('active', scen === 'feshbach');
+      document.getElementById('tab-tof').classList.toggle('active', scen === 'tof');
+      document.getElementById('tab-fermi').classList.toggle('active', scen === 'fermi');
+      document.getElementById('tab-vortex').classList.toggle('active', scen === 'vortex');
+
+      const itemTemp = document.getElementById('item-temp');
+      const itemNatoms = document.getElementById('item-natoms');
+      const itemAspect = document.getElementById('item-trap-aspect');
+      const itemInterfere = document.getElementById('item-interfere-ctrl');
+      const itemLandau = document.getElementById('item-landau-ctrl');
+      const itemFeshbach = document.getElementById('item-feshbach-ctrl');
+      const itemVortex = document.getElementById('item-vortex-omega');
+
+      // Visibility of Controls
+      itemTemp.style.display = (scen === 'bec' || scen === 'tof' || scen === 'fermi') ? 'flex' : 'none';
+      itemNatoms.style.display = (scen === 'bec' || scen === 'tof' || scen === 'fermi') ? 'flex' : 'none';
+      itemAspect.style.display = (scen === 'bec' || scen === 'tof') ? 'flex' : 'none';
+      itemInterfere.style.display = (scen === 'interfere') ? 'flex' : 'none';
+      itemLandau.style.display = (scen === 'landau') ? 'flex' : 'none';
+      itemFeshbach.style.display = (scen === 'feshbach') ? 'flex' : 'none';
+      itemVortex.style.display = (scen === 'vortex') ? 'flex' : 'none';
+
+      // 3D Visual Objects Visibility
+      trapGroup.visible = (scen === 'bec' || scen === 'fermi' || scen === 'vortex' || scen === 'landau' || scen === 'feshbach');
+      interfereGroup.visible = (scen === 'interfere');
+      obstacleGroup.visible = (scen === 'landau');
+
+      if (scen === 'bec') {
+        document.getElementById('title-controls').innerText = 'พารามิเตอร์อุณหพลศาสตร์ควอนตัม (BEC)';
+      } else if (scen === 'interfere') {
+        document.getElementById('title-controls').innerText = 'การแทรกสอดของคลื่นสสารระดับมหภาค (Andrews 1997)';
+      } else if (scen === 'landau') {
+        document.getElementById('title-controls').innerText = 'เกณฑ์ความเร็ววิกฤตลันเดา & สภาพของไหลยิ่งยวด';
+      } else if (scen === 'feshbach') {
+        document.getElementById('title-controls').innerText = 'เฟชบัคเรโซแนนซ์ & การจุดระเบิดโบเซโนวา';
+      } else if (scen === 'tof') {
+        trapGroup.visible = false;
+        document.getElementById('title-controls').innerText = 'การขยายตัวแบบบอลลิสติก (Time-of-Flight)';
+        triggerTOFRelease();
+      } else if (scen === 'fermi') {
+        document.getElementById('title-controls').innerText = 'ก๊าซแฟร์มีเสื่อม & สถิติเฟอร์มิ-ดิแรก';
+      } else if (scen === 'vortex') {
+        document.getElementById('title-controls').innerText = 'วอร์เท็กซ์ควอนไทซ์ & สภาพของไหลยิ่งยวด';
+      }
+      updatePhysics();
+    }
+
+    // -------------------------------------------------------------
+    // Evaporative Cooling Simulation Handlers
+    // -------------------------------------------------------------
+    let evapInterval = null;
+    function triggerEvaporativeCooling() {
+      if (evapInterval) clearInterval(evapInterval);
+      setTemperature(320);
+
+      const btn = document.getElementById('btn-evap');
+      btn.classList.add('primary');
+      btn.innerHTML = '<span>⏳</span> กำลังลดอุณหภูมิแบบระเหย...';
+
+      let step = 0;
+      evapInterval = setInterval(() => {
+        step++;
+        const targetT = Math.max(25, temp_nK - 18);
+        setTemperature(targetT);
+
+        if (targetT <= 170 && targetT + 18 > 170) {
+          playCondensationChime();
+        }
+
+        if (targetT <= 25 || step >= 16) {
+          clearInterval(evapInterval);
+          btn.classList.remove('primary');
+          btn.innerHTML = '<span>❄️</span> ทำความเย็นแบบระเหย';
+        }
+      }, 250);
+    }
+
+    function triggerTOFRelease() {
+      tofTimeMs = 0.0;
+      isTOFRunning = true;
+      trapGroup.visible = false;
+      const btn = document.getElementById('btn-tof-release');
+      btn.classList.add('primary');
+      btn.innerHTML = '<span>⏱️</span> ปล่อยก๊าซบิน TOF...';
+
+      let tStep = 0;
+      const tofTimer = setInterval(() => {
+        tStep++;
+        tofTimeMs += 1.5;
+        document.getElementById('tof-time-lbl').innerText = 't_exp = ' + tofTimeMs.toFixed(1) + ' ms';
+        updatePhysics();
+
+        if (tStep >= 20) {
+          clearInterval(tofTimer);
+          isTOFRunning = false;
+          btn.classList.remove('primary');
+          btn.innerHTML = '<span>⏱️</span> ปิดกับดักขยายตัว TOF';
+        }
+      }, 100);
+    }
+
+    // -------------------------------------------------------------
+    // Slider Handlers & Presets
+    // -------------------------------------------------------------
+    const sliderTemp = document.getElementById('slider-temp');
+    sliderTemp.addEventListener('input', (e) => {
+      setTemperature(parseFloat(e.target.value));
+    });
+
+    function setTemperature(tVal) {
+      temp_nK = tVal;
+      sliderTemp.value = tVal;
+      document.getElementById('val-temp').innerText = temp_nK.toFixed(1) + ' nK';
+      document.querySelectorAll('#item-temp .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes(Math.round(tVal).toString()));
+      });
+      updatePhysics();
+    }
+
+    const sliderNatoms = document.getElementById('slider-natoms');
+    sliderNatoms.addEventListener('input', (e) => {
+      natoms_factor = parseFloat(e.target.value);
+      document.getElementById('val-natoms').innerText = natoms_factor.toFixed(1) + ' × 10⁵ อะตอม';
+      updatePhysics();
+    });
+
+    const sliderAspect = document.getElementById('slider-aspect');
+    sliderAspect.addEventListener('input', (e) => {
+      trapAspect = parseFloat(e.target.value);
+      const name = (trapAspect === 1.0) ? '1.0 (ทรงกลม)' : (trapAspect >= 3.0 ? trapAspect.toFixed(1) + ' (เข็มเรียว)' : trapAspect.toFixed(1) + ' (ซิการ์)');
+      document.getElementById('val-aspect').innerText = name;
+      updatePhysics();
+    });
+
+    // Interference Slider Handlers
+    const sliderInterfereD = document.getElementById('slider-interfere-d');
+    sliderInterfereD.addEventListener('input', (e) => {
+      interfereDist = parseFloat(e.target.value);
+      document.getElementById('val-interfere-d').innerText = interfereDist.toFixed(1) + ' μm';
+      updatePhysics();
+    });
+
+    const sliderInterferePhi = document.getElementById('slider-interfere-phi');
+    sliderInterferePhi.addEventListener('input', (e) => {
+      interferePhi = parseFloat(e.target.value);
+      const deg = Math.round((interferePhi * 180) / Math.PI);
+      document.getElementById('val-interfere-phi').innerText = interferePhi.toFixed(2) + ' rad (' + deg + '°)';
+      updatePhysics();
+    });
+
+    const sliderInterfereTOF = document.getElementById('slider-interfere-tof');
+    sliderInterfereTOF.addEventListener('input', (e) => {
+      interfereTOF = parseFloat(e.target.value);
+      document.getElementById('val-interfere-tof').innerText = interfereTOF.toFixed(1) + ' ms';
+      updatePhysics();
+    });
+
+    function setInterferePreset(dVal, phiVal) {
+      interfereDist = dVal;
+      interferePhi = phiVal;
+      sliderInterfereD.value = dVal;
+      sliderInterferePhi.value = phiVal;
+      document.getElementById('val-interfere-d').innerText = interfereDist.toFixed(1) + ' μm';
+      const deg = Math.round((interferePhi * 180) / Math.PI);
+      document.getElementById('val-interfere-phi').innerText = interferePhi.toFixed(2) + ' rad (' + deg + '°)';
+      updatePhysics();
+    }
+
+    // Landau Obstacle Velocity Slider Handlers
+    const sliderLandauV = document.getElementById('slider-landau-v');
+    sliderLandauV.addEventListener('input', (e) => {
+      setLandauVelocity(parseFloat(e.target.value));
+    });
+
+    function setLandauVelocity(vVal) {
+      landauVelocity = vVal;
+      sliderLandauV.value = vVal;
+      document.getElementById('val-landau-v').innerText = landauVelocity.toFixed(2) + ' mm/s';
+      document.querySelectorAll('#item-landau-ctrl .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes(vVal.toString()));
+      });
+      updatePhysics();
+    }
+
+    // Feshbach Resonance Slider Handlers
+    const sliderFeshbachB = document.getElementById('slider-feshbach-b');
+    sliderFeshbachB.addEventListener('input', (e) => {
+      setFeshbachB(parseFloat(e.target.value));
+    });
+
+    function setFeshbachB(bVal) {
+      feshbachB = bVal;
+      sliderFeshbachB.value = bVal;
+      document.getElementById('val-feshbach-b').innerText = feshbachB.toFixed(1) + ' G';
+      document.querySelectorAll('#item-feshbach-ctrl .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes(Math.round(bVal).toString()));
+      });
+      const as_calc = as_bg * (1.0 - deltaB_res / (feshbachB - B0_res));
+      const lbl = document.getElementById('val-feshbach-as');
+      if (as_calc > 15) {
+        lbl.innerText = '+' + as_calc.toFixed(0) + ' a₀ (ผลักกัน เสถียร)';
+        lbl.style.color = 'var(--accent-gold)';
+      } else if (Math.abs(as_calc) <= 15) {
+        lbl.innerText = as_calc.toFixed(1) + ' a₀ (ก๊าซอุดมคติ ไร้อันตรกิริยา)';
+        lbl.style.color = 'var(--accent-cyan)';
+      } else {
+        lbl.innerText = as_calc.toFixed(0) + ' a₀ (ดึงดูด วิกฤตยุบตัว)';
+        lbl.style.color = '#ef4444';
+      }
+      updatePhysics();
+    }
+
+    function triggerBosenova() {
+      if (bosenovaPhase !== 'idle') return;
+      bosenovaPhase = 'imploding';
+      bosenovaTime = 0.0;
+      playBosenovaBoom();
+      const btn = document.getElementById('btn-bosenova');
+      btn.innerHTML = '<span>💥</span> กำลังยุบตัว (Implosion)...';
+
+      const implosionInterval = setInterval(() => {
+        bosenovaTime += 0.05;
+        glowLight.intensity = 2.0 + bosenovaTime * 8.0;
+        glowLight.color.setHex(0xffffff);
+        sampleAtomCloud(1.0, 0.1);
+
+        if (bosenovaTime >= 0.4) {
+          clearInterval(implosionInterval);
+          bosenovaPhase = 'exploding';
+          bosenovaTime = 0.0;
+          btn.innerHTML = '<span>🚀</span> ระเบิดอนุภาค (Bosenova Burst)...';
+
+          const blastInterval = setInterval(() => {
+            bosenovaTime += 0.04;
+            glowLight.intensity = Math.max(1.5, 8.0 - bosenovaTime * 4.0);
+            glowLight.color.setHex(0xf59e0b);
+            sampleAtomCloud(1.0, 0.1);
+
+            if (bosenovaTime >= 1.6) {
+              clearInterval(blastInterval);
+              bosenovaPhase = 'idle';
+              bosenovaTime = 0.0;
+              glowLight.intensity = 1.5;
+              btn.innerHTML = '<span>💥</span> จุดระเบิดโบเซโนวา (Bosenova Implosion &amp; Burst)';
+              sampleAtomCloud(1.0, 0.1);
+            }
+          }, 40);
+        }
+      }, 40);
+    }
+
+    const sliderVortexOmega = document.getElementById('slider-vortex-omega');
+    sliderVortexOmega.addEventListener('input', (e) => {
+      setVortexOmega(parseFloat(e.target.value));
+    });
+
+    function setVortexOmega(val) {
+      vortexOmega = val;
+      sliderVortexOmega.value = val;
+      document.getElementById('val-vortex-omega').innerText = vortexOmega.toFixed(2);
+      document.querySelectorAll('#item-vortex-omega .preset-btn').forEach(b => {
+        b.classList.toggle('active', b.innerText.includes(val.toFixed(1)));
+      });
+      updatePhysics();
+    }
+
+    function resetView() {
+      camera.position.set(0, 11, 26);
+      controls.target.set(0, 2, 0);
+      controls.update();
+    }
+
+    // -------------------------------------------------------------
+    // HUD Collapsible Dock & Zen Mode Controls
+    // -------------------------------------------------------------
+    let leftCollapsed = false;
+    let rightCollapsed = false;
+    let zenModeActive = false;
+
+    function toggleLeftHUD(collapse) {
+      leftCollapsed = collapse !== undefined ? collapse : !leftCollapsed;
+      document.getElementById('hud-left').classList.toggle('collapsed', leftCollapsed);
+      document.getElementById('dock-left').style.display = leftCollapsed ? 'flex' : 'none';
+    }
+
+    function toggleRightHUD(collapse) {
+      rightCollapsed = collapse !== undefined ? collapse : !rightCollapsed;
+      document.getElementById('hud-right').classList.toggle('collapsed', rightCollapsed);
+      document.getElementById('dock-right').style.display = rightCollapsed ? 'flex' : 'none';
+    }
+
+    function toggleZenMode() {
+      zenModeActive = !zenModeActive;
+      toggleLeftHUD(zenModeActive);
+      toggleRightHUD(zenModeActive);
+      const zenBtn = document.getElementById('btn-zen');
+      zenBtn.classList.toggle('active', zenModeActive);
+      zenBtn.querySelector('span:last-child').innerText = zenModeActive ? 'แสดงบาร์' : 'ย่อทุกบาร์ (H)';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'h' || e.key === 'H') toggleZenMode();
+      if (e.key === ' ') { e.preventDefault(); triggerEvaporativeCooling(); }
+    });
+
+    // -------------------------------------------------------------
+    // Mode Switching: 3D Lab / Marker AR / Touchless Hand AI
+    // -------------------------------------------------------------
+    function switchMode(modeIndex) {
+      document.querySelectorAll('.mode-pill').forEach((pill, idx) => {
+        pill.classList.toggle('active', idx === modeIndex - 1);
+      });
+
+      if (modeIndex === 1) {
+        closeARModal();
+        stopHandAI();
+      } else if (modeIndex === 2) {
+        openARModal();
+        stopHandAI();
+      } else if (modeIndex === 3) {
+        closeARModal();
+        startHandAI();
+      }
+    }
+
+    function openARModal() {
+      document.getElementById('ar-modal').style.display = 'flex';
+    }
+    function closeARModal() {
+      document.getElementById('ar-modal').style.display = 'none';
+    }
+
+    // -------------------------------------------------------------
+    // TOF Absorption Imaging 2D Modal & False-Color Canvas
+    // -------------------------------------------------------------
+    function openTOFModal() {
+      document.getElementById('tof-modal').style.display = 'flex';
+      drawTOFImage();
+    }
+    function closeTOFModal() {
+      document.getElementById('tof-modal').style.display = 'none';
+    }
+
+    function drawTOFImage() {
+      const canvas = document.getElementById('tof-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      if (currentScenario === 'interfere') {
+        const fringeSpacingPx = Math.max(8.0, (interfereTOF / interfereDist) * 7.5);
+        const k_fringe = (2.0 * Math.PI) / fringeSpacingPx;
+        const dCloudPx = Math.max(12.0, (interfereDist * 16.0) / (1.0 + interfereTOF * 0.04));
+        const sigma_int = 42.0 + interfereTOF * 1.8;
+        const lambda_fringes = (interfereTOF / interfereDist) * 0.315;
+        document.getElementById('tof-od-lbl').innerText = 'OD_max = 2.80 (Interference)';
+        document.getElementById('tof-time-lbl').innerText = 't_exp = ' + interfereTOF.toFixed(1) + ' ms';
+
+        const imgData = ctx.createImageData(w, h);
+        const data = imgData.data;
+        const midX = w / 2;
+        const midY = h / 2;
+
+        for (let y = 0; y < h; y++) {
+          const dy = y - midY;
+          for (let x = 0; x < w; x++) {
+            const dx = x - midX;
+            const r1_sq = Math.pow(dx + dCloudPx * 0.5, 2) + dy * dy;
+            const r2_sq = Math.pow(dx - dCloudPx * 0.5, 2) + dy * dy;
+            const env = Math.exp(-r1_sq / (2.0 * sigma_int * sigma_int)) + Math.exp(-r2_sq / (2.0 * sigma_int * sigma_int));
+            const fringe = 0.5 * (1.0 + Math.cos(k_fringe * dx + interferePhi));
+            const totalOD = Math.min(1.0, env * (0.08 + 0.92 * fringe));
+
+            let r = 0, g = 0, b = 0;
+            if (totalOD < 0.25) {
+              const t = totalOD / 0.25;
+              b = Math.floor(t * 220);
+            } else if (totalOD < 0.5) {
+              const t = (totalOD - 0.25) / 0.25;
+              g = Math.floor(t * 220);
+              b = 220;
+            } else if (totalOD < 0.75) {
+              const t = (totalOD - 0.5) / 0.25;
+              r = Math.floor(t * 240);
+              g = 220;
+              b = Math.floor((1 - t) * 220);
+            } else {
+              const t = (totalOD - 0.75) / 0.25;
+              r = 255;
+              g = Math.floor(220 + t * 35);
+              b = Math.floor(t * 255);
+            }
+
+            const idx = (y * w + x) * 4;
+            data[idx] = r;
+            data[idx + 1] = g;
+            data[idx + 2] = b;
+            data[idx + 3] = 255;
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(10, 10, w - 20, h - 20);
+
+        ctx.fillStyle = '#00f0ff';
+        ctx.font = '11px JetBrains Mono';
+        ctx.fillText('Matter-Wave Double-Well Interference (Andrews / Ketterle 1997)', 20, 26);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('Fringe Spacing Λ = ' + lambda_fringes.toFixed(2) + ' μm | Well Distance d = ' + interfereDist.toFixed(1) + ' μm', 20, 42);
+        ctx.fillText('Relative Phase Δφ = ' + interferePhi.toFixed(2) + ' rad | TOF = ' + interfereTOF.toFixed(1) + ' ms', 20, 58);
+        return;
+      }
+
+      const Tc = Tc_base * Math.cbrt(natoms_factor / 5.0);
+      const T_ratio = temp_nK / Tc;
+      const frac = (currentScenario !== 'fermi' && T_ratio < 1.0) ? (1.0 - Math.pow(T_ratio, 3)) : 0.0;
+      const maxOD = 0.5 + frac * 2.2;
+      document.getElementById('tof-od-lbl').innerText = 'OD_max = ' + maxOD.toFixed(2);
+
+      const imgData = ctx.createImageData(w, h);
+      const data = imgData.data;
+
+      const midX = w / 2;
+      const midY = h / 2;
+      const sigma_th = 65.0 * Math.sqrt(temp_nK / 80.0);
+      const sigma_c = 18.0;
+
+      for (let y = 0; y < h; y++) {
+        const dy = y - midY;
+        for (let x = 0; x < w; x++) {
+          const dx = x - midX;
+          const r2 = dx * dx + dy * dy;
+
+          // Thermal Gaussian background
+          const od_thermal = (1.0 - frac) * Math.exp(-r2 / (2.0 * sigma_th * sigma_th));
+
+          // Condensate inverted paraboloid Thomas-Fermi peak
+          let od_condensate = 0.0;
+          if (r2 < sigma_c * sigma_c) {
+            od_condensate = frac * 2.8 * Math.pow(1.0 - r2 / (sigma_c * sigma_c), 1.5);
+          }
+
+          const totalOD = Math.min(1.0, (od_thermal + od_condensate) / 2.6);
+
+          // False-color palette (Blue -> Cyan -> Green -> Yellow -> Red -> White)
+          let r = 0, g = 0, b = 0;
+          if (totalOD < 0.25) {
+            const t = totalOD / 0.25;
+            b = Math.floor(t * 220);
+          } else if (totalOD < 0.5) {
+            const t = (totalOD - 0.25) / 0.25;
+            g = Math.floor(t * 220);
+            b = 220;
+          } else if (totalOD < 0.75) {
+            const t = (totalOD - 0.5) / 0.25;
+            r = Math.floor(t * 240);
+            g = 220;
+            b = Math.floor((1 - t) * 220);
+          } else {
+            const t = (totalOD - 0.75) / 0.25;
+            r = 255;
+            g = Math.floor(220 + t * 35);
+            b = Math.floor(t * 255);
+          }
+
+          const idx = (y * w + x) * 4;
+          data[idx] = r;
+          data[idx + 1] = g;
+          data[idx + 2] = b;
+          data[idx + 3] = 255;
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+
+      // Scale Bars & Labels
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(10, 10, w - 20, h - 20);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '10px JetBrains Mono';
+      ctx.fillText('TOF Time: ' + tofTimeMs.toFixed(1) + ' ms', 20, 26);
+      ctx.fillText('Bimodal Optical Density (OD)', 20, 40);
+      if (frac > 0.1) {
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillText('▲ BEC Sharp Peak (N₀/N = ' + (frac * 100).toFixed(0) + '%)', midX + 25, midY - 20);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Quantum Statistics Comparison Modal (BE vs FD vs MB)
+    // -------------------------------------------------------------
+    function openStatsModal() {
+      document.getElementById('stats-modal').style.display = 'flex';
+      drawStatsCurves();
+    }
+    function closeStatsModal() {
+      document.getElementById('stats-modal').style.display = 'none';
+    }
+
+    function drawStatsCurves() {
+      const canvas = document.getElementById('stats-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Axes
+      const ox = 50;
+      const oy = h - 35;
+      const plotW = w - 75;
+      const plotH = h - 60;
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(ox, 20); ctx.lineTo(ox, oy);
+      ctx.lineTo(w - 20, oy);
+      ctx.stroke();
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px JetBrains Mono';
+      ctx.fillText('n̄(ε)', ox - 35, 30);
+      ctx.fillText('(ε - μ) / k_B T', w - 90, oy + 24);
+
+      // Energy range x = (epsilon - mu)/(k_B T) from -1.0 to 4.0
+      const minX = -0.8;
+      const maxX = 3.5;
+      const maxN = 3.2;
+
+      // 1. Fermi-Dirac Curve (Pink)
+      ctx.strokeStyle = '#ec4899';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let px = 0; px <= plotW; px++) {
+        const xVal = minX + (px / plotW) * (maxX - minX);
+        const n_fd = 1.0 / (Math.exp(xVal) + 1.0);
+        const cy = oy - (n_fd / maxN) * plotH;
+        if (px === 0) ctx.moveTo(ox + px, cy);
+        else ctx.lineTo(ox + px, cy);
+      }
+      ctx.stroke();
+
+      // 2. Maxwell-Boltzmann Curve (Gray)
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 2.0;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      for (let px = 0; px <= plotW; px++) {
+        const xVal = minX + (px / plotW) * (maxX - minX);
+        const n_mb = Math.exp(-xVal);
+        const cy = oy - Math.min(maxN, n_mb) / maxN * plotH;
+        if (px === 0) ctx.moveTo(ox + px, cy);
+        else ctx.lineTo(ox + px, cy);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 3. Bose-Einstein Curve (Cyan)
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 3.0;
+      ctx.beginPath();
+      let started = false;
+      for (let px = 0; px <= plotW; px++) {
+        const xVal = minX + (px / plotW) * (maxX - minX);
+        if (xVal > 0.05) {
+          const n_be = 1.0 / (Math.exp(xVal) - 1.0);
+          const cy = oy - Math.min(maxN, n_be) / maxN * plotH;
+          if (!started) { ctx.moveTo(ox + px, cy); started = true; }
+          else ctx.lineTo(ox + px, cy);
+        }
+      }
+      ctx.stroke();
+
+      // Pauli Limit n = 1 line
+      const y1 = oy - (1.0 / maxN) * plotH;
+      ctx.strokeStyle = 'rgba(236, 72, 153, 0.4)';
+      ctx.setLineDash([2, 4]);
+      ctx.beginPath();
+      ctx.moveTo(ox, y1); ctx.lineTo(w - 20, y1);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#ec4899';
+      ctx.font = '9px JetBrains Mono';
+      ctx.fillText('ขีดจำกัดเพาลี n̄ ≤ 1 (Pauli Limit)', ox + 10, y1 - 6);
+    }
+
+    // -------------------------------------------------------------
+    // Mode 3: MediaPipe Hands AI Tracking
+    // -------------------------------------------------------------
+    let handInstance = null;
+    let cameraInstance = null;
+    let isHandTracking = false;
+
+    function startHandAI() {
+      const pip = document.getElementById('hand-pip-container');
+      const videoEl = document.getElementById('hand-video');
+      pip.style.display = 'block';
+
+      if (!handInstance) {
+        handInstance = new Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+        handInstance.setOptions({
+          maxNumHands: 1,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5
+        });
+        handInstance.onResults((results) => {
+          if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            const marks = results.multiHandLandmarks[0];
+            const thumb = marks[4];
+            const index = marks[8];
+            const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
+
+            // Pinch gesture controls temperature T
+            if (pinchDist < 0.07) {
+              const targetT = Math.max(10, Math.min(320, marks[8].y * 350));
+              setTemperature(targetT);
+            }
+          }
+        });
+      }
+
+      if (!cameraInstance) {
+        cameraInstance = new Camera(videoEl, {
+          onFrame: async () => {
+            if (isHandTracking) await handInstance.send({ image: videoEl });
+          },
+          width: 320,
+          height: 240
+        });
+      }
+
+      cameraInstance.start();
+      isHandTracking = true;
+    }
+
+    function stopHandAI() {
+      isHandTracking = false;
+      document.getElementById('hand-pip-container').style.display = 'none';
+      if (cameraInstance && cameraInstance.stop) {
+        cameraInstance.stop();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Main Render Loop
+    // -------------------------------------------------------------
+    function animate() {
+      requestAnimationFrame(animate);
+      if (isPlaying) {
+        animTime += 0.015;
+        if (currentScenario === 'vortex') {
+          atomCloud.rotation.y += 0.008 * (vortexOmega + 0.2);
+        } else if (currentScenario === 'landau') {
+          sampleAtomCloud(1.0, 0.1);
+        } else if (currentScenario === 'interfere') {
+          atomCloud.rotation.y += 0.001;
+        } else {
+          atomCloud.rotation.y += 0.002;
+        }
+      }
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initial Physics Sync
+    updatePhysics();
+  </script>
+</body>
+</html>

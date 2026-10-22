@@ -1,0 +1,2244 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ห้องปฏิบัติการเสมือนจริง 3 มิติ และ WebAR: การแผ่รังสีวัตถุดำและโฟโตอิเล็กทริก — ผศ.ดร.ชีวะ ทัศนา</title>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --cyan: #00f0ff;
+      --gold: #f59e0b;
+      --purple: #a855f7;
+      --pink: #ec4899;
+      --green: #10b981;
+      --dark-bg: #020617;
+      --card-bg: rgba(6, 12, 28, 0.42);
+      --card-bg-hover: rgba(8, 16, 36, 0.60);
+      --glass-border: rgba(0, 240, 255, 0.20);
+      --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+    body {
+      background: var(--dark-bg);
+      color: #f8fafc;
+      font-family: 'Prompt', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    #canvas-container { position: absolute; inset: 0; z-index: 1; }
+
+    /* Top Navigation Mode Switcher */
+    .top-nav-bar {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(8, 14, 30, 0.55);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      padding: 5px 10px;
+      border-radius: 40px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      max-width: 95vw;
+    }
+    .mode-tab {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 600;
+      font-size: 0.82em;
+      padding: 7px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.22s ease;
+    }
+    .mode-tab:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.08);
+    }
+    .mode-tab.active {
+      color: #030712;
+      background: var(--cyan);
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.55);
+      font-weight: 700;
+    }
+    .zen-toggle-btn {
+      color: #cbd5e1;
+      border: 1px solid rgba(255,255,255,0.15);
+      margin-left: 4px;
+    }
+    .zen-toggle-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* Left Control HUD */
+    .left-hud-stack {
+      position: absolute;
+      top: 72px;
+      left: 16px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: clamp(265px, 23vw, 310px);
+      pointer-events: auto;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .left-hud-stack.collapsed {
+      transform: translateX(calc(-100% - 24px));
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Right Telemetry HUD */
+    .right-hud-stack {
+      position: absolute;
+      top: 72px;
+      right: 16px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: clamp(265px, 23vw, 305px);
+      pointer-events: auto;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .right-hud-stack.collapsed {
+      transform: translateX(calc(100% + 24px));
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Glass Panels */
+    .glass-panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: var(--glass-shadow);
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .glass-panel:hover {
+      background: var(--card-bg-hover);
+      border-color: rgba(0, 240, 255, 0.35);
+    }
+
+    .title-panel {
+      border-left: 5px solid var(--cyan);
+    }
+    .title-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .title-panel h1 {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.98em;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.3;
+    }
+    .title-panel p {
+      font-size: 0.74em;
+      color: #94a3b8;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+    .author-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 0.70em;
+      color: var(--gold);
+      background: rgba(245, 158, 11, 0.12);
+      padding: 2px 8px;
+      border-radius: 14px;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .panel-header-badge {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.84em;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 5px;
+    }
+    .hud-btn-mini {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72em;
+      transition: all 0.2s ease;
+    }
+    .hud-btn-mini:hover {
+      background: var(--cyan);
+      color: #030712;
+      border-color: var(--cyan);
+    }
+
+    /* Floating Dock Open Buttons */
+    .floating-dock {
+      position: absolute;
+      top: 76px;
+      z-index: 35;
+      background: rgba(8, 14, 30, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--cyan);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7), 0 0 12px rgba(0, 240, 255, 0.25);
+      color: #fff;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.75em;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.22s ease;
+    }
+    .floating-dock:hover {
+      background: var(--cyan);
+      color: #030712;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+      transform: scale(1.04);
+    }
+    .dock-left { left: 16px; }
+    .dock-right { right: 16px; border-color: var(--gold); }
+    .dock-right:hover { background: var(--gold); }
+
+    /* Controls Styling */
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ctrl-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .ctrl-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.76em;
+      color: #cbd5e1;
+    }
+    .ctrl-head span.val {
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.95em;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      border-radius: 3px;
+      background: rgba(30, 41, 59, 0.85);
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--cyan);
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .preset-btns {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .preset-btn {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      color: #cbd5e1;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.72em;
+      padding: 5px 3px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+    .preset-btn:hover {
+      background: rgba(0, 240, 255, 0.2);
+      color: #fff;
+      border-color: var(--cyan);
+    }
+    .preset-btn.active {
+      background: var(--cyan);
+      color: #030712;
+      font-weight: 700;
+      border-color: var(--cyan);
+    }
+
+    /* Telemetry Metrics with Balanced Layout */
+    .telemetry-panel {
+      border-right: 5px solid var(--gold);
+    }
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin: 5px 0;
+      font-size: 0.76em;
+    }
+    .metric-label {
+      color: #94a3b8;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .metric-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--gold);
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .metric-val.green { color: var(--green); }
+    .metric-val.purple { color: var(--purple); }
+    .metric-val.pink { color: var(--pink); }
+
+    /* Telemetry Status Indicator Pill */
+    .status-indicator-bar {
+      margin-top: 6px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 0.72em;
+      font-weight: 600;
+      text-align: center;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--green);
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+    }
+    .status-indicator-bar.off {
+      background: rgba(236, 72, 153, 0.15);
+      border-color: var(--pink);
+      color: var(--pink);
+    }
+
+    .formula-panel {
+      border-right: 5px solid var(--purple);
+      font-size: 0.74em;
+    }
+    .formula-text {
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.55;
+      color: #cbd5e1;
+      font-size: 0.92em;
+    }
+
+    /* Mode 2 Book AR Overlay */
+    #book-ar-container {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: none;
+      pointer-events: none;
+    }
+    .book-reticle-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(480px, 86vw);
+      height: min(320px, 58vh);
+      border: 2px dashed rgba(0, 240, 255, 0.55);
+      border-radius: 18px;
+      box-shadow: 0 0 40px rgba(0, 240, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.04) 0%, transparent 70%);
+      pointer-events: auto;
+    }
+    .reticle-corner {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-color: var(--cyan);
+      border-style: solid;
+    }
+    .corner-tl { top: -2px; left: -2px; border-width: 4px 0 0 4px; border-top-left-radius: 10px; }
+    .corner-tr { top: -2px; right: -2px; border-width: 4px 4px 0 0; border-top-right-radius: 10px; }
+    .corner-bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; border-bottom-left-radius: 10px; }
+    .corner-br { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; border-bottom-right-radius: 10px; }
+
+    .ar-book-page-preview {
+      width: 92%;
+      height: 65%;
+      background: rgba(10, 16, 32, 0.65);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+      gap: 6px;
+    }
+    .ar-status-badge {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--green);
+      color: var(--green);
+      padding: 3px 10px;
+      border-radius: 16px;
+      font-size: 0.72em;
+      font-family: 'Chakra Petch', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Mode 3 Hand Tracking Overlay */
+    #hand-cam-wrapper {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 180px;
+      height: 135px;
+      border-radius: 14px;
+      border: 2px solid var(--purple);
+      background: #000;
+      z-index: 50;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(168, 85, 247, 0.35);
+      overflow: hidden;
+      display: none;
+    }
+    #hand-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+    #hand-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform: scaleX(-1);
+    }
+    .hand-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(0,0,0,0.7);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.68em;
+      color: var(--purple);
+      border: 1px solid var(--purple);
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    .gesture-indicator-box {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 45;
+      background: rgba(8, 14, 30, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--purple);
+      border-radius: 30px;
+      padding: 6px 18px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+      white-space: nowrap;
+    }
+    .gesture-step {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74em;
+      color: #e2e8f0;
+    }
+    .gesture-step span.key {
+      background: rgba(168, 85, 247, 0.25);
+      color: var(--purple);
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-family: 'Chakra Petch', sans-serif;
+    }
+
+    .bottom-strip {
+      position: absolute;
+      bottom: 12px;
+      left: 18px;
+      z-index: 25;
+      font-size: 0.72em;
+      color: #64748b;
+      display: flex;
+      gap: 14px;
+      pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      .left-hud-stack, .right-hud-stack {
+        width: 250px;
+        top: 66px;
+      }
+      .left-hud-stack { left: 10px; }
+      .right-hud-stack { right: 10px; }
+      .top-nav-bar {
+        top: 10px;
+        padding: 4px 8px;
+      }
+      .mode-tab {
+        padding: 5px 10px;
+        font-size: 0.76em;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .top-nav-bar {
+        width: 96vw;
+        justify-content: space-between;
+        gap: 3px;
+      }
+      .mode-tab {
+        padding: 5px 8px;
+        font-size: 0.72em;
+      }
+      .mode-tab span:not(.tab-icon) {
+        display: none;
+      }
+      .left-hud-stack, .right-hud-stack {
+        width: calc(100vw - 24px);
+        max-height: 48vh;
+        overflow-y: auto;
+      }
+      .left-hud-stack {
+        left: 12px;
+        top: 60px;
+      }
+      .right-hud-stack {
+        right: 12px;
+        top: auto;
+        bottom: 50px;
+      }
+      .bottom-strip { display: none; }
+      #hand-cam-wrapper {
+        width: 130px;
+        height: 95px;
+        bottom: 12px;
+        right: 12px;
+      }
+      .gesture-indicator-box {
+        bottom: 12px;
+        padding: 4px 10px;
+        font-size: 0.85em;
+      }
+    }
+
+    /* Millikan Plot Modal */
+    .millikan-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.78);
+      backdrop-filter: blur(14px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .millikan-modal-box {
+      width: min(680px, 94vw);
+      background: rgba(6, 12, 28, 0.92);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 16px;
+      padding: 20px 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 240, 255, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+    .millikan-plot-canvas {
+      width: 100%;
+      height: 280px;
+      background: rgba(3, 7, 18, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <!-- Top 3-Mode Switcher + Zen Focus Toggle -->
+  <div class="top-nav-bar">
+    <button class="mode-tab active" id="tab-mode-3d">
+      <span class="tab-icon">🕹️</span> <span>โหมด 1 3D เสมือนจริง</span>
+    </button>
+    <button class="mode-tab" id="tab-mode-ar">
+      <span class="tab-icon">🎯</span> <span>โหมด 2 AR สแกนหนังสือ</span>
+    </button>
+    <button class="mode-tab" id="tab-mode-hand">
+      <span class="tab-icon">🖐️</span> <span>โหมด 3 AI ตรวจจับมือ</span>
+    </button>
+    <button class="mode-tab zen-toggle-btn" id="btn-zen-mode" title="ซ่อน/แสดงแถบทั้งหมด">
+      <span class="tab-icon">👁️</span> <span>ย่อทุกบาร์</span>
+    </button>
+  </div>
+
+  <!-- Left Floating Dock Button -->
+  <div class="floating-dock dock-left" id="dock-left">
+    <span>⚙️ แผงควบคุม</span> <span>▶</span>
+  </div>
+
+  <!-- Right Floating Dock Button -->
+  <div class="floating-dock dock-right" id="dock-right">
+    <span>◀</span> <span>📊 การวัดควอนตัม</span>
+  </div>
+
+  <!-- Left Control HUD -->
+  <div class="left-hud-stack" id="left-hud">
+    <div class="glass-panel title-panel">
+      <div class="title-header-row">
+        <h1>☀️ วัตถุดำและโฟโตอิเล็กทริก</h1>
+        <button class="hud-btn-mini" id="btn-collapse-left" title="ย่อแถบซ้าย">◀</button>
+      </div>
+      <p>เตาหลอมวัตถุดำ สเปกตรัมพลังค์ 3D และหลอดโฟโตอิเล็กทริกมิลลิแกน</p>
+      <div class="author-tag">
+        <span>👨‍🏫</span> ผศ.ดร.ชีวะ ทัศนา — มรภ.รำไพพรรณี
+      </div>
+    </div>
+
+    <div class="glass-panel">
+      <div class="panel-header-badge" style="color:var(--cyan);">
+        <span>⚙️ พารามิเตอร์การทดลอง</span>
+        <span id="active-mode-label" style="font-size:0.85em; color:#94a3b8;">โหมด 1 (3D)</span>
+      </div>
+
+      <div class="control-group">
+        <div class="ctrl-item">
+          <div class="ctrl-head">
+            <span>อุณหภูมิเตาวัตถุดำ T</span>
+            <span class="val" id="val-temp">5800 K</span>
+          </div>
+          <input type="range" id="slider-temp" min="2000" max="8000" step="100" value="5800">
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setTemp(3000)">3000 K (หลอดไส้)</button>
+            <button class="preset-btn active" onclick="setTemp(5800)">5800 K (สุริยะ)</button>
+            <button class="preset-btn" onclick="setTemp(7500)">7500 K (ดาวฤกษ์)</button>
+          </div>
+        </div>
+
+        <div class="ctrl-item" style="margin-top:6px; background:rgba(255,255,255,0.03); padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
+          <div class="ctrl-head" style="margin-bottom:6px;">
+            <span style="color:var(--cyan); font-weight:700;">เปรียบเทียบทฤษฎีการแผ่รังสี 3 มิติ</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:5px; font-size:0.83em;">
+            <label style="display:flex; align-items:center; gap:7px; cursor:pointer; color:#fff;">
+              <input type="checkbox" id="chk-planck" checked style="accent-color:var(--cyan); width:15px; height:15px;">
+              <span>ทฤษฎีควอนตัมพลังค์ (Planck 1900)</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:7px; cursor:pointer; color:#fbbf24;">
+              <input type="checkbox" id="chk-rayleigh" checked style="accent-color:#fbbf24; width:15px; height:15px;">
+              <span>กฎเรย์ลี-จีนส์ (UV Catastrophe)</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:7px; cursor:pointer; color:#38bdf8;">
+              <input type="checkbox" id="chk-wien" checked style="accent-color:#38bdf8; width:15px; height:15px;">
+              <span>กฎของวีน (Wien's Radiation Law)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="ctrl-item" style="margin-top:6px;">
+          <div class="ctrl-head">
+            <span>ความยาวคลื่นแสงกระตุ้น λ</span>
+            <span class="val" id="val-lambda">350 nm (UV)</span>
+          </div>
+          <input type="range" id="slider-lambda" min="150" max="750" step="10" value="350">
+        </div>
+
+        <div class="ctrl-item" style="margin-top:6px;">
+          <div class="ctrl-head">
+            <span>โลหะแคโทด (ฟังก์ชันงาน Φ)</span>
+            <span class="val" id="val-work">2.28 eV (Na)</span>
+          </div>
+          <div class="preset-btns">
+            <button class="preset-btn active" onclick="setMetal('Na', 2.28)">Na (2.28)</button>
+            <button class="preset-btn" onclick="setMetal('Cs', 2.14)">Cs (2.14)</button>
+            <button class="preset-btn" onclick="setMetal('Cu', 4.70)">Cu (4.70)</button>
+            <button class="preset-btn" onclick="setMetal('Pt', 5.65)">Pt (5.65)</button>
+          </div>
+        </div>
+
+        <div class="ctrl-item" style="margin-top:6px;">
+          <div class="ctrl-head">
+            <span>แรงดันหน่วงย้อนกลับ V_retard</span>
+            <span class="val" id="val-vretard">0.00 V</span>
+          </div>
+          <input type="range" id="slider-vretard" min="0.0" max="4.0" step="0.05" value="0.0">
+        </div>
+
+        <div class="preset-btns" style="margin-top:8px;">
+          <button class="preset-btn" id="btn-toggle-cutaway">
+            🔍 ตัดขวางดูโพรงเตา
+          </button>
+          <button class="preset-btn" id="btn-fire-photon" style="background:rgba(236,72,153,0.25); border-color:var(--pink); color:#fff; font-weight:700;">
+            ⚡ ยิงพัลส์โฟตอน
+          </button>
+        </div>
+        <div class="preset-btns">
+          <button class="preset-btn" id="btn-reset-view">
+            🔄 รีเซ็ตมุมมอง 3D
+          </button>
+          <button class="preset-btn" id="btn-open-millikan" style="background:rgba(0,240,255,0.18); border-color:var(--cyan); color:#fff; font-weight:700;">
+            📈 กราฟมิลลิแกนหาค่า h
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Millikan Nobel Prize Plot Modal -->
+  <div class="millikan-modal-backdrop" id="millikan-modal">
+    <div class="millikan-modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-family:'Chakra Petch',sans-serif; font-weight:700; font-size:1.15em; color:var(--cyan); display:flex; align-items:center; gap:8px;">
+            <span>📈 การทดลองมิลลิแกน ---- การหาค่าคงตัวของพลังค์ h</span>
+          </div>
+          <div style="font-size:0.80em; color:#94a3b8; margin-top:2px;">
+            V0 = (h/e)·f - (Φ/e) ---- ความสัมพันธ์เชิงเส้นตรงระหว่างศักย์หยุดยั้งและความถี่แสง
+          </div>
+        </div>
+        <button class="hud-btn-mini" id="btn-close-millikan" style="font-size:1.1em; width:28px; height:28px;">✕</button>
+      </div>
+
+      <canvas class="millikan-plot-canvas" id="canvas-millikan" width="620" height="280"></canvas>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; gap:6px;">
+          <button class="preset-btn active" id="btn-record-point" style="padding:6px 14px;">
+            📍 บันทึกจุดข้อมูลปัจจุบัน (λ = <span id="rec-lambda">350</span> nm)
+          </button>
+          <button class="preset-btn" id="btn-auto-scan" style="padding:6px 14px; background:rgba(16,185,129,0.2); border-color:var(--green); color:#fff;">
+            ⚡ สแกนสเปกตรัมอัตโนมัติ (5 ย่าน)
+          </button>
+          <button class="preset-btn" id="btn-clear-points" style="padding:6px 12px;">
+            🧹 ล้างข้อมูล
+          </button>
+        </div>
+        <div style="font-size:0.82em; color:#cbd5e1; background:rgba(255,255,255,0.04); padding:6px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
+          จุดข้อมูลที่บันทึก ---- <span id="stat-points-count" style="color:var(--cyan); font-weight:700;">0</span> จุด
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.08); font-size:0.82em;">
+        <div>
+          <div style="color:#94a3b8;">ความชัน h/e (Slope)</div>
+          <div id="stat-slope" style="font-weight:700; color:#fbbf24; font-family:'JetBrains Mono',monospace;">-- V·s</div>
+        </div>
+        <div>
+          <div style="color:#94a3b8;">ค่าคงตัวพลังค์จากการทดลอง h_exp</div>
+          <div id="stat-hexp" style="font-weight:700; color:var(--cyan); font-family:'JetBrains Mono',monospace;">-- J·s</div>
+        </div>
+        <div>
+          <div style="color:#94a3b8;">ความคลาดเคลื่อนเทียบค่าจริง</div>
+          <div id="stat-error" style="font-weight:700; color:var(--green); font-family:'JetBrains Mono',monospace;">-- %</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Telemetry Stack -->
+  <div class="right-hud-stack" id="right-hud">
+    <div class="glass-panel telemetry-panel">
+      <div class="panel-header-badge" style="color:var(--gold);">
+        <span>📊 การวัดเชิงฟิสิกส์ควอนตัม</span>
+        <button class="hud-btn-mini" id="btn-collapse-right" title="ย่อแถบขวา">▶</button>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-label">ความยาวคลื่นยอด λ_max</span>
+        <span class="metric-val" id="telem-lmax">499.6 nm</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">เฉดสีเปล่งแสงวัตถุดำ</span>
+        <span class="metric-val" id="telem-bb-color" style="display:flex; align-items:center; gap:6px;">
+          <span id="bb-color-swatch" style="display:inline-block; width:16px; height:16px; border-radius:4px; border:1px solid rgba(255,255,255,0.4); background:#fff6ee; box-shadow:0 0 8px #fff6ee;"></span>
+          <span id="bb-color-name" style="color:#fff;">ขาวสุริยะ (5800 K)</span>
+        </span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">แถบสเปกตรัมยอด</span>
+        <span class="metric-val" id="telem-color-desc" style="color:#38bdf8;">ฟ้าอมเขียว (สุริยะ)</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">กำลังรวม P = σT⁴</span>
+        <span class="metric-val" id="telem-pwr">6.42 × 10⁷ W/m²</span>
+      </div>
+
+      <div style="margin:6px 0; border-top:1px dashed rgba(255,255,255,0.12);"></div>
+
+      <div class="metric-row">
+        <span class="metric-label">พลังงานโฟตอน hf</span>
+        <span class="metric-val purple" id="telem-ephot">3.54 eV</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">พลังงานจลน์สูงสุด K_max</span>
+        <span class="metric-val green" id="telem-kmax">1.26 eV</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">ศักย์หยุดยั้ง V0</span>
+        <span class="metric-val green" id="telem-v0">1.26 V</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">กระแสโฟโตอิเล็กตรอน I</span>
+        <span class="metric-val" id="telem-current" style="color:#38bdf8;">25.40 μA</span>
+      </div>
+
+      <div class="status-indicator-bar" id="telem-status">
+        ⚡ เกิดกระแสโฟโตอิเล็กตรอน (I > 0)
+      </div>
+    </div>
+
+    <!-- Live Quantum Formula Card -->
+    <div class="glass-panel formula-panel">
+      <div class="panel-header-badge" style="color:var(--purple); border-color:rgba(168,85,247,0.25);">
+        <span>📐 สมการและกฎฟิสิกส์หลัก</span>
+      </div>
+      <div class="formula-text">
+        <div>• ควอนตัมพลังค์ ---- u(λ) = (8πhc/λ⁵)·[1/(e^(hc/λkT) - 1)]</div>
+        <div>• เรย์ลี-จีนส์ ---- u_RJ(λ) = 8πkT / λ⁴ (UV Catastrophe)</div>
+        <div>• กฎของวีน ---- u_Wien(λ) = (C1/λ⁵)·e^(-C2/λT)</div>
+        <div>• การกระจัดวีน ---- λ_max · T = 2.898 × 10⁻³ m·K</div>
+        <div>• โฟโตอิเล็กทริก ---- K_max = hf - Φ = e·V0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode 2: AR Marker Book Scan Overlay -->
+  <div id="book-ar-container">
+    <div class="book-reticle-box">
+      <div class="reticle-corner corner-tl"></div>
+      <div class="reticle-corner corner-tr"></div>
+      <div class="reticle-corner corner-bl"></div>
+      <div class="reticle-corner corner-br"></div>
+
+      <div class="ar-status-badge">
+        <span>📷</span> ตรวจพบมาร์กเกอร์หน้าตำรา บทที่ 1 (Target Locked 100%)
+      </div>
+
+      <div class="ar-book-page-preview">
+        <div style="font-size:0.86em; font-weight:700; color:var(--cyan); font-family:'Chakra Petch';">
+          📖 ฟิสิกส์ควอนตัมเบื้องต้น ด้วยเทคโนโลยีเสมือนจริงและการคำนวณปัญญาประดิษฐ์
+        </div>
+        <div style="font-size:0.72em; color:#94a3b8;">
+          บทที่ 1 จุดกำเนิดกลศาสตร์ควอนตัม (Blackbody Radiation) — หน้า 14
+        </div>
+        <div style="display:flex; gap:8px; margin-top:4px;">
+          <button class="preset-btn active" id="btn-ar-simulate">จำลองวัตถุ 3D ลอยเหนือหน้ากระดาษ</button>
+          <button class="preset-btn" onclick="toggleBookBackdrop()">สลับฉากหลังกระดาษ</button>
+        </div>
+      </div>
+
+      <div style="font-size:0.70em; color:#94a3b8; text-align:center;">
+        ส่องกล้องไปยังรูปเตาวัตถุดำในเล่มเพื่อฉายภาพโฮโลแกรม 3 มิติ
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode 3: Hand Tracking PIP & HUD -->
+  <div id="hand-cam-wrapper">
+    <video id="hand-video" autoplay playsinline muted></video>
+    <canvas id="hand-canvas"></canvas>
+    <div class="hand-badge">🖐️ MediaPipe Hand AI</div>
+  </div>
+
+  <div class="gesture-indicator-box" id="gesture-hud">
+    <div class="gesture-step">
+      <span class="key">ยกมือขึ้น-ลง</span>
+      <span>ปรับ T (2000K - 8000K)</span>
+    </div>
+    <div class="gesture-step" style="border-left:1px solid rgba(255,255,255,0.2); padding-left:10px;">
+      <span class="key">จีบนิ้วชี้-โป้ง</span>
+      <span>ยิงลำแสงโฟตอน</span>
+    </div>
+    <button class="preset-btn" id="btn-simulate-gesture" style="margin-left:6px; padding:3px 8px;">
+      ทดสอบ Gesture
+    </button>
+  </div>
+
+  <div class="bottom-strip">
+    <span>💡 เมาส์ซ้ายหมุนมุมมอง 3D</span>
+    <span>💡 ลูกกลิ้งเมาส์ซูม</span>
+    <span>💡 กด H เพื่อซ่อน/เปิดแถบควบคุม</span>
+  </div>
+
+  <script>
+    // ----------------------------------------------------
+    // 1. THREE.JS SCENE, SHADOWS, PBR LIGHTING
+    // ----------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x020617);
+    scene.fog = new THREE.FogExp2(0x020617, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 9.5, 27);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.target.set(0, 2.0, 0);
+    controls.maxPolarAngle = Math.PI / 2 + 0.05; // don't go below floor
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    keyLight.position.set(10, 24, 15);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 1024;
+    keyLight.shadow.mapSize.height = 1024;
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x00f0ff, 0.4);
+    fillLight.position.set(-15, 10, -10);
+    scene.add(fillLight);
+
+    // Optical Bench Table Floor with Subtle Metallic Reflection
+    const floorGeo = new THREE.PlaneGeometry(36, 36);
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: 0x070d1e,
+      roughness: 0.45,
+      metalness: 0.6
+    });
+    const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+    floorMesh.rotation.x = -Math.PI / 2;
+    floorMesh.position.y = -0.01;
+    floorMesh.receiveShadow = true;
+    scene.add(floorMesh);
+
+    const grid = new THREE.GridHelper(32, 32, 0x00f0ff, 0x1e293b);
+    grid.position.y = 0.005;
+    scene.add(grid);
+
+    // Optical Bench Rail (Heavy Anodized Aluminum Rail along X)
+    const railGeo = new THREE.BoxGeometry(22, 0.25, 1.2);
+    const railMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 });
+    const benchRail = new THREE.Mesh(railGeo, railMat);
+    benchRail.position.set(0, 0.12, 0);
+    benchRail.receiveShadow = true;
+    scene.add(benchRail);
+
+    // ----------------------------------------------------
+    // 2. REALISTIC LUMMER-PRINGSHEIM CAVITY FURNACE (BLACKBODY)
+    // ----------------------------------------------------
+    const furnaceGroup = new THREE.Group();
+    furnaceGroup.position.set(-5.5, 0, 0);
+
+    // (A) Cast-iron Laboratory Stand
+    const standBaseGeo = new THREE.CylinderGeometry(1.6, 1.8, 0.35, 32);
+    const castIronMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.7, metalness: 0.5 });
+    const standBase = new THREE.Mesh(standBaseGeo, castIronMat);
+    standBase.position.y = 0.17;
+    furnaceGroup.add(standBase);
+
+    // Vertical Chrome Rod
+    const rodGeo = new THREE.CylinderGeometry(0.18, 0.18, 3.4, 24);
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.15, metalness: 0.95 });
+    const verticalRod = new THREE.Mesh(rodGeo, chromeMat);
+    verticalRod.position.set(0, 1.8, 0);
+    furnaceGroup.add(verticalRod);
+
+    // Clamp Collar with adjustment screw
+    const collarGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.5, 24);
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.3, metalness: 0.85 });
+    const clampCollar = new THREE.Mesh(collarGeo, brassMat);
+    clampCollar.position.set(0, 2.6, 0);
+    furnaceGroup.add(clampCollar);
+
+    const screwGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.6, 16);
+    const clampScrew = new THREE.Mesh(screwGeo, brassMat);
+    clampScrew.rotation.z = Math.PI / 2;
+    clampScrew.position.set(0.45, 2.6, 0);
+    furnaceGroup.add(clampScrew);
+
+    // (B) Cylindrical Furnace Chamber with Thermal Heat Fins
+    const furnaceBodyGroup = new THREE.Group();
+    furnaceBodyGroup.position.set(0, 3.2, 0);
+
+    // Outer Insulation Casing (Brushed Stainless Steel / Titanium)
+    const casingGeo = new THREE.CylinderGeometry(1.5, 1.5, 2.8, 36, 1, false);
+    casingGeo.rotateZ(Math.PI / 2);
+    const steelMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      metalness: 0.8,
+      roughness: 0.35
+    });
+    const outerCasing = new THREE.Mesh(casingGeo, steelMat);
+    furnaceBodyGroup.add(outerCasing);
+
+    // 4 Annular Cooling Heat-Sink Fins around cylinder
+    for (let f = -3; f <= 3; f += 2) {
+      const finGeo = new THREE.TorusGeometry(1.65, 0.08, 16, 36);
+      const finMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.2 });
+      const heatFin = new THREE.Mesh(finGeo, finMat);
+      heatFin.rotation.y = Math.PI / 2;
+      heatFin.position.set(f * 0.35, 0, 0);
+      furnaceBodyGroup.add(heatFin);
+    }
+
+    // Front Brass Conical Aperture (Nozzle from which blackbody radiation emerges)
+    const nozzleGeo = new THREE.CylinderGeometry(0.35, 0.9, 0.6, 32, 1, true);
+    nozzleGeo.rotateZ(-Math.PI / 2);
+    const nozzleMesh = new THREE.Mesh(nozzleGeo, brassMat);
+    nozzleMesh.position.set(1.7, 0, 0);
+    furnaceBodyGroup.add(nozzleMesh);
+
+    // Glowing Inner Cavity Core (Emissive Sphere inside the aperture)
+    const coreGeo = new THREE.SphereGeometry(0.9, 32, 32);
+    const coreMat = new THREE.MeshStandardMaterial({
+      color: 0xffaa00,
+      emissive: 0xff6600,
+      emissiveIntensity: 1.2,
+      roughness: 0.2
+    });
+    const cavityCore = new THREE.Mesh(coreGeo, coreMat);
+    cavityCore.position.set(0.6, 0, 0);
+    furnaceBodyGroup.add(cavityCore);
+
+    // Intense Point Light at the aperture emitting real-time glow onto scene
+    const apertureLight = new THREE.PointLight(0xffaa00, 2.5, 12, 1.2);
+    apertureLight.position.set(1.9, 0, 0);
+    furnaceBodyGroup.add(apertureLight);
+
+    // (C) Cutaway View & Internal Multiple Reflections Ray Paths
+    const rayGroup = new THREE.Group();
+    rayGroup.visible = false; // toggled by button
+    const rayPoints = [
+      new THREE.Vector3(-1.0, 0.6, 0.3),
+      new THREE.Vector3(-0.4, -0.7, -0.4),
+      new THREE.Vector3(0.3, 0.8, -0.2),
+      new THREE.Vector3(0.0, -0.8, 0.5),
+      new THREE.Vector3(0.8, 0.5, 0.1),
+      new THREE.Vector3(1.4, -0.2, 0.0),
+      new THREE.Vector3(2.4, 0.0, 0.0) // emerges out
+    ];
+    const rayCurve = new THREE.CatmullRomCurve3(rayPoints);
+    const rayTubeGeo = new THREE.TubeGeometry(rayCurve, 64, 0.04, 8, false);
+    const rayMat = new THREE.MeshBasicMaterial({ color: 0xffea00 });
+    const rayMesh = new THREE.Mesh(rayTubeGeo, rayMat);
+    rayGroup.add(rayMesh);
+    furnaceBodyGroup.add(rayGroup);
+
+    furnaceGroup.add(furnaceBodyGroup);
+    scene.add(furnaceGroup);
+
+    // ----------------------------------------------------
+    // 3. PLANCK 3D SPECTRAL RADIANCE RIBBON & RAINBOW AXIS
+    // ----------------------------------------------------
+    const spectrumGroup = new THREE.Group();
+    spectrumGroup.position.set(0, 0.25, 0);
+
+    const N_POINTS = 220;
+    // 3D Ribbon Surface Under Planck Curve
+    const ribbonGeo = new THREE.BufferGeometry();
+    const ribbonPos = new Float32Array(N_POINTS * 2 * 3); // top and bottom vertices
+    const ribbonCol = new Float32Array(N_POINTS * 2 * 3);
+    const ribbonIndices = [];
+
+    for (let i = 0; i < N_POINTS - 1; i++) {
+      const topA = i * 2;
+      const botA = i * 2 + 1;
+      const topB = (i + 1) * 2;
+      const botB = (i + 1) * 2 + 1;
+      ribbonIndices.push(topA, botA, topB);
+      ribbonIndices.push(topB, botA, botB);
+    }
+    ribbonGeo.setIndex(ribbonIndices);
+    ribbonGeo.setAttribute('position', new THREE.BufferAttribute(ribbonPos, 3));
+    ribbonGeo.setAttribute('color', new THREE.BufferAttribute(ribbonCol, 3));
+
+    const ribbonMat = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.75
+    });
+    const ribbonMesh = new THREE.Mesh(ribbonGeo, ribbonMat);
+    spectrumGroup.add(ribbonMesh);
+
+    // Glowing Top Border Line for Planck Curve
+    const borderGeo = new THREE.BufferGeometry();
+    const borderPos = new Float32Array(N_POINTS * 3);
+    borderGeo.setAttribute('position', new THREE.BufferAttribute(borderPos, 3));
+    const borderMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 3 });
+    const borderLine = new THREE.Line(borderGeo, borderMat);
+    spectrumGroup.add(borderLine);
+
+    // Rayleigh-Jeans Classical Curve (Amber/Gold with Ultraviolet Catastrophe)
+    const rayleighGeo = new THREE.BufferGeometry();
+    const rayleighPos = new Float32Array(N_POINTS * 3);
+    rayleighGeo.setAttribute('position', new THREE.BufferAttribute(rayleighPos, 3));
+    const rayleighMat = new THREE.LineBasicMaterial({
+      color: 0xfbbf24,
+      linewidth: 3,
+      transparent: true,
+      opacity: 0.95
+    });
+    const rayleighLine = new THREE.Line(rayleighGeo, rayleighMat);
+    spectrumGroup.add(rayleighLine);
+
+    // Wien's Radiation Law Curve (Sky Blue line)
+    const wienGeo = new THREE.BufferGeometry();
+    const wienPos = new Float32Array(N_POINTS * 3);
+    wienGeo.setAttribute('position', new THREE.BufferAttribute(wienPos, 3));
+    const wienMat = new THREE.LineBasicMaterial({
+      color: 0x38bdf8,
+      linewidth: 3,
+      transparent: true,
+      opacity: 0.85
+    });
+    const wienLine = new THREE.Line(wienGeo, wienMat);
+    spectrumGroup.add(wienLine);
+
+    // Visible Spectrum Range Marker (380 nm to 750 nm)
+    // Mapping: lam = 120 + i * 7 -> X from -2.6 to +2.6 (range 120 nm to 1653 nm, span = 1533 nm)
+    // x(lam) = ((lam - 120) / 1533) * 5.2 - 2.6
+    const x380 = ((380 - 120) / 1533) * 5.2 - 2.6; // approx -1.72
+    const x750 = ((750 - 120) / 1533) * 5.2 - 2.6; // approx -0.46
+    const visWidth = x750 - x380; // approx 1.26
+    const visCenterX = (x380 + x750) / 2;
+
+    const visCurtainGeo = new THREE.PlaneGeometry(visWidth, 5.0);
+    const visCurtainMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.08,
+      side: THREE.DoubleSide
+    });
+    const visCurtain = new THREE.Mesh(visCurtainGeo, visCurtainMat);
+    visCurtain.position.set(visCenterX, 2.65, -0.02);
+    spectrumGroup.add(visCurtain);
+
+    // Visible Range Boundary Lines
+    const boundGeo = new THREE.BufferGeometry();
+    boundGeo.setAttribute('position', new THREE.Float32BufferAttribute([
+      x380, 0.15, 0,  x380, 5.2, 0,
+      x750, 0.15, 0,  x750, 5.2, 0
+    ], 3));
+    const boundMat = new THREE.LineBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.4 });
+    const boundLines = new THREE.LineSegments(boundGeo, boundMat);
+    spectrumGroup.add(boundLines);
+
+    // Base Rainbow Spectrum Strip (Physical Wavelength Bar 120nm - 1650nm)
+    const rainbowGeo = new THREE.PlaneGeometry(5.2, 0.3);
+    const rainbowCanvas = document.createElement('canvas');
+    rainbowCanvas.width = 512;
+    rainbowCanvas.height = 32;
+    const rctx = rainbowCanvas.getContext('2d');
+    const rgrad = rctx.createLinearGradient(0, 0, 512, 0);
+    // Smooth Physical Colors matching CIE Wavelengths across [120nm, 1653nm]:
+    // 380 nm is at fraction (380-120)/1533 = 0.17
+    // 750 nm is at fraction (750-120)/1533 = 0.41
+    rgrad.addColorStop(0.0, '#1e1b4b'); // Deep UV
+    rgrad.addColorStop(0.12, '#581c87'); // Near UV
+    rgrad.addColorStop(0.17, '#7c3aed'); // Violet (380 nm)
+    rgrad.addColorStop(0.21, '#2563eb'); // Blue (440 nm)
+    rgrad.addColorStop(0.24, '#06b6d4'); // Cyan (490 nm)
+    rgrad.addColorStop(0.28, '#10b981'); // Green (550 nm)
+    rgrad.addColorStop(0.32, '#eab308'); // Yellow (580 nm)
+    rgrad.addColorStop(0.35, '#f97316'); // Orange (610 nm)
+    rgrad.addColorStop(0.41, '#dc2626'); // Red (750 nm)
+    rgrad.addColorStop(0.48, '#7f1d1d'); // Near IR (850 nm)
+    rgrad.addColorStop(1.0, '#180505'); // Far IR
+    rctx.fillStyle = rgrad;
+    rctx.fillRect(0, 0, 512, 32);
+
+    const rainbowTex = new THREE.CanvasTexture(rainbowCanvas);
+    const rainbowMat = new THREE.MeshBasicMaterial({ map: rainbowTex, side: THREE.DoubleSide });
+    const rainbowBar = new THREE.Mesh(rainbowGeo, rainbowMat);
+    rainbowBar.position.set(0, 0.15, 0.05);
+    spectrumGroup.add(rainbowBar);
+
+    // 3D Peak Flag Indicator (Wien Displacement Marker)
+    const peakFlagGroup = new THREE.Group();
+    const flagPoleGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.2, 12);
+    const flagPole = new THREE.Mesh(flagPoleGeo, chromeMat);
+    flagPole.position.y = 0.6;
+    peakFlagGroup.add(flagPole);
+
+    const flagConeGeo = new THREE.ConeGeometry(0.22, 0.5, 16);
+    const flagConeMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+    const flagCone = new THREE.Mesh(flagConeGeo, flagConeMat);
+    flagCone.rotation.x = Math.PI; // point down
+    flagCone.position.y = 0;
+    peakFlagGroup.add(flagCone);
+
+    spectrumGroup.add(peakFlagGroup);
+    scene.add(spectrumGroup);
+
+    // ----------------------------------------------------
+    // 4. MILLIKAN PHOTOELECTRIC APPARATUS & DIGITAL AMMETER
+    // ----------------------------------------------------
+    const peApparatus = new THREE.Group();
+    peApparatus.position.set(5.5, 0, 0);
+
+    // Tabletop Digital Instrument Box
+    const meterBoxGeo = new THREE.BoxGeometry(4.2, 0.9, 2.6);
+    const meterMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.35, metalness: 0.8 });
+    const meterBox = new THREE.Mesh(meterBoxGeo, meterMat);
+    meterBox.position.set(0, 0.45, 0);
+    meterBox.castShadow = true;
+    peApparatus.add(meterBox);
+
+    // Digital LED Screen Texture for Current Reading
+    const ledCanvas = document.createElement('canvas');
+    ledCanvas.width = 256;
+    ledCanvas.height = 80;
+    const lctx = ledCanvas.getContext('2d');
+    const ledTex = new THREE.CanvasTexture(ledCanvas);
+    function updateLedTexture(text) {
+      lctx.fillStyle = '#020617';
+      lctx.fillRect(0, 0, 256, 80);
+      lctx.strokeStyle = '#00f0ff';
+      lctx.lineWidth = 4;
+      lctx.strokeRect(4, 4, 248, 72);
+      lctx.fillStyle = '#00f0ff';
+      lctx.font = 'bold 36px "JetBrains Mono", monospace';
+      lctx.textAlign = 'center';
+      lctx.textBaseline = 'middle';
+      lctx.fillText(text, 128, 40);
+      ledTex.needsUpdate = true;
+    }
+    updateLedTexture('25.40 uA');
+
+    const ledScreenGeo = new THREE.PlaneGeometry(2.0, 0.55);
+    const ledScreenMat = new THREE.MeshBasicMaterial({ map: ledTex });
+    const ledScreen = new THREE.Mesh(ledScreenGeo, ledScreenMat);
+    ledScreen.position.set(0, 0.46, 1.31);
+    peApparatus.add(ledScreen);
+
+    // High-Precision Evacuated Quartz Bulb (Phototube)
+    const bulbGlassGeo = new THREE.SphereGeometry(1.7, 36, 36);
+    const quartzMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.22,
+      roughness: 0.05,
+      metalness: 0.05,
+      transmission: 0.96,
+      ior: 1.54,
+      reflectivity: 0.8,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.05
+    });
+    const phototubeBulb = new THREE.Mesh(bulbGlassGeo, quartzMat);
+    phototubeBulb.position.set(0, 2.7, 0);
+    peApparatus.add(phototubeBulb);
+
+    // Curved Specular Metal Cathode (Emitter Plate)
+    const cathodePlateGeo = new THREE.CylinderGeometry(1.2, 1.2, 1.8, 32, 1, true, -Math.PI / 3, (2 * Math.PI) / 3);
+    const metalMat = new THREE.MeshStandardMaterial({
+      color: 0xd4d4d8,
+      metalness: 0.95,
+      roughness: 0.15
+    });
+    const cathodeMesh = new THREE.Mesh(cathodePlateGeo, metalMat);
+    cathodeMesh.rotation.y = Math.PI / 2;
+    cathodeMesh.position.set(-0.8, 2.7, 0);
+    peApparatus.add(cathodeMesh);
+
+    // Fine Wire Anode Ring (Collector)
+    const anodeRingGeo = new THREE.TorusGeometry(0.85, 0.035, 16, 36);
+    const anodeMesh = new THREE.Mesh(anodeRingGeo, chromeMat);
+    anodeMesh.rotation.y = Math.PI / 2;
+    anodeMesh.position.set(0.9, 2.7, 0);
+    peApparatus.add(anodeMesh);
+
+    // --- Monochromator Arc Lamp Source & Collimator Assembly ---
+    // (Replaces isolated floating cone with authentic optical bench light housing)
+    const lampGroup = new THREE.Group();
+    lampGroup.position.set(-3.2, 5.1, 0);
+    lampGroup.rotation.z = -Math.PI / 4; // Angle directly towards cathode at (-0.8, 2.7, 0)
+
+    // Heavy Mounting Stand Post from tabletop
+    const lampPostGeo = new THREE.CylinderGeometry(0.08, 0.08, 4.2, 16);
+    const lampPost = new THREE.Mesh(lampPostGeo, chromeMat);
+    lampPost.position.set(-3.2, 2.1, 0);
+    peApparatus.add(lampPost);
+
+    const postClampGeo = new THREE.BoxGeometry(0.35, 0.35, 0.35);
+    const postClamp = new THREE.Mesh(postClampGeo, brassMat);
+    postClamp.position.set(-3.2, 4.2, 0);
+    peApparatus.add(postClamp);
+
+    // Cylindrical Lamp Housing with Cooling Ribs
+    const lampBodyGeo = new THREE.CylinderGeometry(0.55, 0.55, 1.3, 24);
+    const lampBodyMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 });
+    const lampBody = new THREE.Mesh(lampBodyGeo, lampBodyMat);
+    lampBody.position.y = 0.65;
+    lampGroup.add(lampBody);
+
+    // Brass Lock Knobs on Lamp
+    const knobGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.2, 12);
+    const lampKnob = new THREE.Mesh(knobGeo, brassMat);
+    lampKnob.rotation.x = Math.PI / 2;
+    lampKnob.position.set(0, 0.7, 0.62);
+    lampGroup.add(lampKnob);
+
+    // Tapered Collimator Snout / Lens Tube pointing towards phototube
+    const snoutGeo = new THREE.CylinderGeometry(0.32, 0.45, 0.7, 24);
+    const snout = new THREE.Mesh(snoutGeo, chromeMat);
+    snout.position.y = -0.35;
+    lampGroup.add(snout);
+
+    peApparatus.add(lampGroup);
+
+    // Smooth Volumetric Monochromatic Photon Beam (from snout to cathode)
+    const beamLength = 2.9;
+    const beamGeo = new THREE.CylinderGeometry(0.24, 0.42, beamLength, 24, 1, true);
+    beamGeo.translate(0, -beamLength / 2, 0); // origin at top (snout exit)
+    const beamMat = new THREE.MeshBasicMaterial({
+      color: 0xa855f7,
+      transparent: true,
+      opacity: 0.55,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+    const photonBeamMesh = new THREE.Mesh(beamGeo, beamMat);
+    photonBeamMesh.position.set(-3.0, 4.9, 0);
+    photonBeamMesh.rotation.z = -Math.PI / 4; // points along optical path to cathode
+    peApparatus.add(photonBeamMesh);
+
+    // Inner bright core ray
+    const coreRayGeo = new THREE.CylinderGeometry(0.06, 0.12, beamLength, 12, 1, true);
+    coreRayGeo.translate(0, -beamLength / 2, 0);
+    const coreRayMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.65,
+      blending: THREE.AdditiveBlending
+    });
+    const photonCoreRay = new THREE.Mesh(coreRayGeo, coreRayMat);
+    photonBeamMesh.add(photonCoreRay);
+
+    // Cathode Strike Glow Spot
+    const spotGeo = new THREE.CircleGeometry(0.35, 24);
+    const spotMat = new THREE.MeshBasicMaterial({
+      color: 0xa855f7,
+      transparent: true,
+      opacity: 0.75,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+    const cathodeSpot = new THREE.Mesh(spotGeo, spotMat);
+    cathodeSpot.rotation.y = Math.PI / 2;
+    cathodeSpot.position.set(-0.78, 2.7, 0);
+    peApparatus.add(cathodeSpot);
+
+    // Electron Cloud Particle Stream
+    const eCount = 120;
+    const eGeom = new THREE.BufferGeometry();
+    const ePositions = new Float32Array(eCount * 3);
+    const eVelocities = new Float32Array(eCount * 3);
+    const eLifes = new Float32Array(eCount);
+
+    for (let i = 0; i < eCount; i++) {
+      resetElectron(i);
+    }
+    function resetElectron(i) {
+      ePositions[i * 3] = -0.7 + (Math.random() - 0.5) * 0.2;
+      ePositions[i * 3 + 1] = 2.7 + (Math.random() - 0.5) * 1.0;
+      ePositions[i * 3 + 2] = (Math.random() - 0.5) * 0.8;
+      eVelocities[i * 3] = 0.04 + Math.random() * 0.06;
+      eVelocities[i * 3 + 1] = (Math.random() - 0.5) * 0.02;
+      eVelocities[i * 3 + 2] = (Math.random() - 0.5) * 0.02;
+      eLifes[i] = Math.random();
+    }
+    eGeom.setAttribute('position', new THREE.BufferAttribute(ePositions, 3));
+    const eMat = new THREE.PointsMaterial({
+      color: 0x00f0ff,
+      size: 0.18,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending
+    });
+    const electronStream = new THREE.Points(eGeom, eMat);
+    peApparatus.add(electronStream);
+
+    scene.add(peApparatus);
+
+    // --- (D) Simulated Book Page 3D Mesh (for Mode 2 AR) ---
+    const bookGeo = new THREE.PlaneGeometry(26, 17);
+    const bookCanvas = document.createElement('canvas');
+    bookCanvas.width = 1024;
+    bookCanvas.height = 660;
+    const bctx = bookCanvas.getContext('2d');
+    bctx.fillStyle = '#0a1024';
+    bctx.fillRect(0, 0, 1024, 660);
+    bctx.strokeStyle = '#00f0ff';
+    bctx.lineWidth = 5;
+    bctx.strokeRect(20, 20, 984, 620);
+    bctx.fillStyle = '#00f0ff';
+    bctx.font = 'bold 34px "Chakra Petch", sans-serif';
+    bctx.fillText('บทที่ 1 จุดกำเนิดกลศาสตร์ควอนตัม (Blackbody Radiation)', 60, 80);
+    bctx.fillStyle = '#f59e0b';
+    bctx.font = '26px "Prompt", sans-serif';
+    bctx.fillText('ผศ.ดร.ชีวะ ทัศนา — มหาวิทยาลัยราชภัฏรำไพพรรณี', 60, 130);
+    bctx.fillStyle = '#94a3b8';
+    bctx.font = '22px "JetBrains Mono", monospace';
+    bctx.fillText('Planck Formula: u(λ, T) = (8πhc / λ^5) · 1/(exp(hc/λkT) - 1)', 60, 200);
+    bctx.fillText('Wien Law: λ_max · T = 2.898 × 10^-3 m·K', 60, 245);
+    bctx.fillText('Einstein Photoelectric: K_max = hf - Φ', 60, 290);
+
+    const bookTex = new THREE.CanvasTexture(bookCanvas);
+    const bookMat = new THREE.MeshBasicMaterial({ map: bookTex, side: THREE.DoubleSide });
+    const bookMesh = new THREE.Mesh(bookGeo, bookMat);
+    bookMesh.rotation.x = -Math.PI / 2;
+    bookMesh.position.y = -0.05;
+    bookMesh.visible = false;
+    scene.add(bookMesh);
+
+    // ----------------------------------------------------
+    // 5. RIGOROUS PHYSICAL CALCULATIONS & SIMULATION ENGINE
+    // ----------------------------------------------------
+    let T = 5800; // Kelvin
+    let lambda_nm = 350; // nm
+    let phi_eV = 2.28; // Sodium
+    let V_retard = 0.0; // Volts
+    let metalName = 'Sodium (Na)';
+
+    const WIEN_B = 2.897771955e-3; // m·K
+    const STEFAN_SIGMA = 5.670374419e-8; // W/m^2·K^4
+    const H_EVS = 4.135667696e-15; // eV·s
+    const C_LIGHT = 2.99792458e8; // m/s
+
+    // Realistic Blackbody Color Temperature (Planckian Locus Algorithm)
+    function getBlackbodyRGB(tempK) {
+      let t = tempK / 100;
+      let r, g, b;
+      if (t <= 66) {
+        r = 255;
+        g = Math.min(Math.max(99.4708025861 * Math.log(t) - 161.1195681661, 0), 255);
+        b = t <= 19 ? 0 : Math.min(Math.max(138.5177312231 * Math.log(t - 10) - 305.0447927307, 0), 255);
+      } else {
+        r = Math.min(Math.max(329.698727446 * Math.pow(t - 60, -0.1332047592), 0), 255);
+        g = Math.min(Math.max(288.1221695283 * Math.pow(t - 60, -0.0755148492), 0), 255);
+        b = 255;
+      }
+      const r_int = Math.round(r), g_int = Math.round(g), b_int = Math.round(b);
+      return {
+        r: r_int / 255,
+        g: g_int / 255,
+        b: b_int / 255,
+        rgbStr: `rgb(${r_int}, ${g_int}, ${b_int})`,
+        hex: (r_int << 16) | (g_int << 8) | b_int
+      };
+    }
+
+    // Accurate Wavelength to CIE Spectral RGB
+    function wavelengthToRGB(wl) {
+      let r = 0, g = 0, b = 0;
+      if (wl >= 380 && wl < 440) {
+        r = -(wl - 440) / (440 - 380); g = 0.0; b = 1.0;
+      } else if (wl >= 440 && wl < 490) {
+        r = 0.0; g = (wl - 440) / (490 - 440); b = 1.0;
+      } else if (wl >= 490 && wl < 510) {
+        r = 0.0; g = 1.0; b = -(wl - 510) / (510 - 490);
+      } else if (wl >= 510 && wl < 580) {
+        r = (wl - 510) / (580 - 510); g = 1.0; b = 0.0;
+      } else if (wl >= 580 && wl < 645) {
+        r = 1.0; g = -(wl - 645) / (645 - 580); b = 0.0;
+      } else if (wl >= 645 && wl <= 780) {
+        r = 1.0; g = 0.0; b = 0.0;
+      } else if (wl < 380) {
+        const factor = Math.max((wl - 150) / (380 - 150), 0.25);
+        r = 0.65 * factor; g = 0.15 * factor; b = 0.95 * factor;
+      } else {
+        const factor = Math.max(1.0 - (wl - 780) / 400, 0.2);
+        r = 0.85 * factor; g = 0.05 * factor; b = 0.05 * factor;
+      }
+      return {
+        r, g, b,
+        hex: (Math.round(r * 255) << 16) | (Math.round(g * 255) << 8) | Math.round(b * 255)
+      };
+    }
+
+    function updateSimulation() {
+      // 1. Wien Displacement Law
+      const l_max_m = WIEN_B / T;
+      const l_max_nm = l_max_m * 1e9;
+      document.getElementById('telem-lmax').innerText = l_max_nm.toFixed(1) + ' nm';
+
+      // Physical Blackbody Color Temperature & Furnace Glow
+      const bbColor = getBlackbodyRGB(T);
+      const bbSwatch = document.getElementById('bb-color-swatch');
+      const bbName = document.getElementById('bb-color-name');
+      if (bbSwatch) {
+        bbSwatch.style.background = bbColor.rgbStr;
+        bbSwatch.style.boxShadow = `0 0 10px ${bbColor.rgbStr}`;
+      }
+
+      let colorDesc = 'รังสี UV';
+      let bbTitle = 'ขาวสุริยะ';
+      if (T < 2500) { bbTitle = 'แดงเรือง (เตาอบ)'; colorDesc = 'อินฟราเรด (IR)'; }
+      else if (T < 3500) { bbTitle = 'ส้มอุ่น (หลอดไส้)'; colorDesc = 'ส้มเหลือง'; }
+      else if (T < 5200) { bbTitle = 'ขาวนวล (ฮาโลเจน)'; colorDesc = 'เหลืองขาว'; }
+      else if (T < 6500) { bbTitle = 'ขาวสุริยะ (แสงแดด)'; colorDesc = 'ฟ้าอมเขียว (สุริยะ)'; }
+      else if (T < 8500) { bbTitle = 'ขาวประกายฟ้า (ดาวฤกษ์)'; colorDesc = 'ฟ้าครามม่วง'; }
+      else { bbTitle = 'น้ำเงินเจิดจ้า (ดาวซิริอุส)'; colorDesc = 'อัลตราไวโอเลต'; }
+
+      if (bbName) bbName.innerText = `${bbTitle} (${T} K)`;
+      document.getElementById('telem-color-desc').innerText = colorDesc;
+
+      // Stefan-Boltzmann Total Emissive Power
+      const P_total = STEFAN_SIGMA * Math.pow(T, 4);
+      document.getElementById('telem-pwr').innerText = P_total.toExponential(2) + ' W/m²';
+
+      // Cavity Core Glow and Emissive Light matching true Blackbody temperature
+      const tNorm = (T - 2000) / (8000 - 2000);
+      coreMat.color.setHex(bbColor.hex);
+      coreMat.emissive.setHex(bbColor.hex);
+      coreMat.emissiveIntensity = 0.7 + tNorm * 1.8;
+      apertureLight.color.setHex(bbColor.hex);
+      apertureLight.intensity = 1.6 + tNorm * 4.0;
+
+      // 2. Exact 3D Curves: Planck Quantum vs Rayleigh-Jeans vs Wien Laws
+      const rPos = ribbonGeo.attributes.position.array;
+      const rCol = ribbonGeo.attributes.color.array;
+      const bPos = borderGeo.attributes.position.array;
+      const rayPos = rayleighGeo.attributes.position.array;
+      const wPos = wienGeo.attributes.position.array;
+
+      const peakMaxHeight = 4.4; // 4.4 Three.js units tall
+      let peakX = 0, peakY = 0;
+
+      for (let i = 0; i < N_POINTS; i++) {
+        // Sample lambda from 120 nm to 1653 nm mapped across X [-2.6, 2.6]
+        const lam = 120 + i * 7.0;
+        const norm = Math.max(lam / l_max_nm, 0.04);
+        const xCoord = (i / (N_POINTS - 1)) * 5.2 - 2.6;
+
+        // --- (A) Planck's Quantum Law ---
+        const expTerm = Math.exp(Math.min(4.9651 / norm, 40));
+        let curvePlanck = (1.0 / (0.007026 * Math.pow(norm, 5) * (expTerm - 1)));
+        if (isNaN(curvePlanck) || !isFinite(curvePlanck)) curvePlanck = 0;
+        const yPlanck = Math.min(Math.max(curvePlanck * peakMaxHeight, 0.02), 5.5);
+        const yBot = 0.15; // sits on rainbow bar
+
+        // Ribbon top & bottom vertices
+        rPos[i * 6] = xCoord; rPos[i * 6 + 1] = yPlanck; rPos[i * 6 + 2] = 0;
+        rPos[i * 6 + 3] = xCoord; rPos[i * 6 + 4] = yBot; rPos[i * 6 + 5] = 0;
+
+        // Border line vertex
+        bPos[i * 3] = xCoord; bPos[i * 3 + 1] = yPlanck; bPos[i * 3 + 2] = 0;
+
+        // Continuous CIE Physical Spectral Color
+        const specCol = wavelengthToRGB(lam);
+        rCol[i * 6] = specCol.r; rCol[i * 6 + 1] = specCol.g; rCol[i * 6 + 2] = specCol.b;
+        rCol[i * 6 + 3] = specCol.r * 0.25; rCol[i * 6 + 4] = specCol.g * 0.25; rCol[i * 6 + 5] = specCol.b * 0.25;
+
+        // Track peak position
+        if (Math.abs(lam - l_max_nm) < 6.0) {
+          peakX = xCoord;
+          peakY = yPlanck;
+        }
+
+        // --- (B) Rayleigh-Jeans Classical Law (u_RJ = 8*pi*k*T / lam^4) ---
+        // Normalized to Planck peak: u_RJ/u_max = 0.773 * (1/norm)^4
+        let valRJ = 0.773 * Math.pow(1.0 / norm, 4);
+        const yRJ = Math.min(Math.max(valRJ * peakMaxHeight, 0.15), 6.8);
+        rayPos[i * 3] = xCoord; rayPos[i * 3 + 1] = yRJ; rayPos[i * 3 + 2] = 0.04;
+
+        // --- (C) Wien's Radiation Law (u_Wien = (C1/lam^5) * exp(-C2/lam T)) ---
+        // Normalized to peak: u_Wien/u_max = (1/norm)^5 * exp(5 * (1 - 1/norm))
+        const expWien = 5.0 * (1.0 - 1.0 / norm);
+        let valWien = (1.0 / Math.pow(norm, 5)) * Math.exp(Math.min(expWien, 10));
+        if (isNaN(valWien) || !isFinite(valWien)) valWien = 0;
+        const yWien = Math.min(Math.max(valWien * peakMaxHeight, 0.15), 5.5);
+        wPos[i * 3] = xCoord; wPos[i * 3 + 1] = yWien; wPos[i * 3 + 2] = 0.06;
+      }
+
+      ribbonGeo.attributes.position.needsUpdate = true;
+      ribbonGeo.attributes.color.needsUpdate = true;
+      borderGeo.attributes.position.needsUpdate = true;
+      rayleighGeo.attributes.position.needsUpdate = true;
+      wienGeo.attributes.position.needsUpdate = true;
+
+      // Update Wien Peak Flag Marker
+      peakFlagGroup.position.set(peakX, peakY + 0.05, 0);
+
+      // Toggle Curves Visibility based on HUD Checkboxes
+      const chkPlanck = document.getElementById('chk-planck');
+      const chkRayleigh = document.getElementById('chk-rayleigh');
+      const chkWien = document.getElementById('chk-wien');
+      ribbonMesh.visible = chkPlanck ? chkPlanck.checked : true;
+      borderLine.visible = chkPlanck ? chkPlanck.checked : true;
+      rayleighLine.visible = chkRayleigh ? chkRayleigh.checked : true;
+      wienLine.visible = chkWien ? chkWien.checked : true;
+
+      // 3. Einstein Photoelectric Effect with Stopping Voltage Condition
+      const E_phot = (H_EVS * C_LIGHT) / (lambda_nm * 1e-9);
+      document.getElementById('telem-ephot').innerText = E_phot.toFixed(2) + ' eV';
+
+      const K_max = E_phot - phi_eV;
+      const statusEl = document.getElementById('telem-status');
+
+      // Dynamic Photon Beam & Cathode Strike Spot Color by Monochromatic Wavelength
+      const beamCol = wavelengthToRGB(lambda_nm);
+      beamMat.color.setHex(beamCol.hex);
+      cathodeSpot.material.color.setHex(beamCol.hex);
+      cathodeSpot.material.opacity = 0.75;
+
+      if (K_max > 0) {
+        document.getElementById('telem-kmax').innerText = K_max.toFixed(2) + ' eV';
+        document.getElementById('telem-v0').innerText = K_max.toFixed(2) + ' V';
+        document.getElementById('telem-kmax').className = 'metric-val green';
+        document.getElementById('telem-v0').className = 'metric-val green';
+
+        // Check if Retarding Voltage stops electrons
+        if (V_retard >= K_max) {
+          document.getElementById('telem-current').innerText = '0.00 μA (สนามไฟฟ้าหน่วงหยุดยั้ง)';
+          document.getElementById('telem-current').className = 'metric-val pink';
+          updateLedTexture('0.00 uA');
+          statusEl.innerText = '🛑 ศักย์หน่วง V_retard ≥ V0 (กระแสตกเป็นศูนย์)';
+          statusEl.className = 'status-indicator-bar off';
+        } else {
+          const current_uA = (25.4 * Math.sqrt(K_max - V_retard)).toFixed(2);
+          document.getElementById('telem-current').innerText = current_uA + ' μA';
+          document.getElementById('telem-current').className = 'metric-val';
+          updateLedTexture(current_uA + ' uA');
+          statusEl.innerText = '⚡ เกิดกระแสโฟโตอิเล็กตรอน (I > 0)';
+          statusEl.className = 'status-indicator-bar';
+        }
+        electronStream.visible = true;
+      } else {
+        document.getElementById('telem-kmax').innerText = '0.00 eV';
+        document.getElementById('telem-v0').innerText = '0.00 V';
+        document.getElementById('telem-current').innerText = '0.00 μA (hf < Φ)';
+        document.getElementById('telem-kmax').className = 'metric-val pink';
+        document.getElementById('telem-v0').className = 'metric-val pink';
+        document.getElementById('telem-current').className = 'metric-val pink';
+        updateLedTexture('0.00 uA');
+        statusEl.innerText = '❌ พลังงานไม่พอ (hf < Φ ไม่มีอิเล็กตรอนหลุด)';
+        statusEl.className = 'status-indicator-bar off';
+        electronStream.visible = false;
+      }
+    }
+
+    // ----------------------------------------------------
+    // 6. UI EVENT LISTENERS & COLLAPSE / DOCK HANDLERS
+    // ----------------------------------------------------
+    const leftHud = document.getElementById('left-hud');
+    const rightHud = document.getElementById('right-hud');
+    const dockLeft = document.getElementById('dock-left');
+    const dockRight = document.getElementById('dock-right');
+    const btnCollapseLeft = document.getElementById('btn-collapse-left');
+    const btnCollapseRight = document.getElementById('btn-collapse-right');
+    const btnZenMode = document.getElementById('btn-zen-mode');
+
+    function toggleLeft(collapse) {
+      const isCol = collapse !== undefined ? collapse : !leftHud.classList.contains('collapsed');
+      leftHud.classList.toggle('collapsed', isCol);
+      dockLeft.style.display = isCol ? 'flex' : 'none';
+    }
+
+    function toggleRight(collapse) {
+      const isCol = collapse !== undefined ? collapse : !rightHud.classList.contains('collapsed');
+      rightHud.classList.toggle('collapsed', isCol);
+      dockRight.style.display = isCol ? 'flex' : 'none';
+    }
+
+    btnCollapseLeft.addEventListener('click', () => toggleLeft(true));
+    btnCollapseRight.addEventListener('click', () => toggleRight(true));
+    dockLeft.addEventListener('click', () => toggleLeft(false));
+    dockRight.addEventListener('click', () => toggleRight(false));
+
+    let allHidden = false;
+    btnZenMode.addEventListener('click', () => {
+      allHidden = !allHidden;
+      toggleLeft(allHidden);
+      toggleRight(allHidden);
+      btnZenMode.classList.toggle('active', allHidden);
+      btnZenMode.querySelector('span:last-child').innerText = allHidden ? 'แสดงบาร์' : 'ย่อทุกบาร์';
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'h' || e.key === 'H') {
+        btnZenMode.click();
+      }
+    });
+
+    // Sliders
+    const sliderTemp = document.getElementById('slider-temp');
+    sliderTemp.addEventListener('input', (e) => {
+      T = parseFloat(e.target.value);
+      document.getElementById('val-temp').innerText = T + ' K';
+      updateSimulation();
+    });
+
+    const sliderLambda = document.getElementById('slider-lambda');
+    sliderLambda.addEventListener('input', (e) => {
+      lambda_nm = parseFloat(e.target.value);
+      document.getElementById('val-lambda').innerText = lambda_nm + ' nm';
+      updateSimulation();
+    });
+
+    const sliderVRetard = document.getElementById('slider-vretard');
+    sliderVRetard.addEventListener('input', (e) => {
+      V_retard = parseFloat(e.target.value);
+      document.getElementById('val-vretard').innerText = V_retard.toFixed(2) + ' V';
+      updateSimulation();
+    });
+
+    // Radiation Theory Checkbox Listeners
+    ['chk-planck', 'chk-rayleigh', 'chk-wien'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', updateSimulation);
+    });
+
+    window.setTemp = function(tempVal) {
+      T = tempVal;
+      sliderTemp.value = T;
+      document.getElementById('val-temp').innerText = T + ' K';
+      document.querySelectorAll('.left-hud-stack .preset-btn').forEach(b => {
+        if (b.innerText.includes(tempVal + ' K')) b.classList.add('active');
+        else if (b.innerText.includes('K')) b.classList.remove('active');
+      });
+      updateSimulation();
+    };
+
+    window.setMetal = function(name, workVal) {
+      phi_eV = workVal;
+      metalName = name;
+      document.getElementById('val-work').innerText = workVal.toFixed(2) + ' eV (' + name + ')';
+      // Shift cathode metal specular color
+      if (name === 'Cs') metalMat.color.setHex(0xfef08a);
+      else if (name === 'Cu') metalMat.color.setHex(0xfba27a);
+      else if (name === 'Pt') metalMat.color.setHex(0xe2e8f0);
+      else metalMat.color.setHex(0xd4d4d8); // Na
+      document.querySelectorAll('.left-hud-stack .preset-btn').forEach(b => {
+        if (b.innerText.startsWith(name)) b.classList.add('active');
+        else if (['Na', 'Cs', 'Cu', 'Pt'].some(m => b.innerText.startsWith(m))) b.classList.remove('active');
+      });
+      updateSimulation();
+    };
+
+    // Cutaway View Toggle
+    let isCutaway = false;
+    document.getElementById('btn-toggle-cutaway').addEventListener('click', (e) => {
+      isCutaway = !isCutaway;
+      e.target.classList.toggle('active', isCutaway);
+      rayGroup.visible = isCutaway;
+      // Animate casing transparency or opening
+      outerCasing.material.wireframe = isCutaway;
+    });
+
+    document.getElementById('btn-reset-view').addEventListener('click', () => {
+      camera.position.set(0, 9.5, 27);
+      controls.target.set(0, 2.0, 0);
+      controls.update();
+    });
+
+    document.getElementById('btn-fire-photon').addEventListener('click', () => {
+      photonBeamMesh.scale.set(1.5, 1.0, 1.5);
+      setTimeout(() => { photonBeamMesh.scale.set(1, 1, 1); }, 250);
+      if (document.getElementById('telem-kmax').innerText.includes('0.00')) {
+        alert('พลังงานโฟตอน E=' + document.getElementById('telem-ephot').innerText + ' ต่ำกว่าฟังก์ชันงาน Φ=' + phi_eV + ' eV ของ ' + metalName + ' จึงยังไม่มีอิเล็กตรอนหลุด! กรุณาลดความยาวคลื่นแสง λ หรือเลือกโลหะ Cs');
+      }
+    });
+
+    // ----------------------------------------------------
+    // 7. 3-MODE SWITCHER (3D -> AR MARKER -> HAND AI)
+    // ----------------------------------------------------
+    const tab3D = document.getElementById('tab-mode-3d');
+    const tabAR = document.getElementById('tab-mode-ar');
+    const tabHand = document.getElementById('tab-mode-hand');
+    const bookArContainer = document.getElementById('book-ar-container');
+    const handCamWrapper = document.getElementById('hand-cam-wrapper');
+    const gestureHud = document.getElementById('gesture-hud');
+    const activeModeLabel = document.getElementById('active-mode-label');
+
+    function switchMode(newMode) {
+      tab3D.classList.toggle('active', newMode === '3d');
+      tabAR.classList.toggle('active', newMode === 'ar');
+      tabHand.classList.toggle('active', newMode === 'hand');
+
+      if (newMode === '3d') {
+        activeModeLabel.innerText = 'โหมด 1 (3D)';
+        bookArContainer.style.display = 'none';
+        handCamWrapper.style.display = 'none';
+        gestureHud.style.display = 'none';
+        bookMesh.visible = false;
+        grid.visible = true;
+      } else if (newMode === 'ar') {
+        activeModeLabel.innerText = 'โหมด 2 (AR Book)';
+        bookArContainer.style.display = 'block';
+        handCamWrapper.style.display = 'none';
+        gestureHud.style.display = 'none';
+        bookMesh.visible = true;
+        grid.visible = false;
+        camera.position.set(0, 12, 24);
+        controls.target.set(0, 2, 0);
+        controls.update();
+      } else if (newMode === 'hand') {
+        activeModeLabel.innerText = 'โหมด 3 (Hand AI)';
+        bookArContainer.style.display = 'none';
+        handCamWrapper.style.display = 'block';
+        gestureHud.style.display = 'flex';
+        bookMesh.visible = false;
+        grid.visible = true;
+        startHandTracking();
+      }
+    }
+
+    tab3D.addEventListener('click', () => switchMode('3d'));
+    tabAR.addEventListener('click', () => switchMode('ar'));
+    tabHand.addEventListener('click', () => switchMode('hand'));
+
+    window.toggleBookBackdrop = function() {
+      bookMesh.visible = !bookMesh.visible;
+    };
+
+    document.getElementById('btn-ar-simulate').addEventListener('click', () => {
+      let startTime = Date.now();
+      function floatAnim() {
+        const elapsed = (Date.now() - startTime) / 1000;
+        furnaceGroup.position.y = Math.sin(elapsed * 3) * 0.5;
+        peApparatus.position.y = Math.sin(elapsed * 3 + 1) * 0.5;
+        if (elapsed < 3) requestAnimationFrame(floatAnim);
+        else {
+          furnaceGroup.position.y = 0;
+          peApparatus.position.y = 0;
+        }
+      }
+      floatAnim();
+    });
+
+    // ----------------------------------------------------
+    // 8. MEDIAPIPE HAND TRACKING (MODE 3)
+    // ----------------------------------------------------
+    let handTrackerStarted = false;
+    let videoElement = document.getElementById('hand-video');
+    let handCanvas = document.getElementById('hand-canvas');
+    let handCtx = handCanvas.getContext('2d');
+
+    function startHandTracking() {
+      if (handTrackerStarted) return;
+      handTrackerStarted = true;
+
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })
+          .then(stream => {
+            videoElement.srcObject = stream;
+            if (window.Hands) {
+              const hands = new Hands({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+              });
+              hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+              });
+              hands.onResults(onHandResults);
+
+              const cameraFeed = new Camera(videoElement, {
+                onFrame: async () => {
+                  await hands.send({ image: videoElement });
+                },
+                width: 320,
+                height: 240
+              });
+              cameraFeed.start();
+            }
+          })
+          .catch(err => {
+            console.log('Webcam fallback active in sandbox:', err);
+          });
+      }
+    }
+
+    function onHandResults(results) {
+      handCanvas.width = videoElement.videoWidth;
+      handCanvas.height = videoElement.videoHeight;
+      handCtx.clearRect(0, 0, handCanvas.width, handCanvas.height);
+
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        const landmarks = results.multiHandLandmarks[0];
+        handCtx.strokeStyle = '#a855f7';
+        handCtx.lineWidth = 2;
+        handCtx.fillStyle = '#00f0ff';
+        for (let pt of landmarks) {
+          handCtx.beginPath();
+          handCtx.arc(pt.x * handCanvas.width, pt.y * handCanvas.height, 4, 0, 2 * Math.PI);
+          handCtx.fill();
+        }
+
+        const wristY = landmarks[0].y;
+        const mappedTemp = Math.round(8000 - wristY * 6000);
+        T = Math.min(Math.max(mappedTemp, 2000), 8000);
+        sliderTemp.value = T;
+        document.getElementById('val-temp').innerText = T + ' K';
+
+        const thumbTip = landmarks[4];
+        const indexTip = landmarks[8];
+        const dist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
+
+        if (dist < 0.08) {
+          photonBeamMesh.scale.set(1.5, 1.0, 1.5);
+        } else {
+          photonBeamMesh.scale.set(1.0, 1.0, 1.0);
+        }
+        updateSimulation();
+      }
+    }
+
+    document.getElementById('btn-simulate-gesture').addEventListener('click', () => {
+      let step = 0;
+      const interval = setInterval(() => {
+        step++;
+        T = 3000 + Math.sin(step * 0.4) * 3500;
+        sliderTemp.value = Math.round(T);
+        document.getElementById('val-temp').innerText = Math.round(T) + ' K';
+
+        if (step % 4 === 0) {
+          photonBeamMesh.scale.set(1.5, 1.0, 1.5);
+          setTimeout(() => photonBeamMesh.scale.set(1, 1, 1), 200);
+        }
+        updateSimulation();
+
+        if (step > 25) clearInterval(interval);
+      }, 150);
+    });
+
+    // ----------------------------------------------------
+    // 9. ANIMATION LOOP: ELECTRON PARABOLIC FLIGHT & RETARDATION
+    // ----------------------------------------------------
+    updateSimulation();
+
+    let clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // Gentle floating animation of peak indicator flag
+      flagCone.position.y = Math.sin(time * 3) * 0.08;
+
+      // Photoelectron Physics: Flight from Cathode to Anode with V_retard deceleration
+      const E_phot = (H_EVS * C_LIGHT) / (lambda_nm * 1e-9);
+      const K_max = E_phot - phi_eV;
+
+      if (K_max > 0) {
+        const pos = eGeom.attributes.position.array;
+        // Deceleration due to retarding voltage: a = - e*V / d
+        const netEnergy = K_max - V_retard;
+        const initialSpeed = 0.05 * Math.sqrt(K_max);
+
+        for (let i = 0; i < eCount; i++) {
+          eLifes[i] += 0.015;
+          if (netEnergy > 0) {
+            // Electrons fly forward and reach anode
+            pos[i * 3] += initialSpeed + eVelocities[i * 3];
+            if (pos[i * 3] >= 0.9) { // Reached Anode Ring
+              resetElectron(i);
+            }
+          } else {
+            // Retarded: Electrons decelerate and turnaround before anode!
+            const turnDist = -0.7 + Math.max(K_max / (V_retard + 0.01) * 1.5, 0.1);
+            pos[i * 3] += initialSpeed - (V_retard / K_max) * 0.045;
+            if (pos[i * 3] > turnDist || pos[i * 3] < -0.8 || eLifes[i] > 1.0) {
+              resetElectron(i);
+            }
+          }
+        }
+        eGeom.attributes.position.needsUpdate = true;
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // ----------------------------------------------------
+    // 10. MILLIKAN NOBEL PRIZE PLOT ENGINE (V0 vs f -> h/e)
+    // ----------------------------------------------------
+    const millikanModal = document.getElementById('millikan-modal');
+    const btnOpenMillikan = document.getElementById('btn-open-millikan');
+    const btnCloseMillikan = document.getElementById('btn-close-millikan');
+    const btnRecordPoint = document.getElementById('btn-record-point');
+    const btnAutoScan = document.getElementById('btn-auto-scan');
+    const btnClearPoints = document.getElementById('btn-clear-points');
+    const mCanvas = document.getElementById('canvas-millikan');
+    const mctx = mCanvas ? mCanvas.getContext('2d') : null;
+
+    let millikanData = []; // Array of { f_hz, v0_v, lambda_nm, metal }
+
+    if (btnOpenMillikan) {
+      btnOpenMillikan.addEventListener('click', () => {
+        millikanModal.style.display = 'flex';
+        drawMillikanPlot();
+      });
+    }
+    if (btnCloseMillikan) {
+      btnCloseMillikan.addEventListener('click', () => {
+        millikanModal.style.display = 'none';
+      });
+    }
+    if (millikanModal) {
+      millikanModal.addEventListener('click', (e) => {
+        if (e.target === millikanModal) millikanModal.style.display = 'none';
+      });
+    }
+
+    function addMillikanDataPoint(lam_nm) {
+      const f_hz = C_LIGHT / (lam_nm * 1e-9);
+      const E_phot = (H_EVS * C_LIGHT) / (lam_nm * 1e-9);
+      const v0 = Math.max(E_phot - phi_eV, 0);
+      if (v0 > 0) {
+        if (!millikanData.some(p => Math.abs(p.lambda_nm - lam_nm) < 3)) {
+          millikanData.push({ f_hz, v0_v: v0, lambda_nm: lam_nm, metal: metalName });
+        }
+      }
+      drawMillikanPlot();
+    }
+
+    if (btnRecordPoint) {
+      btnRecordPoint.addEventListener('click', () => {
+        addMillikanDataPoint(lambda_nm);
+      });
+    }
+
+    if (btnAutoScan) {
+      btnAutoScan.addEventListener('click', () => {
+        // Auto-sample 5 spectral wavelengths from UV to visible
+        [220, 270, 340, 410, 480].forEach(lam => {
+          addMillikanDataPoint(lam);
+        });
+      });
+    }
+
+    if (btnClearPoints) {
+      btnClearPoints.addEventListener('click', () => {
+        millikanData = [];
+        drawMillikanPlot();
+      });
+    }
+
+    function drawMillikanPlot() {
+      if (!mctx) return;
+      const W = mCanvas.width;
+      const H = mCanvas.height;
+      mctx.clearRect(0, 0, W, H);
+
+      const padL = 60, padR = 30, padT = 30, padB = 45;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+
+      const fMin = 4e14, fMax = 15e14;
+      const vMin = 0.0, vMax = 4.2;
+
+      function toX(f) { return padL + ((f - fMin) / (fMax - fMin)) * plotW; }
+      function toY(v) { return H - padB - ((v - vMin) / (vMax - vMin)) * plotH; }
+
+      // Grid lines
+      mctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      mctx.lineWidth = 1;
+      for (let f = 4e14; f <= 15e14; f += 2e14) {
+        const x = toX(f);
+        mctx.beginPath(); mctx.moveTo(x, padT); mctx.lineTo(x, H - padB); mctx.stroke();
+      }
+      for (let v = 0; v <= 4.0; v += 1.0) {
+        const y = toY(v);
+        mctx.beginPath(); mctx.moveTo(padL, y); mctx.lineTo(W - padR, y); mctx.stroke();
+      }
+
+      // Axes
+      mctx.strokeStyle = '#94a3b8';
+      mctx.lineWidth = 1.5;
+      mctx.beginPath();
+      mctx.moveTo(padL, padT);
+      mctx.lineTo(padL, H - padB);
+      mctx.lineTo(W - padR, H - padB);
+      mctx.stroke();
+
+      // Axis Labels
+      mctx.fillStyle = '#94a3b8';
+      mctx.font = '11px "JetBrains Mono", monospace';
+      mctx.textAlign = 'center';
+      for (let f = 4e14; f <= 14e14; f += 2e14) {
+        const x = toX(f);
+        mctx.fillText((f / 1e14).toFixed(0), x, H - padB + 16);
+      }
+      mctx.fillText('ความถี่แสง f (× 10¹⁴ Hz)', padL + plotW / 2, H - 8);
+
+      mctx.textAlign = 'right';
+      for (let v = 0; v <= 4.0; v += 1.0) {
+        const y = toY(v);
+        mctx.fillText(v.toFixed(1), padL - 8, y + 4);
+      }
+      mctx.save();
+      mctx.translate(14, padT + plotH / 2);
+      mctx.rotate(-Math.PI / 2);
+      mctx.textAlign = 'center';
+      mctx.fillText('ศักย์หยุดยั้ง V0 (V)', 0, 0);
+      mctx.restore();
+
+      // Linear Regression if >= 2 points
+      let slope = 0, intercept = 0, h_exp = 0, errPct = 0;
+      if (millikanData.length >= 2) {
+        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+        const N = millikanData.length;
+        millikanData.forEach(p => {
+          sumX += p.f_hz;
+          sumY += p.v0_v;
+          sumXY += p.f_hz * p.v0_v;
+          sumX2 += p.f_hz * p.f_hz;
+        });
+        slope = (N * sumXY - sumX * sumY) / (N * sumX2 - sumX * sumX);
+        intercept = (sumY - slope * sumX) / N;
+
+        const E_CHARGE = 1.602176634e-19;
+        h_exp = slope * E_CHARGE;
+        const H_ACTUAL = 6.62607015e-34;
+        errPct = Math.abs((h_exp - H_ACTUAL) / H_ACTUAL) * 100;
+
+        // Draw Best-Fit Line
+        const fStart = Math.max(-intercept / slope, fMin);
+        const fEnd = fMax;
+        const x1 = toX(fStart), y1 = toY(Math.max(slope * fStart + intercept, 0));
+        const x2 = toX(fEnd), y2 = toY(slope * fEnd + intercept);
+
+        mctx.strokeStyle = '#00f0ff';
+        mctx.lineWidth = 2.5;
+        mctx.beginPath();
+        mctx.moveTo(x1, y1);
+        mctx.lineTo(x2, y2);
+        mctx.stroke();
+
+        // Threshold frequency f0 annotation
+        const f0 = -intercept / slope;
+        if (f0 >= fMin && f0 <= fMax) {
+          mctx.fillStyle = '#ec4899';
+          mctx.beginPath();
+          mctx.arc(toX(f0), toY(0), 4, 0, Math.PI * 2);
+          mctx.fill();
+          mctx.font = '10px "Prompt", sans-serif';
+          mctx.textAlign = 'center';
+          mctx.fillText(`f0 = ${(f0/1e14).toFixed(2)}×10¹⁴ Hz`, toX(f0), toY(0) - 8);
+        }
+      }
+
+      // Draw Data Points
+      millikanData.forEach(p => {
+        const px = toX(p.f_hz);
+        const py = toY(p.v0_v);
+        mctx.fillStyle = '#fbbf24';
+        mctx.beginPath();
+        mctx.arc(px, py, 5, 0, Math.PI * 2);
+        mctx.fill();
+        mctx.strokeStyle = '#fff';
+        mctx.lineWidth = 1.5;
+        mctx.stroke();
+
+        mctx.fillStyle = '#e2e8f0';
+        mctx.font = '9px "JetBrains Mono", monospace';
+        mctx.textAlign = 'left';
+        mctx.fillText(`${p.lambda_nm}nm`, px + 7, py - 3);
+      });
+
+      // Update telemetry badges
+      const countEl = document.getElementById('stat-points-count');
+      const recLamEl = document.getElementById('rec-lambda');
+      if (countEl) countEl.innerText = millikanData.length;
+      if (recLamEl) recLamEl.innerText = lambda_nm;
+      if (millikanData.length >= 2) {
+        document.getElementById('stat-slope').innerText = slope.toExponential(3) + ' V·s';
+        document.getElementById('stat-hexp').innerText = h_exp.toExponential(3) + ' J·s';
+        document.getElementById('stat-error').innerText = errPct.toFixed(2) + ' %';
+      } else {
+        document.getElementById('stat-slope').innerText = '-- V·s';
+        document.getElementById('stat-hexp').innerText = '-- J·s';
+        document.getElementById('stat-error').innerText = '-- %';
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ห้องปฏิบัติการเสมือนจริง 3 มิติ และ WebAR: การแทรกสอดช่องคู่ของอิเล็กตรอนเดี่ยว — ผศ.ดร.ชีวะ ทัศนา</title>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --cyan: #00f0ff;
+      --gold: #f59e0b;
+      --purple: #a855f7;
+      --pink: #ec4899;
+      --green: #10b981;
+      --dark-bg: #020617;
+      --card-bg: rgba(6, 12, 28, 0.42);
+      --card-bg-hover: rgba(8, 16, 36, 0.60);
+      --glass-border: rgba(0, 240, 255, 0.20);
+      --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+    body {
+      background: var(--dark-bg);
+      color: #f8fafc;
+      font-family: 'Prompt', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    #canvas-container { position: absolute; inset: 0; z-index: 1; }
+
+    /* Top Navigation Mode Switcher */
+    .top-nav-bar {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(8, 14, 30, 0.55);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      padding: 5px 10px;
+      border-radius: 40px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      max-width: 95vw;
+    }
+    .mode-tab {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 600;
+      font-size: 0.82em;
+      padding: 7px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.22s ease;
+    }
+    .mode-tab:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.08);
+    }
+    .mode-tab.active {
+      color: #030712;
+      background: var(--cyan);
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.55);
+      font-weight: 700;
+    }
+    .zen-toggle-btn {
+      color: #cbd5e1;
+      border: 1px solid rgba(255,255,255,0.15);
+      margin-left: 4px;
+    }
+    .zen-toggle-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* Left Control HUD */
+    .left-hud-stack {
+      position: absolute;
+      top: 72px;
+      left: 16px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: clamp(265px, 23vw, 310px);
+      pointer-events: auto;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .left-hud-stack.collapsed {
+      transform: translateX(calc(-100% - 24px));
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Right Telemetry HUD */
+    .right-hud-stack {
+      position: absolute;
+      top: 72px;
+      right: 16px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: clamp(265px, 23vw, 305px);
+      pointer-events: auto;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .right-hud-stack.collapsed {
+      transform: translateX(calc(100% + 24px));
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Glass Panels */
+    .glass-panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: var(--glass-shadow);
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .glass-panel:hover {
+      background: var(--card-bg-hover);
+      border-color: rgba(0, 240, 255, 0.35);
+    }
+
+    .title-panel {
+      border-left: 5px solid var(--cyan);
+    }
+    .title-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .title-panel h1 {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.98em;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.3;
+    }
+    .title-panel p {
+      font-size: 0.74em;
+      color: #94a3b8;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+    .author-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 0.70em;
+      color: var(--gold);
+      background: rgba(245, 158, 11, 0.12);
+      padding: 2px 8px;
+      border-radius: 14px;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .panel-header-badge {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.84em;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 5px;
+    }
+    .hud-btn-mini {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72em;
+      transition: all 0.2s ease;
+    }
+    .hud-btn-mini:hover {
+      background: var(--cyan);
+      color: #030712;
+      border-color: var(--cyan);
+    }
+
+    /* Floating Dock Open Buttons */
+    .floating-dock {
+      position: absolute;
+      top: 76px;
+      z-index: 35;
+      background: rgba(8, 14, 30, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--cyan);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7), 0 0 12px rgba(0, 240, 255, 0.25);
+      color: #fff;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.75em;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.22s ease;
+    }
+    .floating-dock:hover {
+      background: var(--cyan);
+      color: #030712;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+      transform: scale(1.04);
+    }
+    .dock-left { left: 16px; }
+    .dock-right { right: 16px; border-color: var(--green); }
+    .dock-right:hover { background: var(--green); }
+
+    /* Controls Styling */
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ctrl-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .ctrl-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.76em;
+      color: #cbd5e1;
+    }
+    .ctrl-head span.val {
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.95em;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      border-radius: 3px;
+      background: rgba(30, 41, 59, 0.85);
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--cyan);
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .preset-btns {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .preset-btn {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      color: #cbd5e1;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.72em;
+      padding: 5px 3px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+    .preset-btn:hover {
+      background: rgba(0, 240, 255, 0.2);
+      color: #fff;
+      border-color: var(--cyan);
+    }
+    .preset-btn.active {
+      background: var(--cyan);
+      color: #030712;
+      font-weight: 700;
+      border-color: var(--cyan);
+    }
+    .preset-btn.danger {
+      border-color: var(--pink);
+      color: var(--pink);
+    }
+    .preset-btn.danger.active {
+      background: var(--pink);
+      color: #fff;
+      box-shadow: 0 0 14px rgba(236, 72, 153, 0.6);
+    }
+
+    /* Telemetry Metrics */
+    .telemetry-panel {
+      border-right: 5px solid var(--green);
+    }
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin: 5px 0;
+      font-size: 0.76em;
+    }
+    .metric-label {
+      color: #94a3b8;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .metric-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--cyan);
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .metric-val.green { color: var(--green); }
+    .metric-val.purple { color: var(--purple); }
+    .metric-val.pink { color: var(--pink); }
+    .metric-val.gold { color: var(--gold); }
+
+    .status-indicator-bar {
+      margin-top: 6px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 0.72em;
+      font-weight: 600;
+      text-align: center;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--green);
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+    }
+    .status-indicator-bar.collapse {
+      background: rgba(236, 72, 153, 0.15);
+      border-color: var(--pink);
+      color: var(--pink);
+    }
+
+    .formula-panel {
+      border-right: 5px solid var(--purple);
+      font-size: 0.74em;
+    }
+    .formula-text {
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.55;
+      color: #cbd5e1;
+      font-size: 0.92em;
+    }
+
+    /* Mode 2 Book AR Overlay */
+    #book-ar-container {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: none;
+      pointer-events: none;
+    }
+    .book-reticle-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(480px, 86vw);
+      height: min(320px, 58vh);
+      border: 2px dashed rgba(0, 240, 255, 0.55);
+      border-radius: 18px;
+      box-shadow: 0 0 40px rgba(0, 240, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.04) 0%, transparent 70%);
+      pointer-events: auto;
+    }
+    .reticle-corner {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-color: var(--cyan);
+      border-style: solid;
+    }
+    .corner-tl { top: -2px; left: -2px; border-width: 4px 0 0 4px; border-top-left-radius: 10px; }
+    .corner-tr { top: -2px; right: -2px; border-width: 4px 4px 0 0; border-top-right-radius: 10px; }
+    .corner-bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; border-bottom-left-radius: 10px; }
+    .corner-br { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; border-bottom-right-radius: 10px; }
+
+    .ar-book-page-preview {
+      width: 92%;
+      height: 65%;
+      background: rgba(10, 16, 32, 0.65);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+      gap: 6px;
+    }
+    .ar-status-badge {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--green);
+      color: var(--green);
+      padding: 3px 10px;
+      border-radius: 16px;
+      font-size: 0.72em;
+      font-family: 'Chakra Petch', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Mode 3 Hand Tracking Overlay */
+    #hand-cam-wrapper {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 180px;
+      height: 135px;
+      border-radius: 14px;
+      border: 2px solid var(--purple);
+      background: #000;
+      z-index: 50;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(168, 85, 247, 0.35);
+      overflow: hidden;
+      display: none;
+    }
+    #hand-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+    #hand-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform: scaleX(-1);
+    }
+    .hand-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(0,0,0,0.7);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.68em;
+      color: var(--purple);
+      border: 1px solid var(--purple);
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    .gesture-indicator-box {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 45;
+      background: rgba(8, 14, 30, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--purple);
+      border-radius: 30px;
+      padding: 6px 18px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+      white-space: nowrap;
+    }
+    .gesture-step {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74em;
+      color: #e2e8f0;
+    }
+    .gesture-step span.key {
+      background: rgba(168, 85, 247, 0.25);
+      color: var(--purple);
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-family: 'Chakra Petch', sans-serif;
+    }
+
+    .bottom-strip {
+      position: absolute;
+      bottom: 12px;
+      left: 18px;
+      z-index: 25;
+      font-size: 0.72em;
+      color: #64748b;
+      display: flex;
+      gap: 14px;
+      pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      .left-hud-stack, .right-hud-stack {
+        width: 250px;
+        top: 66px;
+      }
+      .left-hud-stack { left: 10px; }
+      .right-hud-stack { right: 10px; }
+      .top-nav-bar {
+        top: 10px;
+        padding: 4px 8px;
+      }
+      .mode-tab {
+        padding: 5px 10px;
+        font-size: 0.76em;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .top-nav-bar {
+        width: 96vw;
+        justify-content: space-between;
+        gap: 3px;
+      }
+      .mode-tab {
+        padding: 5px 8px;
+        font-size: 0.72em;
+      }
+      .mode-tab span:not(.tab-icon) {
+        display: none;
+      }
+      .left-hud-stack, .right-hud-stack {
+        width: calc(100vw - 24px);
+        max-height: 48vh;
+        overflow-y: auto;
+      }
+      .left-hud-stack {
+        left: 12px;
+        top: 60px;
+      }
+      .right-hud-stack {
+        right: 12px;
+        top: auto;
+        bottom: 50px;
+      }
+      .bottom-strip { display: none; }
+      #hand-cam-wrapper {
+        width: 130px;
+        height: 95px;
+        bottom: 12px;
+        right: 12px;
+      }
+      .gesture-indicator-box {
+        bottom: 12px;
+        padding: 4px 10px;
+        font-size: 0.85em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <!-- Top 3-Mode Switcher + Zen Focus Toggle -->
+  <div class="top-nav-bar">
+    <button class="mode-tab active" id="tab-mode-3d">
+      <span class="tab-icon">🕹️</span> <span>โหมด 1 3D เสมือนจริง</span>
+    </button>
+    <button class="mode-tab" id="tab-mode-ar">
+      <span class="tab-icon">🎯</span> <span>โหมด 2 AR สแกนหนังสือ</span>
+    </button>
+    <button class="mode-tab" id="tab-mode-hand">
+      <span class="tab-icon">🖐️</span> <span>โหมด 3 AI ตรวจจับมือ</span>
+    </button>
+    <button class="mode-tab zen-toggle-btn" id="btn-zen-mode" title="ซ่อน/แสดงแถบทั้งหมด">
+      <span class="tab-icon">👁️</span> <span>ย่อทุกบาร์</span>
+    </button>
+  </div>
+
+  <!-- Left Floating Dock Button -->
+  <div class="floating-dock dock-left" id="dock-left">
+    <span>⚙️ แผงควบคุม</span> <span>▶</span>
+  </div>
+
+  <!-- Right Floating Dock Button -->
+  <div class="floating-dock dock-right" id="dock-right">
+    <span>◀</span> <span>🔬 คลื่นสสารเดอบรอยล์</span>
+  </div>
+
+  <!-- Left Control HUD -->
+  <div class="left-hud-stack" id="left-hud">
+    <div class="glass-panel title-panel">
+      <div class="title-header-row">
+        <h1>🎯 สลิตคู่ของอิเล็กตรอนเดี่ยว</h1>
+        <button class="hud-btn-mini" id="btn-collapse-left" title="ย่อแถบซ้าย">◀</button>
+      </div>
+      <p>ทวิภาวะคลื่น-อนุภาค การสะสมลายแทรกสอด และการยุบตัวของฟังก์ชันคลื่น</p>
+      <div class="author-tag">
+        <span>👨‍🏫</span> ผศ.ดร.ชีวะ ทัศนา — มรภ.รำไพพรรณี
+      </div>
+    </div>
+
+    <div class="glass-panel">
+      <div class="panel-header-badge" style="color:var(--cyan);">
+        <span>⚙️ พารามิเตอร์ลำอิเล็กตรอน</span>
+        <span id="active-mode-label" style="font-size:0.85em; color:#94a3b8;">โหมด 1 (3D)</span>
+      </div>
+
+      <div class="control-group">
+        <div class="ctrl-item">
+          <div class="ctrl-head">
+            <span>พลังงานจลน์อิเล็กตรอน E</span>
+            <span class="val" id="val-energy">150 eV</span>
+          </div>
+          <input type="range" id="slider-energy" min="50" max="600" step="10" value="150">
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setEnergy(80)">80 eV (คลื่นยาว)</button>
+            <button class="preset-btn active" onclick="setEnergy(150)">150 eV (มาตรฐาน)</button>
+            <button class="preset-btn" onclick="setEnergy(450)">450 eV (คลื่นสั้น)</button>
+          </div>
+        </div>
+
+        <div class="ctrl-item" style="margin-top:6px;">
+          <div class="ctrl-head">
+            <span>ระยะห่างระหว่างช่องสลิต d</span>
+            <span class="val" id="val-d">1.5 μm</span>
+          </div>
+          <input type="range" id="slider-d" min="0.5" max="3.0" step="0.1" value="1.5">
+        </div>
+
+        <div class="ctrl-item" style="margin-top:6px;">
+          <div class="ctrl-head">
+            <span>ความกว้างช่องสลิตเดี่ยว a</span>
+            <span class="val" id="val-a">0.30 μm</span>
+          </div>
+          <input type="range" id="slider-a" min="0.10" max="0.80" step="0.05" value="0.30">
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setSlitWidth(0.15)">0.15 μm (ไฮเซนแบร์กกว้าง)</button>
+            <button class="preset-btn active" onclick="setSlitWidth(0.30)">0.30 μm (มาตรฐาน)</button>
+            <button class="preset-btn" onclick="setSlitWidth(0.60)">0.60 μm (จำกัดแถบ)</button>
+          </div>
+        </div>
+
+        <div class="ctrl-item" style="margin-top:6px;">
+          <div class="ctrl-head">
+            <span>อัตรายิงอนุภาค (Rate)</span>
+            <span class="val" id="val-rate">เร็ว (120/วินาที)</span>
+          </div>
+          <div class="preset-btns">
+            <button class="preset-btn" onclick="setFireRate(1)">ทีละตัว (1/s)</button>
+            <button class="preset-btn" onclick="setFireRate(10)">ปานกลาง (10/s)</button>
+            <button class="preset-btn active" onclick="setFireRate(120)">ต่อเนื่อง (120/s)</button>
+          </div>
+        </div>
+
+        <div class="preset-btns" style="margin-top:8px;">
+          <button class="preset-btn danger" id="btn-detector">
+            👁️ เปิดเครื่องตรวจจับช่อง (Which-Way)
+          </button>
+        </div>
+        <div class="preset-btns">
+          <button class="preset-btn" id="btn-toggle-wave">
+            🌊 คลื่นความน่าจะเป็น ψ
+          </button>
+          <button class="preset-btn" id="btn-clear">
+            🧹 ล้างฉากฟอสเฟอร์
+          </button>
+          <button class="preset-btn" id="btn-reset-view">
+            🔄 รีเซ็ตมุมมอง
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Telemetry Stack -->
+  <div class="right-hud-stack" id="right-hud">
+    <div class="glass-panel telemetry-panel">
+      <div class="panel-header-badge" style="color:var(--green);">
+        <span>🔬 การวัดคลื่นสสารและฟังก์ชันคลื่น</span>
+        <button class="hud-btn-mini" id="btn-collapse-right" title="ย่อแถบขวา">▶</button>
+      </div>
+
+      <div class="metric-row">
+        <span class="metric-label">ความยาวคลื่นเดอบรอยล์ λ</span>
+        <span class="metric-val green" id="telem-lambda">0.100 nm</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">โมเมนตัมอิเล็กตรอน p</span>
+        <span class="metric-val" id="telem-momentum">6.61 × 10⁻²⁴ kg·m/s</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">ระยะห่างแถบสว่าง Δy</span>
+        <span class="metric-val" id="telem-dy">0.67 mm</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">ความกว้างสลิตเดี่ยว a</span>
+        <span class="metric-val" id="telem-a">0.30 μm</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">ความไม่แน่นอนไฮเซนแบร์ก Δpx</span>
+        <span class="metric-val" id="telem-dpx" style="color:#fbbf24;">3.52 × 10⁻²⁸ kg·m/s</span>
+      </div>
+
+      <div style="margin:6px 0; border-top:1px dashed rgba(255,255,255,0.12);"></div>
+
+      <div class="metric-row">
+        <span class="metric-label">จำนวนอนุภาคที่สะสม</span>
+        <span class="metric-val gold" id="telem-count">0 อนุภาค</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">สถานะสถานะทางควอนตัม</span>
+        <span class="metric-val green" id="telem-state">คลื่นซ้อนทับ (Superposition)</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">รูปแบบการกระจายตัว</span>
+        <span class="metric-val green" id="telem-pattern">|ψ1 + ψ2|² (ลายแทรกสอด)</span>
+      </div>
+
+      <div class="status-indicator-bar" id="telem-status">
+        🌊 ปรากฏการณ์แทรกสอดคลื่นสสารเชิงความน่าจะเป็น
+      </div>
+    </div>
+
+    <!-- Live Quantum Formula Card -->
+    <div class="glass-panel formula-panel">
+      <div class="panel-header-badge" style="color:var(--purple); border-color:rgba(168,85,247,0.25);">
+        <span>📐 สมการและกฎฟิสิกส์หลัก</span>
+      </div>
+      <div class="formula-text">
+        <div>• ความยาวคลื่นเดอบรอยล์ ---- λ = h / p = h / √(2mE)</div>
+        <div>• แถบเลี้ยวเบนสลิตเดี่ยว ---- D(x) = [sin(β)/β]² (β = πax/λL)</div>
+        <div>• แถบแทรกสอดควอนตัม ---- P(x) ∝ D(x) · cos²(πdx/λL)</div>
+        <div>• ความไม่แน่นอนไฮเซนแบร์ก ---- Δx · Δpx ≥ ℏ/2 (a เล็ก ⇒ แถบกว้าง)</div>
+        <div>• การยุบตัวฟังก์ชันคลื่น ---- P_det(x) = |ψ1|² + |ψ2|²</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode 2: AR Marker Book Scan Overlay -->
+  <div id="book-ar-container">
+    <div class="book-reticle-box">
+      <div class="reticle-corner corner-tl"></div>
+      <div class="reticle-corner corner-tr"></div>
+      <div class="reticle-corner corner-bl"></div>
+      <div class="reticle-corner corner-br"></div>
+
+      <div class="ar-status-badge">
+        <span>📷</span> ตรวจพบมาร์กเกอร์หน้าตำรา บทที่ 2 (Target Locked 100%)
+      </div>
+
+      <div class="ar-book-page-preview">
+        <div style="font-size:0.86em; font-weight:700; color:var(--cyan); font-family:'Chakra Petch';">
+          📖 ฟิสิกส์ควอนตัมเบื้องต้น ด้วยเทคโนโลยีเสมือนจริงและการคำนวณปัญญาประดิษฐ์
+        </div>
+        <div style="font-size:0.72em; color:#94a3b8;">
+          บทที่ 2 ทวิภาวะคลื่น-อนุภาคและการทดลองสลิตคู่ (Double-Slit Experiment) — หน้า 38
+        </div>
+        <div style="display:flex; gap:8px; margin-top:4px;">
+          <button class="preset-btn active" id="btn-ar-simulate">จำลองวัตถุ 3D ลอยเหนือหน้ากระดาษ</button>
+          <button class="preset-btn" onclick="toggleBookBackdrop()">สลับฉากหลังกระดาษ</button>
+        </div>
+      </div>
+
+      <div style="font-size:0.70em; color:#94a3b8; text-align:center;">
+        ส่องกล้องไปยังภาพชุดทดลองสลิตคู่ในเล่มเพื่อฉายภาพโฮโลแกรม 3 มิติ
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode 3: Hand Tracking PIP & HUD -->
+  <div id="hand-cam-wrapper">
+    <video id="hand-video" autoplay playsinline muted></video>
+    <canvas id="hand-canvas"></canvas>
+    <div class="hand-badge">🖐️ MediaPipe Hand AI</div>
+  </div>
+
+  <div class="gesture-indicator-box" id="gesture-hud">
+    <div class="gesture-step">
+      <span class="key">ยกมือขึ้น-ลง</span>
+      <span>ปรับพลังงาน E (50eV - 600eV)</span>
+    </div>
+    <div class="gesture-step" style="border-left:1px solid rgba(255,255,255,0.2); padding-left:10px;">
+      <span class="key">จีบนิ้วชี้-โป้ง (Pinch)</span>
+      <span>ยิงพัลส์อิเล็กตรอน</span>
+    </div>
+    <button class="preset-btn" id="btn-simulate-gesture" style="margin-left:6px; padding:3px 8px;">
+      ทดสอบ Gesture
+    </button>
+  </div>
+
+  <div class="bottom-strip">
+    <span>💡 เมาส์ซ้ายหมุนมุมมอง 3D</span>
+    <span>💡 ลูกกลิ้งเมาส์ซูม</span>
+    <span>💡 กด H เพื่อซ่อน/เปิดแถบควบคุม</span>
+  </div>
+
+  <script>
+    // ----------------------------------------------------
+    // 1. THREE.JS SCENE, SHADOWS, PBR LIGHTING
+    // ----------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x020617);
+    scene.fog = new THREE.FogExp2(0x020617, 0.018);
+
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(-15, 7.5, 1);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.target.set(0, 2.5, 1.0);
+    controls.maxPolarAngle = Math.PI / 2 + 0.05;
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    keyLight.position.set(8, 22, 14);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 1024;
+    keyLight.shadow.mapSize.height = 1024;
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x00f0ff, 0.4);
+    fillLight.position.set(-12, 10, -8);
+    scene.add(fillLight);
+
+    // Optical Bench Table Floor
+    const floorGeo = new THREE.PlaneGeometry(36, 36);
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x070d1e, roughness: 0.45, metalness: 0.6 });
+    const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+    floorMesh.rotation.x = -Math.PI / 2;
+    floorMesh.position.y = -0.01;
+    floorMesh.receiveShadow = true;
+    scene.add(floorMesh);
+
+    const grid = new THREE.GridHelper(32, 32, 0x00f0ff, 0x1e293b);
+    grid.position.y = 0.005;
+    scene.add(grid);
+
+    // Optical Bench Rail along Z axis (from Gun at -8 to Screen at +8)
+    const railGeo = new THREE.BoxGeometry(1.4, 0.25, 20);
+    const railMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 });
+    const benchRail = new THREE.Mesh(railGeo, railMat);
+    benchRail.position.set(0, 0.12, 0);
+    benchRail.receiveShadow = true;
+    scene.add(benchRail);
+
+    // ----------------------------------------------------
+    // 2. FIELD EMISSION ELECTRON GUN (Z = -8.5)
+    // ----------------------------------------------------
+    const gunGroup = new THREE.Group();
+    gunGroup.position.set(0, 0, -8.5);
+
+    // Stand base
+    const gunStandGeo = new THREE.CylinderGeometry(1.2, 1.4, 0.35, 24);
+    const castIronMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.7, metalness: 0.5 });
+    const gunStand = new THREE.Mesh(gunStandGeo, castIronMat);
+    gunStand.position.y = 0.17;
+    gunGroup.add(gunStand);
+
+    // Vertical Chrome Rod
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.15, metalness: 0.95 });
+    const gunRod = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 2.2, 16), chromeMat);
+    gunRod.position.set(0, 1.2, 0);
+    gunGroup.add(gunRod);
+
+    // Electron Gun Barrel Housing (Brushed Metal)
+    const gunBarrelGeo = new THREE.CylinderGeometry(0.7, 0.85, 2.8, 32);
+    gunBarrelGeo.rotateX(Math.PI / 2);
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.35 });
+    const gunBarrel = new THREE.Mesh(gunBarrelGeo, steelMat);
+    gunBarrel.position.set(0, 2.5, 0);
+    gunGroup.add(gunBarrel);
+
+    // High Voltage Ceramic Insulator Rings
+    for (let r = -2; r <= 1; r++) {
+      const ringMesh = new THREE.Mesh(
+        new THREE.TorusGeometry(0.78, 0.08, 16, 32),
+        new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.3, metalness: 0.85 })
+      );
+      ringMesh.position.set(0, 2.5, r * 0.5 - 0.2);
+      gunGroup.add(ringMesh);
+    }
+
+    // Gun Nozzle & Emissive Accelerator Ring
+    const gunNozzle = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.35, 0.65, 0.6, 24),
+      chromeMat
+    );
+    gunNozzle.rotation.x = Math.PI / 2;
+    gunNozzle.position.set(0, 2.5, 1.6);
+    gunGroup.add(gunNozzle);
+
+    const gunGlowLight = new THREE.PointLight(0x00f0ff, 2.0, 6);
+    gunGlowLight.position.set(0, 2.5, 1.8);
+    gunGroup.add(gunGlowLight);
+
+    scene.add(gunGroup);
+
+    // ----------------------------------------------------
+    // 3. NANOSCALE DOUBLE-SLIT BARRIER & WHICH-WAY DETECTOR (Z = -0.5)
+    // ----------------------------------------------------
+    const barrierGroup = new THREE.Group();
+    barrierGroup.position.set(0, 0, -0.5);
+
+    // Barrier Post Stand
+    const bStand = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.2, 0.35, 24), castIronMat);
+    bStand.position.y = 0.17;
+    barrierGroup.add(bStand);
+
+    const bRod = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.2, 16), chromeMat);
+    bRod.position.set(0, 1.2, 0);
+    barrierGroup.add(bRod);
+
+    // Double Slit Screen Plate (Machined Dark Metal)
+    const plateGeo = new THREE.BoxGeometry(6.5, 4.0, 0.15);
+    const plateMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.3 });
+    const barrierPlate = new THREE.Mesh(plateGeo, plateMat);
+    barrierPlate.position.set(0, 2.5, 0);
+    barrierGroup.add(barrierPlate);
+
+    // 2 Illuminated Nanoscale Slit Apertures
+    const slitMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+    const slitHeight = 2.4;
+    const slitWidth = 0.08;
+    const slitL = new THREE.Mesh(new THREE.BoxGeometry(slitWidth, slitHeight, 0.22), slitMat);
+    const slitR = new THREE.Mesh(new THREE.BoxGeometry(slitWidth, slitHeight, 0.22), slitMat);
+    slitL.position.set(-0.75, 2.5, 0);
+    slitR.position.set(0.75, 2.5, 0);
+    barrierGroup.add(slitL);
+    barrierGroup.add(slitR);
+
+    // Which-Way Detector Device (Optical Sensor over Slit 1)
+    const detectorGroup = new THREE.Group();
+    detectorGroup.position.set(-0.75, 4.0, 0);
+
+    const detBoxGeo = new THREE.BoxGeometry(0.8, 0.6, 0.8);
+    const detBoxMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.2 });
+    const detBox = new THREE.Mesh(detBoxGeo, detBoxMat);
+    detectorGroup.add(detBox);
+
+    const detLaserGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.6, 12);
+    const detLaserMat = new THREE.MeshBasicMaterial({ color: 0xec4899, transparent: true, opacity: 0.0 });
+    const detLaserBeam = new THREE.Mesh(detLaserGeo, detLaserMat);
+    detLaserBeam.position.set(0, -0.8, 0);
+    detectorGroup.add(detLaserBeam);
+
+    // LED Status Indicator on Detector
+    const detLedGeo = new THREE.SphereGeometry(0.1, 16, 16);
+    const detLedMat = new THREE.MeshBasicMaterial({ color: 0x475569 });
+    const detLed = new THREE.Mesh(detLedGeo, detLedMat);
+    detLed.position.set(0, 0.2, 0.42);
+    detectorGroup.add(detLed);
+
+    barrierGroup.add(detectorGroup);
+
+    // Wavefunction Interference Rings Group (Translucent waves spreading out)
+    const waveGroup = new THREE.Group();
+    waveGroup.position.set(0, 2.5, 0.1);
+    const waveRings = [];
+    for (let w = 1; w <= 6; w++) {
+      const ringL = new THREE.Mesh(
+        new THREE.RingGeometry(w * 0.8, w * 0.8 + 0.06, 32, 1, 0, Math.PI),
+        new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.35 - w * 0.04, side: THREE.DoubleSide })
+      );
+      ringL.rotation.x = Math.PI / 2;
+      ringL.position.set(-0.75, 0, 0);
+
+      const ringR = new THREE.Mesh(
+        new THREE.RingGeometry(w * 0.8, w * 0.8 + 0.06, 32, 1, 0, Math.PI),
+        new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.35 - w * 0.04, side: THREE.DoubleSide })
+      );
+      ringR.rotation.x = Math.PI / 2;
+      ringR.position.set(0.75, 0, 0);
+
+      waveGroup.add(ringL);
+      waveGroup.add(ringR);
+      waveRings.push({ ringL, ringR, baseR: w * 0.8 });
+    }
+    waveGroup.visible = true;
+    barrierGroup.add(waveGroup);
+
+    scene.add(barrierGroup);
+
+    // ----------------------------------------------------
+    // 4. PHOSPHOR SCINTILLATION SCREEN (Z = 8.5)
+    // ----------------------------------------------------
+    const screenGroup = new THREE.Group();
+    screenGroup.position.set(0, 0, 8.5);
+
+    // Screen Base Stand
+    const sStand = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 0.35, 24), castIronMat);
+    sStand.position.y = 0.17;
+    screenGroup.add(sStand);
+
+    const sRod = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 2.2, 16), chromeMat);
+    sRod.position.set(0, 1.2, 0);
+    screenGroup.add(sRod);
+
+    // Heavy Phosphor Frame & Active Detector Surface
+    const sFrameGeo = new THREE.BoxGeometry(9.6, 5.0, 0.2);
+    const sFrameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.85, roughness: 0.4 });
+    const screenFrame = new THREE.Mesh(sFrameGeo, sFrameMat);
+    screenFrame.position.set(0, 2.6, 0);
+    screenGroup.add(screenFrame);
+
+    // High-Persistence Phosphor Detector Plane
+    const pScreenGeo = new THREE.PlaneGeometry(9.0, 4.4);
+    const pScreenMat = new THREE.MeshStandardMaterial({
+      color: 0x05131f,
+      roughness: 0.9,
+      metalness: 0.1,
+      side: THREE.DoubleSide
+    });
+    const phosphorScreen = new THREE.Mesh(pScreenGeo, pScreenMat);
+    phosphorScreen.position.set(0, 2.6, -0.11);
+    phosphorScreen.rotation.y = Math.PI;
+    screenGroup.add(phosphorScreen);
+
+    // 3D Hit Points Accumulator (Point-by-Point Quantum Build-Up)
+    const MAX_HITS = 4000;
+    const hitGeo = new THREE.BufferGeometry();
+    const hitPositions = new Float32Array(MAX_HITS * 3);
+    const hitColors = new Float32Array(MAX_HITS * 3);
+    hitGeo.setAttribute('position', new THREE.BufferAttribute(hitPositions, 3));
+    hitGeo.setAttribute('color', new THREE.BufferAttribute(hitColors, 3));
+
+    const hitMat = new THREE.PointsMaterial({
+      size: 0.11,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.9,
+      blending: THREE.AdditiveBlending
+    });
+    const hitPoints = new THREE.Points(hitGeo, hitMat);
+    screenGroup.add(hitPoints);
+    let hitCount = 0;
+
+    // Flying Single Electron Particle in Transit
+    const flyingGeo = new THREE.BufferGeometry();
+    const flyingPos = new Float32Array(3);
+    flyingGeo.setAttribute('position', new THREE.BufferAttribute(flyingPos, 3));
+    const flyingMat = new THREE.PointsMaterial({
+      color: 0x00f0ff,
+      size: 0.28,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending
+    });
+    const flyingElectron = new THREE.Points(flyingGeo, flyingMat);
+    scene.add(flyingElectron);
+    let electronZ = -8.5;
+    let electronTargetX = 0;
+    let electronTargetY = 2.6;
+
+    // Top Holographic Intensity Curve above Screen
+    const curvePointsCount = 100;
+    const curveGeo = new THREE.BufferGeometry();
+    const curvePos = new Float32Array(curvePointsCount * 3);
+    curveGeo.setAttribute('position', new THREE.BufferAttribute(curvePos, 3));
+    const curveMat = new THREE.LineBasicMaterial({ color: 0x10b981, linewidth: 3 });
+    const intensityCurve = new THREE.Line(curveGeo, curveMat);
+    intensityCurve.position.set(0, 5.2, -0.11);
+    screenGroup.add(intensityCurve);
+
+    scene.add(screenGroup);
+
+    // --- (D) Simulated Book Page 3D Mesh (for Mode 2 AR) ---
+    const bookGeo = new THREE.PlaneGeometry(26, 17);
+    const bookCanvas = document.createElement('canvas');
+    bookCanvas.width = 1024;
+    bookCanvas.height = 660;
+    const bctx = bookCanvas.getContext('2d');
+    bctx.fillStyle = '#0a1024';
+    bctx.fillRect(0, 0, 1024, 660);
+    bctx.strokeStyle = '#00f0ff';
+    bctx.lineWidth = 5;
+    bctx.strokeRect(20, 20, 984, 620);
+    bctx.fillStyle = '#00f0ff';
+    bctx.font = 'bold 34px "Chakra Petch", sans-serif';
+    bctx.fillText('บทที่ 2 ทวิภาวะคลื่น-อนุภาคและการทดลองสลิตคู่', 60, 80);
+    bctx.fillStyle = '#f59e0b';
+    bctx.font = '26px "Prompt", sans-serif';
+    bctx.fillText('ผศ.ดร.ชีวะ ทัศนา — มหาวิทยาลัยราชภัฏรำไพพรรณี', 60, 130);
+    bctx.fillStyle = '#94a3b8';
+    bctx.font = '22px "JetBrains Mono", monospace';
+    bctx.fillText('de Broglie Relation: λ = h / p = h / √(2mE)', 60, 200);
+    bctx.fillText('Double Slit Probability: P(x) = |ψ1 + ψ2|²', 60, 245);
+    bctx.fillText('Wavefunction Collapse: P_det(x) = |ψ1|² + |ψ2|²', 60, 290);
+
+    const bookTex = new THREE.CanvasTexture(bookCanvas);
+    const bookMat = new THREE.MeshBasicMaterial({ map: bookTex, side: THREE.DoubleSide });
+    const bookMesh = new THREE.Mesh(bookGeo, bookMat);
+    bookMesh.rotation.x = -Math.PI / 2;
+    bookMesh.position.y = -0.05;
+    bookMesh.visible = false;
+    scene.add(bookMesh);
+
+    // ----------------------------------------------------
+    // 5. DE BROGLIE QUANTUM MECHANICS COMPUTATION ENGINE
+    // ----------------------------------------------------
+    let energy_eV = 150; // Kinetic Energy
+    let d_um = 1.5; // Slit separation
+    let a_um = 0.30; // Single slit width (Heisenberg diffraction parameter)
+    let detectorActive = false;
+    let fireRate = 120; // electrons per second
+    const L_DIST = 9.0; // Distance from slits to screen in Three.js units
+
+    // Physical Constants
+    const H_PLANCK = 6.62607015e-34; // J·s
+    const H_BAR = 1.054571817e-34; // J·s
+    const M_ELECTRON = 9.1093837e-31; // kg
+    const E_CHARGE = 1.602176634e-19; // C
+
+    function getDeBroglieParams() {
+      const E_joules = energy_eV * E_CHARGE;
+      const momentum = Math.sqrt(2 * M_ELECTRON * E_joules); // p = sqrt(2mE)
+      const lambda_m = H_PLANCK / momentum;
+      const lambda_nm = lambda_m * 1e9;
+      // Fringe spacing Delta y = lambda * L / d (scaled for visual proportionality)
+      const dy_mm = (lambda_nm * (L_DIST * 0.1) / (d_um * 0.1));
+      // Heisenberg momentum uncertainty across single slit: Delta px >= hbar / (2a)
+      const a_m = a_um * 1e-6;
+      const delta_px = H_BAR / (2 * a_m);
+      return { momentum, lambda_nm, dy_mm, delta_px };
+    }
+
+    function sampleScreenHitX() {
+      const { lambda_nm } = getDeBroglieParams();
+      const slitDist = d_um;
+      const slitWidthVal = a_um;
+
+      if (!detectorActive) {
+        // Quantum Double Slit modulated by Single Slit Diffraction Envelope:
+        // P(x) = [sin(beta)/beta]^2 * cos^2(alpha)
+        let trials = 0;
+        while (trials < 100) {
+          trials++;
+          const x = (Math.random() - 0.5) * 8.6;
+          const theta = x / L_DIST;
+          const alpha = (Math.PI * slitDist * 1000 * Math.sin(theta)) / (lambda_nm * 80.0);
+          const beta = (Math.PI * slitWidthVal * 1000 * Math.sin(theta)) / (lambda_nm * 80.0);
+          const sinc = Math.abs(beta) < 1e-4 ? (1 - beta * beta / 6) : (Math.sin(beta) / beta);
+          const diffEnvelope = sinc * sinc;
+          const interference = Math.pow(Math.cos(alpha), 2);
+          const prob = diffEnvelope * interference;
+          if (Math.random() < prob) return x;
+        }
+        return (Math.random() - 0.5) * 2.0;
+      } else {
+        // Classical Collapsed Distribution: 2 independent peaks behind each slit
+        const which = Math.random() < 0.5 ? -slitDist * 0.5 : slitDist * 0.5;
+        const spread = Math.max(slitWidthVal * 2.2, 0.4);
+        const x = which + (Math.random() + Math.random() + Math.random() - 1.5) * spread;
+        return Math.max(Math.min(x, 4.3), -4.3);
+      }
+    }
+
+    function recordElectronHit() {
+      if (hitCount < MAX_HITS) {
+        const x_hit = sampleScreenHitX();
+        const y_hit = 2.6 + (Math.random() - 0.5) * 3.8;
+        const idx = hitCount * 3;
+
+        hitPositions[idx] = x_hit;
+        hitPositions[idx + 1] = y_hit;
+        hitPositions[idx + 2] = -0.12;
+
+        // Color coding: Cyan for quantum interference, Pink for collapsed classical
+        if (!detectorActive) {
+          hitColors[idx] = 0.0; hitColors[idx + 1] = 0.94; hitColors[idx + 2] = 1.0;
+        } else {
+          hitColors[idx] = 0.96; hitColors[idx + 1] = 0.28; hitColors[idx + 2] = 0.65;
+        }
+
+        hitCount++;
+        hitGeo.attributes.position.needsUpdate = true;
+        hitGeo.attributes.color.needsUpdate = true;
+        document.getElementById('telem-count').innerText = hitCount.toLocaleString() + ' อนุภาค';
+      }
+    }
+
+    function updatePhysicsHUD() {
+      const { momentum, lambda_nm, dy_mm, delta_px } = getDeBroglieParams();
+      document.getElementById('telem-lambda').innerText = lambda_nm.toFixed(3) + ' nm';
+      document.getElementById('telem-momentum').innerText = momentum.toExponential(2) + ' kg·m/s';
+      document.getElementById('telem-dy').innerText = dy_mm.toFixed(2) + ' mm';
+      const aEl = document.getElementById('telem-a');
+      const dpxEl = document.getElementById('telem-dpx');
+      if (aEl) aEl.innerText = a_um.toFixed(2) + ' μm';
+      if (dpxEl) dpxEl.innerText = delta_px.toExponential(2) + ' kg·m/s';
+
+      // Update physical distance and width of slits in 3D
+      slitL.position.x = -d_um * 0.5;
+      slitR.position.x = d_um * 0.5;
+      slitL.scale.x = Math.max(a_um / 0.30, 0.3);
+      slitR.scale.x = Math.max(a_um / 0.30, 0.3);
+      detectorGroup.position.x = -d_um * 0.5;
+
+      // Update Intensity Profile Curve above screen
+      const cPos = curveGeo.attributes.position.array;
+      const slitDist = d_um;
+      const slitWidthVal = a_um;
+      for (let i = 0; i < curvePointsCount; i++) {
+        const x = (i / (curvePointsCount - 1)) * 8.6 - 4.3;
+        let y = 0;
+        const theta = x / L_DIST;
+        const beta = (Math.PI * slitWidthVal * 1000 * Math.sin(theta)) / (lambda_nm * 80.0);
+        const sinc = Math.abs(beta) < 1e-4 ? (1 - beta * beta / 6) : (Math.sin(beta) / beta);
+        const diffEnvelope = sinc * sinc;
+
+        if (!detectorActive) {
+          const alpha = (Math.PI * slitDist * 1000 * Math.sin(theta)) / (lambda_nm * 80.0);
+          y = diffEnvelope * Math.pow(Math.cos(alpha), 2) * 1.5;
+        } else {
+          const p1 = Math.exp(-Math.pow(x + slitDist * 0.5, 2) / (slitWidthVal * 1.5 + 0.3));
+          const p2 = Math.exp(-Math.pow(x - slitDist * 0.5, 2) / (slitWidthVal * 1.5 + 0.3));
+          y = (p1 + p2) * 0.85;
+        }
+        cPos[i * 3] = x;
+        cPos[i * 3 + 1] = y;
+        cPos[i * 3 + 2] = 0;
+      }
+      curveGeo.attributes.position.needsUpdate = true;
+      curveMat.color.setHex(!detectorActive ? 0x10b981 : 0xec4899);
+    }
+
+    // ----------------------------------------------------
+    // 6. UI LISTENERS & COLLAPSE / DOCK HANDLERS
+    // ----------------------------------------------------
+    const leftHud = document.getElementById('left-hud');
+    const rightHud = document.getElementById('right-hud');
+    const dockLeft = document.getElementById('dock-left');
+    const dockRight = document.getElementById('dock-right');
+    const btnCollapseLeft = document.getElementById('btn-collapse-left');
+    const btnCollapseRight = document.getElementById('btn-collapse-right');
+    const btnZenMode = document.getElementById('btn-zen-mode');
+
+    function toggleLeft(collapse) {
+      const isCol = collapse !== undefined ? collapse : !leftHud.classList.contains('collapsed');
+      leftHud.classList.toggle('collapsed', isCol);
+      dockLeft.style.display = isCol ? 'flex' : 'none';
+    }
+
+    function toggleRight(collapse) {
+      const isCol = collapse !== undefined ? collapse : !rightHud.classList.contains('collapsed');
+      rightHud.classList.toggle('collapsed', isCol);
+      dockRight.style.display = isCol ? 'flex' : 'none';
+    }
+
+    btnCollapseLeft.addEventListener('click', () => toggleLeft(true));
+    btnCollapseRight.addEventListener('click', () => toggleRight(true));
+    dockLeft.addEventListener('click', () => toggleLeft(false));
+    dockRight.addEventListener('click', () => toggleRight(false));
+
+    let allHidden = false;
+    btnZenMode.addEventListener('click', () => {
+      allHidden = !allHidden;
+      toggleLeft(allHidden);
+      toggleRight(allHidden);
+      btnZenMode.classList.toggle('active', allHidden);
+      btnZenMode.querySelector('span:last-child').innerText = allHidden ? 'แสดงบาร์' : 'ย่อทุกบาร์';
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'h' || e.key === 'H') {
+        btnZenMode.click();
+      }
+    });
+
+    // Sliders
+    const sliderEnergy = document.getElementById('slider-energy');
+    sliderEnergy.addEventListener('input', (e) => {
+      energy_eV = parseFloat(e.target.value);
+      document.getElementById('val-energy').innerText = energy_eV + ' eV';
+      updatePhysicsHUD();
+    });
+
+    const sliderD = document.getElementById('slider-d');
+    sliderD.addEventListener('input', (e) => {
+      d_um = parseFloat(e.target.value);
+      document.getElementById('val-d').innerText = d_um.toFixed(1) + ' μm';
+      updatePhysicsHUD();
+    });
+
+    const sliderA = document.getElementById('slider-a');
+    if (sliderA) {
+      sliderA.addEventListener('input', (e) => {
+        a_um = parseFloat(e.target.value);
+        document.getElementById('val-a').innerText = a_um.toFixed(2) + ' μm';
+        updatePhysicsHUD();
+      });
+    }
+
+    window.setSlitWidth = function(aVal) {
+      a_um = aVal;
+      if (sliderA) sliderA.value = a_um;
+      const valAEl = document.getElementById('val-a');
+      if (valAEl) valAEl.innerText = a_um.toFixed(2) + ' μm';
+      document.querySelectorAll('.left-hud-stack .preset-btn').forEach(b => {
+        if (b.innerText.includes(aVal.toFixed(2) + ' μm') || b.innerText.includes(aVal + ' μm')) b.classList.add('active');
+        else if (b.innerText.includes('ไฮเซนแบร์ก') || b.innerText.includes('มาตรฐาน') || b.innerText.includes('จำกัดแถบ')) b.classList.remove('active');
+      });
+      updatePhysicsHUD();
+    };
+
+    window.setEnergy = function(eVal) {
+      energy_eV = eVal;
+      sliderEnergy.value = energy_eV;
+      document.getElementById('val-energy').innerText = energy_eV + ' eV';
+      document.querySelectorAll('.left-hud-stack .preset-btn').forEach(b => {
+        if (b.innerText.includes(eVal + ' eV')) b.classList.add('active');
+        else if (b.innerText.includes('eV')) b.classList.remove('active');
+      });
+      updatePhysicsHUD();
+    };
+
+    window.setFireRate = function(rateVal) {
+      fireRate = rateVal;
+      let label = 'ต่อเนื่อง (120/s)';
+      if (rateVal === 1) label = 'ทีละตัว (1/s)';
+      else if (rateVal === 10) label = 'ปานกลาง (10/s)';
+      document.getElementById('val-rate').innerText = label;
+      document.querySelectorAll('.left-hud-stack .preset-btn').forEach(b => {
+        if (b.innerText.includes(rateVal + '/s') || (rateVal === 1 && b.innerText.includes('ทีละตัว'))) b.classList.add('active');
+        else if (b.innerText.includes('/s') || b.innerText.includes('ทีละตัว')) b.classList.remove('active');
+      });
+    };
+
+    // Which-Way Detector Toggle
+    const btnDetector = document.getElementById('btn-detector');
+    btnDetector.addEventListener('click', () => {
+      detectorActive = !detectorActive;
+      btnDetector.classList.toggle('active', detectorActive);
+      detLaserBeam.material.opacity = detectorActive ? 0.75 : 0.0;
+      detLed.material.color.setHex(detectorActive ? 0xec4899 : 0x475569);
+
+      const statusEl = document.getElementById('telem-status');
+      const stateEl = document.getElementById('telem-state');
+      const patternEl = document.getElementById('telem-pattern');
+
+      if (detectorActive) {
+        btnDetector.innerText = '👁️ เครื่องตรวจจับเปิดอยู่ (สังเกตการณ์)';
+        stateEl.innerText = 'อนุภาคแยกช่อง (ยุบตัว)';
+        stateEl.className = 'metric-val pink';
+        patternEl.innerText = '|ψ1|² + |ψ2|² (สองแถบคลาสสิก)';
+        patternEl.className = 'metric-val pink';
+        statusEl.innerText = '🛑 ฟังก์ชันคลื่นยุบตัวสู่อนุภาคเดี่ยว (ไร้การแทรกสอด)';
+        statusEl.className = 'status-indicator-bar collapse';
+      } else {
+        btnDetector.innerText = '👁️ เปิดเครื่องตรวจจับช่อง (Which-Way)';
+        stateEl.innerText = 'คลื่นซ้อนทับ (Superposition)';
+        stateEl.className = 'metric-val green';
+        patternEl.innerText = '|ψ1 + ψ2|² (ลายแทรกสอดควอนตัม)';
+        patternEl.className = 'metric-val green';
+        statusEl.innerText = '🌊 ปรากฏการณ์แทรกสอดคลื่นสสารเชิงความน่าจะเป็น';
+        statusEl.className = 'status-indicator-bar';
+      }
+      updatePhysicsHUD();
+    });
+
+    // Toggle Wavefront Rings
+    let waveVisible = true;
+    document.getElementById('btn-toggle-wave').addEventListener('click', (e) => {
+      waveVisible = !waveVisible;
+      waveGroup.visible = waveVisible;
+      e.target.classList.toggle('active', waveVisible);
+    });
+
+    // Clear Screen
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      hitCount = 0;
+      for (let i = 0; i < MAX_HITS * 3; i++) {
+        hitPositions[i] = 0;
+        hitColors[i] = 0;
+      }
+      hitGeo.attributes.position.needsUpdate = true;
+      hitGeo.attributes.color.needsUpdate = true;
+      document.getElementById('telem-count').innerText = '0 อนุภาค';
+    });
+
+    document.getElementById('btn-reset-view').addEventListener('click', () => {
+      camera.position.set(-15, 7.5, 1);
+      controls.target.set(0, 2.5, 1.0);
+      controls.update();
+    });
+
+    // ----------------------------------------------------
+    // 7. 3-MODE SWITCHER (3D -> AR MARKER -> HAND AI)
+    // ----------------------------------------------------
+    const tab3D = document.getElementById('tab-mode-3d');
+    const tabAR = document.getElementById('tab-mode-ar');
+    const tabHand = document.getElementById('tab-mode-hand');
+    const bookArContainer = document.getElementById('book-ar-container');
+    const handCamWrapper = document.getElementById('hand-cam-wrapper');
+    const gestureHud = document.getElementById('gesture-hud');
+    const activeModeLabel = document.getElementById('active-mode-label');
+
+    function switchMode(newMode) {
+      tab3D.classList.toggle('active', newMode === '3d');
+      tabAR.classList.toggle('active', newMode === 'ar');
+      tabHand.classList.toggle('active', newMode === 'hand');
+
+      if (newMode === '3d') {
+        activeModeLabel.innerText = 'โหมด 1 (3D)';
+        bookArContainer.style.display = 'none';
+        handCamWrapper.style.display = 'none';
+        gestureHud.style.display = 'none';
+        bookMesh.visible = false;
+        grid.visible = true;
+        camera.position.set(-15, 7.5, 1);
+        controls.target.set(0, 2.5, 1.0);
+        controls.update();
+      } else if (newMode === 'ar') {
+        activeModeLabel.innerText = 'โหมด 2 (AR Book)';
+        bookArContainer.style.display = 'block';
+        handCamWrapper.style.display = 'none';
+        gestureHud.style.display = 'none';
+        bookMesh.visible = true;
+        grid.visible = false;
+        camera.position.set(-14, 11, 3);
+        controls.target.set(0, 2.2, 1.0);
+        controls.update();
+      } else if (newMode === 'hand') {
+        activeModeLabel.innerText = 'โหมด 3 (Hand AI)';
+        bookArContainer.style.display = 'none';
+        handCamWrapper.style.display = 'block';
+        gestureHud.style.display = 'flex';
+        bookMesh.visible = false;
+        grid.visible = true;
+        camera.position.set(-15, 7.5, 1);
+        controls.target.set(0, 2.5, 1.0);
+        controls.update();
+        startHandTracking();
+      }
+    }
+
+    tab3D.addEventListener('click', () => switchMode('3d'));
+    tabAR.addEventListener('click', () => switchMode('ar'));
+    tabHand.addEventListener('click', () => switchMode('hand'));
+
+    window.toggleBookBackdrop = function() {
+      bookMesh.visible = !bookMesh.visible;
+    };
+
+    document.getElementById('btn-ar-simulate').addEventListener('click', () => {
+      let startTime = Date.now();
+      function floatAnim() {
+        const elapsed = (Date.now() - startTime) / 1000;
+        gunGroup.position.y = Math.sin(elapsed * 3) * 0.4;
+        barrierGroup.position.y = Math.sin(elapsed * 3 + 1) * 0.4;
+        screenGroup.position.y = Math.sin(elapsed * 3 + 2) * 0.4;
+        if (elapsed < 3) requestAnimationFrame(floatAnim);
+        else {
+          gunGroup.position.y = 0;
+          barrierGroup.position.y = 0;
+          screenGroup.position.y = 0;
+        }
+      }
+      floatAnim();
+    });
+
+    // ----------------------------------------------------
+    // 8. MEDIAPIPE HAND TRACKING (MODE 3)
+    // ----------------------------------------------------
+    let handTrackerStarted = false;
+    let videoElement = document.getElementById('hand-video');
+    let handCanvas = document.getElementById('hand-canvas');
+    let handCtx = handCanvas.getContext('2d');
+
+    function startHandTracking() {
+      if (handTrackerStarted) return;
+      handTrackerStarted = true;
+
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })
+          .then(stream => {
+            videoElement.srcObject = stream;
+            if (window.Hands) {
+              const hands = new Hands({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+              });
+              hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+              });
+              hands.onResults(onHandResults);
+
+              const cameraFeed = new Camera(videoElement, {
+                onFrame: async () => {
+                  await hands.send({ image: videoElement });
+                },
+                width: 320,
+                height: 240
+              });
+              cameraFeed.start();
+            }
+          })
+          .catch(err => {
+            console.log('Webcam fallback active in sandbox:', err);
+          });
+      }
+    }
+
+    function onHandResults(results) {
+      handCanvas.width = videoElement.videoWidth;
+      handCanvas.height = videoElement.videoHeight;
+      handCtx.clearRect(0, 0, handCanvas.width, handCanvas.height);
+
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        const landmarks = results.multiHandLandmarks[0];
+        handCtx.strokeStyle = '#a855f7';
+        handCtx.lineWidth = 2;
+        handCtx.fillStyle = '#00f0ff';
+        for (let pt of landmarks) {
+          handCtx.beginPath();
+          handCtx.arc(pt.x * handCanvas.width, pt.y * handCanvas.height, 4, 0, 2 * Math.PI);
+          handCtx.fill();
+        }
+
+        // Gesture 1: Wrist Y position to Electron Kinetic Energy E
+        const wristY = landmarks[0].y;
+        const mappedEnergy = Math.round(600 - wristY * 550);
+        energy_eV = Math.min(Math.max(mappedEnergy, 50), 600);
+        sliderEnergy.value = energy_eV;
+        document.getElementById('val-energy').innerText = energy_eV + ' eV';
+
+        // Gesture 2: Pinch (Index tip 8 & Thumb tip 4) to toggle rapid burst
+        const thumbTip = landmarks[4];
+        const indexTip = landmarks[8];
+        const dist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
+
+        if (dist < 0.08) {
+          fireRate = 200;
+        } else {
+          fireRate = 60;
+        }
+        updatePhysicsHUD();
+      }
+    }
+
+    document.getElementById('btn-simulate-gesture').addEventListener('click', () => {
+      let step = 0;
+      const interval = setInterval(() => {
+        step++;
+        energy_eV = 100 + Math.round((Math.sin(step * 0.3) + 1.0) * 220);
+        sliderEnergy.value = energy_eV;
+        document.getElementById('val-energy').innerText = energy_eV + ' eV';
+
+        if (step % 5 === 0) {
+          for (let k = 0; k < 15; k++) recordElectronHit();
+        }
+        updatePhysicsHUD();
+
+        if (step > 25) clearInterval(interval);
+      }, 150);
+    });
+
+    // ----------------------------------------------------
+    // 9. ANIMATION LOOP: FLYING ELECTRON & HIT ACCUMULATOR
+    // ----------------------------------------------------
+    updatePhysicsHUD();
+
+    let clock = new THREE.Clock();
+    let lastShootTime = 0;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // Ripple animation for wavefunction rings
+      if (waveVisible) {
+        waveRings.forEach(w => {
+          const s = 1.0 + ((time * 1.5) % 1.0) * 0.6;
+          w.ringL.scale.set(s, s, s);
+          w.ringR.scale.set(s, s, s);
+        });
+      }
+
+      // Single Flying Electron Trajectory Animation
+      electronZ += delta * 22.0;
+      if (electronZ > 8.4) {
+        // Impact!
+        electronZ = -8.5;
+        recordElectronHit();
+        electronTargetX = sampleScreenHitX();
+        electronTargetY = 2.6 + (Math.random() - 0.5) * 3.6;
+      }
+      const progress = (electronZ + 8.5) / 16.9; // 0 to 1
+      flyingPos[0] = electronTargetX * progress;
+      flyingPos[1] = 2.5 + (electronTargetY - 2.5) * progress;
+      flyingPos[2] = electronZ;
+      flyingGeo.attributes.position.needsUpdate = true;
+
+      // Batch firing according to fireRate
+      if (fireRate >= 60) {
+        const batchCount = Math.floor(fireRate * delta);
+        for (let i = 0; i < Math.max(batchCount, 1); i++) {
+          recordElectronHit();
+        }
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

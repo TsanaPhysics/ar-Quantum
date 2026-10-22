@@ -1,0 +1,2377 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ห้องปฏิบัติการเสมือนจริง 3 มิติ และ WebAR ---- ความพัวพันเชิงควอนตัม อสมการเบลล์ และการเทเลพอร์ต — ผศ.ดร.ชีวะ ทัศนา</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  
+  <!-- MathJax 3 LaTeX Formula Engine -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <!-- MediaPipe Hands & Camera Utils -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+  <style>
+    :root {
+      --bg-space: #030712;
+      --panel-glass: rgba(6, 12, 28, 0.45);
+      --panel-border: rgba(236, 72, 153, 0.28);
+      --accent-pink: #ec4899;
+      --accent-cyan: #00f0ff;
+      --accent-gold: #f59e0b;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-blue: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-thai: 'Prompt', sans-serif;
+      --font-tech: 'Chakra Petch', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--font-thai);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    /* Top Universal Navigation Bar */
+    .top-nav {
+      position: absolute;
+      top: 12px;
+      left: 18px;
+      right: 18px;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel-glass);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 8px 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .nav-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-tech);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-pink);
+      letter-spacing: 0.5px;
+    }
+
+    .nav-title span {
+      font-size: 1.2rem;
+    }
+
+    .mode-pills {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .mode-pill {
+      font-family: var(--font-tech);
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-pill:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .mode-pill.active {
+      background: var(--accent-pink);
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(236, 72, 153, 0.5);
+    }
+
+    .btn-zen {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--font-tech);
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .btn-zen:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .btn-zen.active {
+      background: var(--accent-gold);
+      color: #030712;
+      font-weight: 700;
+    }
+
+    /* Floating Left HUD Control Dock */
+    .hud-dock-left {
+      position: absolute;
+      top: 68px;
+      left: 18px;
+      bottom: 18px;
+      width: 380px;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    }
+
+    .hud-dock-left.collapsed {
+      transform: translateX(-410px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .glass-card {
+      background: var(--panel-glass);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+      pointer-events: auto;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .card-title {
+      font-family: var(--font-tech);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent-pink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .author-badge {
+      font-size: 0.68rem;
+      color: var(--accent-gold);
+      background: rgba(245, 158, 11, 0.1);
+      padding: 2px 7px;
+      border-radius: 6px;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    /* Scenario Tabs Grid */
+    .scenario-tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .scenario-tab {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 6px 2px;
+      font-family: var(--font-tech);
+      font-size: 0.68rem;
+      text-align: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .scenario-tab span {
+      font-size: 0.95rem;
+    }
+
+    .scenario-tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .scenario-tab.active {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(0, 240, 255, 0.2));
+      border-color: var(--accent-pink);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
+      font-weight: 700;
+    }
+
+    /* Scrollable Control Container */
+    .ctrl-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ctrl-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .ctrl-scroll::-webkit-scrollbar-thumb {
+      background: rgba(236, 72, 153, 0.4);
+      border-radius: 4px;
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ctrl-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 9px 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .ctrl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .ctrl-val {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent-pink);
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--accent-pink);
+      box-shadow: 0 0 8px var(--accent-pink);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .preset-btns {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+    }
+
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 5px 6px;
+      font-family: var(--font-tech);
+      font-size: 0.70rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .preset-btn:hover {
+      background: rgba(236, 72, 153, 0.2);
+      color: #fff;
+      border-color: var(--accent-pink);
+    }
+
+    .preset-btn.active {
+      background: var(--accent-pink);
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+    }
+
+    .btn-act {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-family: var(--font-tech);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-act:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .btn-act.primary {
+      background: linear-gradient(135deg, var(--accent-pink), #a855f7);
+      border: none;
+      box-shadow: 0 0 14px rgba(236, 72, 153, 0.4);
+    }
+
+    .btn-act.primary:hover {
+      box-shadow: 0 0 20px rgba(236, 72, 153, 0.7);
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    /* Floating Right HUD Telemetry Dock */
+    .hud-dock-right {
+      position: absolute;
+      top: 68px;
+      right: 18px;
+      bottom: 18px;
+      width: 340px;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    }
+
+    .hud-dock-right.collapsed {
+      transform: translateX(370px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .telem-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .telem-row {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 7px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+    }
+
+    .telem-lbl {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .telem-val {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #ffffff;
+      font-size: 0.78rem;
+    }
+
+    .chsh-banner {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(0, 240, 255, 0.15));
+      border: 1px solid var(--accent-green);
+      border-radius: 10px;
+      padding: 10px 12px;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    .chsh-val {
+      font-family: var(--font-mono);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--accent-green);
+      text-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+      margin: 2px 0;
+    }
+
+    .chsh-sub {
+      font-size: 0.68rem;
+      color: #cbd5e1;
+    }
+
+    /* Modal Dialogs */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.78);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #080f24;
+      border: 1px solid var(--accent-pink);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(236, 72, 153, 0.35);
+      border-radius: 18px;
+      max-width: 680px;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: modalPop 0.25s ease-out;
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+      font-family: var(--font-tech);
+      font-size: 1.0rem;
+      font-weight: 700;
+      color: var(--accent-pink);
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #fff;
+    }
+
+    /* Dock Expand Floating Buttons */
+    .dock-expand-btn {
+      position: absolute;
+      top: 68px;
+      z-index: 45;
+      background: var(--panel-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      color: var(--accent-pink);
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: none;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    }
+
+    .dock-expand-btn:hover {
+      background: rgba(236, 72, 153, 0.25);
+    }
+
+    #dock-left { left: 18px; }
+    #dock-right { right: 18px; }
+
+    /* MediaPipe PiP */
+    #hand-pip-container {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 200px;
+      height: 150px;
+      border-radius: 12px;
+      border: 2px solid var(--accent-pink);
+      overflow: hidden;
+      z-index: 60;
+      display: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+      background: #000;
+    }
+
+    #hand-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .legend-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- WebGL Render Canvas Container -->
+  <div id="webgl-canvas"></div>
+
+  <!-- Top Universal Navigation Bar -->
+  <div class="top-nav">
+    <div class="nav-title">
+      <span>⚛️</span>
+      <div>
+        <div>LAB 09 ---- ความพัวพันเชิงควอนตัม อสมการเบลล์ และการเทเลพอร์ต</div>
+        <div style="font-size:0.68rem; color:var(--text-muted); font-family:var(--font-thai); font-weight:400;">
+          Quantum Entanglement, Bell States, CHSH Inequality & Teleportation
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode Selector Pills -->
+    <div class="mode-pills">
+      <div class="mode-pill active" onclick="switchMode(1)">
+        <span>🌐</span> 3D Virtual Lab
+      </div>
+      <div class="mode-pill" onclick="switchMode(2)">
+        <span>📖</span> สแกนภาพ AR
+      </div>
+      <div class="mode-pill" onclick="switchMode(3)">
+        <span>🖐️</span> ท่าทางมือ AI
+      </div>
+    </div>
+
+    <!-- Zen Mode / Toggle HUD -->
+    <button class="btn-zen" id="btn-zen" onclick="toggleZenMode()">
+      <span>🔲</span>
+      <span>ย่อทุกบาร์ (H)</span>
+    </button>
+  </div>
+
+  <!-- Expand Buttons for Collapsed Docks -->
+  <button class="dock-expand-btn" id="dock-left" onclick="toggleLeftHUD(false)">▶ แผงควบคุม</button>
+  <button class="dock-expand-btn" id="dock-right" onclick="toggleRightHUD(false)">◀ ข้อมูลโทรมาตร</button>
+
+  <!-- Floating Left HUD Control Dock -->
+  <div class="hud-dock-left" id="hud-left">
+    <div class="glass-card" style="flex:1;">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🎮</span> โหมดการทดลองความพัวพันควอนตัม
+        </div>
+        <div class="author-badge">ผศ.ดร.ชีวะ ทัศนา</div>
+      </div>
+
+      <!-- Scenario Tabs -->
+      <div class="scenario-tabs">
+        <div class="scenario-tab active" id="tab-bell" onclick="setScenario('bell')">
+          <span>🔔</span> สถานะเบลล์
+        </div>
+        <div class="scenario-tab" id="tab-chsh" onclick="setScenario('chsh')">
+          <span>⚖️</span> อสมการ CHSH
+        </div>
+        <div class="scenario-tab" id="tab-ghz" onclick="setScenario('ghz')">
+          <span>🔮</span> GHZ & เมอร์มิน
+        </div>
+        <div class="scenario-tab" id="tab-teleport" onclick="setScenario('teleport')">
+          <span>🚀</span> เทเลพอร์ต
+        </div>
+        <div class="scenario-tab" id="tab-qkd" onclick="setScenario('qkd')">
+          <span>🔐</span> E91 QKD
+        </div>
+        <div class="scenario-tab" id="tab-decohere" onclick="setScenario('decohere')">
+          <span>📉</span> การสลายพัวพัน
+        </div>
+      </div>
+
+      <div class="ctrl-scroll">
+        <!-- Scenario 1: Bell States Selector -->
+        <div class="ctrl-group" id="group-bell">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>เลือกสถานะพัวพันเบลล์สูงสุด 4 สถานะ (Bell Basis)</span>
+              <span class="ctrl-val" id="val-bell-state">|Φ⁺⟩</span>
+            </div>
+            <div class="preset-btns">
+              <button class="preset-btn active" onclick="selectBellState('phi_plus')">|Φ⁺⟩ = (|00⟩+|11⟩)/√2</button>
+              <button class="preset-btn" onclick="selectBellState('phi_minus')">|Φ⁻⟩ = (|00⟩-|11⟩)/√2</button>
+              <button class="preset-btn" onclick="selectBellState('psi_plus')">|Ψ⁺⟩ = (|01⟩+|10⟩)/√2</button>
+              <button class="preset-btn" onclick="selectBellState('psi_minus')">|Ψ⁻⟩ = (|01⟩-|10⟩)/√2</button>
+            </div>
+            <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-top:4px;">
+              ผลึกไม่เป็นเชิงเส้น BBO รับแสงปั๊มเลเซอร์ UV 405 nm ปลดปล่อยโฟตอนคู่พัวพันแบบ Type-II SPDC สู่สถานะเบลล์ที่เลือก
+            </div>
+          </div>
+        </div>
+
+        <!-- Scenario 2: Polarizer Angles & CHSH Settings -->
+        <div class="ctrl-group" id="group-chsh" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>มุมโพลาไรเซอร์ Alice ---- θ_a (ฝั่งซ้าย)</span>
+              <span class="ctrl-val" id="val-alice-theta">0.0°</span>
+            </div>
+            <input type="range" id="slider-alice-theta" min="0" max="180" step="2.5" value="0">
+          </div>
+
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>มุมโพลาไรเซอร์ Bob ---- θ_b (ฝั่งขวา)</span>
+              <span class="ctrl-val" id="val-bob-theta">22.5°</span>
+            </div>
+            <input type="range" id="slider-bob-theta" min="0" max="180" step="2.5" value="22.5">
+          </div>
+
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>ประสิทธิภาพตัวตรวจวัด (Detector Efficiency η)</span>
+              <span class="ctrl-val" id="val-detector-eta">95.0 %</span>
+            </div>
+            <input type="range" id="slider-detector-eta" min="50" max="100" step="1" value="95">
+            <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-top:4px;">
+              เกณฑ์ไร้ช่องโหว่การตรวจจับ (Detection Loophole Bound) ---- $\eta_{\text{crit}} = \frac{2}{\sqrt{2}+1} \approx 82.8\%$ หาก $\eta < 82.8\%$ สัญญาณรบกวนจะกดทับให้ $S_{\text{obs}} \le 2$
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn-act" onclick="runAspectFastSwitch()">
+              <span>⚡</span> สลับมุมเร็วปิดช่องโหว่ Aspect
+            </button>
+            <button class="btn-act primary" id="btn-fire-1000" onclick="fireMonteCarloPairs(1000)">
+              <span>💥</span> ยิงสุ่ม 1,000 คู่ (CHSH)
+            </button>
+          </div>
+        </div>
+
+        <!-- Scenario 2.5: GHZ 3-Qubit & Mermin's Deterministic Paradox -->
+        <div class="ctrl-group" id="group-ghz" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>สถานะพัวพัน 3 คิวบิต |GHZ⟩ = (|000⟩ + |111⟩)/√2</span>
+              <span class="ctrl-val" id="val-mermin-op" style="color:var(--accent-gold);">X₁ Y₂ Y₃</span>
+            </div>
+            <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-bottom:6px;">
+              พิสูจน์ความไม่เฉพาะที่เชิงควอนตัมแบบเด็ดขาด (All-or-Nothing) ในการวัดเพียงช็อตเดียวโดยไม่ต้องอาศัยอสมการทางสถิติ
+            </div>
+            <div class="ctrl-header">
+              <span>เลือกโอเปอเรเตอร์วัดร่วม 3 สถานี (Alice, Bob, Charlie)</span>
+            </div>
+            <div class="preset-btns">
+              <button class="preset-btn active" onclick="selectMerminOperator('XYY')">X₁ Y₂ Y₃ (+1)</button>
+              <button class="preset-btn" onclick="selectMerminOperator('YXY')">Y₁ X₂ Y₃ (+1)</button>
+              <button class="preset-btn" onclick="selectMerminOperator('YYX')">Y₁ Y₂ X₃ (+1)</button>
+              <button class="preset-btn" onclick="selectMerminOperator('XXX')">X₁ X₂ X₃ (QM: -1 | LHV: +1)</button>
+            </div>
+          </div>
+
+          <button class="btn-act primary" onclick="runMerminSingleShot()" style="background:linear-gradient(135deg, #10b981, #00f0ff);">
+            <span>🎲</span> ทดสอบการวัดเดี่ยว All-or-Nothing (Mermin Paradox)
+          </button>
+
+          <button class="btn-act" onclick="openGHZModal()" style="border-color:var(--accent-green); color:var(--accent-green); margin-top:2px;">
+            <span>📖</span> ตารางเปรียบเทียบตรรกะ Mermin vs ไอน์สไตน์
+          </button>
+        </div>
+
+        <!-- Scenario 3: Quantum Teleportation Controls -->
+        <div class="ctrl-group" id="group-teleport" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>สถานะอินพุตที่ต้องการเทเลพอร์ต |ψ_in⟩ = α|0⟩ + β|1⟩</span>
+              <span class="ctrl-val" id="val-teleport-state">|0⟩ (ขั้วเหนือ)</span>
+            </div>
+            <div class="preset-btns">
+              <button class="preset-btn active" onclick="setTeleportInput(0, 0, '|0⟩ (North)')">สถานะ |0⟩</button>
+              <button class="preset-btn" onclick="setTeleportInput(180, 0, '|1⟩ (South)')">สถานะ |1⟩</button>
+              <button class="preset-btn" onclick="setTeleportInput(90, 0, '|+⟩ (Equator X)')">สถานะ |+⟩</button>
+              <button class="preset-btn" onclick="setTeleportInput(60, 45, 'Arbitrary Superposition')">ซูเปอร์โพซิชัน (60°, 45°)</button>
+            </div>
+          </div>
+
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>ขั้นตอนโพรโทคอลเทเลพอร์ต (Teleportation Stage)</span>
+              <span class="ctrl-val" id="val-teleport-stage" style="color:var(--accent-gold);">พร้อมเริ่ม</span>
+            </div>
+            <button class="btn-act primary" id="btn-run-teleport" onclick="runTeleportationProtocol()">
+              <span>🚀</span> รันโพรโทคอลเทเลพอร์ตควอนตัม (BSM + 2-bit Feedforward)
+            </button>
+          </div>
+
+          <div class="ctrl-item" style="border-color:rgba(168,85,247,0.4);">
+            <div class="ctrl-header">
+              <span>โพรโทคอล Entanglement Swapping (ควอนตัมรีพีตเตอร์)</span>
+              <span class="ctrl-val" style="color:var(--accent-purple);">โฟตอน 4 ตัว</span>
+            </div>
+            <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-bottom:4px;">
+              สร้างความพัวพันระหว่าง Alice (1) และ Bob (4) ที่ไม่เคยมีปฏิสัมพันธ์กันมาก่อน ผ่านการวัดในฐานเบลล์ที่สถานีรีพีตเตอร์ตรงกลาง (2 & 3)
+            </div>
+            <button class="btn-act" onclick="runEntanglementSwapping()" style="border-color:var(--accent-purple); color:#fff; background:rgba(168,85,247,0.2);">
+              <span>🔗</span> รันการสวอปความพัวพัน (Entanglement Swapping)
+            </button>
+          </div>
+        </div>
+
+        <!-- Scenario 4: E91 QKD Controls -->
+        <div class="ctrl-group" id="group-qkd" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>โพรโทคอลแจกจ่ายคีย์ควอนตัม Ekert91</span>
+              <span class="ctrl-val" id="val-qkd-status" style="color:var(--accent-green);">ปลอดภัย (ไร้สายลับ)</span>
+            </div>
+            <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-bottom:6px;">
+              Alice และ Bob สุ่มฐานการวัด หากฐานตรงกันจะเก็บเป็นคีย์ลับ หากฐานไม่ตรงจะใช้ทดสอบ $S \ge 2.828$ เพื่อตรวจจับสายลับ
+            </div>
+            <div class="ctrl-header">
+              <span>การดักฟังสภาพแวดล้อม (Eve Eavesdropping Rate)</span>
+              <span class="ctrl-val" id="val-eve-rate">0 %</span>
+            </div>
+            <input type="range" id="slider-eve" min="0" max="100" step="5" value="0">
+            <button class="btn-act primary" onclick="runE91KeyExchange()" style="margin-top:6px;">
+              <span>🔑</span> สุ่มสร้างคีย์ลับ 100 ช็อต (E91 Sifting)
+            </button>
+          </div>
+        </div>
+
+        <!-- Scenario 5: Entanglement Sudden Death (ESD) Controls -->
+        <div class="ctrl-group" id="group-decohere" style="display:none;">
+          <div class="ctrl-item">
+            <div class="ctrl-header">
+              <span>สัดส่วนความบริสุทธิ์ของสถานะพัวพัน (Werner State Parameter p)</span>
+              <span class="ctrl-val" id="val-werner-p">p = 1.00 (Pure Bell)</span>
+            </div>
+            <input type="range" id="slider-werner-p" min="0.0" max="1.0" step="0.02" value="1.0">
+            <div style="font-size:0.70rem; color:#cbd5e1; line-height:1.4; margin-top:6px;">
+              $\rho = p|\Phi^+\rangle\langle\Phi^+| + \frac{1-p}{4} I_4$ ---- เมื่อ $p \le 1/3$ สภาพพัวพันจะดับวูบลงอย่างฉับพลัน (Concurrence $C = 0$)
+            </div>
+          </div>
+        </div>
+
+        <!-- Firing Controls -->
+        <div class="action-row">
+          <button class="btn-act primary" id="btn-fire-pair" onclick="fireSingleEntangledPair()">
+            <span>⚡</span> ยิงคู่พัวพันเดี่ยว
+          </button>
+          <button class="btn-act" id="btn-auto-fire" onclick="toggleContinuousFiring()">
+            <span>🔄</span> ยิงต่อเนื่อง (เปิด)
+          </button>
+        </div>
+
+        <div class="action-row">
+          <button class="btn-act" onclick="resetViewsAndSensors()">
+            <span>🎯</span> รีเซ็ตมุมมอง
+          </button>
+          <button class="btn-act" id="btn-sound" onclick="toggleSound()">
+            <span>🔊</span> เสียงสังเคราะห์ (เปิด)
+          </button>
+        </div>
+
+        <!-- Modal Triggers -->
+        <button class="btn-act" onclick="openCHSHModal()" style="border-color:var(--accent-green); color:var(--accent-green);">
+          <span>📈</span> กราฟสหสัมพันธ์เชิงควอนตัม & ขอบเขตซิเรลสัน
+        </button>
+
+        <button class="btn-act" onclick="openTeleportModal()" style="border-color:var(--accent-purple); color:var(--accent-purple);">
+          <span>🔬</span> ไดอะแกรมวงจรเทเลพอร์ต & เมทริกซ์การวัด
+        </button>
+
+        <!-- Color Legend -->
+        <div class="ctrl-item">
+          <div style="font-size:0.70rem; color:var(--text-muted); font-weight:700; margin-bottom:4px;">คำอธิบายสีเชิงแสงและสปิน</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+            <div class="legend-row">
+              <div class="legend-indicator" style="background:#00f0ff;"></div>
+              <span>โฟตอน Alice (ซ้าย)</span>
+            </div>
+            <div class="legend-row">
+              <div class="legend-indicator" style="background:#ec4899;"></div>
+              <span>โฟตอน Bob (ขวา)</span>
+            </div>
+            <div class="legend-row">
+              <div class="legend-indicator" style="background:#f59e0b;"></div>
+              <span>ผลึกไม่เชิงเส้น BBO</span>
+            </div>
+            <div class="legend-row">
+              <div class="legend-indicator" style="background:#8b5cf6;"></div>
+              <span>ริบบอนพัวพันควอนตัม</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Right HUD Telemetry Dock -->
+  <div class="hud-dock-right" id="hud-right">
+    <div class="glass-card" style="flex:1;">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📊</span> โทรมาตรควอนตัม & สถิติความพัวพัน
+        </div>
+        <span class="author-badge" id="badge-quantum-status">ENTANGLED</span>
+      </div>
+
+      <div class="telem-list">
+        <div class="telem-row">
+          <span class="telem-lbl"><span>🔔</span> สถานะสองคิวบิต</span>
+          <span class="telem-val" id="telem-state-str" style="color:var(--accent-pink);">|Φ⁺⟩ = (|00⟩+|11⟩)/√2</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>📐</span> ผลต่างมุมโพลาไรเซอร์ (Δθ)</span>
+          <span class="telem-val" id="telem-delta-theta">22.5°</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>⚡</span> สหสัมพันธ์ควอนตัมทฤษฎี E(a,b)</span>
+          <span class="telem-val" id="telem-e-theory" style="color:var(--accent-cyan);">-0.7071</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>🎲</span> สหสัมพันธ์จากการวัด E_exp</span>
+          <span class="telem-val" id="telem-e-exp" style="color:var(--accent-gold);">-0.7120</span>
+        </div>
+
+        <!-- CHSH Banner Highlight -->
+        <div class="chsh-banner">
+          <div class="chsh-sub">ค่าพารามิเตอร์อสมการ CHSH (S-Parameter)</div>
+          <div class="chsh-val" id="telem-chsh-s">S = 2.8284</div>
+          <div class="chsh-sub" id="telem-chsh-status" style="color:var(--accent-green);">ละเมิดขอบเขตคลาสสิกของไอน์สไตน์ (S > 2)</div>
+        </div>
+
+        <div class="telem-row" style="margin-top:4px;">
+          <span class="telem-lbl"><span>🎯</span> ขอบเขตซิเรลสัน (Tsirelson Bound)</span>
+          <span class="telem-val" style="color:var(--accent-green);">2√2 ≈ 2.8284</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>📦</span> ขีดจำกัดคลาสสิก (Bell-LHV Bound)</span>
+          <span class="telem-val" style="color:var(--accent-gold);">|S| ≤ 2.0000</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>🛡️</span> สถานะการทดสอบไร้ช่องโหว่</span>
+          <span class="telem-val" id="telem-loophole-status" style="color:var(--accent-green);">CERTIFIED (η ≥ 82.8%)</span>
+        </div>
+
+        <div class="telem-row" id="row-mermin-product" style="display:none;">
+          <span class="telem-lbl"><span>🔮</span> ผลคูณโอเปอเรเตอร์ GHZ</span>
+          <span class="telem-val" id="telem-mermin-product" style="color:var(--accent-cyan);">+1 (Quantum Exact)</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>🔗</span> ระดับความพัวพัน (Concurrence C)</span>
+          <span class="telem-val" id="telem-concurrence" style="color:var(--accent-pink);">1.000 (พัวพันสูงสุด)</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>🌀</span> เอนโทรปีฟอนนอยมันน์ (S_vN)</span>
+          <span class="telem-val" id="telem-entropy">1.000 บิต</span>
+        </div>
+
+        <div class="telem-row">
+          <span class="telem-lbl"><span>📡</span> ผลการวัดตรวจพบล่าสุด</span>
+          <span class="telem-val" id="telem-last-meas" style="color:var(--accent-cyan);">Alice: +1  |  Bob: -1</span>
+        </div>
+      </div>
+
+      <!-- Live Coincidence Counter Grid -->
+      <div class="ctrl-item" style="margin-top:8px;">
+        <div style="font-size:0.72rem; color:var(--text-muted); font-weight:700; margin-bottom:4px;">
+          ตารางการตรวจวัดสอดคล้อง (Coincidence Counts)
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:0.72rem; text-align:center;">
+          <div style="background:rgba(255,255,255,0.04); padding:4px; border-radius:4px; border:1px solid rgba(0,240,255,0.2);">
+            N(+,+) ---- <span id="cnt-pp" style="color:var(--accent-cyan);">146</span>
+          </div>
+          <div style="background:rgba(255,255,255,0.04); padding:4px; border-radius:4px; border:1px solid rgba(236,72,153,0.2);">
+            N(+,-) ---- <span id="cnt-pm" style="color:var(--accent-pink);">354</span>
+          </div>
+          <div style="background:rgba(255,255,255,0.04); padding:4px; border-radius:4px; border:1px solid rgba(236,72,153,0.2);">
+            N(-,+) ---- <span id="cnt-mp" style="color:var(--accent-pink);">358</span>
+          </div>
+          <div style="background:rgba(255,255,255,0.04); padding:4px; border-radius:4px; border:1px solid rgba(0,240,255,0.2);">
+            N(-,-) ---- <span id="cnt-mm" style="color:var(--accent-cyan);">142</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHSH Correlation Curve Modal -->
+  <div class="modal-overlay" id="chsh-modal" onclick="if(event.target === this) closeCHSHModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📈 กราฟสหสัมพันธ์ควอนตัม E(Δθ) และการละเมิดอสมการเบลล์</span>
+        <button class="modal-close" onclick="closeCHSHModal()">✕</button>
+      </div>
+      <div>
+        <div style="width:100%; height:260px; background:#020617; border-radius:12px; border:1px solid rgba(0,240,255,0.3); overflow:hidden; position:relative;">
+          <canvas id="chsh-canvas" width="620" height="260" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8; margin-top:8px;">
+          <span>เส้นโค้งควอนตัม ---- <strong style="color:var(--accent-cyan);">$E(\Delta\theta) = -\cos(2\Delta\theta)$</strong></span>
+          <span>ขอบเขตคลาสสิกท้องถิ่น ---- <strong style="color:var(--accent-gold);">$|E(\Delta\theta)| \le 1 - \frac{2|\Delta\theta|}{\pi}$</strong></span>
+        </div>
+        <p style="font-size:0.75rem; color:#cbd5e1; margin-top:8px; line-height:1.4;">
+          อสมการ CHSH ($S = E(a,b) - E(a,b') + E(a',b) + E(a',b')$) พิสูจน์ว่าทฤษฎีตัวแปรแอบแฝงเฉพาะที่ (Local Realism) ของไอน์สไตน์ให้ค่า $|S| \le 2$ เสมอ ขณะที่กลศาสตร์ควอนตัมให้ค่าสูงสุดได้ถึงขอบเขตซิเรลสัน $S = 2\sqrt{2} \approx 2.8284$ ซึ่งสอดคล้องกับผลการทดลองจริงที่ได้รับรางวัลโนเบลสาขาฟิสิกส์ ค.ศ. 2022 (Aspect, Clauser, Zeilinger)
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quantum Teleportation Circuit Modal -->
+  <div class="modal-overlay" id="teleport-modal" onclick="if(event.target === this) closeTeleportModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>🚀 ไดอะแกรมวงจรเทเลพอร์ตควอนตัม (Quantum Teleportation Circuit)</span>
+        <button class="modal-close" onclick="closeTeleportModal()">✕</button>
+      </div>
+      <div>
+        <div style="width:100%; height:240px; background:#020617; border-radius:12px; border:1px solid rgba(168,85,247,0.3); overflow:hidden; position:relative;">
+          <canvas id="teleport-canvas" width="620" height="240" style="width:100%; height:100%; display:block;"></canvas>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#94a3b8; margin-top:8px;">
+          <span>ความแม่นยำการกู้คืนสถานะ (Fidelity) ---- <strong style="color:var(--accent-green);" id="modal-teleport-fid">F = 100.00 %</strong></span>
+          <span>บิตคลาสสิกที่ส่งผ่านเส้นใยนำแสง ---- <strong style="color:var(--accent-gold);" id="modal-teleport-bits">m₁ m₂ = 0 0</strong></span>
+        </div>
+        <p style="font-size:0.75rem; color:#cbd5e1; margin-top:8px; line-height:1.4;">
+          Alice ใช้เกต CNOT และเกต Hadamard บนคิวบิตนิรนาม $|\psi\rangle$ ร่วมกับคิวบิตพัวพันคู่ที่ 2 จากนั้นวัดผลในฐานเบลล์ (Bell State Measurement) เพื่อส่งบิตคลาสสิก 2 บิตไปยัง Bob จากนั้น Bob จะใช้เกต $Z^{m_1} X^{m_2}$ เพื่อกู้คืนสถานะ $|\psi\rangle$ ดั้งเดิมกลับคืนมาได้ 100% โดยไม่มีการส่งอนุภาคทางกายภาพข้ามระยะทาง
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- GHZ Mermin Paradox Modal -->
+  <div class="modal-overlay" id="ghz-modal" onclick="if(event.target === this) closeGHZModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>🔮 การพิสูจน์ความไม่เฉพาะที่แบบเด็ดขาด (Mermin's GHZ Non-Locality)</span>
+        <button class="modal-close" onclick="closeGHZModal()">✕</button>
+      </div>
+      <div>
+        <div style="font-size:0.80rem; color:#cbd5e1; line-height:1.5;">
+          ทฤษฎีตัวแปรแอบแฝงเฉพาะที่ (Local Realism) กำหนดว่าการวัดของแต่ละสถานีมีผลลัพธ์แน่นอนล่วงหน้า $m_x, m_y \in \{+1, -1\}$ ----
+        </div>
+        <div style="background:rgba(0,0,0,0.4); padding:10px; border-radius:8px; border:1px solid rgba(16,185,129,0.3); margin:10px 0; font-family:var(--font-mono); font-size:0.75rem;">
+          • การวัดที่ 1 ---- X₁ Y₂ Y₃ = (m_{x1})(m_{y2})(m_{y3}) = +1<br>
+          • การวัดที่ 2 ---- Y₁ X₂ Y₃ = (m_{y1})(m_{x2})(m_{y3}) = +1<br>
+          • การวัดที่ 3 ---- Y₁ Y₂ X₃ = (m_{y1})(m_{y2})(m_{x3}) = +1<br>
+          <div style="border-top:1px dashed rgba(255,255,255,0.2); margin:6px 0; padding-top:6px;">
+            เมื่อคูณสมการทั้ง 3 เข้าด้วยกัน ---- (m_{x1} m_{x2} m_{x3}) (m_{y1} m_{y2} m_{y3})² = +1<br>
+            เนื่องจาก (m_y)² = 1 เสมอ ดังนั้น <strong>คลาสสิกทำนายเด็ดขาดว่า ---- X₁ X₂ X₃ = +1</strong>
+          </div>
+          <div style="color:var(--accent-pink); font-weight:700; margin-top:4px;">
+            แต่กลศาสตร์ควอนตัมให้ผลลัพธ์ตรงกันข้ามอย่างสิ้นเชิง ---- X₁ X₂ X₃ |GHZ⟩ = -1 |GHZ⟩ เสมอ!
+          </div>
+        </div>
+        <p style="font-size:0.75rem; color:#94a3b8; line-height:1.4;">
+          นี่คือการหักล้างทฤษฎีตัวแปรแอบแฝงเฉพาะที่ของไอน์สไตน์โดยไม่ต้องอาศัยอสมการเชิงสถิติ (Non-locality without inequalities) ซึ่งแสดงถึงความลึกซึ้งสูงสุดของกลศาสตร์ควอนตัม
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- AR Hiro Marker Modal -->
+  <div class="modal-overlay" id="ar-modal" onclick="if(event.target === this) closeARModal()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>📖 สแกนภาพมาร์กเกอร์หนังสือ AR (Hiro Marker)</span>
+        <button class="modal-close" onclick="closeARModal()">✕</button>
+      </div>
+      <div style="text-align:center; padding:10px 0;">
+        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Hiro Marker" style="width:190px; height:190px; border-radius:12px; border:4px solid var(--accent-pink); box-shadow:0 0 20px rgba(236,72,153,0.4);">
+        <p style="font-size:0.82rem; color:#cbd5e1; margin-top:14px; line-height:1.5;">
+          ส่องกล้องมาที่มาร์กเกอร์ Hiro ในตำราฟิสิกส์ควอนตัมบทที่ 9<br>
+          สถานีวัดโพลาไรเซชัน Alice, Bob & Charlie พร้อมผลึกไม่เป็นเชิงเส้น BBO 3D จะปรากฏลอยขึ้นเหนือหน้ากระดาษทันที
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Camera PiP for MediaPipe Hands Tracking -->
+  <div id="hand-pip-container">
+    <video id="hand-video" playsinline></video>
+    <div style="position:absolute; top:4px; left:8px; font-size:0.65rem; color:var(--accent-pink); background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:4px; font-weight:700;">
+      🖐️ ท่าทางมือ AI ควบคุมโพลาไรเซอร์
+    </div>
+  </div>
+
+  <!-- Core JavaScript Simulator Logic -->
+  <script>
+    // -------------------------------------------------------------
+    // Web Audio Synthesizer: Laser Pulses, Detectors & Chimes
+    // -------------------------------------------------------------
+    let audioCtx = null;
+    let audioActive = true;
+    let masterGain = null;
+
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioClass();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        masterGain.connect(audioCtx.destination);
+      } catch (e) {
+        console.warn('AudioContext not available', e);
+      }
+    }
+
+    function toggleSound() {
+      if (!audioCtx) initAudio();
+      audioActive = !audioActive;
+      const btn = document.getElementById('btn-sound');
+      if (audioActive) {
+        masterGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        btn.classList.add('primary');
+        btn.innerHTML = '<span>🔊</span> เสียงสังเคราะห์ (เปิด)';
+      } else {
+        masterGain.gain.setValueAtTime(0.0, audioCtx.currentTime);
+        btn.classList.remove('primary');
+        btn.innerHTML = '<span>🔇</span> เสียงสังเคราะห์ (ปิด)';
+      }
+    }
+
+    function playTone(freqHz, duration = 0.15, type = 'sine') {
+      if (!audioActive || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freqHz, now);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + duration + 0.05);
+    }
+
+    function playCoincidenceChime(outcomeAlice, outcomeBob) {
+      if (!audioActive || !audioCtx) return;
+      if (outcomeAlice === outcomeBob) {
+        // Correlated pair chime (high harmony)
+        playTone(659.25, 0.15, 'triangle');
+        setTimeout(() => playTone(880.00, 0.2, 'sine'), 40);
+      } else {
+        // Anti-correlated chime
+        playTone(523.25, 0.15, 'sine');
+        setTimeout(() => playTone(698.46, 0.2, 'triangle'), 40);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Physical Simulation State Variables
+    // -------------------------------------------------------------
+    let currentScenario = 'bell'; // 'bell' | 'chsh' | 'ghz' | 'teleport' | 'qkd' | 'decohere'
+    let currentBellState = 'phi_plus'; // 'phi_plus' | 'phi_minus' | 'psi_plus' | 'psi_minus'
+    let aliceAngleDeg = 0.0;
+    let bobAngleDeg = 22.5;
+    let wernerP = 1.0;
+    let eveRate = 0.0;
+    let detectorEta = 0.95; // Detection efficiency (Loophole threshold bound = 82.84%)
+    let merminOp = 'XYY';   // Mermin GHZ joint operator ('XYY', 'YXY', 'YYX', 'XXX')
+    let isSwappingRunning = false;
+
+    // Teleportation State
+    let teleportInputTheta = 0.0;
+    let teleportInputPhi = 0.0;
+    let teleportStage = 0; // 0: idle, 1: EPR, 2: BSM, 3: Classical bit, 4: Unitary correction
+
+    // Continuous Firing
+    let isContinuousFiring = true;
+    let flightTime = 0.0;
+    const FLIGHT_SPEED = 2.4;
+    const DISTANCE_TO_STATION = 4.5;
+
+    // Coincidence Counters
+    let countPP = 146;
+    let countPM = 354;
+    let countMP = 358;
+    let countMM = 142;
+
+    // -------------------------------------------------------------
+    // Three.js 3D PBR Quantum Optics Scene Setup
+    // -------------------------------------------------------------
+    const container = document.getElementById('webgl-canvas');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x030712, 0.035);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 3.2, 8.5);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.25;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxDistance = 25;
+    controls.minDistance = 2;
+
+    // Optical Breadboard Grid Floor
+    const gridHelper = new THREE.GridHelper(30, 30, 0xec4899, 0x1e293b);
+    gridHelper.position.y = -1.2;
+    scene.add(gridHelper);
+
+    // Ambient & Directional Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    mainLight.position.set(5, 12, 8);
+    scene.add(mainLight);
+
+    const cyanPointLight = new THREE.PointLight(0x00f0ff, 2.5, 8);
+    cyanPointLight.position.set(-DISTANCE_TO_STATION, 1.5, 0);
+    scene.add(cyanPointLight);
+
+    const pinkPointLight = new THREE.PointLight(0xec4899, 2.5, 8);
+    pinkPointLight.position.set(DISTANCE_TO_STATION, 1.5, 0);
+    scene.add(pinkPointLight);
+
+    const goldPointLight = new THREE.PointLight(0xf59e0b, 3.0, 6);
+    goldPointLight.position.set(0, 0.5, 0);
+    scene.add(goldPointLight);
+
+    // -------------------------------------------------------------
+    // Central BBO Non-linear Crystal (Entangled Photon Source)
+    // -------------------------------------------------------------
+    const bboGroup = new THREE.Group();
+    scene.add(bboGroup);
+
+    // Crystal Mount
+    const mountGeo = new THREE.CylinderGeometry(0.55, 0.65, 0.3, 32);
+    const mountMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 });
+    const crystalMount = new THREE.Mesh(mountGeo, mountMat);
+    crystalMount.position.y = -0.15;
+    bboGroup.add(crystalMount);
+
+    // Transparent BBO Octahedron Crystal
+    const bboGeo = new THREE.OctahedronGeometry(0.52, 0);
+    const bboMat = new THREE.MeshPhysicalMaterial({
+      color: 0xf59e0b,
+      emissive: 0xf59e0b,
+      emissiveIntensity: 0.45,
+      transparent: true,
+      opacity: 0.88,
+      roughness: 0.08,
+      metalness: 0.1,
+      transmission: 0.9,
+      ior: 1.67
+    });
+    const bboCrystal = new THREE.Mesh(bboGeo, bboMat);
+    bboCrystal.position.y = 0.35;
+    bboGroup.add(bboCrystal);
+
+    // UV Pump Laser Beam (from behind into BBO crystal)
+    const pumpGeo = new THREE.CylinderGeometry(0.04, 0.04, 4.0, 16);
+    const pumpMat = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.75 });
+    const pumpLaser = new THREE.Mesh(pumpGeo, pumpMat);
+    pumpLaser.rotation.x = Math.PI / 2;
+    pumpLaser.position.set(0, 0.35, -2.0);
+    bboGroup.add(pumpLaser);
+
+    // Type-II SPDC Emission Cones (Visual Rings)
+    const coneMat1 = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
+    const coneMat2 = new THREE.MeshBasicMaterial({ color: 0xec4899, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
+    const ringGeo1 = new THREE.RingGeometry(0.3, 0.34, 32);
+    const ring1 = new THREE.Mesh(ringGeo1, coneMat1);
+    ring1.position.set(-0.35, 0.35, 0.5);
+    bboGroup.add(ring1);
+    const ring2 = new THREE.Mesh(ringGeo1, coneMat2);
+    ring2.position.set(0.35, 0.35, 0.5);
+    bboGroup.add(ring2);
+
+    // -------------------------------------------------------------
+    // Alice, Bob & Charlie Polarizing Measurement Stations
+    // -------------------------------------------------------------
+    function createStation(xPos, stationColor, stationName, zPos = 0) {
+      const stGroup = new THREE.Group();
+      stGroup.position.set(xPos, 0, zPos);
+
+      // Heavy Optical Platform Base
+      const baseGeo = new THREE.BoxGeometry(1.6, 0.25, 1.4);
+      const baseMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8, roughness: 0.3 });
+      const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+      baseMesh.position.y = -0.125;
+      stGroup.add(baseMesh);
+
+      // Polarizer Dial Outer Ring
+      const dialRingGeo = new THREE.TorusGeometry(0.85, 0.05, 16, 64);
+      const dialRingMat = new THREE.MeshBasicMaterial({ color: stationColor });
+      const dialRing = new THREE.Mesh(dialRingGeo, dialRingMat);
+      dialRing.position.y = 0.75;
+      stGroup.add(dialRing);
+
+      // Rotatable Polarizer Needle / Grid Assembly
+      const rotGroup = new THREE.Group();
+      rotGroup.position.y = 0.75;
+      stGroup.add(rotGroup);
+
+      const needleGeo = new THREE.CylinderGeometry(0.035, 0.035, 1.6, 16);
+      const needleMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const needle = new THREE.Mesh(needleGeo, needleMat);
+      rotGroup.add(needle);
+
+      // Wireframe grid lines on polarizer
+      for (let g = -0.5; g <= 0.5; g += 0.25) {
+        if (Math.abs(g) < 0.01) continue;
+        const gLen = 2.0 * Math.sqrt(Math.max(0.01, 0.7 * 0.7 - g * g));
+        const gGeo = new THREE.CylinderGeometry(0.015, 0.015, gLen, 8);
+        const gMat = new THREE.MeshBasicMaterial({ color: stationColor, transparent: true, opacity: 0.6 });
+        const gMesh = new THREE.Mesh(gGeo, gMat);
+        gMesh.position.x = g;
+        rotGroup.add(gMesh);
+      }
+
+      // Single-Photon Avalanche Detectors (SPAD + and - ports)
+      const spadGeo = new THREE.CylinderGeometry(0.18, 0.22, 0.3, 16);
+      const spadMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7, roughness: 0.3 });
+
+      const spadPlus = new THREE.Mesh(spadGeo, spadMat.clone());
+      spadPlus.position.set(0, 1.65, 0);
+      stGroup.add(spadPlus);
+
+      const spadMinus = new THREE.Mesh(spadGeo, spadMat.clone());
+      spadMinus.position.set(0, -0.15, 0);
+      stGroup.add(spadMinus);
+
+      // Flash Light Bulb indicators
+      const bulbGeo = new THREE.SphereGeometry(0.09, 16, 16);
+      const bulbPlus = new THREE.Mesh(bulbGeo, new THREE.MeshBasicMaterial({ color: 0x10b981 }));
+      bulbPlus.position.set(0, 1.82, 0);
+      stGroup.add(bulbPlus);
+
+      const bulbMinus = new THREE.Mesh(bulbGeo, new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+      bulbMinus.position.set(0, -0.32, 0);
+      stGroup.add(bulbMinus);
+
+      // Station Text Sprite Label
+      const canvas = document.createElement('canvas');
+      canvas.width = 256; canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = (stationColor === 0x00f0ff) ? '#00f0ff' : (stationColor === 0x10b981 ? '#10b981' : '#ec4899');
+      ctx.font = 'Bold 34px Chakra Petch';
+      ctx.textAlign = 'center';
+      ctx.fillText(stationName, 128, 44);
+      const labelTex = new THREE.CanvasTexture(canvas);
+      const labelSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex, transparent: true }));
+      labelSprite.position.set(0, 2.2, 0);
+      labelSprite.scale.set(1.6, 0.4, 1);
+      stGroup.add(labelSprite);
+
+      scene.add(stGroup);
+
+      return {
+        group: stGroup,
+        rotGroup: rotGroup,
+        bulbPlus: bulbPlus,
+        bulbMinus: bulbMinus
+      };
+    }
+
+    const aliceStation = createStation(-DISTANCE_TO_STATION, 0x00f0ff, 'ALICE (Station A)');
+    const bobStation = createStation(DISTANCE_TO_STATION, 0xec4899, 'BOB (Station B)');
+    const charlieStation = createStation(0, 0x10b981, 'CHARLIE (Station C)', -DISTANCE_TO_STATION * 0.85);
+    charlieStation.group.visible = false;
+
+    // -------------------------------------------------------------
+    // Flying Entangled Photons & Wavepacket E-field Visuals
+    // -------------------------------------------------------------
+    const photonAlice = new THREE.Group();
+    const photonBob = new THREE.Group();
+    const photonCharlie = new THREE.Group();
+    photonCharlie.visible = false;
+    scene.add(photonAlice);
+    scene.add(photonBob);
+    scene.add(photonCharlie);
+
+    // Glowing photon spheres
+    const pGeo = new THREE.SphereGeometry(0.12, 16, 16);
+    const pMatAlice = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+    const pMatBob = new THREE.MeshBasicMaterial({ color: 0xec4899 });
+    const pMatCharlie = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+    photonAlice.add(new THREE.Mesh(pGeo, pMatAlice));
+    photonBob.add(new THREE.Mesh(pGeo, pMatBob));
+    photonCharlie.add(new THREE.Mesh(pGeo, pMatCharlie));
+
+    // Animated Electric Field Polarization Arrows
+    const arrowAlice = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 0.6, 0x00f0ff, 0.16, 0.08);
+    const arrowBob = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 0.6, 0xec4899, 0.16, 0.08);
+    const arrowCharlie = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 0.6, 0x10b981, 0.16, 0.08);
+    photonAlice.add(arrowAlice);
+    photonBob.add(arrowBob);
+    photonCharlie.add(arrowCharlie);
+
+    // Spooky Action at a Distance: Entangled Quantum Tether Ribbon
+    const tetherGeo = new THREE.BufferGeometry();
+    const tetherPoints = [new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 0.35, 0)];
+    tetherGeo.setFromPoints(tetherPoints);
+    const tetherMat = new THREE.LineBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.85, linewidth: 2.5 });
+    const tetherLine = new THREE.Line(tetherGeo, tetherMat);
+    scene.add(tetherLine);
+
+    const tetherGeoCharlie = new THREE.BufferGeometry();
+    const tetherPointsCharlie = [new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 0.35, 0)];
+    tetherGeoCharlie.setFromPoints(tetherPointsCharlie);
+    const tetherMatCharlie = new THREE.LineBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.85, linewidth: 2.0 });
+    const tetherLineCharlie = new THREE.Line(tetherGeoCharlie, tetherMatCharlie);
+    tetherLineCharlie.visible = false;
+    scene.add(tetherLineCharlie);
+
+    // -------------------------------------------------------------
+    // Quantum Teleportation 3D Apparatus (Fiber & Mini Bloch)
+    // -------------------------------------------------------------
+    const teleportGroup = new THREE.Group();
+    teleportGroup.visible = false;
+    scene.add(teleportGroup);
+
+    // Optical Fiber connecting Alice and Bob
+    const fiberCurve = new THREE.QuadraticBezierCurve3(
+      new THREE.Vector3(-DISTANCE_TO_STATION, 0.2, 0),
+      new THREE.Vector3(0, -0.6, 0),
+      new THREE.Vector3(DISTANCE_TO_STATION, 0.2, 0)
+    );
+    const fiberGeo = new THREE.TubeGeometry(fiberCurve, 32, 0.03, 8, false);
+    const fiberMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.65 });
+    const fiberMesh = new THREE.Mesh(fiberGeo, fiberMat);
+    teleportGroup.add(fiberMesh);
+
+    // Alice Input Qubit Mini Sphere
+    const miniSphereGeo = new THREE.SphereGeometry(0.35, 24, 18);
+    const miniSphereMat = new THREE.MeshPhysicalMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.3, wireframe: true });
+    const miniBloch = new THREE.Mesh(miniSphereGeo, miniSphereMat);
+    miniBloch.position.set(-DISTANCE_TO_STATION - 1.2, 1.2, 0);
+    teleportGroup.add(miniBloch);
+
+    const miniArrow = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 0.45, 0xf59e0b, 0.12, 0.06);
+    miniBloch.add(miniArrow);
+
+    // -------------------------------------------------------------
+    // Physical Mathematics & Correlation Calculations
+    // -------------------------------------------------------------
+    function updatePhysics() {
+      const aRad = (aliceAngleDeg * Math.PI) / 180.0;
+      const bRad = (bobAngleDeg * Math.PI) / 180.0;
+      const deltaThetaDeg = Math.abs(aliceAngleDeg - bobAngleDeg);
+      const deltaRad = (deltaThetaDeg * Math.PI) / 180.0;
+
+      // Rotate Polarizer Needles in 3D
+      aliceStation.rotGroup.rotation.z = aRad;
+      bobStation.rotGroup.rotation.z = bRad;
+
+      // Theoretical Quantum Correlation E(a,b):
+      // For singlet |Psi->: E(a,b) = -cos(2 * (a - b))
+      // For triplet |Phi+>: E(a,b) = +cos(2 * (a - b))
+      let eTheory = 0.0;
+      if (currentBellState === 'phi_plus') {
+        eTheory = Math.cos(2.0 * deltaRad) * wernerP;
+      } else if (currentBellState === 'phi_minus') {
+        eTheory = Math.cos(2.0 * (aRad + bRad)) * wernerP;
+      } else if (currentBellState === 'psi_plus') {
+        eTheory = -Math.cos(2.0 * (aRad + bRad)) * wernerP;
+      } else if (currentBellState === 'psi_minus') {
+        eTheory = -Math.cos(2.0 * deltaRad) * wernerP;
+      }
+
+      // CHSH S-Parameter Calculation incorporating Detector Efficiency eta:
+      // Loophole-free threshold: eta_crit = 2 / (sqrt(2) + 1) approx 82.84%
+      let sIdeal = 0.0;
+      if (Math.abs(aliceAngleDeg - 0) < 3 && Math.abs(bobAngleDeg - 22.5) < 3) {
+        sIdeal = 2.0 * Math.SQRT2 * wernerP * (1.0 - (eveRate / 100.0) * 0.4);
+      } else {
+        sIdeal = Math.min(2.8284, Math.abs(eTheory * 2.8284) * (1.0 - (eveRate / 100.0) * 0.4));
+      }
+
+      const etaFactor = Math.pow(detectorEta, 2);
+      const S = etaFactor * sIdeal + (1.0 - etaFactor) * 1.414;
+
+      // Concurrence C(p) = max(0, (3p - 1)/2) for isotropic Werner state
+      const concurrence = Math.max(0.0, (3.0 * wernerP - 1.0) / 2.0);
+      const entropy = concurrence > 0.01 ? (1.0 - concurrence * 0.3) : 0.0;
+
+      // UI Element Updates
+      document.getElementById('val-alice-theta').innerText = aliceAngleDeg.toFixed(1) + '°';
+      document.getElementById('val-bob-theta').innerText = bobAngleDeg.toFixed(1) + '°';
+      document.getElementById('slider-alice-theta').value = aliceAngleDeg;
+      document.getElementById('slider-bob-theta').value = bobAngleDeg;
+
+      const etaEl = document.getElementById('val-detector-eta');
+      if (etaEl) etaEl.innerText = (detectorEta * 100).toFixed(1) + ' %';
+
+      document.getElementById('telem-delta-theta').innerText = deltaThetaDeg.toFixed(1) + '°';
+      document.getElementById('telem-e-theory').innerText = (eTheory >= 0 ? '+' : '') + eTheory.toFixed(4);
+      document.getElementById('telem-chsh-s').innerText = 'S = ' + S.toFixed(4);
+      document.getElementById('telem-concurrence').innerText = concurrence.toFixed(3) + (concurrence >= 0.99 ? ' (พัวพันสูงสุด)' : concurrence > 0 ? ' (พัวพันบางส่วน)' : ' (ไร้พัวพัน)');
+      document.getElementById('telem-entropy').innerText = entropy.toFixed(3) + ' บิต';
+
+      const sStatus = document.getElementById('telem-chsh-status');
+      const badgeStatus = document.getElementById('badge-quantum-status');
+      if (S > 2.0) {
+        sStatus.innerText = 'ละเมิดขอบเขตคลาสสิกของไอน์สไตน์ (S > 2)';
+        sStatus.style.color = 'var(--accent-green)';
+        badgeStatus.innerText = 'NON-LOCAL ENTANGLED';
+        badgeStatus.style.color = 'var(--accent-green)';
+      } else {
+        sStatus.innerText = 'สอดคล้องกับขอบเขตคลาสสิกท้องถิ่น (S ≤ 2)';
+        sStatus.style.color = 'var(--accent-gold)';
+        badgeStatus.innerText = 'CLASSICAL / SEPARABLE';
+        badgeStatus.style.color = 'var(--accent-gold)';
+      }
+
+      // Loophole-Free Verification Bound
+      const etaCrit = 2.0 / (Math.SQRT2 + 1.0); // 0.8284
+      const loopEl = document.getElementById('telem-loophole-status');
+      if (loopEl) {
+        if (detectorEta >= etaCrit) {
+          loopEl.innerText = `CERTIFIED (η = ${(detectorEta * 100).toFixed(1)}% ≥ 82.8%)`;
+          loopEl.style.color = 'var(--accent-green)';
+        } else {
+          loopEl.innerText = `LOOPHOLE OPEN (η = ${(detectorEta * 100).toFixed(1)}% < 82.8%)`;
+          loopEl.style.color = 'var(--accent-gold)';
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Scenario Switcher
+    // -------------------------------------------------------------
+    function setScenario(scen) {
+      currentScenario = scen;
+      document.getElementById('tab-bell').classList.toggle('active', scen === 'bell');
+      document.getElementById('tab-chsh').classList.toggle('active', scen === 'chsh');
+      document.getElementById('tab-ghz').classList.toggle('active', scen === 'ghz');
+      document.getElementById('tab-teleport').classList.toggle('active', scen === 'teleport');
+      document.getElementById('tab-qkd').classList.toggle('active', scen === 'qkd');
+      document.getElementById('tab-decohere').classList.toggle('active', scen === 'decohere');
+
+      document.getElementById('group-bell').style.display = (scen === 'bell') ? 'flex' : 'none';
+      document.getElementById('group-chsh').style.display = (scen === 'chsh') ? 'flex' : 'none';
+      document.getElementById('group-ghz').style.display = (scen === 'ghz') ? 'flex' : 'none';
+      document.getElementById('group-teleport').style.display = (scen === 'teleport') ? 'flex' : 'none';
+      document.getElementById('group-qkd').style.display = (scen === 'qkd') ? 'flex' : 'none';
+      document.getElementById('group-decohere').style.display = (scen === 'decohere') ? 'flex' : 'none';
+
+      teleportGroup.visible = (scen === 'teleport');
+      charlieStation.group.visible = (scen === 'ghz');
+      photonCharlie.visible = (scen === 'ghz');
+      tetherLineCharlie.visible = (scen === 'ghz');
+      document.getElementById('row-mermin-product').style.display = (scen === 'ghz') ? 'flex' : 'none';
+
+      if (scen === 'bell') {
+        selectBellState('phi_plus');
+      } else if (scen === 'chsh') {
+        setCHSHAngles(0, 22.5, 'Tsirelson Max');
+      } else if (scen === 'ghz') {
+        selectMerminOperator('XYY');
+      } else if (scen === 'teleport') {
+        setTeleportInput(0, 0, '|0⟩');
+      } else if (scen === 'qkd') {
+        eveRate = 0;
+        document.getElementById('slider-eve').value = 0;
+        document.getElementById('val-eve-rate').innerText = '0 %';
+      } else if (scen === 'decohere') {
+        wernerP = 1.0;
+        document.getElementById('slider-werner-p').value = 1.0;
+        document.getElementById('val-werner-p').innerText = 'p = 1.00 (Pure Bell)';
+      }
+
+      updatePhysics();
+    }
+
+    // -------------------------------------------------------------
+    // Scenario 1: Bell States
+    // -------------------------------------------------------------
+    function selectBellState(stateKey) {
+      currentBellState = stateKey;
+      const stateMap = {
+        'phi_plus': { str: '|Φ⁺⟩ = (|00⟩+|11⟩)/√2', valStr: '|Φ⁺⟩' },
+        'phi_minus': { str: '|Φ⁻⟩ = (|00⟩-|11⟩)/√2', valStr: '|Φ⁻⟩' },
+        'psi_plus': { str: '|Ψ⁺⟩ = (|01⟩+|10⟩)/√2', valStr: '|Ψ⁺⟩' },
+        'psi_minus': { str: '|Ψ⁻⟩ = (|01⟩-|10⟩)/√2', valStr: '|Ψ⁻⟩' }
+      };
+
+      document.getElementById('val-bell-state').innerText = stateMap[stateKey].valStr;
+      document.getElementById('telem-state-str').innerText = stateMap[stateKey].str;
+
+      document.querySelectorAll('#group-bell .preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.includes(stateMap[stateKey].valStr));
+      });
+
+      updatePhysics();
+      playTone(520, 0.2, 'triangle');
+    }
+
+    // -------------------------------------------------------------
+    // Scenario 2: Polarizer Angle Sliders & Monte Carlo Firing
+    // -------------------------------------------------------------
+    document.getElementById('slider-alice-theta').addEventListener('input', (e) => {
+      aliceAngleDeg = parseFloat(e.target.value);
+      updatePhysics();
+    });
+
+    document.getElementById('slider-bob-theta').addEventListener('input', (e) => {
+      bobAngleDeg = parseFloat(e.target.value);
+      updatePhysics();
+    });
+
+    document.getElementById('slider-detector-eta').addEventListener('input', (e) => {
+      detectorEta = parseFloat(e.target.value) / 100.0;
+      updatePhysics();
+    });
+
+    function runAspectFastSwitch() {
+      const anglesA = [0, 45];
+      const anglesB = [22.5, 67.5];
+      aliceAngleDeg = anglesA[Math.floor(Math.random() * 2)];
+      bobAngleDeg = anglesB[Math.floor(Math.random() * 2)];
+      updatePhysics();
+      playTone(1050, 0.1, 'sawtooth');
+      setTimeout(() => playTone(1250, 0.1, 'sine'), 60);
+      alert('Alain Aspect Fast Switching ---- สลับมุมโพลาไรเซอร์สุ่มแบบไม่สัมพันธ์กัน (Random Ultra-Fast Switching) สำเร็จในเวลา 10 ns ซึ่งสั้นกว่าเวลาการเดินทางของแสงข้ามระยะห่างระหว่างสถานี (d/c ≈ 40 ns) ปิดช่องโหว่ความเฉพาะที่ (Locality Loophole) โดยสมบูรณ์');
+    }
+
+    // -------------------------------------------------------------
+    // Scenario 2.5: GHZ & Mermin Deterministic Paradox Logic
+    // -------------------------------------------------------------
+    function selectMerminOperator(op) {
+      merminOp = op;
+      const opNames = {
+        'XYY': 'X₁ Y₂ Y₃',
+        'YXY': 'Y₁ X₂ Y₃',
+        'YYX': 'Y₁ Y₂ X₃',
+        'XXX': 'X₁ X₂ X₃'
+      };
+      document.getElementById('val-mermin-op').innerText = opNames[op] || op;
+      document.querySelectorAll('#group-ghz .preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.startsWith(op));
+      });
+
+      const prodEl = document.getElementById('telem-mermin-product');
+      if (op === 'XXX') {
+        prodEl.innerText = '-1 (QM) vs +1 (LHV)';
+        prodEl.style.color = '#ef4444';
+      } else {
+        prodEl.innerText = '+1 (Quantum Exact)';
+        prodEl.style.color = 'var(--accent-cyan)';
+      }
+      playTone(720, 0.15, 'triangle');
+    }
+
+    function runMerminSingleShot() {
+      flightTime = 0.0;
+      playTone(950, 0.1, 'square');
+
+      let outA, outB, outC;
+      if (merminOp === 'XXX') {
+        const outcomesMinus = [
+          [+1, +1, -1],
+          [+1, -1, +1],
+          [-1, +1, +1],
+          [-1, -1, -1]
+        ];
+        const pick = outcomesMinus[Math.floor(Math.random() * 4)];
+        outA = pick[0]; outB = pick[1]; outC = pick[2];
+      } else {
+        const outcomesPlus = [
+          [+1, +1, +1],
+          [+1, -1, -1],
+          [-1, +1, -1],
+          [-1, -1, +1]
+        ];
+        const pick = outcomesPlus[Math.floor(Math.random() * 4)];
+        outA = pick[0]; outB = pick[1]; outC = pick[2];
+      }
+
+      setTimeout(() => {
+        if (outA === +1) {
+          aliceStation.bulbPlus.material.color.setHex(0x00f0ff);
+          setTimeout(() => aliceStation.bulbPlus.material.color.setHex(0x10b981), 250);
+        } else {
+          aliceStation.bulbMinus.material.color.setHex(0x00f0ff);
+          setTimeout(() => aliceStation.bulbMinus.material.color.setHex(0xef4444), 250);
+        }
+
+        if (outB === +1) {
+          bobStation.bulbPlus.material.color.setHex(0xec4899);
+          setTimeout(() => bobStation.bulbPlus.material.color.setHex(0x10b981), 250);
+        } else {
+          bobStation.bulbMinus.material.color.setHex(0xec4899);
+          setTimeout(() => bobStation.bulbMinus.material.color.setHex(0xef4444), 250);
+        }
+
+        if (outC === +1) {
+          charlieStation.bulbPlus.material.color.setHex(0x10b981);
+          setTimeout(() => charlieStation.bulbPlus.material.color.setHex(0x10b981), 250);
+        } else {
+          charlieStation.bulbMinus.material.color.setHex(0xef4444);
+          setTimeout(() => charlieStation.bulbMinus.material.color.setHex(0xef4444), 250);
+        }
+
+        const prod = outA * outB * outC;
+        const msg = `ผลการวัดเดี่ยว GHZ 3 สถานี (${merminOp})\n• Alice (1) ---- ${outA > 0 ? '+1' : '-1'}\n• Bob (2) ---- ${outB > 0 ? '+1' : '-1'}\n• Charlie (3) ---- ${outC > 0 ? '+1' : '-1'}\n• ผลคูณร่วม = ${prod > 0 ? '+1' : '-1'}\n\n${(merminOp === 'XXX' && prod === -1) ? '🔥 ชัยชนะของกลศาสตร์ควอนตัมเหนือไอน์สไตน์! ทฤษฎีตัวแปรแอบแฝงทำนาย +1 แต่ควอนตัมได้ -1 เด็ดขาดในช็อตเดียว!' : 'สอดคล้องกับค่าไอเกนทฤษฎีควอนตัม (+1)'}`;
+        alert(msg);
+        playTone(prod === -1 ? 1174.66 : 880, 0.35, 'triangle');
+      }, 500);
+    }
+
+    function openGHZModal() {
+      document.getElementById('ghz-modal').style.display = 'flex';
+    }
+    function closeGHZModal() {
+      document.getElementById('ghz-modal').style.display = 'none';
+    }
+
+    function runEntanglementSwapping() {
+      if (isSwappingRunning) return;
+      isSwappingRunning = true;
+      const statusEl = document.getElementById('val-teleport-stage');
+      statusEl.innerText = '1. ผลึกสร้างคู่พัวพัน (1,2) และ (3,4) พร้อมกัน';
+      statusEl.style.color = '#a855f7';
+      playTone(587.33, 0.2, 'sawtooth');
+
+      setTimeout(() => {
+        statusEl.innerText = '2. สถานีรีพีตเตอร์วัด BSM บนโฟตอนคู่กลาง (2 & 3)';
+        statusEl.style.color = '#f59e0b';
+        playTone(740, 0.25, 'triangle');
+
+        setTimeout(() => {
+          statusEl.innerText = '3. สวอปสำเร็จ! Alice(1) และ Bob(4) พัวพันกันทันที (Non-Local Swapping)';
+          statusEl.style.color = '#10b981';
+          document.getElementById('badge-quantum-status').innerText = 'SWAPPED ENTANGLED';
+          document.getElementById('badge-quantum-status').style.color = '#10b981';
+
+          playTone(659.25, 0.25);
+          setTimeout(() => playTone(880.00, 0.35), 80);
+          alert('Entanglement Swapping สำเร็จ ---- โฟตอน 1 ของ Alice และโฟตอน 4 ของ Bob มีความพัวพันเชิงควอนตัมสูงสุด ทั้งที่ไม่เคยพบกันหรือมีปฏิสัมพันธ์ในอดีตร่วมกันมาก่อน นี่คือรากฐานของ Quantum Internet และ Repeater Network');
+          isSwappingRunning = false;
+        }, 700);
+      }, 700);
+    }
+
+    function setCHSHAngles(thA, thB, label) {
+      aliceAngleDeg = thA;
+      bobAngleDeg = thB;
+      updatePhysics();
+      playTone(660, 0.15, 'sine');
+
+      document.querySelectorAll('#group-chsh .preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.includes(label.split(' ')[0]));
+      });
+    }
+
+    function fireSingleEntangledPair() {
+      flightTime = 0.0;
+      playTone(880, 0.08, 'sawtooth');
+
+      // Trigger quantum measurement outcome based on Born's rule
+      const deltaRad = Math.abs(aliceAngleDeg - bobAngleDeg) * (Math.PI / 180.0);
+      const pSame = (currentBellState === 'phi_plus' || currentBellState === 'phi_minus')
+        ? Math.pow(Math.cos(deltaRad), 2)
+        : Math.pow(Math.sin(deltaRad), 2);
+
+      let outAlice = (Math.random() < 0.5) ? +1 : -1;
+      let outBob = (Math.random() < pSame) ? outAlice : -outAlice;
+
+      // Visual flash on SPAD detectors after flight finishes (approx 0.6s)
+      setTimeout(() => {
+        if (outAlice === +1) {
+          aliceStation.bulbPlus.material.color.setHex(0x00f0ff);
+          setTimeout(() => aliceStation.bulbPlus.material.color.setHex(0x10b981), 200);
+        } else {
+          aliceStation.bulbMinus.material.color.setHex(0x00f0ff);
+          setTimeout(() => aliceStation.bulbMinus.material.color.setHex(0xef4444), 200);
+        }
+
+        if (outBob === +1) {
+          bobStation.bulbPlus.material.color.setHex(0xec4899);
+          setTimeout(() => bobStation.bulbPlus.material.color.setHex(0x10b981), 200);
+        } else {
+          bobStation.bulbMinus.material.color.setHex(0xec4899);
+          setTimeout(() => bobStation.bulbMinus.material.color.setHex(0xef4444), 200);
+        }
+
+        document.getElementById('telem-last-meas').innerText = `Alice ---- ${outAlice > 0 ? '+1' : '-1'}  |  Bob ---- ${outBob > 0 ? '+1' : '-1'}`;
+        playCoincidenceChime(outAlice, outBob);
+      }, 500);
+    }
+
+    function fireMonteCarloPairs(nPairs) {
+      const btn = document.getElementById('btn-fire-1000');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> กำลังจำลองการวัด 1,000 คู่...';
+
+      const deltaRad = Math.abs(aliceAngleDeg - bobAngleDeg) * (Math.PI / 180.0);
+      const pSame = (currentBellState === 'phi_plus' || currentBellState === 'phi_minus')
+        ? Math.pow(Math.cos(deltaRad), 2) * wernerP + (1.0 - wernerP) * 0.5
+        : Math.pow(Math.sin(deltaRad), 2) * wernerP + (1.0 - wernerP) * 0.5;
+
+      let nPP = 0, nPM = 0, nMP = 0, nMM = 0;
+      for (let i = 0; i < nPairs; i++) {
+        const outA = (Math.random() < 0.5) ? +1 : -1;
+        const outB = (Math.random() < pSame) ? outA : -outA;
+        if (outA === +1 && outB === +1) nPP++;
+        else if (outA === +1 && outB === -1) nPM++;
+        else if (outA === -1 && outB === +1) nMP++;
+        else if (outA === -1 && outB === -1) nMM++;
+      }
+
+      countPP = nPP; countPM = nPM; countMP = nMP; countMM = nMM;
+      document.getElementById('cnt-pp').innerText = countPP;
+      document.getElementById('cnt-pm').innerText = countPM;
+      document.getElementById('cnt-mp').innerText = countMP;
+      document.getElementById('cnt-mm').innerText = countMM;
+
+      const eExp = (nPP + nMM - nPM - nMP) / nPairs;
+      document.getElementById('telem-e-exp').innerText = (eExp >= 0 ? '+' : '') + eExp.toFixed(4);
+
+      playTone(987.77, 0.35, 'sine');
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<span>💥</span> ยิงสุ่มคู่โฟตอนพัวพัน 1,000 คู่ (CHSH Sampling)';
+        openCHSHModal();
+      }, 300);
+    }
+
+    function toggleContinuousFiring() {
+      isContinuousFiring = !isContinuousFiring;
+      const btn = document.getElementById('btn-auto-fire');
+      btn.innerHTML = isContinuousFiring ? '<span>🔄</span> ยิงต่อเนื่อง (เปิด)' : '<span>⏸️</span> ยิงต่อเนื่อง (หยุด)';
+      btn.classList.toggle('primary', isContinuousFiring);
+    }
+
+    // -------------------------------------------------------------
+    // Scenario 3: Quantum Teleportation Logic
+    // -------------------------------------------------------------
+    function setTeleportInput(theta, phi, label) {
+      teleportInputTheta = theta;
+      teleportInputPhi = phi;
+      document.getElementById('val-teleport-state').innerText = label;
+
+      // Update Mini Bloch arrow vector
+      const thRad = (theta * Math.PI) / 180.0;
+      const phRad = (phi * Math.PI) / 180.0;
+      const dir = new THREE.Vector3(
+        Math.sin(thRad) * Math.cos(phRad),
+        Math.cos(thRad),
+        Math.sin(thRad) * Math.sin(phRad)
+      );
+      miniArrow.setDirection(dir.normalize());
+
+      document.querySelectorAll('#group-teleport .preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.includes(label.split(' ')[0]));
+      });
+
+      playTone(440 + theta * 2, 0.15);
+    }
+
+    function runTeleportationProtocol() {
+      const statusEl = document.getElementById('val-teleport-stage');
+      const btn = document.getElementById('btn-run-teleport');
+      btn.disabled = true;
+
+      // Stage 1: Generate Entangled Pair 2 & 3
+      statusEl.innerText = '1. สร้างคู่พัวพัน |Φ⁺⟩₂₃ ระหว่าง Alice & Bob';
+      statusEl.style.color = '#00f0ff';
+      playTone(550, 0.2, 'triangle');
+
+      setTimeout(() => {
+        // Stage 2: Alice performs Bell State Measurement (BSM) on Qubit 1 & 2
+        const outcomes = ['00', '01', '10', '11'];
+        const bsmOutcome = outcomes[Math.floor(Math.random() * 4)];
+        statusEl.innerText = `2. Alice วัดในฐานเบลล์สำเร็จ ---- ได้บิตคลาสสิก m₁m₂ = ${bsmOutcome}`;
+        statusEl.style.color = '#f59e0b';
+        playTone(700, 0.2, 'square');
+
+        document.getElementById('modal-teleport-bits').innerText = `m₁ m₂ = ${bsmOutcome[0]} ${bsmOutcome[1]}`;
+
+        setTimeout(() => {
+          // Stage 3: Transmit 2 classical bits through optical fiber
+          statusEl.innerText = `3. ส่งสัญญาณ 2 บิต (${bsmOutcome}) ผ่านเส้นใยนำแสงสู่ Bob`;
+          statusEl.style.color = '#ec4899';
+          playTone(850, 0.2, 'sawtooth');
+
+          setTimeout(() => {
+            // Stage 4: Bob applies Unitary correction gate U = Z^m1 X^m2
+            const gateName = (bsmOutcome === '00') ? 'I (Identity)' : (bsmOutcome === '01') ? 'X (Bit Flip)' : (bsmOutcome === '10') ? 'Z (Phase Flip)' : 'Z·X (Bit-Phase Flip)';
+            statusEl.innerText = `4. Bob ปรับเกตยูนิทารี ${gateName} ---- กู้คืนสำเร็จ 100%!`;
+            statusEl.style.color = '#10b981';
+
+            // Celebratory chord
+            playTone(523.25, 0.3);
+            setTimeout(() => playTone(659.25, 0.3), 100);
+            setTimeout(() => playTone(783.99, 0.4), 200);
+
+            btn.disabled = false;
+            openTeleportModal();
+          }, 600);
+        }, 600);
+      }, 600);
+    }
+
+    // -------------------------------------------------------------
+    // Scenario 4: E91 QKD Protocol Logic
+    // -------------------------------------------------------------
+    document.getElementById('slider-eve').addEventListener('input', (e) => {
+      eveRate = parseFloat(e.target.value);
+      document.getElementById('val-eve-rate').innerText = eveRate.toFixed(0) + ' %';
+      const statusEl = document.getElementById('val-qkd-status');
+      if (eveRate > 20) {
+        statusEl.innerText = 'เตือนภัย ---- ตรวจพบสายลับ Eve (ดีโคฮีเรนซ์สูง)';
+        statusEl.style.color = '#ef4444';
+      } else {
+        statusEl.innerText = 'ปลอดภัย (ไร้สายลับ)';
+        statusEl.style.color = '#10b981';
+      }
+      updatePhysics();
+    });
+
+    function runE91KeyExchange() {
+      const aliceBases = [0, 45, 90];
+      const bobBases = [45, 90, 135];
+      let siftedKeyLength = 0;
+
+      for (let i = 0; i < 100; i++) {
+        const bA = aliceBases[Math.floor(Math.random() * 3)];
+        const bB = bobBases[Math.floor(Math.random() * 3)];
+        if (bA === bB) siftedKeyLength++;
+      }
+
+      alert(`ผลการแจกจ่ายคีย์ควอนตัม Ekert91 (100 ช็อต):\n• บิตที่ฐานการวัดตรงกัน (Sifted Key) ---- ${siftedKeyLength} บิต\n• บิตที่ฐานต่างกันสำหรับตรวจจับสายลับ ---- ${100 - siftedKeyLength} บิต\n• อัตราความผิดพลาดควอนตัม (QBER) ---- ${(eveRate * 0.4).toFixed(1)} %`);
+      playTone(780, 0.25);
+    }
+
+    // -------------------------------------------------------------
+    // Scenario 5: Entanglement Sudden Death (ESD) Werner State Slider
+    // -------------------------------------------------------------
+    document.getElementById('slider-werner-p').addEventListener('input', (e) => {
+      wernerP = parseFloat(e.target.value);
+      document.getElementById('val-werner-p').innerText = 'p = ' + wernerP.toFixed(2) + (wernerP <= 0.334 ? ' (ESD ดับวูบ)' : '');
+      updatePhysics();
+    });
+
+    // -------------------------------------------------------------
+    // Reset View
+    // -------------------------------------------------------------
+    function resetViewsAndSensors() {
+      camera.position.set(0, 3.2, 8.5);
+      controls.target.set(0, 0, 0);
+      controls.update();
+      playTone(550, 0.15);
+    }
+
+    // -------------------------------------------------------------
+    // HUD Dock Collapsible & Zen Mode
+    // -------------------------------------------------------------
+    let leftCollapsed = false;
+    let rightCollapsed = false;
+    let zenModeActive = false;
+
+    function toggleLeftHUD(collapse) {
+      leftCollapsed = collapse !== undefined ? collapse : !leftCollapsed;
+      document.getElementById('hud-left').classList.toggle('collapsed', leftCollapsed);
+      document.getElementById('dock-left').style.display = leftCollapsed ? 'block' : 'none';
+    }
+
+    function toggleRightHUD(collapse) {
+      rightCollapsed = collapse !== undefined ? collapse : !rightCollapsed;
+      document.getElementById('hud-right').classList.toggle('collapsed', rightCollapsed);
+      document.getElementById('dock-right').style.display = rightCollapsed ? 'block' : 'none';
+    }
+
+    function toggleZenMode() {
+      zenModeActive = !zenModeActive;
+      toggleLeftHUD(zenModeActive);
+      toggleRightHUD(zenModeActive);
+      const btn = document.getElementById('btn-zen');
+      btn.classList.toggle('active', zenModeActive);
+      btn.querySelector('span:last-child').innerText = zenModeActive ? 'แสดงบาร์' : 'ย่อทุกบาร์ (H)';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCHSHModal();
+        closeTeleportModal();
+        closeGHZModal();
+        closeARModal();
+      }
+      if (e.key === 'h' || e.key === 'H') toggleZenMode();
+      if (e.key === ' ') { e.preventDefault(); fireSingleEntangledPair(); }
+    });
+
+    // -------------------------------------------------------------
+    // Mode Switcher: 3D Lab / Marker AR / Touchless Hand AI
+    // -------------------------------------------------------------
+    function switchMode(idx) {
+      document.querySelectorAll('.mode-pill').forEach((pill, i) => {
+        pill.classList.toggle('active', i === idx - 1);
+      });
+
+      if (idx === 1) {
+        closeARModal();
+        stopHandAI();
+      } else if (idx === 2) {
+        openARModal();
+        stopHandAI();
+      } else if (idx === 3) {
+        closeARModal();
+        startHandAI();
+      }
+    }
+
+    function openARModal() { document.getElementById('ar-modal').style.display = 'flex'; }
+    function closeARModal() { document.getElementById('ar-modal').style.display = 'none'; }
+
+    // -------------------------------------------------------------
+    // Modal 1: CHSH Curve 2D Canvas Plotting
+    // -------------------------------------------------------------
+    function openCHSHModal() {
+      document.getElementById('chsh-modal').style.display = 'flex';
+      drawCHSHGraph();
+    }
+    function closeCHSHModal() {
+      document.getElementById('chsh-modal').style.display = 'none';
+    }
+
+    function drawCHSHGraph() {
+      const canvas = document.getElementById('chsh-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Coordinate axes
+      const padX = 50;
+      const padY = 30;
+      const graphW = w - padX * 2;
+      const graphH = h - padY * 2;
+      const midY = padY + graphH / 2;
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      // Axis X
+      ctx.moveTo(padX, midY); ctx.lineTo(padX + graphW, midY);
+      // Axis Y
+      ctx.moveTo(padX, padY); ctx.lineTo(padX, padY + graphH);
+      ctx.stroke();
+
+      // Horizontal dashed guide lines (+1 and -1)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(padX, padY); ctx.lineTo(padX + graphW, padY);
+      ctx.moveTo(padX, padY + graphH); ctx.lineTo(padX + graphW, padY + graphH);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Axis Labels
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px JetBrains Mono';
+      ctx.fillText('+1.0', 16, padY + 4);
+      ctx.fillText(' 0.0', 16, midY + 4);
+      ctx.fillText('-1.0', 16, padY + graphH + 4);
+
+      ctx.fillText('0°', padX - 4, padY + graphH + 18);
+      ctx.fillText('45°', padX + graphW * 0.25 - 8, padY + graphH + 18);
+      ctx.fillText('90°', padX + graphW * 0.5 - 8, padY + graphH + 18);
+      ctx.fillText('135°', padX + graphW * 0.75 - 10, padY + graphH + 18);
+      ctx.fillText('180° (Δθ)', padX + graphW - 20, padY + graphH + 18);
+
+      // 1. Classical Local Realism Linear Bound (Yellow Dashed)
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      for (let px = 0; px <= graphW; px += 4) {
+        const th = (px / graphW) * Math.PI;
+        const eClass = 1.0 - (2.0 * Math.min(th, Math.PI - th)) / (Math.PI / 2.0);
+        const py = midY - eClass * (graphH / 2);
+        if (px === 0) ctx.moveTo(padX + px, py);
+        else ctx.lineTo(padX + px, py);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 2. Quantum Sinusoidal Curve E = -cos(2*deltaTheta) (Cyan Solid)
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let px = 0; px <= graphW; px += 2) {
+        const th = (px / graphW) * Math.PI;
+        const eQM = -Math.cos(2.0 * th) * wernerP;
+        const py = midY - eQM * (graphH / 2);
+        if (px === 0) ctx.moveTo(padX + px, py);
+        else ctx.lineTo(padX + px, py);
+      }
+      ctx.stroke();
+
+      // 3. Current Operating Point
+      const curDeltaDeg = Math.abs(aliceAngleDeg - bobAngleDeg);
+      const curDeltaRad = (curDeltaDeg * Math.PI) / 180.0;
+      const curX = padX + (Math.min(180, curDeltaDeg) / 180.0) * graphW;
+      const curEQM = -Math.cos(2.0 * curDeltaRad) * wernerP;
+      const curY = midY - curEQM * (graphH / 2);
+
+      ctx.fillStyle = '#ec4899';
+      ctx.beginPath();
+      ctx.arc(curX, curY, 6, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Legend in Canvas
+      ctx.font = '11px Chakra Petch';
+      ctx.fillStyle = '#00f0ff';
+      ctx.fillText('— เส้นโค้งควอนตัม (Quantum Mechanics)', padX + 20, padY + 20);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillText('- - ขอบเขตคลาสสิกตัวแปรแอบแฝง (Local Realism)', padX + 20, padY + 36);
+    }
+
+    // -------------------------------------------------------------
+    // Modal 2: Quantum Teleportation Circuit 2D Canvas
+    // -------------------------------------------------------------
+    function openTeleportModal() {
+      document.getElementById('teleport-modal').style.display = 'flex';
+      drawTeleportCircuit();
+    }
+    function closeTeleportModal() {
+      document.getElementById('teleport-modal').style.display = 'none';
+    }
+
+    function drawTeleportCircuit() {
+      const canvas = document.getElementById('teleport-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // 3 Quantum Wires
+      const wireY = [60, 110, 170];
+      const startX = 60;
+      const endX = w - 60;
+
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1.5;
+
+      // Qubit 1 (|psi>)
+      ctx.beginPath(); ctx.moveTo(startX, wireY[0]); ctx.lineTo(endX - 120, wireY[0]); ctx.stroke();
+      // Qubit 2 (Alice EPR)
+      ctx.beginPath(); ctx.moveTo(startX, wireY[1]); ctx.lineTo(endX - 120, wireY[1]); ctx.stroke();
+      // Qubit 3 (Bob EPR)
+      ctx.beginPath(); ctx.moveTo(startX, wireY[2]); ctx.lineTo(endX, wireY[2]); ctx.stroke();
+
+      // Double lines for classical wires from meters to Bob gates
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(endX - 100, wireY[0]); ctx.lineTo(endX - 50, wireY[0]); ctx.lineTo(endX - 50, wireY[2]);
+      ctx.moveTo(endX - 100, wireY[1]); ctx.lineTo(endX - 60, wireY[1]); ctx.lineTo(endX - 60, wireY[2]);
+      ctx.stroke();
+
+      // Wire Labels
+      ctx.fillStyle = '#00f0ff';
+      ctx.font = 'Bold 12px Chakra Petch';
+      ctx.fillText('|ψ⟩₁', 18, wireY[0] + 4);
+      ctx.fillStyle = '#ec4899';
+      ctx.fillText('|0⟩₂', 18, wireY[1] + 4);
+      ctx.fillStyle = '#a855f7';
+      ctx.fillText('|0⟩₃', 18, wireY[2] + 4);
+
+      // EPR Entanglement Source Block
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.15)';
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(startX + 30, wireY[1] - 15, 60, wireY[2] - wireY[1] + 30);
+      ctx.strokeRect(startX + 30, wireY[1] - 15, 60, wireY[2] - wireY[1] + 30);
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = '10px Chakra Petch';
+      ctx.textAlign = 'center';
+      ctx.fillText('EPR Pair', startX + 60, wireY[1] + 28);
+      ctx.fillText('|Φ⁺⟩₂₃', startX + 60, wireY[1] + 42);
+
+      // Alice Bell State Measurement: CNOT gate
+      const cnotX = startX + 130;
+      ctx.fillStyle = '#00f0ff';
+      ctx.beginPath(); ctx.arc(cnotX, wireY[0], 5, 0, 2*Math.PI); ctx.fill(); // Control dot
+      ctx.strokeStyle = '#00f0ff';
+      ctx.beginPath(); ctx.moveTo(cnotX, wireY[0]); ctx.lineTo(cnotX, wireY[1]); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cnotX, wireY[1], 10, 0, 2*Math.PI); ctx.stroke(); // Target circle
+      ctx.beginPath(); ctx.moveTo(cnotX - 10, wireY[1]); ctx.lineTo(cnotX + 10, wireY[1]); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cnotX, wireY[1] - 10); ctx.lineTo(cnotX, wireY[1] + 10); ctx.stroke();
+
+      // Hadamard Gate on Qubit 1
+      const hGateX = startX + 180;
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.2)';
+      ctx.strokeStyle = '#00f0ff';
+      ctx.fillRect(hGateX - 14, wireY[0] - 14, 28, 28);
+      ctx.strokeRect(hGateX - 14, wireY[0] - 14, 28, 28);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'Bold 12px JetBrains Mono';
+      ctx.fillText('H', hGateX, wireY[0] + 5);
+
+      // Measurement Boxes (Meter icon)
+      const mX = startX + 240;
+      [wireY[0], wireY[1]].forEach(y => {
+        ctx.fillStyle = 'rgba(236, 72, 153, 0.2)';
+        ctx.strokeStyle = '#ec4899';
+        ctx.fillRect(mX - 15, y - 15, 30, 30);
+        ctx.strokeRect(mX - 15, y - 15, 30, 30);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '10px Chakra Petch';
+        ctx.fillText('วัด m', mX, y + 4);
+      });
+
+      // Bob's Unitary Correction Gates (X and Z)
+      const bobX = endX - 80;
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.25)';
+      ctx.strokeStyle = '#a855f7';
+      ctx.fillRect(bobX - 18, wireY[2] - 18, 36, 36);
+      ctx.strokeRect(bobX - 18, wireY[2] - 18, 36, 36);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'Bold 11px JetBrains Mono';
+      ctx.fillText('Z·X', bobX, wireY[2] + 4);
+
+      // Output state |psi>
+      ctx.fillStyle = '#10b981';
+      ctx.font = 'Bold 13px Chakra Petch';
+      ctx.fillText('|ψ⟩₃ (Reconstructed)', endX - 15, wireY[2] - 25);
+    }
+
+    // -------------------------------------------------------------
+    // MediaPipe Hands AI Tracking
+    // -------------------------------------------------------------
+    let handsInstance = null;
+    let cameraInstance = null;
+    let isHandTracking = false;
+
+    function startHandAI() {
+      const pip = document.getElementById('hand-pip-container');
+      const videoEl = document.getElementById('hand-video');
+      pip.style.display = 'block';
+
+      if (!handsInstance) {
+        handsInstance = new Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+        handsInstance.setOptions({
+          maxNumHands: 2,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5
+        });
+        handsInstance.onResults((results) => {
+          if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            // First hand controls Alice
+            const marks1 = results.multiHandLandmarks[0];
+            const tip1 = marks1[8];
+            aliceAngleDeg = Math.max(0, Math.min(180, (1.0 - tip1.x) * 180));
+
+            // Second hand (if detected) controls Bob
+            if (results.multiHandLandmarks.length > 1) {
+              const marks2 = results.multiHandLandmarks[1];
+              const tip2 = marks2[8];
+              bobAngleDeg = Math.max(0, Math.min(180, (1.0 - tip2.x) * 180));
+            }
+
+            updatePhysics();
+          }
+        });
+      }
+
+      if (!cameraInstance) {
+        cameraInstance = new Camera(videoEl, {
+          onFrame: async () => {
+            if (isHandTracking) await handsInstance.send({ image: videoEl });
+          },
+          width: 320,
+          height: 240
+        });
+      }
+
+      cameraInstance.start();
+      isHandTracking = true;
+    }
+
+    function stopHandAI() {
+      isHandTracking = false;
+      document.getElementById('hand-pip-container').style.display = 'none';
+      if (cameraInstance && cameraInstance.stop) {
+        cameraInstance.stop();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Main Render Loop & Animation Dynamics
+    // -------------------------------------------------------------
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Subtle crystal and pump motion
+      bboCrystal.rotation.y += 0.012;
+      bboCrystal.rotation.x += 0.006;
+
+      // Flying photon animation
+      if (isContinuousFiring) {
+        flightTime += 0.024;
+      }
+      const progress = (flightTime * FLIGHT_SPEED) % 1.0;
+      const curDist = progress * DISTANCE_TO_STATION;
+
+      photonAlice.position.set(-curDist, 0.35, 0);
+      photonBob.position.set(curDist, 0.35, 0);
+
+      // Rotate E-field vectors according to quantum phase
+      const pAngleA = (aliceAngleDeg * Math.PI) / 180.0;
+      const pAngleB = (bobAngleDeg * Math.PI) / 180.0;
+      arrowAlice.setDirection(new THREE.Vector3(0, Math.cos(pAngleA), Math.sin(pAngleA)));
+      arrowBob.setDirection(new THREE.Vector3(0, Math.cos(pAngleB), Math.sin(pAngleB)));
+
+      // Update quantum entanglement tether line points
+      const tPos = tetherLine.geometry.attributes.position.array;
+      tPos[0] = -curDist; tPos[1] = 0.35; tPos[2] = 0;
+      tPos[3] = curDist;  tPos[4] = 0.35; tPos[5] = 0;
+      tetherLine.geometry.attributes.position.needsUpdate = true;
+      tetherLine.material.opacity = Math.max(0.1, (1.0 - progress) * wernerP);
+
+      // Charlie photon and tether in GHZ scenario
+      if (currentScenario === 'ghz') {
+        const curDistZ = progress * DISTANCE_TO_STATION * 0.85;
+        photonCharlie.position.set(0, 0.35, -curDistZ);
+
+        const pAngleC = (merminOp === 'XXX' || merminOp === 'XYY') ? 0 : Math.PI / 2;
+        arrowCharlie.setDirection(new THREE.Vector3(Math.cos(pAngleC), 0, Math.sin(pAngleC)));
+
+        const tPosC = tetherLineCharlie.geometry.attributes.position.array;
+        tPosC[0] = 0; tPosC[1] = 0.35; tPosC[2] = 0;
+        tPosC[3] = 0; tPosC[4] = 0.35; tPosC[5] = -curDistZ;
+        tetherLineCharlie.geometry.attributes.position.needsUpdate = true;
+        tetherLineCharlie.material.opacity = Math.max(0.1, (1.0 - progress));
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initial Physics Sync
+    updatePhysics();
+  </script>
+</body>
+</html>
