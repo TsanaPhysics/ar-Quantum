@@ -389,6 +389,7 @@
     <button class="mode-btn active" id="btn-mode-3d">🌐 โหมด 3D สำรวจอิสระ</button>
     <button class="mode-btn" id="btn-mode-ar">📷 โหมด AR ส่องหน้าหนังสือ</button>
     <button class="mode-btn" id="btn-mode-hand">✋ AI สั่งการด้วยมือ</button>
+    <button class="mode-btn" id="btn-toggle-hologram" style="border:1px solid rgba(0,240,255,0.4); color:var(--cyan);">✨ โหมดฮอโลแกรม (Hologram)</button>
     <button class="mode-btn btn-target-preview" id="btn-view-target">📖 ดูภาพเป้าหมาย (ภาพที่ 1.1)</button>
   </div>
 
@@ -733,8 +734,122 @@
     cavityRootGroup.add(photonSystem);
 
     // ==========================================================
-    // AUDIO SYNTHESIZER (WEB AUDIO API: 0-BYTE AUDIO)
+    // HOLOGRAPHIC 3D DISPLAY SYSTEM (ระบบแสดงผลฮอโลแกรม 3 มิติ)
     // ==========================================================
+    let isHolographicMode = false;
+    const hologramGroup = new THREE.Group();
+    hologramGroup.visible = false;
+    cavityRootGroup.add(hologramGroup);
+
+    // 1. Hologram Emitter Disc (แท่นฉายแสงเลเซอร์ฮอโลแกรมที่ระนาบฐาน)
+    const emitterRing1Geo = new THREE.RingGeometry(1.5, 1.62, 64);
+    emitterRing1Geo.rotateX(-Math.PI / 2);
+    const emitterMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
+    const emitterRing1 = new THREE.Mesh(emitterRing1Geo, emitterMat);
+    emitterRing1.position.y = -2.1;
+    hologramGroup.add(emitterRing1);
+
+    const emitterRing2Geo = new THREE.RingGeometry(0.75, 0.82, 48);
+    emitterRing2Geo.rotateX(-Math.PI / 2);
+    const emitterRing2 = new THREE.Mesh(emitterRing2Geo, emitterMat);
+    emitterRing2.position.y = -2.1;
+    hologramGroup.add(emitterRing2);
+
+    // Concentric radial tick lines on holographic emitter
+    const tickGeo = new THREE.BufferGeometry();
+    const tickPos = [];
+    for (let i = 0; i < 32; i++) {
+      const angle = (i / 32) * Math.PI * 2;
+      const r1 = 1.25, r2 = 1.5;
+      tickPos.push(Math.cos(angle) * r1, -2.1, Math.sin(angle) * r1);
+      tickPos.push(Math.cos(angle) * r2, -2.1, Math.sin(angle) * r2);
+    }
+    tickGeo.setAttribute('position', new THREE.Float32BufferAttribute(tickPos, 3));
+    const tickLines = new THREE.LineSegments(tickGeo, new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.65 }));
+    hologramGroup.add(tickLines);
+
+    // 2. Volumetric Upward Projection Light Cone (ลำแสงโคนฮอโลแกรมพุ่งลอยขึ้น)
+    const coneGeo = new THREE.CylinderGeometry(2.35, 0.65, 2.2, 32, 1, true);
+    coneGeo.translate(0, -1.0, 0);
+    const coneMat = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
+      transparent: true,
+      opacity: 0.22,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const hologramCone = new THREE.Mesh(coneGeo, coneMat);
+    hologramGroup.add(hologramCone);
+
+    // 3. Floating 3D Quantum Hologram Data Billboard (HUD 3 มิติ ลอยเคียงข้าง)
+    const hudCanvas = document.createElement('canvas');
+    hudCanvas.width = 512;
+    hudCanvas.height = 256;
+    const hudTexture = new THREE.CanvasTexture(hudCanvas);
+    const hudPlaneGeo = new THREE.PlaneGeometry(2.2, 1.1);
+    const hudPlaneMat = new THREE.MeshBasicMaterial({
+      map: hudTexture,
+      transparent: true,
+      opacity: 0.88,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending
+    });
+    const hudPlaneMesh = new THREE.Mesh(hudPlaneGeo, hudPlaneMat);
+    hudPlaneMesh.position.set(2.4, 1.1, 0);
+    hudPlaneMesh.rotation.y = -Math.PI / 6;
+    hologramGroup.add(hudPlaneMesh);
+
+    // 4. Glowing Cyan Wireframe Cage Overlay for Cavity
+    const holoWireMat = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.55,
+      blending: THREE.AdditiveBlending
+    });
+    const holoShellMesh = new THREE.Mesh(outerShellGeo, holoWireMat);
+    holoShellMesh.visible = false;
+    cavityRootGroup.add(holoShellMesh);
+
+    function updateHologramHud(T, lambda_nm, power) {
+      const ctx = hudCanvas.getContext('2d');
+      ctx.clearRect(0, 0, 512, 256);
+      
+      // HUD Cyan Frame
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(10, 10, 492, 236);
+      
+      // Sci-Fi corner notches
+      ctx.fillStyle = '#00f0ff';
+      ctx.fillRect(6, 6, 26, 6);
+      ctx.fillRect(6, 6, 6, 26);
+      ctx.fillRect(480, 6, 26, 6);
+      ctx.fillRect(500, 6, 6, 26);
+      ctx.fillRect(6, 224, 6, 26);
+      ctx.fillRect(6, 244, 26, 6);
+      ctx.fillRect(500, 224, 6, 26);
+      ctx.fillRect(480, 244, 26, 6);
+      
+      // HUD Header
+      ctx.font = 'bold 22px "Chakra Petch", monospace';
+      ctx.fillStyle = '#00f0ff';
+      ctx.fillText('⚡ QUANTUM BLACKBODY HUD', 30, 44);
+      
+      // Live Metrics
+      ctx.font = '19px "Chakra Petch", monospace';
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillText(`• TEMPERATURE: ${T.toLocaleString()} K`, 30, 82);
+      ctx.fillText(`• PEAK λ_max: ${lambda_nm.toFixed(1)} nm`, 30, 118);
+      ctx.fillText(`• EMITTED POWER: ${(power/1e7).toFixed(2)} × 10⁷ W/m²`, 30, 154);
+      
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 20px "Chakra Petch", monospace';
+      ctx.fillText('• QUANTUM HYPOTHESIS: E = n·h·ν', 30, 198);
+      
+      hudTexture.needsUpdate = true;
+    }
     let audioCtx = null;
     let osc = null;
     let gainNode = null;
@@ -828,6 +943,7 @@
       }
 
       drawSpectrumCurve(T);
+      updateHologramHud(T, lambda_max_nm, power);
     }
 
     // Live 2D Planck Spectrum Canvas Graph
@@ -936,6 +1052,31 @@
     document.getElementById('btn-mode-hand').addEventListener('click', () => {
       setMode(false, true);
     });
+
+    // Hologram Mode Toggle Button
+    function toggleHologramMode() {
+      isHolographicMode = !isHolographicMode;
+      const btn = document.getElementById('btn-toggle-hologram');
+      btn.classList.toggle('active', isHolographicMode);
+      
+      hologramGroup.visible = isHolographicMode;
+      holoShellMesh.visible = isHolographicMode;
+
+      if (isHolographicMode) {
+        outerShellMat.transparent = true;
+        outerShellMat.opacity = 0.28;
+        outerShellMat.wireframe = true;
+        btn.textContent = '✨ ฮอโลแกรมเปิดอยู่ (Active)';
+        btn.style.boxShadow = '0 0 20px rgba(0, 240, 255, 0.7)';
+      } else {
+        outerShellMat.transparent = false;
+        outerShellMat.opacity = 1.0;
+        outerShellMat.wireframe = false;
+        btn.textContent = '✨ โหมดฮอโลแกรม (Hologram)';
+        btn.style.boxShadow = 'none';
+      }
+    }
+    document.getElementById('btn-toggle-hologram').addEventListener('click', toggleHologramMode);
 
     function setMode(ar, hand) {
       isARMode = ar;
@@ -1095,6 +1236,17 @@
         }
       }
       photonSystem.geometry.attributes.position.needsUpdate = true;
+
+      // Animate 3D Hologram Projection Elements
+      if (isHolographicMode) {
+        emitterRing1.rotation.z += 0.012;
+        emitterRing2.rotation.z -= 0.018;
+        tickLines.rotation.y += 0.008;
+        // Subtle scanline shimmer and pulse
+        hologramCone.material.opacity = 0.20 + Math.sin(time * 12) * 0.06;
+        hudPlaneMesh.position.y = 1.1 + Math.sin(time * 2.5) * 0.07;
+        hudPlaneMesh.lookAt(camera.position); // Billboard faces user camera
+      }
 
       controls.update();
       renderer.render(scene, camera);
