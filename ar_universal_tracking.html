@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ระบบสแกนเนอร์ AR อัจฉริยะหลายภาพ (Universal Multi-Target WebAR) — ฟิสิกส์ควอนตัม</title>
+  
+  <meta name="theme-color" content="#030712">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --cyan: #00f0ff;
+      --pink: #ec4899;
+      --emerald: #10b981;
+      --purple: #8b5cf6;
+      --gold: #f59e0b;
+      --panel-glass: rgba(15, 23, 42, 0.88);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: #f8fafc;
+      font-family: 'Prompt', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* WebGL Canvas & AR Video Feed */
+    #webgl-canvas-container {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: radial-gradient(circle at 50% 30%, #0f1d38 0%, #030712 90%);
+      transition: background 0.3s ease;
+    }
+    body.ar-active, body.ar-active #webgl-canvas-container {
+      background: transparent !important;
+    }
+
+    #camera-video {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 0;
+      display: none;
+      background: #000;
+    }
+
+    /* Top Glass Header */
+    .top-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(3, 7, 18, 0.95) 0%, rgba(3, 7, 18, 0.6) 80%, transparent 100%);
+      backdrop-filter: blur(10px);
+    }
+    .brand-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+    }
+    .brand-title i {
+      color: var(--cyan);
+      text-shadow: 0 0 10px var(--cyan);
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* Target Selector Bar (Quick Carousel) */
+    .target-selector-bar {
+      position: absolute;
+      top: 60px;
+      left: 0;
+      right: 0;
+      z-index: 38;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 6px 16px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      background: linear-gradient(180deg, rgba(3, 7, 18, 0.7) 0%, transparent 100%);
+    }
+    .target-selector-bar::-webkit-scrollbar { display: none; }
+    
+    .target-pill {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #94a3b8;
+      backdrop-filter: blur(12px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .target-pill.active {
+      background: rgba(0, 240, 255, 0.22);
+      border-color: var(--cyan);
+      color: #fff;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
+    }
+    .target-pill i { font-size: 0.75rem; }
+    .pill-auto.active i { color: var(--gold); }
+    .pill-fig1.active i { color: var(--gold); }
+    .pill-fig2.active i { color: var(--cyan); }
+    .pill-fig3.active i { color: var(--pink); }
+
+    /* Active Target Info Banner */
+    .active-target-banner {
+      position: absolute;
+      top: 104px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 36;
+      width: min(360px, 92vw);
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 14px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      animation: fadeInDown 0.3s ease;
+    }
+    .target-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .target-badge-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(0, 240, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cyan);
+      font-size: 1rem;
+    }
+    .target-badge-text h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    .target-badge-text p {
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+    .target-status-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--gold);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    .target-status-tag.locked {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--emerald);
+      border-color: var(--emerald);
+    }
+
+    /* AR Optical Tracking Reticle */
+    #ar-reticle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(320px, 78vw);
+      height: min(320px, 78vw);
+      border: 2px dashed rgba(0, 240, 255, 0.6);
+      border-radius: 20px;
+      z-index: 30;
+      display: none;
+      pointer-events: auto;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.25);
+      overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .reticle-corner {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--cyan);
+      transition: border-color 0.25s ease;
+    }
+    .rc-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; border-radius: 12px 0 0 0; }
+    .rc-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; border-radius: 0 12px 0 0; }
+    .rc-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; border-radius: 0 0 0 12px; }
+    .rc-br { bottom: -2px; right: -2px; border-left: none; border-top: none; border-radius: 0 0 12px 0; }
+
+    .reticle-scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--cyan), #fff, var(--cyan), transparent);
+      box-shadow: 0 0 16px var(--cyan);
+      animation: scanLaser 2.2s infinite ease-in-out;
+    }
+    @keyframes scanLaser {
+      0% { top: 4%; opacity: 0.2; }
+      50% { top: 94%; opacity: 1; }
+      100% { top: 4%; opacity: 0.2; }
+    }
+    #ar-reticle.locked .reticle-scan-line { display: none; }
+    #ar-reticle.locked {
+      border-color: var(--emerald) !important;
+      box-shadow: 0 0 45px rgba(16, 185, 129, 0.7) !important;
+    }
+    #ar-reticle.locked .reticle-corner {
+      border-color: var(--emerald) !important;
+    }
+
+    .reticle-tag {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(3, 7, 18, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.5);
+      color: #fff;
+      font-size: 0.75rem;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 600;
+      padding: 4px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(8px);
+    }
+
+    /* Target Preview Modal */
+    #targetPreviewModal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(15px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-box {
+      background: #0f172a;
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      max-width: 440px;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.1rem;
+      color: var(--cyan);
+    }
+    .modal-body img {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: #fff;
+    }
+
+    /* Bangchak-Style Curve & Notch Bottom Bar */
+    #mobileBottomNav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      height: 80px;
+      z-index: 50;
+      display: flex;
+      align-items: flex-end;
+      pointer-events: none;
+    }
+    .scoop-bar-container {
+      position: relative;
+      width: 100%;
+      height: 74px;
+      pointer-events: auto;
+    }
+    .scoop-svg-bg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 86px;
+      filter: drop-shadow(0 -10px 24px rgba(0, 0, 0, 0.65));
+      pointer-events: none;
+    }
+    .nav-buttons-row {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 100%;
+      height: 70px;
+      padding: 0 10px 6px 10px;
+    }
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nav-btn .clay-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.2s ease;
+    }
+    .nav-btn span {
+      font-size: 0.68rem;
+      font-family: 'Prompt', sans-serif;
+      font-weight: 500;
+    }
+    .nav-btn.active {
+      color: var(--cyan);
+    }
+    .nav-btn.active .clay-icon-wrap {
+      background: rgba(0, 240, 255, 0.18);
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+      color: #fff;
+    }
+
+    /* Floating Center 58px Gem Button */
+    .center-action-spacer {
+      flex: 1.2;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100%;
+      position: relative;
+    }
+    .floating-gem-btn {
+      position: absolute;
+      top: -26px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #38bdf8 0%, #0284c7 60%, #0369a1 100%);
+      border: 2.5px solid rgba(255, 255, 255, 0.8);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.6), 0 0 0 4px rgba(15, 23, 42, 0.8);
+      cursor: pointer;
+      pointer-events: auto;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .floating-gem-btn:active {
+      transform: scale(0.92);
+    }
+    .floating-gem-btn i {
+      font-size: 1.25rem;
+    }
+    .floating-gem-btn span {
+      font-size: 0.58rem;
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* Interactive Drawer / Parameter Sheet */
+    .drawer-panel {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 80px;
+      background: var(--panel-glass);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-top: 1px solid var(--glass-border);
+      border-radius: 20px 20px 0 0;
+      padding: 18px;
+      z-index: 45;
+      display: none;
+      max-height: 50vh;
+      overflow-y: auto;
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.7);
+      animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .drawer-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .close-drawer {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    .param-group {
+      margin-bottom: 14px;
+    }
+    .param-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .param-val {
+      color: var(--cyan);
+      font-family: 'Chakra Petch', sans-serif;
+      font-weight: 700;
+    }
+    .slider-custom {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #1e293b;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .slider-custom::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .info-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .info-card h5 {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-bottom: 3px;
+    }
+    .info-card p {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="top-header">
+    <div class="brand-title">
+      <i class="fa-solid fa-atom"></i>
+      <span>WebAR Multi-Target Scanner</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="openTargetModal()" title="ดูภาพเป้าหมายในตำรา"><i class="fa-solid fa-book-open"></i></button>
+      <button class="icon-btn" onclick="resetTracking()" title="รีเซ็ตตำแหน่งวัตถุ"><i class="fa-solid fa-rotate"></i></button>
+      <a href="index.html" class="icon-btn" title="กลับหน้าสารบัญ"><i class="fa-solid fa-house"></i></a>
+    </div>
+  </header>
+
+  <!-- Target Carousel Selector (Auto + Manual Fig 1.1, 1.2, 2.1) -->
+  <nav class="target-selector-bar">
+    <div class="target-pill pill-auto active" onclick="setTargetMode('auto')">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <span>⚡ สแกนอัตโนมัติ (AI Auto)</span>
+    </div>
+    <div class="target-pill pill-fig1" onclick="setTargetMode('fig1')">
+      <i class="fa-solid fa-sun"></i>
+      <span>ภาพ 1.1 โพรงวัตถุดำ</span>
+    </div>
+    <div class="target-pill pill-fig2" onclick="setTargetMode('fig2')">
+      <i class="fa-solid fa-bolt"></i>
+      <span>ภาพ 1.2 โฟโตอิเล็กทริก</span>
+    </div>
+    <div class="target-pill pill-fig3" onclick="setTargetMode('fig3')">
+      <i class="fa-solid fa-ring"></i>
+      <span>ภาพ 2.1 เดวิสสัน-เจอร์เมอร์</span>
+    </div>
+  </nav>
+
+  <!-- Active Target Info Banner -->
+  <div class="active-target-banner" id="activeTargetBanner">
+    <div class="target-badge">
+      <div class="target-badge-icon" id="bannerIcon">
+        <i class="fa-solid fa-crosshairs"></i>
+      </div>
+      <div class="target-badge-text">
+        <h4 id="bannerTitle">รอตรวจจับภาพในตำรา...</h4>
+        <p id="bannerSubtitle">นำกล้องส่องไปที่ ภาพที่ 1.1, 1.2 หรือ 2.1</p>
+      </div>
+    </div>
+    <div class="target-status-tag" id="bannerStatus">รอภาพ (WAIT)</div>
+  </div>
+
+  <!-- AR Scanning Reticle -->
+  <div id="ar-reticle">
+    <div class="reticle-corner rc-tl"></div>
+    <div class="reticle-corner rc-tr"></div>
+    <div class="reticle-corner rc-bl"></div>
+    <div class="reticle-corner rc-br"></div>
+    <div class="reticle-scan-line"></div>
+    <div class="reticle-tag" id="reticleTagText">
+      <i class="fa-solid fa-camera"></i>
+      <span>เล็งกล้องไปที่รูปภาพในหนังสือเรียน</span>
+    </div>
+  </div>
+
+  <!-- Video Stream & Three.js Canvas -->
+  <video id="camera-video" autoplay playsinline webkit-playsinline muted></video>
+  <div id="webgl-canvas-container"></div>
+
+  <!-- Drawer Panels -->
+  <!-- 1. Parameters Drawer -->
+  <div class="drawer-panel" id="drawerParams">
+    <div class="drawer-header">
+      <div class="drawer-title" id="paramDrawerTitle"><i class="fa-solid fa-sliders"></i> พารามิเตอร์การทดลอง</div>
+      <button class="close-drawer" onclick="closeAllDrawers()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="paramControlsContent">
+      <!-- Dynamically generated according to active figure -->
+    </div>
+  </div>
+
+  <!-- 2. Physics Telemetry Drawer -->
+  <div class="drawer-panel" id="drawerTelemetry">
+    <div class="drawer-header">
+      <div class="drawer-title"><i class="fa-solid fa-chart-line"></i> ค่าการวัดฟิสิกส์สด (Real-Time Physics)</div>
+      <button class="close-drawer" onclick="closeAllDrawers()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="info-grid" id="telemetryContent">
+      <!-- Dynamically updated -->
+    </div>
+  </div>
+
+  <!-- Target Preview Modal -->
+  <div id="targetPreviewModal" onclick="closeTargetModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modalTitle">ภาพเป้าหมายในตำราเรียน</h3>
+        <button class="close-drawer" onclick="closeTargetModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <img id="modalTargetImg" src="target_fig2_photoelectric_apparatus.png" alt="Target Figure">
+        <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 8px;" id="modalTargetDesc">
+          เปิดหนังสือเรียนไปที่ภาพนี้ แล้วใช้กล้องส่องในระยะประมาณ 15-30 ซม. โมเดล 3D จะปรากฏขึ้นลอยอยู่บนหน้ากระดาษ
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bangchak-Style Curved Scoop Bottom Bar -->
+  <nav id="mobileBottomNav">
+    <div class="scoop-bar-container">
+      <svg class="scoop-svg-bg" viewBox="0 0 375 86" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="scoopGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0f172a" stop-opacity="0.96"/>
+            <stop offset="100%" stop-color="#030712" stop-opacity="0.99"/>
+          </linearGradient>
+        </defs>
+        <!-- Center Notch Scoop Curve -->
+        <path d="M 0 16 Q 0 0 16 0 L 132 0 C 146 0 154 10 160 22 C 168 38 182 46 187.5 46 C 193 46 207 38 215 22 C 221 10 229 0 243 0 L 359 0 Q 375 0 375 16 L 375 86 L 0 86 Z" 
+              fill="url(#scoopGradient)" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.2"/>
+        <!-- Dish highlight rim -->
+        <ellipse cx="187.5" cy="46" rx="34" ry="10" fill="none" stroke="rgba(0, 240, 255, 0.2)" stroke-width="1.5"/>
+      </svg>
+
+      <div class="nav-buttons-row">
+        <!-- Tab 1: Adjust Physics -->
+        <button class="nav-btn" onclick="toggleDrawer('drawerParams')">
+          <div class="clay-icon-wrap"><i class="fa-solid fa-sliders"></i></div>
+          <span>ปรับแต่ง</span>
+        </button>
+
+        <!-- Tab 2: Physics Data -->
+        <button class="nav-btn" onclick="toggleDrawer('drawerTelemetry')">
+          <div class="clay-icon-wrap"><i class="fa-solid fa-chart-pie"></i></div>
+          <span>ข้อมูลสด</span>
+        </button>
+
+        <!-- Center 58px Floating Gem Action Button -->
+        <div class="center-action-spacer">
+          <button class="floating-gem-btn" id="btnArToggle" onclick="toggleARMode()" title="สลับกล้อง AR">
+            <i class="fa-solid fa-camera" id="gemIcon"></i>
+            <span id="gemText">AR CAM</span>
+          </button>
+        </div>
+
+        <!-- Tab 3: Target Image -->
+        <button class="nav-btn" onclick="openTargetModal()">
+          <div class="clay-icon-wrap"><i class="fa-solid fa-image"></i></div>
+          <span>รูปตำรา</span>
+        </button>
+
+        <!-- Tab 4: Reset View -->
+        <button class="nav-btn" onclick="resetCameraView()">
+          <div class="clay-icon-wrap"><i class="fa-solid fa-arrows-to-eye"></i></div>
+          <span>มุมมอง</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Logic & 3D Engine -->
+  <script>
+    // ==========================================================
+    // 1. TARGET CATALOG & MULTI-IMAGE REGISTRY
+    // ==========================================================
+    const TARGET_CATALOG = {
+      fig1: {
+        id: 'fig1',
+        title: 'ภาพที่ 1.1 แบบจำลองโพรงรังสีวัตถุดำ',
+        subtitle: 'Blackbody Radiation Cavity',
+        icon: 'fa-sun',
+        color: '#f59e0b',
+        image: 'target_fig1_blackbody_cavity.png',
+        desc: 'การสะท้อนของคลื่นแม่เหล็กไฟฟ้าหลายครั้งภายในโพรงจนเกิดสมดุลความร้อนและการแผ่รังสีของพลังค์',
+        params: { temp: 5000, reflections: 8 }
+      },
+      fig2: {
+        id: 'fig2',
+        title: 'ภาพที่ 1.2 หลอดทดลองโฟโตอิเล็กทริก',
+        subtitle: 'Photoelectric Vacuum Tube Apparatus',
+        icon: 'fa-bolt',
+        color: '#00f0ff',
+        image: 'target_fig2_photoelectric_apparatus.png',
+        desc: 'หลอดแก้วสุญญากาศ แผ่นแคโทดเป้า หน้าต่างควอตซ์ แอมมิเตอร์ และแหล่งจ่ายความต่างศักย์ปรับค่าได้',
+        params: { lambda: 350, intensity: 80, voltage: 0.0, workFunc: 2.14 }
+      },
+      fig3: {
+        id: 'fig3',
+        title: 'ภาพที่ 2.1 การทดลองเดวิสสัน-เจอร์เมอร์',
+        subtitle: 'Davisson-Germer Electron Diffraction',
+        icon: 'fa-ring',
+        color: '#ec4899',
+        image: 'target_fig3_davisson_germer.png',
+        desc: 'การเลี้ยวเบนของลำอิเล็กตรอนพลังงาน 54 eV จากระนาบผลึกนิกเกิล แทรกสอดเสริมกันที่มุม phi = 50 องศา',
+        params: { voltage: 54, angle: 50, latticeD: 0.215 }
+      }
+    };
+
+    let currentTargetMode = 'auto'; // 'auto' | 'fig1' | 'fig2' | 'fig3'
+    let activeTargetId = 'fig2';    // Currently loaded 3D scene
+    let isARMode = false;
+    let isTargetLocked = false;
+    let lockHoldFrames = 0;
+    let cameraStream = null;
+
+    // ==========================================================
+    // 2. THREE.JS SCENE SETUP
+    // ==========================================================
+    const container = document.getElementById('webgl-canvas-container');
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 1.2, 5.0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    // Master Root Group
+    const masterGroup = new THREE.Group();
+    scene.add(masterGroup);
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const mainDirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    mainDirLight.position.set(5, 8, 5);
+    scene.add(mainDirLight);
+
+    const cyanPoint = new THREE.PointLight(0x00f0ff, 1.5, 12);
+    cyanPoint.position.set(-3, 2, 2);
+    scene.add(cyanPoint);
+
+    // ==========================================================
+    // 3. BUILD 3D MODELS FOR ALL TARGETS
+    // ==========================================================
+    const models = {};
+
+    // --- MODEL 1: Blackbody Cavity (Fig 1.1) ---
+    function buildFig1Model() {
+      const g = new THREE.Group();
+      
+      // Spherical outer cavity cutaway
+      const cavityGeo = new THREE.SphereGeometry(1.6, 48, 48, 0, Math.PI * 1.5, 0, Math.PI);
+      const cavityMat = new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        metalness: 0.8,
+        roughness: 0.25,
+        side: THREE.BackSide
+      });
+      const cavity = new THREE.Mesh(cavityGeo, cavityMat);
+      g.add(cavity);
+
+      // Outer golden shell
+      const outerMat = new THREE.MeshStandardMaterial({
+        color: 0xd97706,
+        metalness: 0.9,
+        roughness: 0.2,
+        side: THREE.FrontSide
+      });
+      const outer = new THREE.Mesh(cavityGeo, outerMat);
+      g.add(outer);
+
+      // Hole ring
+      const holeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+      const hole = new THREE.Mesh(new THREE.CircleGeometry(0.35, 32), holeMat);
+      hole.position.set(0, 0, 1.6);
+      g.add(hole);
+
+      // Glowing Ray Lines
+      const rayPoints = [
+        new THREE.Vector3(0, 0, 1.6),
+        new THREE.Vector3(-0.9, 0.8, 0.7),
+        new THREE.Vector3(0.7, -1.0, -0.4),
+        new THREE.Vector3(-0.6, -0.7, 0.8),
+        new THREE.Vector3(1.1, 0.5, 0.3),
+        new THREE.Vector3(0, 0, 1.6)
+      ];
+      const rayGeo = new THREE.BufferGeometry().setFromPoints(rayPoints);
+      const rayMat = new THREE.LineBasicMaterial({ color: 0xf59e0b, linewidth: 2 });
+      const rayLine = new THREE.Line(rayGeo, rayMat);
+      g.add(rayLine);
+
+      // Heated core glow
+      const coreGeo = new THREE.SphereGeometry(0.6, 24, 24);
+      const coreMat = new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.45 });
+      const core = new THREE.Mesh(coreGeo, coreMat);
+      g.add(core);
+
+      g.scale.set(1.0, 1.0, 1.0);
+      return { group: g, rayLine, coreMat };
+    }
+
+    // --- MODEL 2: Photoelectric Vacuum Tube (Fig 1.2) ---
+    function buildFig2Model() {
+      const g = new THREE.Group();
+
+      // Vacuum Tube Cylinder
+      const tubeGeo = new THREE.CylinderGeometry(0.9, 0.9, 3.0, 32, 1, true);
+      tubeGeo.rotateZ(Math.PI / 2);
+      const tubeMat = new THREE.MeshPhysicalMaterial({
+        color: 0x93c5fd,
+        transparent: true,
+        opacity: 0.28,
+        transmission: 0.85,
+        roughness: 0.05,
+        metalness: 0.1,
+        side: THREE.DoubleSide
+      });
+      g.add(new THREE.Mesh(tubeGeo, tubeMat));
+
+      // Quartz Window
+      const quartzGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.1, 24);
+      quartzGeo.rotateX(Math.PI / 4);
+      const quartzMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.75, emissive: 0x00f0ff, emissiveIntensity: 0.4 });
+      const quartz = new THREE.Mesh(quartzGeo, quartzMat);
+      quartz.position.set(-1.1, 0.75, 0.35);
+      g.add(quartz);
+
+      // Cathode plate
+      const catGeo = new THREE.CylinderGeometry(0.7, 0.7, 0.06, 32);
+      catGeo.rotateZ(Math.PI / 2);
+      const catMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9, roughness: 0.2 });
+      const cathode = new THREE.Mesh(catGeo, catMat);
+      cathode.position.set(-0.9, 0, 0);
+      g.add(cathode);
+
+      // Anode Ring
+      const anGeo = new THREE.RingGeometry(0.2, 0.7, 32);
+      anGeo.rotateY(Math.PI / 2);
+      const anMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.3, side: THREE.DoubleSide });
+      const anode = new THREE.Mesh(anGeo, anMat);
+      anode.position.set(0.9, 0, 0);
+      g.add(anode);
+
+      // Photon Beam
+      const beamGeo = new THREE.CylinderGeometry(0.04, 0.15, 1.3, 16);
+      beamGeo.rotateZ(-Math.PI / 3.3);
+      beamGeo.translate(-1.3, 0.55, 0.18);
+      const beamMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.75 });
+      const beam = new THREE.Mesh(beamGeo, beamMat);
+      g.add(beam);
+
+      // Electron Particles
+      const eCount = 60;
+      const eGeo = new THREE.BufferGeometry();
+      const ePos = new Float32Array(eCount * 3);
+      const eSpeed = new Float32Array(eCount);
+      for (let i = 0; i < eCount; i++) {
+        ePos[i * 3] = -0.85 + Math.random() * 1.7;
+        ePos[i * 3 + 1] = (Math.random() - 0.5) * 0.9;
+        ePos[i * 3 + 2] = (Math.random() - 0.5) * 0.9;
+        eSpeed[i] = 0.01 + Math.random() * 0.025;
+      }
+      eGeo.setAttribute('position', new THREE.BufferAttribute(ePos, 3));
+      const eMat = new THREE.PointsMaterial({ color: 0xec4899, size: 0.07, transparent: true, blending: THREE.AdditiveBlending });
+      const particles = new THREE.Points(eGeo, eMat);
+      g.add(particles);
+
+      // Circuit Wire and Meter Dial
+      const meter = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.12, 32), new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8 }));
+      meter.rotateX(Math.PI / 2);
+      meter.position.set(0, -1.4, 0);
+      g.add(meter);
+
+      const needleGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0.07), new THREE.Vector3(0, 0.3, 0.07)]);
+      const needle = new THREE.Line(needleGeo, new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 2 }));
+      needle.position.set(0, -1.4, 0);
+      g.add(needle);
+
+      return { group: g, beamMat, particles, ePos, eSpeed, needle };
+    }
+
+    // --- MODEL 3: Davisson-Germer Nickel Crystal & Electron Diffraction (Fig 2.1) ---
+    function buildFig3Model() {
+      const g = new THREE.Group();
+
+      // Nickel Crystal Base Block
+      const crystalGeo = new THREE.BoxGeometry(2.6, 0.6, 1.8);
+      const crystalMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.85, roughness: 0.25 });
+      const crystal = new THREE.Mesh(crystalGeo, crystalMat);
+      crystal.position.set(0.4, -0.6, 0);
+      g.add(crystal);
+
+      // Crystal Atoms (Lattice Points)
+      const atomMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.2 });
+      for (let x = -0.7; x <= 1.5; x += 0.4) {
+        for (let z = -0.6; z <= 0.6; z += 0.4) {
+          const atom = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), atomMat);
+          atom.position.set(x, -0.3, z);
+          g.add(atom);
+        }
+      }
+
+      // Electron Gun
+      const gunGeo = new THREE.CylinderGeometry(0.18, 0.24, 0.9, 24);
+      gunGeo.rotateZ(Math.PI / 3);
+      const gunMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.7, roughness: 0.3 });
+      const gun = new THREE.Mesh(gunGeo, gunMat);
+      gun.position.set(-1.4, 1.4, 0);
+      g.add(gun);
+
+      // Incident Beam
+      const inBeamGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.8, 16);
+      inBeamGeo.rotateZ(Math.PI / 3);
+      const inBeamMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.85 });
+      const inBeam = new THREE.Mesh(inBeamGeo, inBeamMat);
+      inBeam.position.set(-0.6, 0.6, 0);
+      g.add(inBeam);
+
+      // Movable Detector
+      const detRingGeo = new THREE.TorusGeometry(1.8, 0.03, 16, 48, Math.PI / 1.5);
+      detRingGeo.rotateZ(-Math.PI / 4);
+      const detRingMat = new THREE.LineBasicMaterial({ color: 0x64748b });
+      const detRing = new THREE.Line(detRingGeo, detRingMat);
+      detRing.position.set(0.4, -0.3, 0);
+      g.add(detRing);
+
+      const detCupGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.4, 20);
+      detCupGeo.rotateZ(Math.PI / 4);
+      const detCupMat = new THREE.MeshStandardMaterial({ color: 0xec4899, emissive: 0xec4899, emissiveIntensity: 0.3 });
+      const detCup = new THREE.Mesh(detCupGeo, detCupMat);
+      detCup.position.set(1.6, 1.3, 0);
+      g.add(detCup);
+
+      // Scattered Interference Beam (phi = 50 deg)
+      const scatBeamGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.9, 16);
+      scatBeamGeo.rotateZ(-Math.PI / 3.6);
+      const scatBeamMat = new THREE.MeshBasicMaterial({ color: 0xec4899, transparent: true, opacity: 0.9 });
+      const scatBeam = new THREE.Mesh(scatBeamGeo, scatBeamMat);
+      scatBeam.position.set(1.0, 0.5, 0);
+      g.add(scatBeam);
+
+      return { group: g, detCup, scatBeam };
+    }
+
+    // Initialize all 3 models in memory
+    models.fig1 = buildFig1Model();
+    models.fig2 = buildFig2Model();
+    models.fig3 = buildFig3Model();
+
+    // Attach them to masterGroup
+    Object.values(models).forEach(m => {
+      m.group.visible = false;
+      masterGroup.add(m.group);
+    });
+
+    // Default active model: Fig 1.2
+    switch3DTarget('fig2');
+
+    function switch3DTarget(targetId) {
+      activeTargetId = targetId;
+      Object.keys(models).forEach(k => {
+        models[k].group.visible = (k === targetId) && (!isARMode || isTargetLocked);
+      });
+
+      // Update Top Banner
+      const cfg = TARGET_CATALOG[targetId];
+      document.getElementById('bannerTitle').textContent = cfg.title;
+      document.getElementById('bannerSubtitle').textContent = cfg.subtitle;
+      document.getElementById('bannerIcon').innerHTML = `<i class="fa-solid ${cfg.icon}"></i>`;
+      document.getElementById('bannerIcon').style.color = cfg.color;
+      document.getElementById('modalTargetImg').src = cfg.image;
+      document.getElementById('modalTitle').textContent = cfg.title;
+      document.getElementById('modalTargetDesc').textContent = cfg.desc;
+
+      // Update Drawer Controls
+      renderParamControls(targetId);
+      renderTelemetry(targetId);
+    }
+
+    // ==========================================================
+    // 4. AUDIO SYNTHESIZER (Web Audio API)
+    // ==========================================================
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    function playLockChime() {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc1.type = 'sine'; osc1.frequency.setValueAtTime(587.33, now); // D5
+        osc1.frequency.exponentialRampToValueAtTime(880, now + 0.12);    // A5
+        osc2.type = 'triangle'; osc2.frequency.setValueAtTime(1174.66, now); // D6
+        osc2.frequency.exponentialRampToValueAtTime(1760, now + 0.15);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+        osc1.connect(gain); osc2.connect(gain); gain.connect(audioCtx.destination);
+        osc1.start(now); osc2.start(now);
+        osc1.stop(now + 0.35); osc2.stop(now + 0.35);
+      } catch(e) {}
+    }
+
+    // ==========================================================
+    // 5. MULTI-TARGET OPTICAL RECOGNITION (Image Matching Engine)
+    // ==========================================================
+    const trackerCanvas = document.createElement('canvas');
+    trackerCanvas.width = 120; trackerCanvas.height = 120;
+    const trackerCtx = trackerCanvas.getContext('2d', { willReadFrequently: true });
+    const reticle = document.getElementById('ar-reticle');
+    const statusBanner = document.getElementById('bannerStatus');
+    const reticleTag = document.getElementById('reticleTagText');
+
+    function processMultiTargetOpticalFrame() {
+      const video = document.getElementById('camera-video');
+      if (!isARMode || video.readyState < 2) return;
+      const vw = video.videoWidth, vh = video.videoHeight;
+      if (vw === 0 || vh === 0) return;
+
+      const cropSize = Math.min(vw, vh) * 0.45;
+      trackerCtx.drawImage(video, (vw - cropSize)/2, (vh - cropSize)/2, cropSize, cropSize, 0, 0, 120, 120);
+      const data = trackerCtx.getImageData(0, 0, 120, 120).data;
+
+      // Extract optical features:
+      // 1. Overall brightness & background paper whiteness
+      // 2. Center inner vs outer contrast
+      // 3. Top-half vs bottom-half symmetry (Davisson-Germer has heavy base at bottom)
+      // 4. Horizontal vs vertical elongation (Photoelectric is horizontal cylinder)
+      let totalLuma = 0;
+      let outerLuma = 0, outerCount = 0;
+      let innerLuma = 0, innerCount = 0;
+      let topLuma = 0, bottomLuma = 0;
+      let leftLuma = 0, rightLuma = 0;
+
+      for (let y = 0; y < 120; y += 2) {
+        for (let x = 0; x < 120; x += 2) {
+          const luma = 0.299 * data[(y*120+x)*4] + 0.587 * data[(y*120+x)*4+1] + 0.114 * data[(y*120+x)*4+2];
+          totalLuma += luma;
+
+          const dx = x - 60, dy = y - 60;
+          const r2 = dx*dx + dy*dy;
+          if (r2 > 45*45) { outerLuma += luma; outerCount++; }
+          else if (r2 < 32*32) { innerLuma += luma; innerCount++; }
+
+          if (y < 60) topLuma += luma; else bottomLuma += luma;
+          if (x < 60) leftLuma += luma; else rightLuma += luma;
+        }
+      }
+
+      const avgOuter = outerLuma / (outerCount || 1);
+      const avgInner = innerLuma / (innerCount || 1);
+      const contrastDiff = avgOuter - avgInner;
+      const vRatio = (topLuma - bottomLuma) / ((topLuma + bottomLuma) || 1);
+
+      // Book Page Condition: White page background (avgOuter > 50) and figure contrast (diff > 12)
+      if (avgOuter > 50 && contrastDiff > 12) {
+        let detected = null;
+
+        if (currentTargetMode === 'auto') {
+          // AI Classification heuristic:
+          // - Fig 3 (Davisson-Germer): Heavy dark nickel crystal block at bottom -> topLuma significantly brighter than bottomLuma (vRatio > 0.12)
+          // - Fig 1 (Blackbody Cavity): High radial symmetry with very dark center cavity
+          // - Fig 2 (Photoelectric): Balanced top/bottom with horizontal tube geometry
+          if (vRatio > 0.10) {
+            detected = 'fig3';
+          } else if (contrastDiff > 18) {
+            detected = 'fig1';
+          } else {
+            detected = 'fig2';
+          }
+        } else {
+          // Manual target locked
+          detected = currentTargetMode;
+        }
+
+        if (detected) {
+          lockHoldFrames++;
+          if (lockHoldFrames >= 2) {
+            if (!isTargetLocked || activeTargetId !== detected) {
+              isTargetLocked = true;
+              switch3DTarget(detected);
+              masterGroup.scale.set(0.12, 0.12, 0.12);
+              reticle.classList.add('locked');
+              statusBanner.classList.add('locked');
+              statusBanner.textContent = '✅ ตรวจพบเป้าหมาย (LOCKED)';
+              reticleTag.innerHTML = `🎯 ล็อกเป้าหมาย: ${TARGET_CATALOG[detected].title}`;
+              playLockChime();
+            }
+          }
+        }
+      } else {
+        if (lockHoldFrames > 0) lockHoldFrames--;
+        if (lockHoldFrames === 0 && isTargetLocked) {
+          // Kept locked for stable viewing unless user taps or resets
+        }
+      }
+    }
+
+    // Tap reticle to manually toggle target lock
+    reticle.addEventListener('click', () => {
+      isTargetLocked = !isTargetLocked;
+      models[activeTargetId].group.visible = isTargetLocked;
+      reticle.classList.toggle('locked', isTargetLocked);
+      statusBanner.classList.toggle('locked', isTargetLocked);
+      statusBanner.textContent = isTargetLocked ? '✅ ตรวจพบเป้าหมาย (LOCKED)' : 'รอภาพ (WAIT)';
+      if (isTargetLocked) {
+        masterGroup.scale.set(0.15, 0.15, 0.15);
+        playLockChime();
+      }
+    });
+
+    // ==========================================================
+    // 6. TARGET MODE SWITCHER
+    // ==========================================================
+    function setTargetMode(mode) {
+      currentTargetMode = mode;
+      document.querySelectorAll('.target-pill').forEach(p => p.classList.remove('active'));
+      document.querySelector(`.pill-${mode}`).classList.add('active');
+
+      if (mode !== 'auto') {
+        switch3DTarget(mode);
+        if (!isARMode) {
+          models[mode].group.visible = true;
+        }
+      } else {
+        reticleTag.innerHTML = `<span>⚡ เล็งกล้องไปที่รูปภาพใดก็ได้ในตำรา</span>`;
+      }
+    }
+
+    // ==========================================================
+    // 7. CAMERA AND AR MODE CONTROL
+    // ==========================================================
+    async function toggleARMode() {
+      if (!isARMode) {
+        await startCamera();
+      } else {
+        stopCamera();
+      }
+    }
+
+    async function startCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("⚠️ กล้อง AR ต้องการการเชื่อมต่อแบบปลอดภัย HTTPS โปรดเปิดผ่าน GitHub Pages");
+        return;
+      }
+      try {
+        let stream = null;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+          });
+        } catch(e) {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          } catch(e2) {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          }
+        }
+
+        const video = document.getElementById('camera-video');
+        video.srcObject = stream;
+        video.style.display = 'block';
+        cameraStream = stream;
+        await video.play();
+
+        isARMode = true;
+        document.body.classList.add('ar-active');
+        reticle.style.display = 'block';
+        document.getElementById('gemText').textContent = '3D LAB';
+        document.getElementById('gemIcon').className = 'fa-solid fa-cube';
+
+        // Hidden Until Tracked: Hide all 3D models until optical target locks!
+        isTargetLocked = false;
+        Object.values(models).forEach(m => m.group.visible = false);
+        reticle.classList.remove('locked');
+        statusBanner.classList.remove('locked');
+        statusBanner.textContent = 'รอภาพ (WAIT)';
+      } catch(err) {
+        alert("ไม่สามารถเปิดกล้องได้: " + err.message + "\nโปรดตรวจสอบการอนุญาตสิทธิ์กล้องในเบราว์เซอร์");
+      }
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+      const video = document.getElementById('camera-video');
+      video.style.display = 'none';
+      isARMode = false;
+      document.body.classList.remove('ar-active');
+      reticle.style.display = 'none';
+      document.getElementById('gemText').textContent = 'AR CAM';
+      document.getElementById('gemIcon').className = 'fa-solid fa-camera';
+
+      // In 3D Lab view, active model is visible
+      models[activeTargetId].group.visible = true;
+      masterGroup.scale.set(1.0, 1.0, 1.0);
+    }
+
+    // Reset View
+    function resetCameraView() {
+      camera.position.set(0, 1.2, 5.0);
+      controls.target.set(0, 0, 0);
+      controls.update();
+    }
+
+    function resetTracking() {
+      isTargetLocked = false;
+      lockHoldFrames = 0;
+      if (isARMode) {
+        models[activeTargetId].group.visible = false;
+        reticle.classList.remove('locked');
+        statusBanner.classList.remove('locked');
+        statusBanner.textContent = 'รอภาพ (WAIT)';
+      }
+    }
+
+    // Modal Helpers
+    function openTargetModal() {
+      document.getElementById('targetPreviewModal').style.display = 'flex';
+    }
+    function closeTargetModal() {
+      document.getElementById('targetPreviewModal').style.display = 'none';
+    }
+
+    // Drawer Helpers
+    function toggleDrawer(id) {
+      const el = document.getElementById(id);
+      const isVisible = el.style.display === 'block';
+      closeAllDrawers();
+      if (!isVisible) el.style.display = 'block';
+    }
+    function closeAllDrawers() {
+      document.querySelectorAll('.drawer-panel').forEach(d => d.style.display = 'none');
+    }
+
+    // ==========================================================
+    // 8. DYNAMIC PARAMETER & TELEMETRY CONTROLS
+    // ==========================================================
+    function renderParamControls(targetId) {
+      const container = document.getElementById('paramControlsContent');
+      if (targetId === 'fig1') {
+        container.innerHTML = `
+          <div class="param-group">
+            <div class="param-label"><span>อุณหภูมิโพรงรังสี (Temperature $T$)</span><span class="param-val" id="disp-t">5000 K</span></div>
+            <input type="range" class="slider-custom" min="1500" max="9000" step="100" value="5000" oninput="updateFig1Temp(this.value)">
+          </div>
+          <div class="param-group">
+            <div class="param-label"><span>จำนวนการสะท้อนของคลื่นภายใน ($N$)</span><span class="param-val" id="disp-n">8 ครั้ง</span></div>
+            <input type="range" class="slider-custom" min="2" max="20" step="1" value="8" oninput="updateFig1Reflect(this.value)">
+          </div>
+        `;
+      } else if (targetId === 'fig2') {
+        container.innerHTML = `
+          <div class="param-group">
+            <div class="param-label"><span>ความยาวคลื่นแสง ($\lambda$)</span><span class="param-val" id="disp-lambda">350 nm (UV)</span></div>
+            <input type="range" class="slider-custom" min="200" max="750" step="5" value="350" oninput="updateFig2Lambda(this.value)">
+          </div>
+          <div class="param-group">
+            <div class="param-label"><span>ความต่างศักย์ปรับค่าได้ ($V$)</span><span class="param-val" id="disp-v">0.00 V</span></div>
+            <input type="range" class="slider-custom" min="-3.0" max="3.0" step="0.1" value="0.0" oninput="updateFig2Voltage(this.value)">
+          </div>
+          <div class="param-group">
+            <div class="param-label"><span>ความเข้มแสงโฟตอน</span><span class="param-val" id="disp-int">80%</span></div>
+            <input type="range" class="slider-custom" min="10" max="100" step="5" value="80" oninput="updateFig2Intensity(this.value)">
+          </div>
+        `;
+      } else if (targetId === 'fig3') {
+        container.innerHTML = `
+          <div class="param-group">
+            <div class="param-label"><span>ความต่างศักย์เร่งอิเล็กตรอน ($V$)</span><span class="param-val" id="disp-dg-v">54 V (เดอ บรอยล์)</span></div>
+            <input type="range" class="slider-custom" min="20" max="100" step="1" value="54" oninput="updateFig3Voltage(this.value)">
+          </div>
+          <div class="param-group">
+            <div class="param-label"><span>มุมการกระเจิงสังเกตการณ์ ($\phi$)</span><span class="param-val" id="disp-dg-phi">50.0°</span></div>
+            <input type="range" class="slider-custom" min="20" max="90" step="1" value="50" oninput="updateFig3Angle(this.value)">
+          </div>
+        `;
+      }
+    }
+
+    function renderTelemetry(targetId) {
+      const container = document.getElementById('telemetryContent');
+      if (targetId === 'fig1') {
+        container.innerHTML = `
+          <div class="info-card"><h5>ยอดคลื่นวีน ($\lambda_{\\max}$)</h5><p id="t-wien">579.6 nm</p></div>
+          <div class="info-card"><h5>กำลังสเปกตรัมรวม ($u$)</h5><p id="t-power">35.4 kW/m²</p></div>
+          <div class="info-card"><h5>สถานะความร้อน</h5><p style="color:var(--gold);">สมดุลทางความร้อน</p></div>
+          <div class="info-card"><h5>กฎการแผ่รังสี</h5><p>พลังค์ (Planck 1900)</p></div>
+        `;
+      } else if (targetId === 'fig2') {
+        container.innerHTML = `
+          <div class="info-card"><h5>พลังงานโฟตอน ($h\\nu$)</h5><p id="t-pe-e">3.54 eV</p></div>
+          <div class="info-card"><h5>ฟังก์ชันงาน ($\Phi$)</h5><p>2.14 eV (ซีเซียม)</p></div>
+          <div class="info-card"><h5>พลังงานจลน์สูงสุด ($K_{\\max}$)</h5><p id="t-pe-kmax">1.40 eV</p></div>
+          <div class="info-card"><h5>ความต่างศักย์หยุดยั้ง ($V_0$)</h5><p id="t-pe-v0">-1.40 V</p></div>
+        `;
+      } else if (targetId === 'fig3') {
+        container.innerHTML = `
+          <div class="info-card"><h5>ความยาวคลื่นเดอ บรอยล์</h5><p id="t-dg-lam">0.167 nm</p></div>
+          <div class="info-card"><h5>ระยะห่างแลตทิซผลึก ($D$)</h5><p>0.215 nm</p></div>
+          <div class="info-card"><h5>มุมเสริมกัน ($D\\sin\\phi$)</h5><p id="t-dg-diff">0.165 nm (1st)</p></div>
+          <div class="info-card"><h5>ความคลาดเคลื่อน</h5><p style="color:var(--emerald);">&lt; 1.0%</p></div>
+        `;
+      }
+    }
+
+    // Dynamic parameter listeners
+    function updateFig1Temp(v) {
+      document.getElementById('disp-t').textContent = `${v} K`;
+      const lamMax = (2.898e-3 / v * 1e9).toFixed(1);
+      document.getElementById('t-wien').textContent = `${lamMax} nm`;
+      models.fig1.coreMat.color.setHSL(0.08 + (v / 15000), 1.0, 0.5);
+    }
+    function updateFig1Reflect(v) {
+      document.getElementById('disp-n').textContent = `${v} ครั้ง`;
+    }
+
+    let f2Lambda = 350, f2Volt = 0.0, f2Int = 80;
+    function updateFig2Lambda(v) {
+      f2Lambda = parseFloat(v);
+      document.getElementById('disp-lambda').textContent = `${f2Lambda} nm`;
+      updateFig2Physics();
+    }
+    function updateFig2Voltage(v) {
+      f2Volt = parseFloat(v);
+      document.getElementById('disp-v').textContent = `${f2Volt.toFixed(2)} V`;
+      updateFig2Physics();
+    }
+    function updateFig2Intensity(v) {
+      f2Int = parseFloat(v);
+      document.getElementById('disp-int').textContent = `${f2Int}%`;
+      updateFig2Physics();
+    }
+    function updateFig2Physics() {
+      const photonE = 1240 / f2Lambda;
+      const kmax = Math.max(0, photonE - 2.14);
+      const v0 = kmax;
+      document.getElementById('t-pe-e').textContent = `${photonE.toFixed(2)} eV`;
+      document.getElementById('t-pe-kmax').textContent = `${kmax.toFixed(2)} eV`;
+      document.getElementById('t-pe-v0').textContent = `-${v0.toFixed(2)} V`;
+
+      // Needle deflect
+      let current = (kmax > 0 && f2Volt >= -v0) ? (f2Int * 0.15) * Math.min(1.0, (f2Volt + v0 + 0.2)) : 0;
+      const targetAngle = -Math.PI / 4 + (current / 20) * (Math.PI / 2);
+      models.fig2.needle.rotation.z = -targetAngle;
+    }
+
+    function updateFig3Voltage(v) {
+      document.getElementById('disp-dg-v').textContent = `${v} V`;
+      const lam = (1.226 / Math.sqrt(v)).toFixed(3);
+      document.getElementById('t-dg-lam').textContent = `${lam} nm`;
+    }
+    function updateFig3Angle(v) {
+      document.getElementById('disp-dg-phi').textContent = `${v}.0°`;
+      const rad = v * Math.PI / 180;
+      const dSin = (0.215 * Math.sin(rad)).toFixed(3);
+      document.getElementById('t-dg-diff').textContent = `${dSin} nm`;
+      models.fig3.detCup.position.x = 0.4 + 1.8 * Math.cos(rad);
+      models.fig3.detCup.position.y = -0.3 + 1.8 * Math.sin(rad);
+    }
+
+    // ==========================================================
+    // 9. ANIMATION LOOP
+    // ==========================================================
+    let clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // Optical tracking step
+      if (isARMode) {
+        processMultiTargetOpticalFrame();
+      }
+
+      // Smooth Scale Lerp when target locked
+      if (isTargetLocked) {
+        masterGroup.scale.lerp(new THREE.Vector3(1.0, 1.0, 1.0), 0.08);
+      }
+
+      // Model 1 animations
+      if (activeTargetId === 'fig1' && models.fig1.group.visible) {
+        models.fig1.group.rotation.y += 0.005;
+      }
+
+      // Model 2 animations (Photoelectrons stream)
+      if (activeTargetId === 'fig2' && models.fig2.group.visible) {
+        const p = models.fig2;
+        const pos = p.ePos;
+        for (let i = 0; i < 60; i++) {
+          pos[i * 3] += p.eSpeed[i];
+          if (pos[i * 3] > 0.85) {
+            pos[i * 3] = -0.85;
+            pos[i * 3 + 1] = (Math.random() - 0.5) * 0.9;
+            pos[i * 3 + 2] = (Math.random() - 0.5) * 0.9;
+          }
+        }
+        p.particles.geometry.attributes.position.needsUpdate = true;
+      }
+
+      // Model 3 animations (Davisson-Germer electron glow pulse)
+      if (activeTargetId === 'fig3' && models.fig3.group.visible) {
+        models.fig3.scatBeam.material.opacity = 0.6 + Math.sin(time * 6) * 0.35;
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Start Loop
+    animate();
+  </script>
+</body>
+</html>
