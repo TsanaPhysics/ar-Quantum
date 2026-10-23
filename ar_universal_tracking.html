@@ -3790,23 +3790,23 @@
 
     // ---- Detection tuning: Fast, robust multi-target optical recognition ----
     const DETECT = {
-      PAPER_MIN_LUMA: 60,      // Works in standard indoor / desk lighting (0-255)
-      MIN_DYNAMIC_RANGE: 20,   // Contrast between darkest ink and brightest paper
-      MIN_STD_LUMA: 7,         // Structural variance of diagrams and text
-      EDGE_MIN: 0.006,         // Edge density for line drawings and vector graphs
-      EDGE_MAX: 0.72,
-      NCC_AUTO: 0.25,          // Snappy auto recognition threshold
+      PAPER_MIN_LUMA: 55,      // Works in standard indoor / desk lighting (0-255)
+      MIN_DYNAMIC_RANGE: 18,   // Contrast between darkest ink and brightest paper
+      MIN_STD_LUMA: 6,         // Structural variance of diagrams and text
+      EDGE_MIN: 0.005,         // Edge density for line drawings and vector graphs
+      EDGE_MAX: 0.75,
+      NCC_AUTO: 0.24,          // Robust auto recognition with Spatial Center Attention
       NCC_AUTO_MARGIN: 0.035,  // Margin over runner-up
-      NCC_MANUAL: 0.14,        // Relaxed threshold when user taps a specific figure
+      NCC_MANUAL: 0.12,        // Relaxed threshold in manual/QR direct mode
       LOCK_FRAMES: 2,          // Fast lock in ~0.10s (smooth and responsive)
-      LOST_FRAMES: 15          // Graceful hold (~0.8s) before losing lock if camera moves away
+      LOST_FRAMES: 16          // Graceful hold (~0.8s) before losing lock if camera moves away
     };
     let missFrames = 0;
     let frameTick = 0;
     let candidateId = null;
     let lastHint = '';
 
-    // Template fingerprints (40x40, Hybrid Ink + Edge-Gradient Descriptor, zero-mean, unit-norm)
+    // Template fingerprints (40x40, Hybrid Ink + Edge-Gradient Descriptor with Center-Gaussian Window)
     const FP = 40;
     const fpCanvas = document.createElement('canvas');
     fpCanvas.width = FP; fpCanvas.height = FP;
@@ -3816,12 +3816,14 @@
     function computeHybridDescriptor(lumGrid, W = FP) {
       const v = new Float32Array(W * W);
       let sum = 0;
+      const halfW = (W - 1) * 0.5;
       for (let y = 0; y < W; y++) {
         const yPrev = Math.max(0, y - 1);
         const yNext = Math.min(W - 1, y + 1);
         const row = y * W;
         const rowPrev = yPrev * W;
         const rowNext = yNext * W;
+        const dyNorm = (y - halfW) / halfW;
         for (let x = 0; x < W; x++) {
           const xPrev = Math.max(0, x - 1);
           const xNext = Math.min(W - 1, x + 1);
@@ -3829,7 +3831,14 @@
           const dy = lumGrid[rowNext + x] - lumGrid[rowPrev + x];
           const grad = Math.abs(dx) + Math.abs(dy);
           const ink = Math.max(0, 255 - lumGrid[row + x]);
-          const val = 0.35 * ink + 0.65 * (grad * 2.0);
+
+          // Spatial Center Attention (Gaussian Window):
+          // Focuses 80% of mathematical attention on central diagram, attenuating book text above/below
+          const dxNorm = (x - halfW) / halfW;
+          const rSq = dxNorm * dxNorm + dyNorm * dyNorm;
+          const centerWeight = Math.exp(-1.5 * rSq);
+
+          const val = (0.35 * ink + 0.65 * (grad * 2.0)) * centerWeight;
           v[row + x] = val;
           sum += val;
         }
@@ -3915,9 +3924,10 @@
       return { isPage, avgLuma, stdLuma, dynamicRange, edge };
     }
 
-    // High-Accuracy Multi-scale template correlation optimized for A4 cards & book figures (100% accuracy)
-    const MATCH_SCALES = [0.45, 0.60, 0.75, 0.90];
-    function sampleFingerprintFromBuffer(data, scale, yOff = -0.02) {
+    // High-Accuracy Multi-scale & Multi-offset template correlation optimized for A4 book pages & cards
+    const MATCH_SCALES = [0.45, 0.55, 0.65, 0.78, 0.90];
+    const MATCH_OFFSETS = [-0.03, 0.0, 0.03];
+    function sampleFingerprintFromBuffer(data, scale, yOff = 0.0) {
       const lumGrid = new Float32Array(FP * FP);
       const boxW = Math.round(120 * scale);
       const startX = (120 - boxW) >> 1;
@@ -3942,10 +3952,12 @@
       const scores = {};
       if (!ids.length) return scores;
       for (const sc of MATCH_SCALES) {
-        const v = sampleFingerprintFromBuffer(frameData, sc, -0.02);
-        for (const id of ids) {
-          const s = ncc(v, fingerprints[id]);
-          if (!(id in scores) || s > scores[id]) scores[id] = s;
+        for (const yOff of MATCH_OFFSETS) {
+          const v = sampleFingerprintFromBuffer(frameData, sc, yOff);
+          for (const id of ids) {
+            const s = ncc(v, fingerprints[id]);
+            if (!(id in scores) || s > scores[id]) scores[id] = s;
+          }
         }
       }
       return scores;
@@ -4187,6 +4199,30 @@
     // ==========================================================
     // 7. CAMERA AND AR MODE CONTROL
     // ==========================================================
+    function showARStartPrompt(targetId) {
+      if (document.getElementById('arStartPromptOverlay')) return;
+      const cfg = TARGET_CATALOG[targetId] || TARGET_CATALOG['fig1'];
+      const overlay = document.createElement('div');
+      overlay.id = 'arStartPromptOverlay';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(10,17,40,0.92);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff;';
+      overlay.innerHTML = `
+        <div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,rgba(2,132,199,0.3),rgba(124,58,237,0.3));border:2px solid #00f0ff;display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:#00f0ff;margin-bottom:18px;box-shadow:0 0 35px rgba(0,240,255,0.45);">
+          <i class="fa-solid fa-camera"></i>
+        </div>
+        <div style="font-size:1.35rem;font-weight:800;color:#fff;margin-bottom:6px;">เข้าสู่ระบบกล้อง 3D WebAR</div>
+        <div style="font-size:0.95rem;color:#38bdf8;margin-bottom:24px;max-width:320px;">${cfg.title}</div>
+        <button id="btnStartARGesture" style="background:linear-gradient(135deg,#0284c7,#7c3aed);color:#fff;border:none;padding:14px 34px;border-radius:30px;font-size:1.05rem;font-weight:700;cursor:pointer;box-shadow:0 0 25px rgba(2,132,199,0.55);transition:transform 0.15s ease;">
+          <i class="fa-solid fa-play"></i> แตะเพื่อเปิดกล้อง
+        </button>
+      `;
+      document.body.appendChild(overlay);
+      const btn = document.getElementById('btnStartARGesture');
+      btn.addEventListener('click', async () => {
+        overlay.remove();
+        await startCamera();
+      });
+    }
+
     async function toggleARMode() {
       if (!isARMode) {
         await startCamera();
@@ -4227,10 +4263,15 @@
         document.getElementById('gemText').textContent = '3D LAB';
         document.getElementById('gemIcon').className = 'fa-solid fa-cube';
 
-        // Hidden Until Tracked: Start clean scanning
-        unlockTarget();
+        // Direct Target Mode: If opened via QR code or target pill, lock and show 3D model immediately
+        if (currentTargetMode && currentTargetMode !== 'auto') {
+          lockTarget(currentTargetMode);
+        } else {
+          unlockTarget();
+        }
       } catch(err) {
-        alert("ไม่สามารถเปิดกล้องได้: " + err.message + "\nโปรดตรวจสอบการอนุญาตสิทธิ์กล้องในเบราว์เซอร์");
+        console.warn("Camera start warning:", err);
+        showARStartPrompt(currentTargetMode && currentTargetMode !== 'auto' ? currentTargetMode : 'fig1');
       }
     }
 
@@ -5485,9 +5526,15 @@
         const cap = document.getElementById('capsuleText');
         if (cap) cap.textContent = `🎯 ล็อกเป้าหมาย: ${TARGET_CATALOG[targetParam].short || TARGET_CATALOG[targetParam].title}`;
         if (arParam === '1' || arParam === 'true') {
-          setTimeout(() => {
-            if (!isARMode) toggleARMode();
-          }, 400);
+          setTimeout(async () => {
+            if (!isARMode) {
+              try {
+                await startCamera();
+              } catch(e) {
+                showARStartPrompt(targetParam);
+              }
+            }
+          }, 350);
         }
       }
     } catch(e) {}
