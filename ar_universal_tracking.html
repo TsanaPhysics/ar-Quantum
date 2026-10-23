@@ -2143,9 +2143,46 @@
         desc: 'ระบบลำกล้องอิเล็กตรอน 300 kV ตัวอย่างแช่แข็งในน้ำแข็งอสัณฐาน 77 K และฟังก์ชันถ่ายโอนคอนทราสต์ CTF(k) ที่สภาวะเชอร์เซอร์โฟกัส',
         facts: [['ความยาวคลื่นอิเล็กตรอน', 'λ = 1.97 pm (ที่ 300 kV)'], ['เชอร์เซอร์โฟกัส', 'Δf_Sch = √(4/3 C_s λ)'], ['ความละเอียด', '< 1.2 Å ระดับอะตอม'], ['รางวัลโนเบล', 'เคมี 2017 (Cryo-EM)']]
       },
+      // ---------- Chapter 3: 6 Complete Sub-Topics ----------
+      fig3_1: {
+        id: 'fig3_1', chapter: 3, short: '3.1 ฟังก์ชันคลื่นเชิงซ้อน', icon: 'fa-wave-square', color: '#00f0ff', image: 'target_fig3_1.png',
+        title: 'ภาพที่ 3.1 ฟังก์ชันคลื่นเชิงซ้อนและการหมุนควงของเฟส', subtitle: 'Complex Wavefunction & Phase Helix',
+        desc: 'การสั่นกวัดเชิงซ้อนของส่วนจริง u(x,t) และส่วนจินตภาพ v(x,t) ภายใต้แฟกเตอร์เฟส e^{-iEt/ℏ} พร้อมเปลือกหุ้มความหนาแน่นความน่าจะเป็น |Ψ|²',
+        facts: [['ฟังก์ชันคลื่น', 'Ψ(x,t) = u + iv = A e^{i(kx-ωt)}'], ['ความน่าจะเป็น', 'ρ(x,t) = |Ψ|² = u² + v²'], ['วิวัฒนาการเฟส', 'e^{-iEt/ℏ}'], ['หลักการซ้อนทับ', 'Ψ = c₁Ψ₁ + c₂Ψ₂']]
+      },
+      fig3_2: {
+        id: 'fig3_2', chapter: 3, short: '3.2 กระแสความน่าจะเป็น', icon: 'fa-arrows-split-up-and-left', color: '#10b981', image: 'target_fig3_2.png',
+        title: 'ภาพที่ 3.2 กฎอนุรักษ์ความน่าจะเป็นและกระแสความน่าจะเป็น', subtitle: 'Probability Current Density & Continuity Flux',
+        desc: 'การอนุรักษ์ความน่าจะเป็นในปริมาตรควบคุม ∂ρ/∂t + ∇·j = 0 โดยที่เวกเตอร์กระแสความน่าจะเป็น j = (ℏ/m)Im(Ψ*∇Ψ) ถ่ายโอนฟลักซ์ข้ามขอบเขต',
+        facts: [['สมการความต่อเนื่อง', '∂ρ/∂t + ∇·j = 0'], ['เวกเตอร์กระแส', 'j = (ℏ/2mi)(Ψ*∇Ψ - Ψ∇Ψ*)'], ['กรณีคลื่นระนาบ', 'j = v|A|² = (p/m)|A|²'], ['ความไม่แปรเปลี่ยนเกจ', 'A\' = A + ∇χ → j\' = j']]
+      },
+      fig3_3: {
+        id: 'fig3_3', chapter: 3, short: '3.3 ปริภูมิฮิลเบิร์ต', icon: 'fa-cubes', color: '#a855f7', image: 'target_fig3_3.png',
+        title: 'ภาพที่ 3.3 เรขาคณิตของปริภูมิฮิลเบิร์ตและสัญกรณ์ดิแรก', subtitle: 'Hilbert Space Geometry & Dirac Projection Operators',
+        desc: 'เวกเตอร์สถานะ |ψ⟩ ในปริภูมิฮิลเบิร์ต การฉายภาพบนฐานตั้งฉากปรกติ c_n = ⟨u_n|ψ⟩ และความสัมพันธ์ความสมบูรณ์ ∑ |u_n⟩⟨u_n| = I',
+        facts: [['สัญกรณ์ดิแรก', '|ψ⟩ (ket), ⟨ψ| (bra)'], ['ผลคูณภายใน', '⟨φ|ψ⟩ = ∫ φ* ψ dx'], ['ความสมบูรณ์', '∑ₙ |u_n⟩⟨u_n| = I'], ['ตัวดำเนินการฉาย', 'P_n = |u_n⟩⟨u_n|, P_n² = P_n']]
+      },
+      fig3_4: {
+        id: 'fig3_4', chapter: 3, short: '3.4 ทฤษฎีบทเอห์เรนเฟสต์', icon: 'fa-person-running', color: '#ec4899', image: 'target_fig3_4.png',
+        title: 'ภาพที่ 3.4 ทฤษฎีบทเอห์เรนเฟสต์และการเคลื่อนที่ของกลุ่มคลื่น', subtitle: 'Ehrenfest Theorem & Classical Correspondence',
+        desc: 'อัตราการเปลี่ยนแปลงค่าคาดหวังของตำแหน่งและโมเมนตัม m d²⟨x⟩/dt² = ⟨-∇V⟩ ซึ่งลดรูปกลับไปเป็นกฎข้อ 2 ของนิวตันเมื่อความกว้างกลุ่มคลื่นแคบมาก',
+        facts: [['สมการเอห์เรนเฟสต์ 1', 'd⟨x⟩/dt = ⟨p⟩/m'], ['สมการเอห์เรนเฟสต์ 2', 'd⟨p⟩/dt = ⟨-∂V/∂x⟩ = ⟨F⟩'], ['การประมาณคลาสสิก', '⟨F(x)⟩ ≈ F(⟨x⟩) เมื่อ σ_x → 0'], ['หลักความสอดคล้อง', 'ควอนตัม → คลาสสิก']]
+      },
+      fig3_5: {
+        id: 'fig3_5', chapter: 3, short: '3.5 โครงข่าย PINNs', icon: 'fa-brain', color: '#f59e0b', image: 'target_fig3_5.png',
+        title: 'ภาพที่ 3.5 สถาปัตยกรรมโครงข่ายประสาทเทียมฟิสิกส์ PINNs', subtitle: 'Physics-Informed Neural Networks for TDSE',
+        desc: 'โครงข่ายประสาทเทียมหลายชั้นป้อนพิกัด (x, t) ทำนาย (u, v) ผ่านการหาอนุพันธ์อัตโนมัติ (Autograd) และฟังก์ชันการสูญเสียเรซิดัวล์ L_PDE = |f_u|² + |f_v|²',
+        facts: [['อินพุต/เอาต์พุต', '(x, t) → NN(θ) → (u, v)'], ['อนุพันธ์อัตโนมัติ', 'Autograd ∂u/∂t, ∂²u/∂x² โดยไม่ต้องใช้กริด'], ['ฟังก์ชันสูญเสีย', 'L_total = w_pde L_PDE + w_bc L_BC + w_ic L_IC'], ['ตัวปรับค่าพารามิเตอร์', 'Adam + L-BFGS Optimizer']]
+      },
+      fig3_6: {
+        id: 'fig3_6', chapter: 3, short: '3.6 ผลต่างสืบเนื่อง', icon: 'fa-table-cells', color: '#0284c7', image: 'target_fig3_6.png',
+        title: 'ภาพที่ 3.6 ระเบียบวิธีผลต่างสืบเนื่องและเมทริกซ์ฮามิลโทเนียน', subtitle: 'Finite Difference Discretization & Tridiagonal Matrix',
+        desc: 'การแบ่งกริดเชิงพื้นที่ 1D Discretization การประมาณอนุพันธ์อันดับสอง 3 จุด และโครงสร้างเมทริกซ์ฮามิลโทเนียนแบบสามแนวทแยง (Tridiagonal Hamiltonian) Hψ = Eψ',
+        facts: [['อนุพันธ์ 3 จุด', 'd²ψ/dx² ≈ (ψ_{i+1} - 2ψ_i + ψ_{i-1})/Δx²'], ['แนวทแยงหลัก', 'd_i = ℏ²/(mΔx²) + V(x_i)'], ['แนวทแยงรอง', 't = -ℏ²/(2mΔx²)'], ['ขั้นตอนวิธี', 'scipy.linalg.eigh(H)']]
+      },
       fig5: {
-        id: 'fig5', chapter: 3, short: 'บท 3 แพ็กเก็ตคลื่น', icon: 'fa-wave-square', color: '#22d3ee', image: null,
-        title: 'บทที่ 3 แพ็กเก็ตคลื่นเกาส์เซียนอิสระ', subtitle: 'Free Gaussian Wave Packet ψ(x,t)',
+        id: 'fig5', chapter: 3, short: '3.1 แพ็กเก็ตคลื่น', icon: 'fa-wave-square', color: '#22d3ee', image: 'target_fig3_1.png',
+        title: 'ภาพที่ 3.1 ฟังก์ชันคลื่นเชิงซ้อนและการหมุนควงของเฟส', subtitle: 'Complex Wavefunction & Wave Packet',
         desc: 'เกลียว 3 มิติของ Re ψ และ Im ψ เคลื่อนที่ด้วยความเร็วกลุ่ม v_g = ħk₀/m ขณะที่เฟสเคลื่อนที่ด้วย v_p = v_g/2 และกลุ่มคลื่นแผ่กว้างขึ้นตามเวลา σ(t) = σ₀√(1+(t/τ)²)',
         facts: [['ความเร็วกลุ่ม', 'v_g = ħk₀/m'], ['ความเร็วเฟส', 'v_p = v_g / 2'], ['การแผ่กว้าง', 'σ(t)=σ₀√(1+(t/τ)²)'], ['หลักความไม่แน่นอน', 'Δx·Δp ≥ ħ/2']]
       },
@@ -3776,6 +3813,224 @@
       return { group: g, update };
     }
 
+    // ==========================================================
+    // CHAPTER 3 COMPLETE 3D AR MODELS (SCHRÖDINGER SUITE)
+    // ==========================================================
+    function buildProbabilityCurrentModel() {
+      const g = new THREE.Group();
+      const boxGeo = new THREE.BoxGeometry(2.4, 1.8, 1.8);
+      const boxMat = new THREE.MeshPhysicalMaterial({
+        color: 0x0284c7, transparent: true, opacity: 0.25,
+        roughness: 0.1, transmission: 0.7, thickness: 0.5
+      });
+      const box = new THREE.Mesh(boxGeo, boxMat);
+      g.add(box);
+
+      const edges = new THREE.EdgesGeometry(boxGeo);
+      const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 }));
+      g.add(line);
+
+      const arrowIn = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(-2.2, 0, 0), 1.0, 0x10b981, 0.3, 0.2);
+      const arrowOut = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(1.2, 0, 0), 1.0, 0xef4444, 0.3, 0.2);
+      g.add(arrowIn);
+      g.add(arrowOut);
+
+      const count = 120;
+      const ptsGeo = new THREE.BufferGeometry();
+      const pos = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        pos[i*3] = (Math.random() - 0.5) * 3.6;
+        pos[i*3+1] = (Math.random() - 0.5) * 1.4;
+        pos[i*3+2] = (Math.random() - 0.5) * 1.4;
+      }
+      ptsGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const ptsMat = new THREE.PointsMaterial({ color: 0x00f0ff, size: 0.08, transparent: true, opacity: 0.85 });
+      const particles = new THREE.Points(ptsGeo, ptsMat);
+      g.add(particles);
+
+      function update(t) {
+        const pArr = particles.geometry.attributes.position.array;
+        for (let i = 0; i < count; i++) {
+          pArr[i*3] += 0.025;
+          if (pArr[i*3] > 2.0) pArr[i*3] = -2.0;
+        }
+        particles.geometry.attributes.position.needsUpdate = true;
+        g.rotation.y = Math.sin(t * 0.4) * 0.3;
+      }
+      return { group: g, update };
+    }
+
+    function buildHilbertSpaceModel() {
+      const g = new THREE.Group();
+      const axX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 2.0, 0x38bdf8, 0.25, 0.15);
+      const axY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 2.0, 0x38bdf8, 0.25, 0.15);
+      const axZ = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 2.0, 0x38bdf8, 0.25, 0.15);
+      g.add(axX); g.add(axY); g.add(axZ);
+
+      const stateArrow = new THREE.ArrowHelper(new THREE.Vector3(1, 1, 1).normalize(), new THREE.Vector3(0, 0, 0), 2.2, 0xec4899, 0.3, 0.2);
+      g.add(stateArrow);
+
+      const tipGeo = new THREE.SphereGeometry(0.1, 16, 16);
+      const tipMat = new THREE.MeshStandardMaterial({ color: 0xec4899, emissive: 0xec4899 });
+      const tip = new THREE.Mesh(tipGeo, tipMat);
+      g.add(tip);
+
+      const grid = new THREE.GridHelper(3.0, 6, 0x0284c7, 0x1e293b);
+      grid.position.y = -0.01;
+      g.add(grid);
+
+      function update(t) {
+        const phi = t * 0.8;
+        const dir = new THREE.Vector3(Math.cos(phi) * 1.2, 1.4 + Math.sin(t*0.5)*0.3, Math.sin(phi) * 1.2).normalize();
+        stateArrow.setDirection(dir);
+        tip.position.copy(dir.clone().multiplyScalar(2.2));
+        g.rotation.y = t * 0.15;
+      }
+      return { group: g, update };
+    }
+
+    function buildEhrenfestModel() {
+      const g = new THREE.Group();
+      const wellGeo = new THREE.CylinderGeometry(2.2, 0.2, 1.8, 32, 12, true);
+      const wellMat = new THREE.MeshStandardMaterial({ color: 0x334155, wireframe: true, transparent: true, opacity: 0.45 });
+      const well = new THREE.Mesh(wellGeo, wellMat);
+      well.position.y = 0.9;
+      g.add(well);
+
+      const coreGeo = new THREE.SphereGeometry(0.2, 24, 24);
+      const coreMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x00f0ff });
+      const packetCore = new THREE.Mesh(coreGeo, coreMat);
+
+      const shellGeo = new THREE.SphereGeometry(0.42, 24, 24);
+      const shellMat = new THREE.MeshPhysicalMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.35, roughness: 0.1 });
+      const packetShell = new THREE.Mesh(shellGeo, shellMat);
+
+      const packet = new THREE.Group();
+      packet.add(packetCore);
+      packet.add(packetShell);
+      g.add(packet);
+
+      const trailCount = 60;
+      const trailPos = new Float32Array(trailCount * 3);
+      const trailGeo = new THREE.BufferGeometry();
+      trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+      const trailMat = new THREE.LineBasicMaterial({ color: 0xec4899, transparent: true, opacity: 0.7, linewidth: 2 });
+      const trail = new THREE.Line(trailGeo, trailMat);
+      g.add(trail);
+
+      function update(t) {
+        const amp = 1.4;
+        const x = Math.sin(t * 2.0) * amp;
+        const y = 0.25 * x * x + 0.3;
+        packet.position.set(x, y, 0);
+
+        const arr = trail.geometry.attributes.position.array;
+        for (let i = trailCount - 1; i > 0; i--) {
+          arr[i * 3] = arr[(i - 1) * 3];
+          arr[i * 3 + 1] = arr[(i - 1) * 3 + 1];
+          arr[i * 3 + 2] = arr[(i - 1) * 3 + 2];
+        }
+        arr[0] = x; arr[1] = y; arr[2] = 0;
+        trail.geometry.attributes.position.needsUpdate = true;
+
+        g.rotation.y = Math.sin(t * 0.3) * 0.2;
+      }
+      return { group: g, update };
+    }
+
+    function buildPINNsModel() {
+      const g = new THREE.Group();
+      const layerSizes = [2, 4, 4, 2];
+      const layerSpacing = 1.2;
+      const nodeSpacing = 0.65;
+      const nodes = [];
+
+      layerSizes.forEach((size, lIdx) => {
+        const x = (lIdx - (layerSizes.length - 1) / 2) * layerSpacing;
+        for (let nIdx = 0; nIdx < size; nIdx++) {
+          const y = (nIdx - (size - 1) / 2) * nodeSpacing;
+          const isInput = lIdx === 0;
+          const isOutput = lIdx === layerSizes.length - 1;
+          const col = isInput ? 0x00f0ff : (isOutput ? 0xec4899 : 0xa855f7);
+          const nodeGeo = new THREE.SphereGeometry(0.12, 16, 16);
+          const nodeMat = new THREE.MeshStandardMaterial({ color: col, emissive: col });
+          const node = new THREE.Mesh(nodeGeo, nodeMat);
+          node.position.set(x, y, 0);
+          g.add(node);
+          nodes.push({ mesh: node, layer: lIdx, x, y });
+        }
+      });
+
+      const lineMat = new THREE.LineBasicMaterial({ color: 0x334155, transparent: true, opacity: 0.45 });
+      for (let l = 0; l < layerSizes.length - 1; l++) {
+        const currentNodes = nodes.filter(n => n.layer === l);
+        const nextNodes = nodes.filter(n => n.layer === l + 1);
+        currentNodes.forEach(c => {
+          nextNodes.forEach(nx => {
+            const lineGeo = new THREE.BufferGeometry().setFromPoints([c.mesh.position, nx.mesh.position]);
+            g.add(new THREE.Line(lineGeo, lineMat));
+          });
+        });
+      }
+
+      const orbGeo = new THREE.IcosahedronGeometry(0.35, 1);
+      const orbMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, wireframe: true });
+      const orb = new THREE.Mesh(orbGeo, orbMat);
+      orb.position.set(2.4, 0, 0);
+      g.add(orb);
+
+      function update(t) {
+        orb.rotation.y = t * 1.5;
+        orb.rotation.x = t * 0.9;
+        g.rotation.y = Math.sin(t * 0.4) * 0.3;
+      }
+      return { group: g, update };
+    }
+
+    function buildFiniteDifferenceModel() {
+      const g = new THREE.Group();
+      const N = 15;
+      const L = 3.6;
+      const dx = L / (N - 1);
+      const stems = [];
+
+      const baseGeo = new THREE.CylinderGeometry(0.04, 0.04, L, 16);
+      const baseMat = new THREE.MeshStandardMaterial({ color: 0x64748b });
+      const base = new THREE.Mesh(baseGeo, baseMat);
+      base.rotation.z = Math.PI / 2;
+      g.add(base);
+
+      for (let i = 0; i < N; i++) {
+        const x = -L / 2 + i * dx;
+        const stemGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.0, 12);
+        const stemMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, emissive: 0x0369a1 });
+        const stem = new THREE.Mesh(stemGeo, stemMat);
+
+        const beadGeo = new THREE.SphereGeometry(0.08, 16, 16);
+        const beadMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7 });
+        const bead = new THREE.Mesh(beadGeo, beadMat);
+
+        const col = new THREE.Group();
+        col.position.x = x;
+        col.add(stem);
+        col.add(bead);
+        g.add(col);
+        stems.push({ group: col, stem, bead, idx: i });
+      }
+
+      function update(t) {
+        const mode = 1 + (Math.floor(t * 0.4) % 3);
+        stems.forEach(s => {
+          const val = Math.sin(mode * Math.PI * (s.idx / (N - 1))) * 1.2 * Math.cos(t * 3.0);
+          s.stem.scale.y = Math.max(0.05, Math.abs(val));
+          s.stem.position.y = val / 2;
+          s.bead.position.y = val;
+        });
+        g.rotation.y = t * 0.25;
+      }
+      return { group: g, update };
+    }
+
     function buildChapterModels() {
       return {
         fig4: buildDoubleSlitModel(),
@@ -3812,7 +4067,17 @@
     models.fig2_5 = buildCOWInterferometerModel();
     models.fig2_6 = buildCryoEMModel();
 
+    // Chapter 3 Complete Suite
+    models.fig3_1 = buildWavePacketModel();
+    models.fig3_2 = buildProbabilityCurrentModel();
+    models.fig3_3 = buildHilbertSpaceModel();
+    models.fig3_4 = buildEhrenfestModel();
+    models.fig3_5 = buildPINNsModel();
+    models.fig3_6 = buildFiniteDifferenceModel();
+
     Object.assign(models, buildChapterModels()); // Chapters 3-12 (fig5 ... fig14)
+    models.fig5 = models.fig3_1; // Alias fig5 to fig3_1
+
 
     // Attach them to masterGroup
     Object.values(models).forEach(m => {
