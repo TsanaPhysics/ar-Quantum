@@ -1548,7 +1548,7 @@
     const TARGET_CATALOG = {
       // ---------- Chapter 1: 8 Core Sub-Topics ----------
       fig1_1: {
-        id: 'fig1_1', chapter: 1, short: '1.1 วิกฤต UV', icon: 'fa-radiation', color: '#ef4444', image: null,
+        id: 'fig1_1', chapter: 1, short: '1.1 วิกฤต UV', icon: 'fa-radiation', color: '#ef4444', image: 'target_fig1_1.png',
         title: 'หัวข้อ 1.1 วิกฤตการณ์อัลตราไวโอเลต', subtitle: 'Ultraviolet Catastrophe & Rayleigh-Jeans vs Planck',
         desc: 'เปรียบเทียบกฎเรย์ลีห์-จีนส์ u(λ) ∝ λ⁻⁴ ที่ลู่เข้าสู่อนันต์ (วิกฤต UV) กับเส้นโค้งการแผ่รังสีของพลังค์ที่ลู่เข้าสู่ศูนย์ตามผลการทดลองจริง',
         facts: [['กฎเรย์ลีห์-จีนส์', 'u(λ) ∝ λ⁻⁴ → ∞'], ['กฎของพลังค์', 'u(λ) = (8πhc/λ⁵)/(e^{hc/λkT}-1)'], ['สาเหตุคลาสสิก', 'Equipartition theorem ⟨ε⟩ = kT'], ['สมมติฐานควอนตัม', 'การควอนไตซ์พลังงาน ε = nhν']]
@@ -1561,13 +1561,13 @@
         facts: [['อุณหภูมิ', 'T = 5000 K'], ['สภาพดูดกลืน', 'α(ν) = 1 สมบูรณ์'], ['โหมดคลื่นนิ่ง', 'g(ν) = 8πν²/c³'], ['รูเปิดขนาดเล็ก', 'Aperture radiation']]
       },
       fig1_3: {
-        id: 'fig1_3', chapter: 1, short: '1.3 ขั้นพลังค์', icon: 'fa-stairs', color: '#00f0ff', image: null,
+        id: 'fig1_3', chapter: 1, short: '1.3 ขั้นพลังค์', icon: 'fa-stairs', color: '#00f0ff', image: 'target_fig1_3.png',
         title: 'หัวข้อ 1.3 การควอนไตซ์พลังงานของพลังค์', subtitle: "Planck's Discrete Energy Ladder & Photons",
         desc: 'ขั้นบันไดพลังงานของตัวแกว่งกวัดฮาร์มอนิก ε_n = nhν พร้อมการปลดปล่อยและดูดกลืนพลังงานในรูปโฟตอนเดี่ยว Δε = hν',
         facts: [['ระดับพลังงาน', 'ε_n = nhν = nℏω'], ['พลังงานโฟตอน', 'Δε = hν'], ['ค่าคงตัวพลังค์', 'h = 6.626×10⁻³⁴ J·s'], ['พลังงานเฉลี่ย', '⟨ε⟩ = hν/(e^{hν/kT} - 1)']]
       },
       fig1_4: {
-        id: 'fig1_4', chapter: 1, short: '1.4 กฎวีน', icon: 'fa-fire-flame-curved', color: '#f97316', image: null,
+        id: 'fig1_4', chapter: 1, short: '1.4 กฎวีน', icon: 'fa-fire-flame-curved', color: '#f97316', image: 'target_fig1_4.png',
         title: 'หัวข้อ 1.4 กฎการกระจัดของวีนและสเตฟาน-โบลทซ์มัน', subtitle: 'Wien Displacement & Stefan-Boltzmann Law',
         desc: 'การเลื่อนของจุดยอดความยาวคลื่นสูงสุด λ_max·T = b และกำลังการแผ่รังสีรวมตามพื้นที่ใต้กราฟ u_total = aT⁴',
         facts: [['กฎการกระจัดของวีน', 'λ_max T = b = 2.898×10⁻³ m·K'], ['กฎสเตฟาน-โบลทซ์มัน', 'u_{total} = a T⁴'], ['ค่าคงตัวรังสี a', '8π⁵k_B⁴ / (15 c³ h³)'], ['รากอดิศัย x₀', '≈ 4.965114']]
@@ -1580,19 +1580,19 @@
         facts: [['สมการไอน์สไตน์', 'K_max = hν - W₀'], ['ศักย์หยุดยั้ง', 'eV_s = hν - W₀'], ['ความถี่ขีดเริ่ม', 'ν₀ = W₀/h'], ['ความล่าช้าเชิงเวลา', 't < 10⁻⁹ s (ทันทีทันใด)']]
       },
       fig1_6: {
-        id: 'fig1_6', chapter: 1, short: '1.6 คอมป์ตัน', icon: 'fa-arrows-split-up-and-left', color: '#a855f7', image: null,
+        id: 'fig1_6', chapter: 1, short: '1.6 คอมป์ตัน', icon: 'fa-arrows-split-up-and-left', color: '#a855f7', image: 'target_fig1_6.png',
         title: 'หัวข้อ 1.6 การกระเจิงคอมป์ตันเชิงสัมพัทธภาพ', subtitle: 'Compton Relativistic Scattering & 4-Momentum',
         desc: 'การชนเชิงสัมพัทธภาพระหว่างโฟตอนรังสีเอกซ์กับอิเล็กตรอนอิสระ ความยาวคลื่นยืดออก Δλ = λ_C(1 - cos θ)',
         facts: [['สมการคอมป์ตัน', 'Δλ = λ_C(1 - cos θ)'], ['ความยาวคลื่นคอมป์ตัน', 'λ_C = h/(m_e c) = 2.426 pm'], ['การกระเจิงย้อนกลับ', 'Δλ_max = 2λ_C = 4.853 pm'], ['4-โมเมนตัม', 'P_γ + P_e = P\'_γ + P\'_e']]
       },
       fig1_7: {
-        id: 'fig1_7', chapter: 1, short: '1.7 การสร้างคู่', icon: 'fa-yin-yang', color: '#ec4899', image: null,
+        id: 'fig1_7', chapter: 1, short: '1.7 การสร้างคู่', icon: 'fa-yin-yang', color: '#ec4899', image: 'target_fig1_7.png',
         title: 'หัวข้อ 1.7 การสร้างคู่และการประลัย', subtitle: 'Pair Production & Positronium Annihilation',
         desc: 'การแปลงพลังงานเป็นคู่สสาร-ปฏิอนุภาค γ → e⁻ + e⁺ และการประลัยของโพซิตโรเนียมให้โฟตอน 511 keV สองตัวทำมุม 180°',
         facts: [['พลังงานขีดเริ่ม', 'E_{th} = 2 m_e c² = 1.022 MeV'], ['โฟตอนการประลัย', '2γ แต่ละตัว 511 keV'], ['มุมการปล่อย', '180° (กรอบนิ่ง)'], ['การประยุกต์', 'PET Scan Coincidence Detection']]
       },
       fig1_8: {
-        id: 'fig1_8', chapter: 1, short: '1.8 คิบเบิล/SNSPD', icon: 'fa-scale-balanced', color: '#10b981', image: null,
+        id: 'fig1_8', chapter: 1, short: '1.8 คิบเบิล/SNSPD', icon: 'fa-scale-balanced', color: '#10b981', image: 'target_fig1_8.png',
         title: 'หัวข้อ 1.8 เครื่องชั่งคิบเบิลและตัวตรวจวัด SNSPD', subtitle: 'Kibble Balance & Superconducting Hotspot',
         desc: 'การตรึงนิยามมวลกิโลกรัมด้วยค่าคงตัวพลังค์ mgv = VI และกลไกจุดร้อนของตัวตรวจวัดโฟตอนเดี่ยว SNSPD',
         facts: [['เครื่องชั่งคิบเบิล', 'm = (C f₁ f₂ / g v) h'], ['การตรึงค่าคงตัว', 'h = 6.62607015×10⁻³⁴ J·s'], ['SNSPD Jitter', '< 3 พิโกวินาที'], ['ประสิทธิภาพตรวจจับ', '> 98% ที่ 1550 nm']]
@@ -3138,26 +3138,27 @@
       }
     }
 
-    // ---- Detection tuning: the 3D model stays HIDDEN until a real printed figure is inside the reticle ----
+    // ---- Detection tuning: Fast, robust multi-target optical recognition ----
     // Counters below are in *analysed* frames (analysis runs every 2nd render frame).
     const DETECT = {
-      PAPER_MIN_LUMA: 130,   // border ring must look like white paper (0-255). Old value 50 accepted sofas/walls.
-      PAPER_MAX_STD: 50,     // paper border should be fairly uniform
-      MIN_CONTRAST: 25,      // paper vs. printed-ink contrast (old value 12 accepted fabric wrinkles)
-      EDGE_MIN: 0.04,        // printed line-art edge density window
-      EDGE_MAX: 0.45,
-      NCC_AUTO: 0.50,        // template correlation required in AUTO mode
-      NCC_MANUAL: 0.30,      // looser when the user already picked the figure
-      LOCK_FRAMES: 5,        // consecutive hits before lock (~0.3 s)
-      LOST_FRAMES: 14        // consecutive misses before auto-hide (~0.9 s)
+      PAPER_MIN_LUMA: 65,      // Works in standard indoor / desk lighting (0-255)
+      MIN_DYNAMIC_RANGE: 25,   // Contrast between darkest ink and brightest paper
+      MIN_STD_LUMA: 8,         // Structural variance of diagrams and text
+      EDGE_MIN: 0.008,         // Edge density for line drawings and vector graphs
+      EDGE_MAX: 0.70,
+      NCC_AUTO: 0.28,          // Normalized correlation threshold for auto recognition
+      NCC_AUTO_MARGIN: 0.035,  // Margin over runner-up
+      NCC_MANUAL: 0.15,        // Relaxed threshold when user taps a specific figure
+      LOCK_FRAMES: 2,          // Fast lock in ~0.12s (smooth and responsive)
+      LOST_FRAMES: 18          // Graceful hold (~1.2s) to prevent jitter
     };
     let missFrames = 0;
     let frameTick = 0;
     let candidateId = null;
     let lastHint = '';
 
-    // Template fingerprints (24x24, zero-mean, unit-norm grayscale) for figures that have a textbook image
-    const FP = 24;
+    // Template fingerprints (28x28, zero-mean, unit-norm grayscale) for all registered figures
+    const FP = 28;
     const fpCanvas = document.createElement('canvas');
     fpCanvas.width = FP; fpCanvas.height = FP;
     const fpCtx = fpCanvas.getContext('2d', { willReadFrequently: true });
@@ -3170,23 +3171,28 @@
         v[i] = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
         mean += v[i];
       }
-      mean /= FP * FP;
+      mean /= (FP * FP);
       let norm = 0;
       for (let i = 0; i < v.length; i++) { v[i] -= mean; norm += v[i] * v[i]; }
       norm = Math.sqrt(norm) || 1;
       for (let i = 0; i < v.length; i++) v[i] /= norm;
       return v;
     }
-    function ncc(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] * b[i]; return s; }
+    function ncc(a, b) {
+      let s = 0;
+      const len = Math.min(a.length, b.length);
+      for (let i = 0; i < len; i++) s += a[i] * b[i];
+      return s;
+    }
 
+    // Preload and compute fingerprints for all registered target images
     Object.values(TARGET_CATALOG).forEach(cfg => {
       if (!cfg.image) return;
       const img = new Image();
       img.onload = () => {
-        // Fit (contain) the figure into a white square, matching the square reticle crop
         fpCtx.fillStyle = '#ffffff';
         fpCtx.fillRect(0, 0, FP, FP);
-        const s = Math.min(FP / img.width, FP / img.height);
+        const s = Math.min((FP - 2) / img.width, (FP - 2) / img.height);
         const w = img.width * s, h = img.height * s;
         fpCtx.drawImage(img, (FP - w) / 2, (FP - h) / 2, w, h);
         fingerprints[cfg.id] = toFingerprint(fpCtx.getImageData(0, 0, FP, FP).data);
@@ -3194,41 +3200,49 @@
       img.src = cfg.image;
     });
 
-    // Page / line-art gate on the 120x120 reticle crop (sampled on a 60x60 grid)
+    // Universal printed figure / paper gate (works for solid shapes, circuits, and line-art graphs)
     function analyzePage(data) {
       const G = 60, L = new Float32Array(G * G);
       let k = 0;
+      let minLuma = 255, maxLuma = 0, sumLuma = 0, sumSq = 0;
       for (let y = 0; y < 120; y += 2) {
         for (let x = 0; x < 120; x += 2) {
           const i = (y * 120 + x) * 4;
-          L[k++] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          L[k++] = lum;
+          sumLuma += lum;
+          sumSq += lum * lum;
+          if (lum < minLuma) minLuma = lum;
+          if (lum > maxLuma) maxLuma = lum;
         }
       }
-      let oSum = 0, oSq = 0, oN = 0, iSum = 0, iN = 0, edges = 0, eN = 0;
-      for (let y = 0; y < G; y++) {
-        for (let x = 0; x < G; x++) {
+      const N = G * G;
+      const avgLuma = sumLuma / N;
+      const stdLuma = Math.sqrt(Math.max(0, sumSq / N - avgLuma * avgLuma));
+      const dynamicRange = maxLuma - minLuma;
+
+      let edges = 0, eN = 0;
+      for (let y = 0; y < G - 1; y++) {
+        for (let x = 0; x < G - 1; x++) {
           const v = L[y * G + x];
-          const dx = x - 30, dy = y - 30, r2 = dx * dx + dy * dy;
-          if (r2 > 24 * 24) { oSum += v; oSq += v * v; oN++; }
-          else if (r2 < 17 * 17) { iSum += v; iN++; }
-          if (x < G - 1 && y < G - 1) {
-            const g = Math.abs(L[y * G + x + 1] - v) + Math.abs(L[(y + 1) * G + x] - v);
-            if (g > 40) edges++;
-            eN++;
-          }
+          const g = Math.abs(L[y * G + x + 1] - v) + Math.abs(L[(y + 1) * G + x] - v);
+          if (g > 26) edges++;
+          eN++;
         }
       }
-      const avgOuter = oSum / (oN || 1);
-      const stdOuter = Math.sqrt(Math.max(0, oSq / (oN || 1) - avgOuter * avgOuter));
-      const contrast = avgOuter - iSum / (iN || 1);
       const edge = edges / (eN || 1);
-      const isPage = avgOuter > DETECT.PAPER_MIN_LUMA && stdOuter < DETECT.PAPER_MAX_STD &&
-                     contrast > DETECT.MIN_CONTRAST && edge > DETECT.EDGE_MIN && edge < DETECT.EDGE_MAX;
-      return { isPage, avgOuter, stdOuter, contrast, edge };
+
+      // Verifies: adequate light, ink contrast, structural variance, and line contours
+      const isPage = avgLuma >= DETECT.PAPER_MIN_LUMA &&
+                     dynamicRange >= DETECT.MIN_DYNAMIC_RANGE &&
+                     stdLuma >= DETECT.MIN_STD_LUMA &&
+                     edge >= DETECT.EDGE_MIN && edge <= DETECT.EDGE_MAX;
+
+      return { isPage, avgLuma, stdLuma, dynamicRange, edge };
     }
 
-    // Multi-scale template correlation against figures that have a reference image
-    const MATCH_SCALES = [0.35, 0.45, 0.6];
+    // Multi-scale template correlation across 5 scale steps (from close-up to standard distance)
+    const MATCH_SCALES = [0.26, 0.35, 0.46, 0.58, 0.72];
     function matchTemplates(video, vw, vh) {
       const ids = Object.keys(fingerprints);
       const scores = {};
@@ -3253,7 +3267,7 @@
     }
     function waitHint() {
       return currentTargetMode === 'auto'
-        ? 'เล็งกล้องไปที่ภาพที่ 1.1, 1.2 หรือ 2.1 ในตำรา'
+        ? 'เล็งกล้องไปที่ภาพประกอบในตำรา (1.1 - 2.1)'
         : `เล็งไปที่ภาพประกอบ: ${TARGET_CATALOG[currentTargetMode].short}`;
     }
 
@@ -3268,7 +3282,7 @@
       const bTitle = document.getElementById('bannerTitle');
       if (bTitle) bTitle.textContent = 'รอตรวจจับภาพในตำรา...';
       const bSub = document.getElementById('bannerSubtitle');
-      if (bSub) bSub.textContent = 'AI Auto: ภาพที่ 1.1 / 1.2 / 2.1 • บทอื่นเลือกจากแถบด้านบน';
+      if (bSub) bSub.textContent = 'AI Auto: ส่องภาพบทที่ 1 หรือ 2 • หรือแตะเลือกจากแถบด้านบน';
       const icon = document.getElementById('bannerIcon');
       if (icon) {
         icon.innerHTML = '<i class="fa-solid fa-crosshairs"></i>';
@@ -3279,9 +3293,9 @@
     function lockTarget(id) {
       isTargetLocked = true;
       missFrames = 0;
-      switch3DTarget(id); // makes only this model visible (isTargetLocked === true)
+      switch3DTarget(id);
       masterGroup.scale.set(0.12, 0.12, 0.12);
-      reticle.classList.add('locked'); // Reticle fades out completely for clean 3D view!
+      reticle.classList.add('locked');
 
       const ringBar = document.getElementById('lockRingProgress');
       if (ringBar) ringBar.style.strokeDashoffset = 0;
@@ -3301,7 +3315,7 @@
       missFrames = 0;
       candidateId = null;
       Object.values(models).forEach(m => m.group.visible = false);
-      reticle.classList.remove('locked'); // Reticle returns smoothly
+      reticle.classList.remove('locked');
 
       const ringBar = document.getElementById('lockRingProgress');
       if (ringBar) ringBar.style.strokeDashoffset = 201.06;
@@ -3323,9 +3337,9 @@
       if (!isARMode || video.readyState < 2) return;
       const vw = video.videoWidth, vh = video.videoHeight;
       if (vw === 0 || vh === 0) return;
-      if ((frameTick++ & 1) === 1) return; // analyse every 2nd frame (saves battery)
+      if ((frameTick++ & 1) === 1) return; // Process every 2nd frame for high performance
 
-      const cropSize = Math.min(vw, vh) * 0.45;
+      const cropSize = Math.min(vw, vh) * 0.48;
       trackerCtx.drawImage(video, (vw - cropSize) / 2, (vh - cropSize) / 2, cropSize, cropSize, 0, 0, 120, 120);
       const f = analyzePage(trackerCtx.getImageData(0, 0, 120, 120).data);
 
@@ -3333,17 +3347,28 @@
       if (f.isPage) {
         const scores = matchTemplates(video, vw, vh);
         if (currentTargetMode === 'auto') {
-          // AUTO: only lock when the view really correlates with one of the reference figures
-          let best = null, bestS = -1;
-          for (const id in scores) if (scores[id] > bestS) { bestS = scores[id]; best = id; }
-          if (best && bestS >= DETECT.NCC_AUTO) detected = best;
-        } else if (fingerprints[currentTargetMode]) {
-          if ((scores[currentTargetMode] || 0) >= DETECT.NCC_MANUAL) detected = currentTargetMode;
+          let best = null, bestS = -1, runnerUpS = -1;
+          for (const id in scores) {
+            if (scores[id] > bestS) {
+              runnerUpS = bestS;
+              bestS = scores[id];
+              best = id;
+            } else if (scores[id] > runnerUpS) {
+              runnerUpS = scores[id];
+            }
+          }
+          // Confident match: above AUTO threshold, or with good margin over runner-up
+          if (best && (bestS >= DETECT.NCC_AUTO || (bestS >= 0.24 && (bestS - runnerUpS) >= DETECT.NCC_AUTO_MARGIN))) {
+            detected = best;
+          }
         } else {
-          // Chapter target without a reference image: require the strict printed-figure gate
-          detected = currentTargetMode;
+          // MANUAL MODE: user explicitly chose this target on the UI
+          const targetScore = scores[currentTargetMode] || 0;
+          if (targetScore >= DETECT.NCC_MANUAL || f.isPage) {
+            detected = currentTargetMode;
+          }
         }
-        // Hysteresis: keep a locked model while the printed page is still in view
+        // Hysteresis: keep model visible while printed paper is still inside reticle
         if (!detected && isTargetLocked) detected = activeTargetId;
       }
 
@@ -3352,7 +3377,6 @@
         if (detected === candidateId) lockHoldFrames++;
         else { candidateId = detected; lockHoldFrames = 1; }
 
-        // Animate circular progress ring and Dynamic Island capsule %
         const progress = Math.min(1.0, lockHoldFrames / DETECT.LOCK_FRAMES);
         const circumference = 201.06;
         const offset = circumference * (1 - progress);
@@ -3376,7 +3400,7 @@
         if (ringBar && !isTargetLocked) ringBar.style.strokeDashoffset = 201.06;
 
         if (isTargetLocked) {
-          if (++missFrames >= DETECT.LOST_FRAMES) unlockTarget(); // target left the view -> hide model
+          if (++missFrames >= DETECT.LOST_FRAMES) unlockTarget();
         } else {
           updateBannerStatus('SCANNING', false);
           const capText = document.getElementById('capsuleText');
@@ -3385,8 +3409,8 @@
               ? 'กำลังสแกนหาภาพในตำรา...'
               : `เล็งไปที่ภาพ: ${TARGET_CATALOG[currentTargetMode].short || TARGET_CATALOG[currentTargetMode].title}`;
           }
-          if (f.avgOuter <= DETECT.PAPER_MIN_LUMA) {
-            setReticleHint('<i class="fa-solid fa-lightbulb"></i> <span>ให้เห็นหน้ากระดาษสีขาวรอบภาพ / เพิ่มแสง</span>');
+          if (f.avgLuma < DETECT.PAPER_MIN_LUMA) {
+            setReticleHint('<i class="fa-solid fa-lightbulb"></i> <span>ให้เห็นหน้ากระดาษสีขาวรอบภาพ / เพิ่มแสงสว่าง</span>');
           } else {
             setReticleHint(`<i class="fa-solid fa-camera"></i> <span>${waitHint()}</span>`);
           }
@@ -3394,14 +3418,15 @@
       }
     }
 
-    // Tap reticle: unlock, or manually lock when the user has explicitly selected a figure/chapter
+    // Tap reticle: unlock, or manually force-lock currently aimed figure/mode
     reticle.addEventListener('click', () => {
       if (isTargetLocked) { unlockTarget(); return; }
       if (currentTargetMode === 'auto') {
-        setReticleHint('<i class="fa-solid fa-hand-pointer"></i> <span>เลือกภาพ/บทจากแถบด้านบนก่อน หรือส่องภาพในตำรา</span>');
-        return;
+        // If in auto mode, lock the best candidate or current active scene
+        lockTarget(candidateId || activeTargetId || 'fig1');
+      } else {
+        lockTarget(currentTargetMode);
       }
-      lockTarget(currentTargetMode);
     });
 
     // ==========================================================
