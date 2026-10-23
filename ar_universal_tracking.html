@@ -1123,71 +1123,323 @@
       letter-spacing: 0.5px;
     }
 
-    /* Interactive Drawer / Parameter Sheet with Sci-Fi HUD Framing */
-    .drawer-panel {
+    /* ==========================================================
+       CYBER SCI-FI DUAL SIDEBARS (Matching Attached Gold HUD Reference)
+       Left Sidebar: ข้อมูลจากการทดลอง (Experimental Physics Telemetry)
+       Right Sidebar: ชุดควบคุมการทดลอง (Control Matrix & Interactive Knobs)
+       ========================================================== */
+    :root {
+      --gold-neon: #ffd000;
+      --gold-glow: rgba(255, 208, 0, 0.48);
+      --gold-dim: rgba(255, 208, 0, 0.15);
+      --gold-glass: rgba(8, 13, 24, 0.94);
+      --gold-border: rgba(255, 208, 0, 0.85);
+    }
+
+    .cyber-sidebar {
       position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 74px;
-      background: rgba(8, 14, 26, 0.94);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border: none;
-      border-top: 2px solid var(--cyan);
-      border-radius: 16px 16px 0 0;
-      padding: 20px 18px 24px;
-      z-index: 45;
-      display: none;
-      max-height: 52vh;
-      overflow-y: auto;
-      box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(0, 240, 255, 0.25);
-      animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      top: 104px;
+      bottom: 84px;
+      z-index: 46;
+      background: var(--gold-glass);
+      backdrop-filter: blur(22px) saturate(190%);
+      -webkit-backdrop-filter: blur(22px) saturate(190%);
+      border: 1.5px solid var(--gold-neon);
+      box-shadow: 0 0 28px var(--gold-glow), inset 0 0 20px rgba(255, 208, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+                  width 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                  opacity 0.25s ease;
+      overflow: visible;
     }
-    .drawer-panel > * {
+
+    /* Left Sidebar: Chamfer top-left & bottom-right */
+    .cyber-sidebar-left {
+      left: 12px;
+      width: 310px;
+      max-width: calc(100vw - 24px);
+      clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 26px), calc(100% - 26px) 100%, 0 100%, 0 18px);
+    }
+    .cyber-sidebar-left.closed {
+      transform: translateX(calc(-100% - 30px));
+      pointer-events: none;
+      opacity: 0;
+    }
+    .cyber-sidebar-left.collapsed {
+      width: 46px;
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    }
+    .cyber-sidebar-left.expanded {
+      width: 440px;
+      max-width: calc(100vw - 24px);
+    }
+
+    /* Right Sidebar: Chamfer top-right & bottom-left */
+    .cyber-sidebar-right {
+      right: 12px;
+      width: 310px;
+      max-width: calc(100vw - 24px);
+      clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 26px 100%, 0 calc(100% - 26px));
+    }
+    .cyber-sidebar-right.closed {
+      transform: translateX(calc(100% + 30px));
+      pointer-events: none;
+      opacity: 0;
+    }
+    .cyber-sidebar-right.collapsed {
+      width: 46px;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    }
+    .cyber-sidebar-right.expanded {
+      width: 440px;
+      max-width: calc(100vw - 24px);
+    }
+
+    /* Top Glowing Spotlight Lamp (Faithful to attached yellow HUD reference) */
+    .hud-spotlight-lamp {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 7px;
+      background: var(--gold-neon);
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 0 18px 4px var(--gold-neon);
+      z-index: 5;
+    }
+    .hud-spotlight-beam {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 160px;
+      height: 75px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255, 208, 0, 0.4) 0%, rgba(255, 208, 0, 0.08) 55%, transparent 75%);
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    /* Protruding Dock Tab with Dot Matrix (Right border of left bar / Left border of right bar) */
+    .hud-protrude-tab {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 70px;
+      background: var(--gold-neon);
+      box-shadow: 0 0 14px var(--gold-glow);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      z-index: 6;
+      cursor: pointer;
+    }
+    .cyber-sidebar-left .hud-protrude-tab {
+      right: -14px;
+      border-radius: 0 4px 4px 0;
+    }
+    .cyber-sidebar-right .hud-protrude-tab {
+      left: -14px;
+      border-radius: 4px 0 0 4px;
+    }
+    .hud-protrude-tab i {
+      display: block;
+      width: 4px;
+      height: 4px;
+      background: #020617;
+      border-radius: 50%;
+    }
+
+    /* Diagonal Hazard Slits on Corner */
+    .hud-corner-hazard {
+      position: absolute;
+      bottom: 6px;
+      width: 60px;
+      height: 10px;
+      background: repeating-linear-gradient(-45deg, var(--gold-neon) 0, var(--gold-neon) 2.5px, transparent 2.5px, transparent 6.5px);
+      opacity: 0.95;
+      z-index: 4;
+    }
+    .cyber-sidebar-left .hud-corner-hazard { left: 16px; }
+    .cyber-sidebar-right .hud-corner-hazard { right: 16px; }
+
+    /* Inner Container */
+    .cyber-sidebar-inner {
       position: relative;
-      z-index: 2;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 14px 14px 18px;
+      overflow: hidden;
     }
-    @keyframes slideUp {
-      from { transform: translateY(100%); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    .drawer-header {
+
+    /* Header with 3 Window Action Buttons: ย่อ (_), ขยาย (⛶), ปิด (✕) */
+    .cyber-sidebar-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 208, 0, 0.25);
+      margin-bottom: 12px;
+      flex-shrink: 0;
     }
-    .drawer-title {
+    .cyber-sidebar.collapsed .cyber-sidebar-header {
+      display: none;
+    }
+    .cyber-title {
       font-family: 'Chakra Petch', sans-serif;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 700;
-      color: var(--cyan);
+      color: var(--gold-neon);
       display: flex;
       align-items: center;
       gap: 8px;
+      text-shadow: 0 0 10px rgba(255, 208, 0, 0.4);
+      letter-spacing: 0.5px;
     }
-    .close-drawer {
-      background: none;
-      border: none;
-      color: #94a3b8;
-      font-size: 1.1rem;
+    .cyber-window-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .win-btn {
+      width: 28px;
+      height: 28px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 208, 0, 0.45);
+      color: var(--gold-neon);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.76rem;
       cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    .win-btn:hover, .win-btn:active {
+      background: var(--gold-neon);
+      color: #030712;
+      box-shadow: 0 0 14px var(--gold-neon);
+      transform: scale(1.05);
+    }
+    .win-btn.close:hover {
+      background: #ef4444;
+      border-color: #ef4444;
+      color: #fff;
+      box-shadow: 0 0 14px #ef4444;
     }
 
+    /* Collapsed Rail (Visible only when sidebar is collapsed) */
+    .cyber-collapsed-rail {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      padding: 10px 0;
+      cursor: pointer;
+    }
+    .cyber-sidebar.collapsed .cyber-collapsed-rail {
+      display: flex;
+    }
+    .cyber-collapsed-rail i.rail-icon {
+      color: var(--gold-neon);
+      font-size: 1.1rem;
+      text-shadow: 0 0 10px var(--gold-neon);
+    }
+    .vertical-label {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--gold-neon);
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px rgba(255, 208, 0, 0.5);
+    }
+    .mini-dots {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mini-dots i {
+      display: block;
+      width: 4px;
+      height: 4px;
+      background: var(--gold-neon);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--gold-neon);
+    }
+
+    /* Main Scrollable Body */
+    .cyber-sidebar-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold-neon) rgba(0,0,0,0.3);
+    }
+    .cyber-sidebar.collapsed .cyber-sidebar-body {
+      display: none;
+    }
+    .cyber-sidebar-body::-webkit-scrollbar {
+      width: 4px;
+    }
+    .cyber-sidebar-body::-webkit-scrollbar-thumb {
+      background: var(--gold-neon);
+      border-radius: 2px;
+    }
+
+    .telemetry-hud-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 4px 8px;
+      background: rgba(255, 208, 0, 0.08);
+      border-left: 2px solid var(--gold-neon);
+      border-radius: 2px;
+    }
+    .hud-chip {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--gold-neon);
+      letter-spacing: 0.5px;
+    }
+    .hud-id-tag {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.7rem;
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+
+    /* Parameters Sliders (Gold Cyber Aesthetic) */
     .param-group {
       margin-bottom: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 208, 0, 0.15);
     }
     .param-label {
       display: flex;
       justify-content: space-between;
       font-size: 0.8rem;
-      color: #cbd5e1;
-      margin-bottom: 6px;
+      color: #e2e8f0;
+      margin-bottom: 8px;
     }
     .param-val {
-      color: var(--cyan);
+      color: var(--gold-neon);
       font-family: 'Chakra Petch', sans-serif;
       font-weight: 700;
+      text-shadow: 0 0 8px rgba(255, 208, 0, 0.4);
     }
     .slider-custom {
       width: 100%;
@@ -1202,33 +1454,104 @@
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      background: var(--cyan);
+      background: var(--gold-neon);
       cursor: pointer;
-      box-shadow: 0 0 10px var(--cyan);
+      box-shadow: 0 0 12px var(--gold-neon), inset 0 0 4px #000;
+      border: 1.5px solid #fff;
     }
 
+    /* Telemetry Info Cards (Gold Cyber Aesthetic) */
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
+    .cyber-sidebar.expanded .info-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
     .info-card {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--glass-border);
-      border-radius: 10px;
-      padding: 10px;
+      background: rgba(255, 208, 0, 0.04);
+      border: 1px solid rgba(255, 208, 0, 0.22);
+      border-radius: 8px;
+      padding: 10px 12px;
+      position: relative;
+    }
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 6px;
+      height: 6px;
+      border-top: 2px solid var(--gold-neon);
+      border-left: 2px solid var(--gold-neon);
     }
     .info-card h5 {
       font-size: 0.72rem;
       color: #94a3b8;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
+      font-weight: 500;
     }
     .info-card p {
       font-family: 'Chakra Petch', sans-serif;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 700;
-      color: #f8fafc;
+      color: #fff;
+      text-shadow: 0 0 8px rgba(255, 208, 0, 0.3);
     }
+
+    /* Floating Screen-Edge Dock Triggers (Pinned to Left & Right screen edges) */
+    .edge-dock-trigger {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 44;
+      background: rgba(8, 14, 26, 0.92);
+      border: 1.5px solid var(--gold-neon);
+      box-shadow: 0 0 18px var(--gold-glow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: 12px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      color: var(--gold-neon);
+      transition: all 0.25s ease;
+    }
+    .edge-dock-trigger:hover, .edge-dock-trigger:active {
+      background: var(--gold-neon);
+      color: #030712;
+      box-shadow: 0 0 25px var(--gold-neon);
+    }
+    .edge-dock-left {
+      left: 0;
+      border-left: none;
+      border-radius: 0 8px 8px 0;
+      clip-path: polygon(0 0, 100% 8px, 100% calc(100% - 8px), 0 100%);
+    }
+    .edge-dock-right {
+      right: 0;
+      border-right: none;
+      border-radius: 8px 0 0 8px;
+      clip-path: polygon(0 8px, 100% 0, 100% 100%, 0 calc(100% - 8px));
+    }
+    .edge-dock-trigger i {
+      font-size: 0.95rem;
+    }
+    .edge-dock-trigger span {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+
+    /* Drawer Fallback compatibility */
+    .drawer-panel { display: none !important; }
   </style>
 </head>
 <body>
@@ -1459,30 +1782,118 @@
   <video id="camera-video" autoplay playsinline webkit-playsinline muted></video>
   <div id="webgl-canvas-container"></div>
 
-  <!-- Drawer Panels -->
-  <!-- 1. Parameters Drawer -->
-  <div class="drawer-panel" id="drawerParams">
-    <svg class="panel-hud-frame"><use id="paramsHudUse" href="#hud-cyan-style-5"></use></svg>
-    <div class="drawer-header">
-      <div class="drawer-title" id="paramDrawerTitle"><i class="fa-solid fa-sliders"></i> พารามิเตอร์การทดลอง</div>
-      <button class="close-drawer" onclick="closeAllDrawers()"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div id="paramControlsContent">
-      <!-- Dynamically generated according to active figure -->
-    </div>
-  </div>
+  <!-- ==========================================================
+       CYBER SCI-FI DUAL SIDEBARS (Matching Attached Gold HUD Reference)
+       Left Sidebar: ข้อมูลจากการทดลอง (Experimental Physics Telemetry)
+       Right Sidebar: ชุดควบคุมการทดลอง (Control Matrix & Interactive Knobs)
+       ========================================================== -->
 
-  <!-- 2. Physics Telemetry Drawer -->
-  <div class="drawer-panel" id="drawerTelemetry">
-    <svg class="panel-hud-frame"><use id="telemetryHudUse" href="#hud-cyan-style-5"></use></svg>
-    <div class="drawer-header">
-      <div class="drawer-title"><i class="fa-solid fa-chart-line"></i> ค่าการวัดฟิสิกส์สด (Real-Time Physics)</div>
-      <button class="close-drawer" onclick="closeAllDrawers()"><i class="fa-solid fa-xmark"></i></button>
+  <!-- Left Sidebar: ข้อมูลจากการทดลอง (Experimental Physics Telemetry) -->
+  <aside class="cyber-sidebar cyber-sidebar-left" id="sidebarLeft">
+    <!-- Glowing Top Spotlight Lamp -->
+    <div class="hud-spotlight-lamp"></div>
+    <div class="hud-spotlight-beam"></div>
+
+    <!-- Protruding Dock Tab with Dot Matrix (Right border of left sidebar) -->
+    <div class="hud-protrude-tab" onclick="collapseSidebar('left')" title="แตะเพื่อย่อ/ขยาย">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
     </div>
-    <div class="info-grid" id="telemetryContent">
-      <!-- Dynamically updated -->
+
+    <!-- Corner Hazard Slits -->
+    <div class="hud-corner-hazard"></div>
+
+    <div class="cyber-sidebar-inner">
+      <!-- Header with 3 Window Action Buttons: ย่อ (_), ขยาย (⛶), ปิด (✕) -->
+      <div class="cyber-sidebar-header">
+        <div class="cyber-title">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>ข้อมูลการทดลอง</span>
+        </div>
+        <div class="cyber-window-actions">
+          <button class="win-btn" onclick="collapseSidebar('left')" title="ย่อเป็นแถบกะทัดรัด"><i class="fa-solid fa-minus"></i></button>
+          <button class="win-btn" onclick="toggleExpandSidebar('left')" title="ขยายเต็มตา"><i class="fa-solid fa-expand"></i></button>
+          <button class="win-btn close" onclick="closeSidebar('left')" title="ปิดหน้าต่าง"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <!-- Collapsed Vertical Rail (Visible when collapsed) -->
+      <div class="cyber-collapsed-rail" onclick="expandSidebar('left', 'normal')">
+        <i class="fa-solid fa-chart-line rail-icon"></i>
+        <span class="vertical-label">DATA MONITOR</span>
+        <div class="mini-dots"><i></i><i></i><i></i><i></i></div>
+      </div>
+
+      <!-- Main Telemetry Body -->
+      <div class="cyber-sidebar-body">
+        <div class="telemetry-hud-status">
+          <span class="hud-chip">LIVE TELEMETRY</span>
+          <span class="hud-id-tag" id="sidebarLeftTargetId">FIG: ACTIVE</span>
+        </div>
+        <div class="info-grid" id="telemetryContent">
+          <!-- Dynamically populated according to active figure -->
+        </div>
+      </div>
     </div>
-  </div>
+  </aside>
+
+  <!-- Right Sidebar: ชุดควบคุมการทดลอง (Control Matrix & Interactive Knobs) -->
+  <aside class="cyber-sidebar cyber-sidebar-right" id="sidebarRight">
+    <!-- Glowing Top Spotlight Lamp -->
+    <div class="hud-spotlight-lamp"></div>
+    <div class="hud-spotlight-beam"></div>
+
+    <!-- Protruding Dock Tab with Dot Matrix (Left border of right sidebar) -->
+    <div class="hud-protrude-tab" onclick="collapseSidebar('right')" title="แตะเพื่อย่อ/ขยาย">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+
+    <!-- Corner Hazard Slits -->
+    <div class="hud-corner-hazard"></div>
+
+    <div class="cyber-sidebar-inner">
+      <!-- Header with 3 Window Action Buttons: ย่อ (_), ขยาย (⛶), ปิด (✕) -->
+      <div class="cyber-sidebar-header">
+        <div class="cyber-title">
+          <i class="fa-solid fa-sliders"></i>
+          <span>ชุดควบคุมการทดลอง</span>
+        </div>
+        <div class="cyber-window-actions">
+          <button class="win-btn" onclick="collapseSidebar('right')" title="ย่อเป็นแถบกะทัดรัด"><i class="fa-solid fa-minus"></i></button>
+          <button class="win-btn" onclick="toggleExpandSidebar('right')" title="ขยายเต็มตา"><i class="fa-solid fa-expand"></i></button>
+          <button class="win-btn close" onclick="closeSidebar('right')" title="ปิดหน้าต่าง"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <!-- Collapsed Vertical Rail (Visible when collapsed) -->
+      <div class="cyber-collapsed-rail" onclick="expandSidebar('right', 'normal')">
+        <i class="fa-solid fa-sliders rail-icon"></i>
+        <span class="vertical-label">CONTROL MATRIX</span>
+        <div class="mini-dots"><i></i><i></i><i></i><i></i></div>
+      </div>
+
+      <!-- Main Controls Body -->
+      <div class="cyber-sidebar-body">
+        <div class="telemetry-hud-status">
+          <span class="hud-chip">SIMULATION PARAMS</span>
+          <span class="hud-id-tag" id="sidebarRightTargetId">ACTIVE</span>
+        </div>
+        <div id="paramControlsContent">
+          <!-- Dynamically populated according to active figure -->
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Floating Screen-Edge Dock Triggers (Pinned to Left & Right screen edges for quick open/close) -->
+  <button class="edge-dock-trigger edge-dock-left" id="btnDockTabLeft" onclick="toggleSidebar('left')" title="เปิด/ปิด ข้อมูลการทดลอง (ซ้าย)">
+    <i class="fa-solid fa-chart-line"></i>
+    <span>DATA</span>
+  </button>
+
+  <button class="edge-dock-trigger edge-dock-right" id="btnDockTabRight" onclick="toggleSidebar('right')" title="เปิด/ปิด ชุดควบคุม (ขวา)">
+    <i class="fa-solid fa-sliders"></i>
+    <span>CTRL</span>
+  </button>
 
   <!-- Target Preview Modal -->
   <div id="targetPreviewModal" onclick="closeTargetModal()">
@@ -1771,7 +2182,7 @@
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.6));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
     container.appendChild(renderer.domElement);
@@ -3064,9 +3475,13 @@
       const mDesc = document.getElementById('modalTargetDesc');
       if (mDesc) mDesc.textContent = cfg.desc;
 
-      // Update Drawer Controls
+      // Update Drawer / Sidebar Controls & Header Badges
       renderParamControls(targetId);
       renderTelemetry(targetId);
+      const lTag = document.getElementById('sidebarLeftTargetId');
+      if (lTag) lTag.textContent = cfg.short || cfg.title;
+      const rTag = document.getElementById('sidebarRightTargetId');
+      if (rTag) rTag.textContent = cfg.short || cfg.title;
     }
 
     // ==========================================================
@@ -3241,17 +3656,44 @@
       return { isPage, avgLuma, stdLuma, dynamicRange, edge };
     }
 
-    // Multi-scale template correlation across 5 scale steps (from close-up to standard distance)
-    const MATCH_SCALES = [0.26, 0.35, 0.46, 0.58, 0.72];
-    function matchTemplates(video, vw, vh) {
+    // Multi-scale template correlation computed directly in CPU memory from single frame buffer (Zero GPU Stalls)
+    const MATCH_SCALES = [0.34, 0.48, 0.65];
+    function sampleFingerprintFromBuffer(data, scale) {
+      const v = new Float32Array(FP * FP);
+      const boxW = Math.round(120 * scale);
+      const startX = (120 - boxW) >> 1;
+      const startY = (120 - boxW) >> 1;
+      const step = boxW / FP;
+      let mean = 0;
+      let idx = 0;
+      for (let py = 0; py < FP; py++) {
+        const srcY = Math.min(119, Math.max(0, Math.round(startY + py * step)));
+        const rowOffset = srcY * 120;
+        for (let px = 0; px < FP; px++) {
+          const srcX = Math.min(119, Math.max(0, Math.round(startX + px * step)));
+          const p = (rowOffset + srcX) << 2;
+          const lum = 0.299 * data[p] + 0.587 * data[p + 1] + 0.114 * data[p + 2];
+          v[idx++] = lum;
+          mean += lum;
+        }
+      }
+      mean /= (FP * FP);
+      let norm = 0;
+      for (let i = 0; i < idx; i++) {
+        v[i] -= mean;
+        norm += v[i] * v[i];
+      }
+      norm = Math.sqrt(norm) || 1;
+      for (let i = 0; i < idx; i++) v[i] /= norm;
+      return v;
+    }
+
+    function matchTemplates(frameData) {
       const ids = Object.keys(fingerprints);
       const scores = {};
       if (!ids.length) return scores;
-      const minDim = Math.min(vw, vh);
       for (const sc of MATCH_SCALES) {
-        const c = minDim * sc;
-        fpCtx.drawImage(video, (vw - c) / 2, (vh - c) / 2, c, c, 0, 0, FP, FP);
-        const v = toFingerprint(fpCtx.getImageData(0, 0, FP, FP).data);
+        const v = sampleFingerprintFromBuffer(frameData, sc);
         for (const id of ids) {
           const s = ncc(v, fingerprints[id]);
           if (!(id in scores) || s > scores[id]) scores[id] = s;
@@ -3307,6 +3749,12 @@
       updateBannerStatus('LOCKED', true);
       setReticleHint(`🎯 ${cfg.title}`);
       playLockChime();
+
+      // Update Sidebar Target Tags
+      const lTag = document.getElementById('sidebarLeftTargetId');
+      if (lTag) lTag.textContent = cfg.short || cfg.title;
+      const rTag = document.getElementById('sidebarRightTargetId');
+      if (rTag) rTag.textContent = cfg.short || cfg.title;
     }
 
     function unlockTarget() {
@@ -3337,15 +3785,22 @@
       if (!isARMode || video.readyState < 2) return;
       const vw = video.videoWidth, vh = video.videoHeight;
       if (vw === 0 || vh === 0) return;
-      if ((frameTick++ & 1) === 1) return; // Process every 2nd frame for high performance
+
+      // ADAPTIVE SCAN THROTTLING:
+      // While scanning: check every 3rd frame (~20 FPS) for snappy detection
+      // While locked: check only every 12th frame (~5 FPS) for 60 FPS silky smooth 3D rendering
+      const scanInterval = isTargetLocked ? 12 : 3;
+      if ((frameTick++ % scanInterval) !== 0) return;
 
       const cropSize = Math.min(vw, vh) * 0.48;
+      // Single drawImage and single getImageData per cycle (Zero GPU stalls)
       trackerCtx.drawImage(video, (vw - cropSize) / 2, (vh - cropSize) / 2, cropSize, cropSize, 0, 0, 120, 120);
-      const f = analyzePage(trackerCtx.getImageData(0, 0, 120, 120).data);
+      const frameData = trackerCtx.getImageData(0, 0, 120, 120).data;
+      const f = analyzePage(frameData);
 
       let detected = null;
       if (f.isPage) {
-        const scores = matchTemplates(video, vw, vh);
+        const scores = matchTemplates(frameData);
         if (currentTargetMode === 'auto') {
           let best = null, bestS = -1, runnerUpS = -1;
           for (const id in scores) {
@@ -3551,25 +4006,86 @@
       document.getElementById('targetPreviewModal').style.display = 'none';
     }
 
-    // Drawer Helpers
-    function toggleDrawer(id) {
-      const el = document.getElementById(id);
-      const isVisible = el.style.display === 'block';
-      closeAllDrawers();
-      if (!isVisible) {
-        el.style.display = 'block';
-        if (id === 'drawerParams') {
-          const u = document.getElementById('paramsHudUse');
-          if (u) u.setAttribute('href', '#hud-cyan-style-1'); // Style 1: Cyber Notch
-        } else if (id === 'drawerTelemetry') {
-          const u = document.getElementById('telemetryHudUse');
-          if (u) u.setAttribute('href', '#hud-cyan-style-3'); // Style 3: Circuit Trace
-        }
+    // ==========================================================
+    // CYBER SCI-FI DUAL SIDEBAR STATE CONTROLLERS
+    // ==========================================================
+    const sidebarState = {
+      left: window.innerWidth < 768 ? 'closed' : 'open',   // 'open', 'collapsed', 'expanded', 'closed'
+      right: 'open'                                         // 'open', 'collapsed', 'expanded', 'closed'
+    };
+
+    function updateSidebarDOM(side) {
+      const el = document.getElementById(side === 'left' ? 'sidebarLeft' : 'sidebarRight');
+      if (!el) return;
+      const st = sidebarState[side];
+      el.classList.remove('closed', 'collapsed', 'expanded');
+      if (st === 'closed') {
+        el.classList.add('closed');
+      } else if (st === 'collapsed') {
+        el.classList.add('collapsed');
+      } else if (st === 'expanded') {
+        el.classList.add('expanded');
       }
     }
-    function closeAllDrawers() {
-      document.querySelectorAll('.drawer-panel').forEach(d => d.style.display = 'none');
+
+    function toggleSidebar(side) {
+      if (sidebarState[side] === 'closed') {
+        sidebarState[side] = 'open';
+      } else {
+        sidebarState[side] = 'closed';
+      }
+      updateSidebarDOM(side);
     }
+
+    function collapseSidebar(side) {
+      if (sidebarState[side] === 'collapsed') {
+        sidebarState[side] = 'open';
+      } else {
+        sidebarState[side] = 'collapsed';
+      }
+      updateSidebarDOM(side);
+    }
+
+    function toggleExpandSidebar(side) {
+      if (sidebarState[side] === 'expanded') {
+        sidebarState[side] = 'open';
+      } else {
+        sidebarState[side] = 'expanded';
+        // On narrow mobile screens, collapse opposite bar if open so AR scene stays clear
+        if (window.innerWidth < 768) {
+          const other = side === 'left' ? 'right' : 'left';
+          if (sidebarState[other] === 'open') {
+            sidebarState[other] = 'collapsed';
+            updateSidebarDOM(other);
+          }
+        }
+      }
+      updateSidebarDOM(side);
+    }
+
+    function expandSidebar(side, mode = 'open') {
+      sidebarState[side] = mode;
+      updateSidebarDOM(side);
+    }
+
+    function closeSidebar(side) {
+      sidebarState[side] = 'closed';
+      updateSidebarDOM(side);
+    }
+
+    // Compatibility shims for legacy triggers
+    function toggleDrawer(id) {
+      if (id === 'drawerParams') toggleSidebar('right');
+      else if (id === 'drawerTelemetry') toggleSidebar('left');
+    }
+    function closeAllDrawers() {
+      closeSidebar('left');
+      closeSidebar('right');
+    }
+
+    // Initialize sidebars on load
+    updateSidebarDOM('left');
+    updateSidebarDOM('right');
 
     // ==========================================================
     // 8. DYNAMIC PARAMETER & TELEMETRY CONTROLS
