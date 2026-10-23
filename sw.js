@@ -1,5 +1,5 @@
 // Service Worker for RBRU Quantum AR Simulation (Smart Network-First for HTML, Cache-First for Assets)
-const CACHE_NAME = 'rbru-quantum-ar-v20';
+const CACHE_NAME = 'rbru-quantum-ar-v21';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -35,6 +35,12 @@ const ASSETS_TO_CACHE = [
   './target_fig4_4.png',
   './target_fig4_5.png',
   './target_fig4_6.png',
+  './target_fig5_1.png',
+  './target_fig5_2.png',
+  './target_fig5_3.png',
+  './target_fig5_4.png',
+  './target_fig5_5.png',
+  './target_fig5_6.png',
   './ar_markers_all9_A4.png',
   './ar_markers_primary3_A4.png',
   './ar_markers_sheet_page1.png',
@@ -42,6 +48,7 @@ const ASSETS_TO_CACHE = [
   './ar_markers_sheet_page3_ch02.png',
   './ar_markers_sheet_page4_ch03.png',
   './ar_markers_sheet_page5_ch04.png',
+  './ar_markers_sheet_page6_ch05.png',
 
   './lab01_blackbody_photoelectric.html',
   './lab02_double_slit.html',

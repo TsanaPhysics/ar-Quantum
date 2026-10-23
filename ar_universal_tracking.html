@@ -2230,11 +2230,48 @@
         facts: [['กระแสทันเนลลิง', 'I ∝ V e^(−2κd)'], ['κ', '√(2mφ)/ħ ≈ 10 nm⁻¹'], ['ความละเอียดแนวดิ่ง', '~0.01 nm'], ['โหมด', 'Constant current']]
       },
 
+      // --- CH 5: Quantum Harmonic Oscillator & Quantum Optics (6 Targets) ---
+      fig5_1: {
+        id: 'fig5_1', chapter: 5, short: '5.1 ศักย์พาราโบลา', icon: 'fa-chart-line', color: '#00f0ff', image: 'target_fig5_1.png',
+        title: 'ภาพที่ 5.1 ศักย์พาราโบลาและการกระจายอนุกรมเทย์เลอร์', subtitle: 'Parabolic Potential & Taylor Approximation (Morse vs Harmonic)',
+        desc: 'การประมาณศักย์โมเลกุลด้วยอนุกรมเทย์เลอร์รอบจุดสมดุล V(x) ≈ V(x₀) + ½k(x-x₀)² เปรียบเทียบกับศักย์มอร์ส V_Morse ที่สะท้อนการแตกตัวของพันธะเคมีที่พลังงานสูง',
+        facts: [['อนุกรมเทย์เลอร์', 'V(x) ≈ ½k(x-x₀)²'], ['ค่าคงตัวสปริงยังผล', 'k = d²V/dx²|_{x₀}'], ['ความถี่เชิงมุม', 'ω = √(k/m)'], ['ศักย์มอร์ส', 'V_M(r) = D_e(1 - e^{-a(r-r_e)})²']]
+      },
+      fig5_2: {
+        id: 'fig5_2', chapter: 5, short: '5.2 ฟังก์ชันแอร์มีต', icon: 'fa-chart-area', color: '#a78bfa', image: 'target_fig5_2.png',
+        title: 'ภาพที่ 5.2 ฟังก์ชันคลื่นพหุนามแอร์มีตและระดับพลังงานควอนไตซ์', subtitle: 'Hermite Eigenfunctions & Quantized Energy Ladder',
+        desc: 'บ่อศักย์พาราโบลา ระดับพลังงานควอนไตซ์ Eₙ = (n+½)ℏω ห่างเท่ากันสม่ำเสมอ ΔE = ℏω ฟังก์ชันคลื่น ψₙ(x) ∝ Hₙ(ξ)e^{-ξ²/2} มีพาริตี (-1)ⁿ และ n จุดตัดศูนย์',
+        facts: [['ระดับพลังงาน', 'Eₙ = (n + ½)ℏω'], ['ระยะห่างระดับพลังงาน', 'ΔE = ℏω (คงที่ทุกชั้น)'], ['พหุนามแอร์มีต', 'Hₙ(ξ) = (-1)ⁿ e^{ξ²} dⁿ/dξⁿ(e^{-ξ²})'], ['จุดวกกลับคลาสสิก', 'x_c = ±√((2n+1)ℏ/(mω))']]
+      },
+      fig5_3: {
+        id: 'fig5_3', chapter: 5, short: '5.3 พลังงานจุดศูนย์/คาสิเมียร์', icon: 'fa-compress', color: '#10b981', image: 'target_fig5_3.png',
+        title: 'ภาพที่ 5.3 พลังงานจุดศูนย์สุญญากาศและปรากฏการณ์คาสิเมียร์', subtitle: 'Zero-Point Energy & Casimir Effect (Parallel Cavity)',
+        desc: 'พลังงานต่ำสุด E₀ = ½ℏω > 0 จากหลักความไม่แน่นอน ส่งผลให้แผ่นตัวนำคู่ขนานจำกัดโหมดสุญญากาศภายใน เกิดแรงดึงดูดคาสิเมียร์สุทธิ F/A = -π²ℏc / (240 d⁴)',
+        facts: [['พลังงานจุดศูนย์', 'E₀ = ½ℏω > 0'], ['แรงคาสิเมียร์สุทธิ', 'F/A = -π²ℏc / (240 d⁴)'], ['โหมดภายในโพรง', 'kₙ = nπ / d'], ['ผลเชิงประจักษ์', 'ฮีเลียมเหลวไม่แข็งตัวที่ 0 K']]
+      },
+      fig5_4: {
+        id: 'fig5_4', chapter: 5, short: '5.4 ตัวดำเนินการบันได', icon: 'fa-stairs', color: '#f59e0b', image: 'target_fig5_4.png',
+        title: 'ภาพที่ 5.4 ตัวดำเนินการบันไดของดิแรกและพีชคณิตสเปซฟอก', subtitle: 'Dirac Ladder Operators & Fock Space Algebra',
+        desc: 'พีชคณิตตัวดำเนินการสร้างและทำลาย [a, a†] = 1 โดย a†|n⟩ = √(n+1)|n+1⟩ เพิ่มระดับพลังงาน และ a|n⟩ = √n|n-1⟩ ลดระดับพลังงาน โดยสถานะสุญญากาศ a|0⟩ = 0',
+        facts: [['คอมมิวเตเตอร์โบซอน', '[a, a†] = 1'], ['ตัวดำเนินการจำนวน', 'N = a†a, N|n⟩ = n|n⟩'], ['ตัวดำเนินการสร้าง/ทำลาย', 'a†|n⟩ = √(n+1)|n+1⟩, a|n⟩ = √n|n-1⟩'], ['ฮามิลโทเนียน', 'H = ℏω(N + ½)']]
+      },
+      fig5_5: {
+        id: 'fig5_5', chapter: 5, short: '5.5 สถานะอาพันธ์กลอเบอร์', icon: 'fa-circle-notch', color: '#ec4899', image: 'target_fig5_5.png',
+        title: 'ภาพที่ 5.5 สถานะอาพันธ์ของกลอเบอร์และการแจกแจงแบบปัวซง', subtitle: 'Glauber Coherent States & Poisson Distribution',
+        desc: 'สถานะเจาะจงของตัวดำเนินการทำลาย a|α⟩ = α|α⟩ เคลื่อนที่ในระนาบเฟสสเปซ (x, p) โดยกลุ่มคลื่นไม่กระจายตัว (ΔxΔp = ℏ/2) พร้อมสถิติโฟตอนแบบปัวซง P(n) = e^{-|α|²}|α|^{2n}/n!',
+        facts: [['สถานะอาพันธ์', '|α⟩ = e^{-|α|²/2} ∑ (αⁿ/√n!)|n⟩'], ['ผลคูณความไม่แน่นอน', 'ΔxΔp = ℏ/2 (ต่ำสุดตลอดกาล)'], ['สถิติโฟตอน', 'การแจกแจงแบบปัวซง P(n)'], ['ความกว้างกลุ่มคลื่น', 'คงที่ตลอดกาล ไม่แผ่กระจาย']]
+      },
+      fig5_6: {
+        id: 'fig5_6', chapter: 5, short: '5.6 แสงบีบอัด/ออปโตเมคานิกส์', icon: 'fa-compress-arrows-alt', color: '#8b5cf6', image: 'target_fig5_6.png',
+        title: 'ภาพที่ 5.6 สถานะบีบอัดของแสงและทรานสดิวเซอร์ควอนตัมออปโตเมคานิกส์', subtitle: 'Squeezed Light & Quantum Optomechanical Resonator',
+        desc: 'การบีบอัดความไม่แน่นอนของควอดราเจอร์ ΔX₁ < ½ เพื่อลดสัญญาณรบกวนควอนตัมต่ำกว่า SQL ประยุกต์ใน LIGO และโพรง Fabry-Pérot ออปโตเมคานิกส์เชื่อมโยงแสงกับไมโครมิเรอร์',
+        facts: [['วงรีควอดราเจอร์', 'ΔX₁ = ½ e^{-r}, ΔX₂ = ½ e^{r}'], ['การประยุกต์ LIGO', 'ฉีด Squeezed Light ลด Shot Noise'], ['แรงดันการแผ่รังสี', 'F_{rp} = ℏg₀ a†a'], ['โพรงออปโตเมคานิกส์', 'กระจกไมโครสั่นพ้อง Ω_m']]
+      },
       fig7: {
-        id: 'fig7', chapter: 5, short: 'บท 5 ตัวกวัดแกว่ง', icon: 'fa-chart-area', color: '#a78bfa', image: null,
-        title: 'บทที่ 5 ตัวกวัดแกว่งฮาร์มอนิกควอนตัม', subtitle: 'Quantum Harmonic Oscillator ψₙ(x)',
-        desc: 'บ่อศักย์พาราโบลา V = ½kx² ระดับพลังงาน Eₙ = (n+½)ħω ห่างเท่ากัน ฟังก์ชันคลื่นพหุนามแอร์มีต ψₙ ∝ Hₙ(ξ)e^(−ξ²/2) และลูกบอลเรืองแสงแทนสถานะโคฮีเรนต์',
-        facts: [['ระดับพลังงาน', 'Eₙ = (n+½)ħω'], ['พลังงานจุดศูนย์', 'E₀ = ½ħω'], ['ระยะห่างระดับ', 'ΔE = ħω'], ['ฟังก์ชันคลื่น', 'Hₙ(ξ)e^(−ξ²/2)']]
+        id: 'fig7', chapter: 5, short: '5.2 ฟังก์ชันแอร์มีต (เดิม)', icon: 'fa-chart-area', color: '#a78bfa', image: 'target_fig5_2.png',
+        title: 'ภาพที่ 5.2 ฟังก์ชันคลื่นพหุนามแอร์มีตและระดับพลังงานควอนไตซ์', subtitle: 'Hermite Eigenfunctions & Quantized Energy Ladder',
+        desc: 'บ่อศักย์พาราโบลา ระดับพลังงานควอนไตซ์ Eₙ = (n+½)ℏω ห่างเท่ากันสม่ำเสมอ ฟังก์ชันคลื่น ψₙ(x) ∝ Hₙ(ξ)e^{-ξ²/2}',
+        facts: [['ระดับพลังงาน', 'Eₙ = (n + ½)ℏω'], ['ระยะห่างระดับพลังงาน', 'ΔE = ℏω'], ['พหุนามแอร์มีต', 'Hₙ(ξ)'], ['สถานะพื้น', 'E₀ = ½ℏω']]
       },
       fig8: {
         id: 'fig8', chapter: 6, short: 'บท 6 ออร์บิทัล 3d', icon: 'fa-atom', color: '#f472b6', image: null,
@@ -4398,6 +4435,331 @@
       return { group: g, update };
     }
 
+    // ==========================================
+    // CH 5 COMPLETE 3D MODELS
+    // ==========================================
+    function buildParabolicVsMorseModel() {
+      const g = new THREE.Group();
+      const nPts = 100;
+      const morseGeo = new THREE.BufferGeometry();
+      const morsePos = new Float32Array(nPts * 3);
+      morseGeo.setAttribute('position', new THREE.BufferAttribute(morsePos, 3));
+      const morseLine = new THREE.Line(morseGeo, new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 3 }));
+      g.add(morseLine);
+
+      const harmGeo = new THREE.BufferGeometry();
+      const harmPos = new Float32Array(nPts * 3);
+      harmGeo.setAttribute('position', new THREE.BufferAttribute(harmPos, 3));
+      const harmLine = new THREE.Line(harmGeo, new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 3 }));
+      g.add(harmLine);
+
+      const eqSphere = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), glowMat(0xfacc15, 0.9));
+      eqSphere.position.set(0, -1.2, 0);
+      g.add(eqSphere);
+
+      const pBall = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), glowMat(0x10b981, 1.0));
+      g.add(pBall);
+
+      const dissLine = lineOf([new THREE.Vector3(-2.2, 0.8, 0), new THREE.Vector3(2.5, 0.8, 0)], 0xef4444, 0.5);
+      g.add(dissLine);
+
+      const lbl = makeLabel('ศักย์พาราโบลา vs ศักย์มอร์ส V(x) ≈ ½k(x-x₀)²', '#00f0ff', 0.75);
+      lbl.position.set(0, 1.6, 0);
+      g.add(lbl);
+
+      function update(t) {
+        const De = 2.0;
+        const a = 0.85;
+        const k = 2 * De * a * a;
+        const mArr = morseLine.geometry.attributes.position.array;
+        const hArr = harmLine.geometry.attributes.position.array;
+        for (let i = 0; i < nPts; i++) {
+          const x = -1.5 + (i / (nPts - 1)) * 3.8;
+          const vM = Math.min(De * Math.pow(1 - Math.exp(-a * x), 2) - 1.2, 1.8);
+          mArr[i * 3] = x;
+          mArr[i * 3 + 1] = vM;
+          mArr[i * 3 + 2] = 0;
+
+          const vH = Math.min(0.5 * k * x * x - 1.2, 1.8);
+          hArr[i * 3] = x;
+          hArr[i * 3 + 1] = vH;
+          hArr[i * 3 + 2] = 0.02;
+        }
+        morseLine.geometry.attributes.position.needsUpdate = true;
+        harmLine.geometry.attributes.position.needsUpdate = true;
+
+        const xOsc = 0.65 * Math.sin(t * 2.8);
+        const yOsc = 0.5 * k * xOsc * xOsc - 1.2 + 0.12;
+        pBall.position.set(xOsc, yOsc, 0.05);
+
+        g.rotation.y = Math.sin(t * 0.4) * 0.2;
+      }
+      return { group: g, update };
+    }
+
+    function buildCasimirCavityModel() {
+      const g = new THREE.Group();
+      const plateGeo = new THREE.BoxGeometry(0.15, 2.4, 2.2);
+      const plateMat = new THREE.MeshPhysicalMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.15, transparent: true, opacity: 0.85 });
+      const plate1 = new THREE.Mesh(plateGeo, plateMat);
+      const plate2 = new THREE.Mesh(plateGeo, plateMat);
+      plate1.position.set(-0.85, 0, 0);
+      plate2.position.set(0.85, 0, 0);
+      g.add(plate1);
+      g.add(plate2);
+
+      const modeColors = [0x00f0ff, 0x10b981, 0xfacc15];
+      const cavModes = [];
+      for (let n = 1; n <= 3; n++) {
+        const nPts = 60;
+        const mGeo = new THREE.BufferGeometry();
+        const mPos = new Float32Array(nPts * 3);
+        mGeo.setAttribute('position', new THREE.BufferAttribute(mPos, 3));
+        const mLine = new THREE.Line(mGeo, new THREE.LineBasicMaterial({ color: modeColors[n - 1], linewidth: 2.5 }));
+        g.add(mLine);
+        cavModes.push({ n, line: mLine, yOffset: (n - 2) * 0.55 });
+      }
+
+      const extPts = 50;
+      const extGeo1 = new THREE.BufferGeometry();
+      const extGeo2 = new THREE.BufferGeometry();
+      extGeo1.setAttribute('position', new THREE.BufferAttribute(new Float32Array(extPts * 3), 3));
+      extGeo2.setAttribute('position', new THREE.BufferAttribute(new Float32Array(extPts * 3), 3));
+      const extLine1 = new THREE.Line(extGeo1, new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 2 }));
+      const extLine2 = new THREE.Line(extGeo2, new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 2 }));
+      g.add(extLine1);
+      g.add(extLine2);
+
+      const coneGeo = new THREE.ConeGeometry(0.12, 0.35, 16);
+      coneGeo.rotateZ(-Math.PI / 2);
+      const fMat = glowMat(0xef4444, 1.0);
+      const arrowL = new THREE.Mesh(coneGeo, fMat);
+      arrowL.position.set(-1.25, 0, 0);
+      arrowL.rotation.z = Math.PI;
+      const arrowR = new THREE.Mesh(coneGeo, fMat);
+      arrowR.position.set(1.25, 0, 0);
+      g.add(arrowL);
+      g.add(arrowR);
+
+      const lbl = makeLabel('ปรากฏการณ์คาสิเมียร์: F/A = -π²ℏc / (240 d⁴)', '#10b981', 0.75);
+      lbl.position.set(0, 1.55, 0);
+      g.add(lbl);
+
+      function update(t) {
+        const d = 0.85 + 0.1 * Math.sin(t * 1.5);
+        plate1.position.x = -d;
+        plate2.position.x = d;
+        arrowL.position.x = -d - 0.35;
+        arrowR.position.x = d + 0.35;
+
+        cavModes.forEach(m => {
+          const arr = m.line.geometry.attributes.position.array;
+          const nPts = arr.length / 3;
+          for (let i = 0; i < nPts; i++) {
+            const frac = i / (nPts - 1);
+            const x = -d + frac * 2 * d;
+            const amp = 0.28 * Math.sin(m.n * Math.PI * frac) * Math.cos(t * (3.0 + m.n * 1.5));
+            arr[i * 3] = x;
+            arr[i * 3 + 1] = m.yOffset + amp;
+            arr[i * 3 + 2] = 0;
+          }
+          m.line.geometry.attributes.position.needsUpdate = true;
+        });
+
+        const a1 = extLine1.geometry.attributes.position.array;
+        const a2 = extLine2.geometry.attributes.position.array;
+        for (let i = 0; i < extPts; i++) {
+          const x1 = -2.2 + (i / (extPts - 1)) * (2.2 - d);
+          const x2 = d + (i / (extPts - 1)) * (2.2 - d);
+          a1[i * 3] = x1;
+          a1[i * 3 + 1] = 0.2 * Math.sin(12 * x1 - t * 4);
+          a1[i * 3 + 2] = 0;
+
+          a2[i * 3] = x2;
+          a2[i * 3 + 1] = 0.2 * Math.sin(12 * x2 + t * 4);
+          a2[i * 3 + 2] = 0;
+        }
+        extLine1.geometry.attributes.position.needsUpdate = true;
+        extLine2.geometry.attributes.position.needsUpdate = true;
+
+        g.rotation.y = t * 0.2;
+      }
+      return { group: g, update };
+    }
+
+    function buildDiracLadderModel() {
+      const g = new THREE.Group();
+      const levels = 5;
+      const rungWidth = 2.4;
+      const ySpacing = 0.65;
+      for (let n = 0; n < levels; n++) {
+        const y = -1.3 + n * ySpacing;
+        const rung = lineOf([new THREE.Vector3(-rungWidth / 2, y, 0), new THREE.Vector3(rungWidth / 2, y, 0)], 0x38bdf8, 0.85);
+        g.add(rung);
+        const tag = makeLabel(`|${n}⟩ (E_${n} = ${(n + 0.5).toFixed(1)}ℏω)`, '#38bdf8', 0.55);
+        tag.position.set(rungWidth / 2 + 0.8, y, 0);
+        g.add(tag);
+      }
+
+      const upPhoton = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), glowMat(0x10b981, 1.0));
+      g.add(upPhoton);
+
+      const downPhoton = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), glowMat(0xef4444, 1.0));
+      g.add(downPhoton);
+
+      const vacTag = makeLabel('â|0⟩ = 0 (สุญญากาศ)', '#ef4444', 0.6);
+      vacTag.position.set(-0.7, -1.75, 0);
+      g.add(vacTag);
+
+      const lbl = makeLabel('ตัวดำเนินการบันได: â†|n⟩ = √(n+1)|n+1⟩, â|n⟩ = √n|n-1⟩', '#f59e0b', 0.7);
+      lbl.position.set(0, 1.85, 0);
+      g.add(lbl);
+
+      function update(t) {
+        const cycleUp = (t * 0.7) % 4.0;
+        const fromN = Math.floor(cycleUp);
+        const fracUp = cycleUp - fromN;
+        const smoothUp = (1 - Math.cos(fracUp * Math.PI)) / 2;
+        upPhoton.position.set(0.65, -1.3 + (fromN + smoothUp) * ySpacing, 0.1);
+
+        const cycleDown = (t * 0.7 + 2.0) % 4.0;
+        const fromDown = 4 - Math.floor(cycleDown);
+        const fracDown = cycleDown - Math.floor(cycleDown);
+        const smoothDown = (1 - Math.cos(fracDown * Math.PI)) / 2;
+        downPhoton.position.set(-0.65, -1.3 + (fromDown - smoothDown) * ySpacing, 0.1);
+
+        g.rotation.y = Math.sin(t * 0.3) * 0.25;
+      }
+      return { group: g, update };
+    }
+
+    function buildCoherentStatePhaseModel() {
+      const g = new THREE.Group();
+      const circGeo = new THREE.RingGeometry(1.48, 1.52, 64);
+      const circ = new THREE.Mesh(circGeo, new THREE.MeshBasicMaterial({ color: 0x475569, side: THREE.DoubleSide }));
+      g.add(circ);
+
+      g.add(lineOf([new THREE.Vector3(-1.8, 0, 0), new THREE.Vector3(1.8, 0, 0)], 0x64748b, 0.6));
+      g.add(lineOf([new THREE.Vector3(0, -1.8, 0), new THREE.Vector3(0, 1.8, 0)], 0x64748b, 0.6));
+
+      const vecLine = lineOf([new THREE.Vector3(0, 0, 0), new THREE.Vector3(1.1, 0.8, 0)], 0x00f0ff, 0.9);
+      g.add(vecLine);
+
+      const diskGeo = new THREE.CircleGeometry(0.38, 32);
+      const diskMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.45, side: THREE.DoubleSide });
+      const uncertDisk = new THREE.Mesh(diskGeo, diskMat);
+      g.add(uncertDisk);
+
+      const core = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), glowMat(0xf472b6, 1.0));
+      g.add(core);
+
+      const barGroup = new THREE.Group();
+      const nBars = 8;
+      const bars = [];
+      for (let n = 0; n < nBars; n++) {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1, 0.12), glowMat(0x10b981, 0.85));
+        b.position.set(-1.8 + n * 0.26, -1.5, 0);
+        barGroup.add(b);
+        bars.push(b);
+      }
+      g.add(barGroup);
+
+      const lbl = makeLabel('สถานะอาพันธ์กลอเบอร์: ΔX₁ΔX₂ = ¼ (กลุ่มคลื่นไม่กระจายตัว)', '#ec4899', 0.7);
+      lbl.position.set(0, 1.85, 0);
+      g.add(lbl);
+
+      function update(t) {
+        const omega = 1.6;
+        const R = 1.2;
+        const x = R * Math.cos(omega * t);
+        const y = R * Math.sin(omega * t);
+
+        const pos = vecLine.geometry.attributes.position.array;
+        pos[3] = x; pos[4] = y; pos[5] = 0;
+        vecLine.geometry.attributes.position.needsUpdate = true;
+
+        uncertDisk.position.set(x, y, 0.05);
+        core.position.set(x, y, 0.1);
+
+        const lambda = 2.5 + 0.8 * Math.sin(t * 1.2);
+        const fact = [1, 1, 2, 6, 24, 120, 720, 5040];
+        for (let n = 0; n < nBars; n++) {
+          const pn = Math.exp(-lambda) * Math.pow(lambda, n) / fact[n];
+          const h = pn * 2.8;
+          bars[n].scale.set(1, Math.max(h, 0.05), 1);
+          bars[n].position.y = -1.5 + h / 2;
+        }
+
+        g.rotation.y = Math.sin(t * 0.3) * 0.2;
+      }
+      return { group: g, update };
+    }
+
+    function buildSqueezedOptomechanicsModel() {
+      const g = new THREE.Group();
+      const sqGroup = new THREE.Group();
+      sqGroup.position.set(-1.2, 0, 0);
+
+      const vacCirc = new THREE.RingGeometry(0.58, 0.62, 48);
+      sqGroup.add(new THREE.Mesh(vacCirc, new THREE.MeshBasicMaterial({ color: 0x64748b, side: THREE.DoubleSide })));
+
+      const sqGeo = new THREE.CircleGeometry(0.6, 48);
+      const sqMat = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+      const sqEllipse = new THREE.Mesh(sqGeo, sqMat);
+      sqGroup.add(sqEllipse);
+      g.add(sqGroup);
+
+      const cavGroup = new THREE.Group();
+      cavGroup.position.set(1.1, 0, 0);
+
+      const fixM = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.6, 1.2), new THREE.MeshPhysicalMaterial({ color: 0x00f0ff, metalness: 0.9 }));
+      fixM.position.set(-0.9, 0, 0);
+      cavGroup.add(fixM);
+
+      const movM = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.3, 1.0), new THREE.MeshPhysicalMaterial({ color: 0xfacc15, metalness: 0.8 }));
+      movM.position.set(0.7, 0, 0);
+      cavGroup.add(movM);
+
+      const springArm = lineOf([new THREE.Vector3(0.76, 0, 0), new THREE.Vector3(1.4, 0, 0)], 0x94a3b8, 0.8);
+      cavGroup.add(springArm);
+
+      const laserPts = 40;
+      const laserGeo = new THREE.BufferGeometry();
+      laserGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(laserPts * 3), 3));
+      const laserLine = new THREE.Line(laserGeo, new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 3 }));
+      cavGroup.add(laserLine);
+      g.add(cavGroup);
+
+      const lbl = makeLabel('สถานะบีบอัด (Squeezed State) & ออปโตเมคานิกส์โพรงสั่นพ้อง', '#8b5cf6', 0.68);
+      lbl.position.set(0, 1.6, 0);
+      g.add(lbl);
+
+      function update(t) {
+        const r = 0.55 + 0.3 * Math.sin(t * 2.2);
+        const sX = Math.exp(-r);
+        const sY = Math.exp(r);
+        sqEllipse.scale.set(sX, sY, 1);
+        sqEllipse.rotation.z = -0.4;
+
+        const xMov = 0.7 + 0.08 * Math.sin(t * 7.5);
+        movM.position.x = xMov;
+
+        const lArr = laserLine.geometry.attributes.position.array;
+        const cavL = xMov - (-0.9);
+        for (let i = 0; i < laserPts; i++) {
+          const frac = i / (laserPts - 1);
+          const x = -0.9 + frac * cavL;
+          lArr[i * 3] = x;
+          lArr[i * 3 + 1] = 0.35 * Math.sin(3 * Math.PI * frac) * Math.sin(t * 12);
+          lArr[i * 3 + 2] = 0;
+        }
+        laserLine.geometry.attributes.position.needsUpdate = true;
+
+        g.rotation.y = t * 0.2;
+      }
+      return { group: g, update };
+    }
+
     function buildChapterModels() {
       return {
         fig4: buildDoubleSlitModel(),
@@ -4449,6 +4811,14 @@
     models.fig4_4 = buildRTDModel();
     models.fig4_5 = buildGamowModel();
     models.fig4_6 = buildSTMModel();
+
+    // Chapter 5 Complete Suite
+    models.fig5_1 = buildParabolicVsMorseModel();
+    models.fig5_2 = buildQHOModel();
+    models.fig5_3 = buildCasimirCavityModel();
+    models.fig5_4 = buildDiracLadderModel();
+    models.fig5_5 = buildCoherentStatePhaseModel();
+    models.fig5_6 = buildSqueezedOptomechanicsModel();
 
     Object.assign(models, buildChapterModels()); // Chapters 3-12 (fig5 ... fig14)
     models.fig5 = models.fig3_1; // Alias fig5 to fig3_1
@@ -5585,16 +5955,66 @@
           break;
 
 
-        // --- CH 5: Quantum Harmonic Oscillator ---
+        // --- CH 5: Quantum Harmonic Oscillator & Quantum Optics (6 Targets) ---
+        case 'fig5_1':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>พลังงานการแตกตัว ($D_e$)</span><span class="param-val" id="disp-pm-de">2.00 eV</span></div>
+              <input type="range" class="slider-custom" min="1.0" max="5.0" step="0.2" value="2.0" oninput="updateFig5_1De(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ค่าคงตัวสปริง ($k$)</span><span class="param-val" id="disp-pm-k">2.89 N/m</span></div>
+              <input type="range" class="slider-custom" min="1.0" max="6.0" step="0.2" value="2.89" oninput="updateFig5_1K(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig5_2':
         case 'fig7':
           container.innerHTML = `
             <div class="param-group">
-              <div class="param-label"><span>ระดับพลังงาน ($n$)</span><span class="param-val" id="disp-qho-n">n = 0..4</span></div>
+              <div class="param-label"><span>ระดับพลังงานควอนไตซ์ ($n$)</span><span class="param-val" id="disp-qho-n">n = 0</span></div>
               <input type="range" class="slider-custom" min="0" max="4" step="1" value="0" oninput="updateFig7Level(this.value)">
             </div>
             <div class="param-group">
               <div class="param-label"><span>ความถี่เชิงมุมบ่อศักย์ ($\\omega$)</span><span class="param-val" id="disp-qho-w">1.8 rad/s</span></div>
               <input type="range" class="slider-custom" min="0.8" max="3.5" step="0.1" value="1.8" oninput="updateFig7Omega(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig5_3':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ระยะห่างแผ่นตัวนำ ($d$)</span><span class="param-val" id="disp-cas-d">0.85 μm</span></div>
+              <input type="range" class="slider-custom" min="0.40" max="1.80" step="0.05" value="0.85" oninput="updateFig5_3Spacing(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig5_4':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>สถานะฟอก ($|n\\rangle$)</span><span class="param-val" id="disp-lad-n">n = 2</span></div>
+              <input type="range" class="slider-custom" min="0" max="4" step="1" value="2" oninput="updateFig5_4Fock(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig5_5':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>แอมพลิจูดสถานะอาพันธ์ ($|\\alpha|$)</span><span class="param-val" id="disp-coh-a">1.20</span></div>
+              <input type="range" class="slider-custom" min="0.5" max="2.5" step="0.1" value="1.2" oninput="updateFig5_5Alpha(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig5_6':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>พารามิเตอร์การบีบ ($r$)</span><span class="param-val" id="disp-sq-r">0.55 (ΔX₁ < ½)</span></div>
+              <input type="range" class="slider-custom" min="0.1" max="1.4" step="0.05" value="0.55" oninput="updateFig5_6Squeeze(this.value)">
             </div>
           `;
           break;
@@ -5888,15 +6308,71 @@
           `;
           break;
 
-        // --- CH 5: QHO ---
+        // --- CH 5: Quantum Harmonic Oscillator & Quantum Optics (6 Targets) ---
+        case 'fig5_1':
+          container.innerHTML = `
+            <div class="info-card"><h5>ศักย์โมเลกุล</h5><p>Morse vs Parabola</p></div>
+            <div class="info-card"><h5>เงื่อนไขสมดุล</h5><p>V'(x₀) = 0</p></div>
+            <div class="info-card"><h5>ค่าคงตัวสปริงยังผล</h5><p id="t-pm-k">k = 2 D_e a²</p></div>
+            <div class="info-card"><h5>พลังงานแตกตัว</h5><p id="t-pm-de">D_e = 2.0 eV</p></div>
+            <div class="info-card"><h5>ขีดจำกัดแอมพลิจูดต่ำ</h5><p style="color:#10b981;">ลู่เข้าฮาร์มอนิก 100%</p></div>
+            <div class="info-card"><h5>การประยุกต์</h5><p>การสั่นพันธะเคมี</p></div>
+          `;
+          break;
+
+        case 'fig5_2':
         case 'fig7':
           container.innerHTML = `
             <div class="info-card"><h5>ระดับพลังงาน ($E_n$)</h5><p id="t-qho-e">E₀ = 0.275 eV</p></div>
             <div class="info-card"><h5>พลังงานจุดศูนย์ ($E_0$)</h5><p style="color:#10b981;">½ℏω (Non-zero)</p></div>
             <div class="info-card"><h5>ระยะห่างระหว่างระดับ ($\Delta E$)</h5><p>ℏω (ห่างเท่ากัน)</p></div>
             <div class="info-card"><h5>ฟังก์ชันพหุนามแอร์มีต</h5><p>H_n(ξ) e^(−ξ²/2)</p></div>
-            <div class="info-card"><h5>สถานะโคฮีเรนต์</h5><p>Glauber Coherent</p></div>
-            <div class="info-card"><h5>ความน่าจะเป็นอุโมงค์</h5><p>ทะลุเขตห้ามคลาสสิก</p></div>
+            <div class="info-card"><h5>จุดวกกลับคลาสสิก</h5><p>x_c = ±√((2n+1)ℏ/(mω))</p></div>
+            <div class="info-card"><h5>ความน่าจะเป็นอุโมงค์</h5><p style="color:var(--gold);">แทรกซึมออกนอกบ่อ</p></div>
+          `;
+          break;
+
+        case 'fig5_3':
+          container.innerHTML = `
+            <div class="info-card"><h5>แรงคาสิเมียร์สุทธิ</h5><p id="t-cas-f" style="color:#ef4444;">-0.85 mPa</p></div>
+            <div class="info-card"><h5>ระยะห่างแผ่น ($d$)</h5><p id="t-cas-d">0.85 μm</p></div>
+            <div class="info-card"><h5>กฎกำลังสี่</h5><p>F ∝ 1 / d⁴</p></div>
+            <div class="info-card"><h5>โหมดคัดเลือกภายใน</h5><p style="color:#10b981;">k_n = nπ/d (จำกัด)</p></div>
+            <div class="info-card"><h5>โหมดสุญญากาศภายนอก</h5><p>ต่อเนื่อง (ความหนาแน่นสูง)</p></div>
+            <div class="info-card"><h5>หลักฐานฟิสิกส์</h5><p>ความผันผวนสุญญากาศ</p></div>
+          `;
+          break;
+
+        case 'fig5_4':
+          container.innerHTML = `
+            <div class="info-card"><h5>สถานะฟอก ($|n\\rangle$)</h5><p id="t-lad-n" style="color:var(--gold);">|2⟩</p></div>
+            <div class="info-card"><h5>ตัวดำเนินการสร้าง</h5><p style="color:#10b981;">a†|n⟩ = √(n+1)|n+1⟩</p></div>
+            <div class="info-card"><h5>ตัวดำเนินการทำลาย</h5><p style="color:#ef4444;">a|n⟩ = √n|n-1⟩</p></div>
+            <div class="info-card"><h5>คอมมิวเตเตอร์</h5><p>[a, a†] = 1</p></div>
+            <div class="info-card"><h5>สถานะสุญญากาศ</h5><p>a|0⟩ = 0</p></div>
+            <div class="info-card"><h5>ตัวดำเนินการจำนวน</h5><p>N = a†a (N|n⟩ = n|n⟩)</p></div>
+          `;
+          break;
+
+        case 'fig5_5':
+          container.innerHTML = `
+            <div class="info-card"><h5>แอมพลิจูดโคฮีเรนต์</h5><p id="t-coh-a">|α| = 1.20</p></div>
+            <div class="info-card"><h5>จำนวนโฟตอนเฉลี่ย</h5><p id="t-coh-n">⟨n⟩ = 1.44</p></div>
+            <div class="info-card"><h5>การกระจายตัวกลุ่มคลื่น</h5><p style="color:#10b981;">คงที่ตลอดกาล (Zero Spread)</p></div>
+            <div class="info-card"><h5>ผลคูณความไม่แน่นอน</h5><p>ΔxΔp = ½ℏ (ต่ำสุด)</p></div>
+            <div class="info-card"><h5>สถิติการแจกแจง</h5><p>ปัวซง (Poissonian)</p></div>
+            <div class="info-card"><h5>การเคลื่อนที่เฟสสเปซ</h5><p>หมุนควงด้วยความถี่ ω</p></div>
+          `;
+          break;
+
+        case 'fig5_6':
+          container.innerHTML = `
+            <div class="info-card"><h5>พารามิเตอร์การบีบ ($r$)</h5><p id="t-sq-r">r = 0.55</p></div>
+            <div class="info-card"><h5>ควอดราเจอร์บีบอัด</h5><p style="color:#10b981;">ΔX₁ = 0.288 (< ½)</p></div>
+            <div class="info-card"><h5>ควอดราเจอร์ขยาย</h5><p>ΔX₂ = 0.867 (> ½)</p></div>
+            <div class="info-card"><h5>ผลคูณความไม่แน่นอน</h5><p>ΔX₁ΔX₂ = 0.25 (ต่ำสุด)</p></div>
+            <div class="info-card"><h5>การประยุกต์ LIGO</h5><p>ลดสัญญาณช็อตนอยส์</p></div>
+            <div class="info-card"><h5>โพรงออปโตเมคานิกส์</h5><p>แรงดันแสง F_rp = ℏg₀a†a</p></div>
           `;
           break;
 
@@ -6245,6 +6721,61 @@
     }
     function updateFig6Bias(v) {
       document.getElementById('disp-stm-v').textContent = `${v} V`;
+    }
+
+    // --- CH 5 Helper Functions ---
+    function updateFig5_1De(v) {
+      const de = parseFloat(v);
+      const k = (2 * de * 0.85 * 0.85).toFixed(2);
+      const dispDe = document.getElementById('disp-pm-de');
+      const dispK = document.getElementById('disp-pm-k');
+      const tDe = document.getElementById('t-pm-de');
+      const tK = document.getElementById('t-pm-k');
+      if (dispDe) dispDe.textContent = `${de.toFixed(2)} eV`;
+      if (dispK) dispK.textContent = `${k} N/m`;
+      if (tDe) tDe.textContent = `D_e = ${de.toFixed(2)} eV`;
+      if (tK) tK.textContent = `k = ${k} N/m`;
+    }
+    function updateFig5_1K(v) {
+      const k = parseFloat(v);
+      const dispK = document.getElementById('disp-pm-k');
+      const tK = document.getElementById('t-pm-k');
+      if (dispK) dispK.textContent = `${k.toFixed(2)} N/m`;
+      if (tK) tK.textContent = `k = ${k.toFixed(2)} N/m`;
+    }
+    function updateFig5_3Spacing(v) {
+      const d = parseFloat(v);
+      const dispD = document.getElementById('disp-cas-d');
+      const tD = document.getElementById('t-cas-d');
+      const tF = document.getElementById('t-cas-f');
+      if (dispD) dispD.textContent = `${d.toFixed(2)} μm`;
+      if (tD) tD.textContent = `${d.toFixed(2)} μm`;
+      const fVal = (-0.85 / Math.pow(d / 0.85, 4)).toFixed(2);
+      if (tF) tF.textContent = `${fVal} mPa`;
+    }
+    function updateFig5_4Fock(n) {
+      const nInt = parseInt(n);
+      const dispN = document.getElementById('disp-lad-n');
+      const tN = document.getElementById('t-lad-n');
+      if (dispN) dispN.textContent = `n = ${nInt}`;
+      if (tN) tN.textContent = `|${nInt}⟩`;
+    }
+    function updateFig5_5Alpha(v) {
+      const a = parseFloat(v);
+      const dispA = document.getElementById('disp-coh-a');
+      const tA = document.getElementById('t-coh-a');
+      const tN = document.getElementById('t-coh-n');
+      if (dispA) dispA.textContent = `${a.toFixed(2)}`;
+      if (tA) tA.textContent = `|α| = ${a.toFixed(2)}`;
+      if (tN) tN.textContent = `⟨n⟩ = ${(a * a).toFixed(2)}`;
+    }
+    function updateFig5_6Squeeze(v) {
+      const r = parseFloat(v);
+      const dispR = document.getElementById('disp-sq-r');
+      const tR = document.getElementById('t-sq-r');
+      const desc = r > 0 ? '(ΔX₁ < ½)' : '';
+      if (dispR) dispR.textContent = `${r.toFixed(2)} ${desc}`;
+      if (tR) tR.textContent = `r = ${r.toFixed(2)}`;
     }
 
     // Fig 7: QHO
