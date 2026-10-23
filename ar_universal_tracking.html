@@ -1124,16 +1124,16 @@
     }
 
     /* ==========================================================
-       CYBER SCI-FI DUAL SIDEBARS (Matching Attached Gold HUD Reference)
+       CYBER SCI-FI DUAL SIDEBARS (Ultra-Transparent Glassmorphic HUD)
        Left Sidebar: ข้อมูลจากการทดลอง (Experimental Physics Telemetry)
        Right Sidebar: ชุดควบคุมการทดลอง (Control Matrix & Interactive Knobs)
        ========================================================== */
     :root {
       --gold-neon: #ffd000;
-      --gold-glow: rgba(255, 208, 0, 0.48);
-      --gold-dim: rgba(255, 208, 0, 0.15);
-      --gold-glass: rgba(8, 13, 24, 0.94);
-      --gold-border: rgba(255, 208, 0, 0.85);
+      --gold-glow: rgba(255, 208, 0, 0.35);
+      --gold-dim: rgba(255, 208, 0, 0.12);
+      --gold-glass: rgba(5, 10, 20, 0.30); /* 70% Transparent Glassmorphic Background */
+      --gold-border: rgba(255, 208, 0, 0.75);
     }
 
     .cyber-sidebar {
@@ -1142,24 +1142,25 @@
       bottom: 84px;
       z-index: 46;
       background: var(--gold-glass);
-      backdrop-filter: blur(22px) saturate(190%);
-      -webkit-backdrop-filter: blur(22px) saturate(190%);
+      backdrop-filter: blur(8px) saturate(160%);
+      -webkit-backdrop-filter: blur(8px) saturate(160%);
       border: 1.5px solid var(--gold-neon);
-      box-shadow: 0 0 28px var(--gold-glow), inset 0 0 20px rgba(255, 208, 0, 0.08);
+      box-shadow: 0 0 18px var(--gold-glow), inset 0 0 14px rgba(255, 208, 0, 0.05);
       display: flex;
       flex-direction: column;
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
                   width 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
                   opacity 0.25s ease;
       overflow: visible;
+      pointer-events: auto;
     }
 
     /* Left Sidebar: Chamfer top-left & bottom-right */
     .cyber-sidebar-left {
-      left: 12px;
-      width: 310px;
-      max-width: calc(100vw - 24px);
-      clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 26px), calc(100% - 26px) 100%, 0 100%, 0 18px);
+      left: 10px;
+      width: 270px;
+      max-width: 78vw;
+      clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 24px), calc(100% - 24px) 100%, 0 100%, 0 18px);
     }
     .cyber-sidebar-left.closed {
       transform: translateX(calc(-100% - 30px));
@@ -1167,20 +1168,21 @@
       opacity: 0;
     }
     .cyber-sidebar-left.collapsed {
-      width: 46px;
-      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+      width: 42px;
+      clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+      background: rgba(5, 10, 20, 0.38);
     }
     .cyber-sidebar-left.expanded {
-      width: 440px;
-      max-width: calc(100vw - 24px);
+      width: 390px;
+      max-width: calc(100vw - 20px);
     }
 
     /* Right Sidebar: Chamfer top-right & bottom-left */
     .cyber-sidebar-right {
-      right: 12px;
-      width: 310px;
-      max-width: calc(100vw - 24px);
-      clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 26px 100%, 0 calc(100% - 26px));
+      right: 10px;
+      width: 270px;
+      max-width: 78vw;
+      clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 24px 100%, 0 calc(100% - 24px));
     }
     .cyber-sidebar-right.closed {
       transform: translateX(calc(100% + 30px));
@@ -1188,12 +1190,13 @@
       opacity: 0;
     }
     .cyber-sidebar-right.collapsed {
-      width: 46px;
-      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      width: 42px;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      background: rgba(5, 10, 20, 0.38);
     }
     .cyber-sidebar-right.expanded {
-      width: 440px;
-      max-width: calc(100vw - 24px);
+      width: 390px;
+      max-width: calc(100vw - 20px);
     }
 
     /* Top Glowing Spotlight Lamp (Faithful to attached yellow HUD reference) */
@@ -1422,11 +1425,13 @@
 
     /* Parameters Sliders (Gold Cyber Aesthetic) */
     .param-group {
-      margin-bottom: 14px;
-      background: rgba(255, 255, 255, 0.03);
+      margin-bottom: 12px;
+      background: rgba(3, 7, 18, 0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
       padding: 10px 12px;
       border-radius: 8px;
-      border: 1px solid rgba(255, 208, 0, 0.15);
+      border: 1px solid rgba(255, 208, 0, 0.22);
     }
     .param-label {
       display: flex;
@@ -1445,7 +1450,7 @@
       width: 100%;
       height: 6px;
       border-radius: 3px;
-      background: #1e293b;
+      background: rgba(30, 41, 59, 0.7);
       outline: none;
       -webkit-appearance: none;
     }
@@ -1470,10 +1475,12 @@
       grid-template-columns: 1fr 1fr 1fr;
     }
     .info-card {
-      background: rgba(255, 208, 0, 0.04);
-      border: 1px solid rgba(255, 208, 0, 0.22);
+      background: rgba(3, 7, 18, 0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 208, 0, 0.24);
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 9px 11px;
       position: relative;
     }
     .info-card::before {
@@ -4010,8 +4017,8 @@
     // CYBER SCI-FI DUAL SIDEBAR STATE CONTROLLERS
     // ==========================================================
     const sidebarState = {
-      left: window.innerWidth < 768 ? 'closed' : 'open',   // 'open', 'collapsed', 'expanded', 'closed'
-      right: 'open'                                         // 'open', 'collapsed', 'expanded', 'closed'
+      left: window.innerWidth < 768 ? 'closed' : 'open',       // 'open', 'collapsed', 'expanded', 'closed'
+      right: window.innerWidth < 768 ? 'collapsed' : 'open'     // 'open', 'collapsed', 'expanded', 'closed'
     };
 
     function updateSidebarDOM(side) {
@@ -4086,6 +4093,21 @@
     // Initialize sidebars on load
     updateSidebarDOM('left');
     updateSidebarDOM('right');
+
+    // Tap canvas to auto-minimize sidebars on mobile so 3D model is fully visible
+    const canvasWrap = document.getElementById('webgl-canvas-container');
+    if (canvasWrap) {
+      canvasWrap.addEventListener('pointerdown', () => {
+        if (window.innerWidth < 768) {
+          if (sidebarState.left === 'open' || sidebarState.left === 'expanded') {
+            closeSidebar('left');
+          }
+          if (sidebarState.right === 'expanded') {
+            collapseSidebar('right');
+          }
+        }
+      });
+    }
 
     // ==========================================================
     // 8. DYNAMIC PARAMETER & TELEMETRY CONTROLS
