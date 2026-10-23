@@ -2309,14 +2309,45 @@
         desc: 'อันตรกิริยา H_SO = ξ(r) L·S แยกสถานะ 2P ออกเป็น 2P_3/2 และ 2P_1/2 ด้วยผลต่าง ΔE_FS ≈ 4.5×10⁻⁵ eV และนำไปสู่อุปกรณ์สปินทรอนิกส์ GMR สปินวาล์ว ความต้านทานต่ำ/สูงตามทิศทางขนาน/ตรงข้ามขนาน',
         facts: [['อันตรกิริยาสปิน-ออร์บิท', 'H_SO = ξ(r) L·S = ½ξ(r)(J² - L² - S²)'], ['การแยกโครงสร้างละเอียด', 'ΔE_FS = 4.53 × 10⁻⁵ eV'], ['โมเมนตัมรวม', 'J = L + S (j = ℓ ± ½)'], ['GMR Ratio', '(R_AP - R_P)/R_P × 100% (โนเบล 2007)']]
       },
-      fig8: {
-        id: 'fig8', chapter: 6, short: '6.3 ออร์บิทัล 3d (เดิม)', icon: 'fa-atom', color: '#f472b6', image: 'target_fig6_3.png',
-        title: 'ภาพที่ 6.3 ออร์บิทัลอะตอมไฮโดรเจน 3d_z²', subtitle: 'Hydrogen Orbital |ψ₃₂₀|² Probability Cloud',
-        desc: 'เมฆความหนาแน่นความน่าจะเป็นสุ่มจาก |ψ₃₂₀|² ∝ r⁴e^(−2r/3a₀)(3cos²θ−1)² สีฟ้า/ชมพูแทนเครื่องหมายเฟสบวก/ลบของฟังก์ชันคลื่น',
-        facts: [['เลขควอนตัม', 'n=3, ℓ=2, m=0'], ['พลังงาน', 'E₃ = −13.6/9 = −1.51 eV'], ['ระนาบโหนด (กรวย)', 'cos²θ = 1/3'], ['จำนวนจุดสุ่ม', '4,000 จุด']]
+      // --- CH 7: Perturbation Theory, Quantum Statistics & Condensed Matter (6 Targets) ---
+      fig7_1: {
+        id: 'fig7_1', chapter: 7, short: '7.1 สตาร์กเอฟเฟกต์', icon: 'fa-bolt', color: '#00d2ff', image: 'target_fig7_1.png',
+        title: 'ภาพที่ 7.1 ปรากฏการณ์สตาร์กเชิงเส้นและการแยกสถานะเสื่อม n=2', subtitle: 'Linear Stark Effect & Degenerate Perturbation in Hydrogen',
+        desc: 'การแยกตัวของระดับพลังงาน n=2 (เสื่อม 4 เท่า) ในสนามไฟฟ้าภายนอก E_ext ผสมสถานะ |2s⟩ และ |2p_0⟩ เป็นไดโพลโมเมนต์ถาวรแยก 3 แขนง ΔE = 0, ±3eE_ext a_0',
+        facts: [['ระดับพลังงาน n=2', '4-fold degenerate (|2s⟩, |2p_0⟩, |2p_±1⟩)'], ['การแยกพลังงาน', 'ΔE = ±3e E_ext a_0, 0'], ['ไดโพลโมเมนต์ถาวร', 'p_z = 3e a_0 (เกิดจากการผสม sp-hybrid)'], ['การประยุกต์', 'การวัดสนามไฟฟ้าในพลาสมาและดาวฤกษ์']]
+      },
+      fig7_2: {
+        id: 'fig7_2', chapter: 7, short: '7.2 ระเบียบวิธีแปรผัน', icon: 'fa-chart-line', color: '#8b5cf6', image: 'target_fig7_2.png',
+        title: 'ภาพที่ 7.2 ระเบียบวิธีแปรผันของเรย์ลี-ริตซ์ และการบดบังประจุของฮีเลียม', subtitle: 'Rayleigh-Ritz Variational Method & Helium Screening',
+        desc: 'การประมาณค่าขอบเขตบนของพลังงานสถานะพื้น E[ψ_α] ≥ E_0 โดยปรับประจุยังผล Z_eff = Z - 5/16 = 1.6875 ให้ค่าต่ำสุด -77.49 eV คลาดเคลื่อนเพียง 1.9% จากผลทดลองจริง (-79.0 eV)',
+        facts: [['หลักการแปรผัน', '⟨H⟩_α ≥ E_0 (ขอบเขตบนเสมอ)'], ['ประจุยังผลฮีเลียม', 'Z_eff = 2 - 5/16 = 1.6875'], ['พลังงานคำนวณได้', 'E_min = -77.49 eV (ทดลอง -79.00 eV)'], ['การบดบังประจุ', 'อิเล็กตรอนหนึ่งตัวบดบังประจุนิวเคลียร์ให้อีกตัว 5/16']]
+      },
+      fig7_3: {
+        id: 'fig7_3', chapter: 7, short: '7.3 กฎทองของแฟร์มี', icon: 'fa-wave-square', color: '#f43f5e', image: 'target_fig7_3.png',
+        title: 'ภาพที่ 7.3 กฎทองของแฟร์มี การเปลี่ยนสถานะสู่คอนตินิวอัม และฟังก์ชัน sinc²', subtitle: "Fermi's Golden Rule & Transition Rate to Continuum",
+        desc: 'การเปลี่ยนสถานะควอนตัมภายใต้การรบกวนฮาร์โมนิก V(t) ~ e^(-iωt) ฟังก์ชันการสั่นพ้อง sinc² บีบแคบลงกลายเป็นเดลตาดิแรก 2πt δ(E_f - E_i - ℏω) นำไปสู่อัตราการเปลี่ยนสถานะคงที่ W_i→f = (2π/ℏ)|⟨f|V|i⟩|² ρ(E_f)',
+        facts: [['อัตราการเปลี่ยนสถานะ', 'W_i→f = (2π/ℏ) |V_fi|² ρ(E_f)'], ['การอนุรักษ์พลังงาน', 'E_f = E_i ± ℏω (เดลตาดิแรก)'], ['ฟังก์ชันการสั่นพ้อง', 'sinc²(Δω t / 2) → 2πt δ(Δω)'], ['ความหนาแน่นสถานะ', 'ρ(E_f) = dN/dE ในย่านคอนตินิวอัม']]
+      },
+      fig7_4: {
+        id: 'fig7_4', chapter: 7, short: '7.4 สถิติควอนตัม 3 แบบ', icon: 'fa-project-diagram', color: '#fbbf24', image: 'target_fig7_4.png',
+        title: 'ภาพที่ 7.4 การเปรียบเทียบฟังก์ชันการแจกแจงสถิติ MB, FD และ BE', subtitle: 'Quantum Statistics Distributions: Maxwell-Boltzmann, Fermi-Dirac, Bose-Einstein',
+        desc: 'การเปรียบเทียบการแจกแจงสถานะ n̄(ε) = 1/(e^((ε-μ)/kT) + a) โดย a = +1 (FD: เฟอร์มิออน มีขีดจำกัดเพาลี n̄ ≤ 1), a = 0 (MB: คลาสสิก), a = -1 (BE: โบซอน รวมตัวกันได้ไม่จำกัดและควบแน่นสู่สถานะพื้น)',
+        facts: [['เฟอร์มิ-ดิแรก (FD)', 'สปินครึ่ง (อิเล็กตรอน, ควาร์ก) ห้ามซ้อนทับ n̄ ≤ 1'], ['โบส-ไอน์สไตน์ (BE)', 'สปินเต็ม (โฟตอน, โฟนอน, He-4) ควบแน่นได้'], ['แมกซ์เวลล์-โบลต์ซมันน์', 'ลิมิตคลาสสิกเมื่อ T สูง หรือความหนาแน่นต่ำ'], ['ศักย์เคมีโบซอน', 'μ < ε_0 เสมอเพื่อให้อนุภาคเป็นบวก']]
+      },
+      fig7_5: {
+        id: 'fig7_5', chapter: 7, short: '7.5 ทรงกลมแฟร์มี', icon: 'fa-circle-notch', color: '#00d2ff', image: 'target_fig7_5.png',
+        title: 'ภาพที่ 7.5 ทรงกลมแฟร์มีใน k-space และความดันดีเจเนอเรซีของดาวแคระขาว', subtitle: 'Fermi Sphere, Fermi Surface & White Dwarf Degeneracy Pressure',
+        desc: 'การบรรจุสถานะของก๊าซแฟร์มีในปริภูมิ k จนเต็มรัศมี k_F = (3π²n)^(1/3) ก่อให้เกิดพลังงานแฟร์มี E_F และความดันควอนตัมดีเจเนอเรซี P = (2/5)n E_F ที่ค้ำจุนดาวแคระขาวไม่ให้ยุบตัวภายใต้แรงโน้มถ่วงมหาศาล',
+        facts: [['รัศมีแฟร์มี', 'k_F = (3π² n)^(1/3)'], ['พลังงานแฟร์มี', 'E_F = ℏ² k_F² / (2m)'], ['ความดันดีเจเนอเรซี', 'P = (2/5) n E_F ∝ n^(5/3)'], ['ขีดจำกัดจันทรเศขร', 'M_Ch ≈ 1.44 M_⊙ (เสถียรภาพดาวแคระขาว)']]
+      },
+      fig7_6: {
+        id: 'fig7_6', chapter: 7, short: '7.6 BEC/สภาพนำยิ่งยวด', icon: 'fa-temperature-low', color: '#10b981', image: 'target_fig7_6.png',
+        title: 'ภาพที่ 7.6 การควบแน่นโบส-ไอน์สไตน์ (BEC) และคู่คูเปอร์ในสภาพนำยิ่งยวด', subtitle: 'Bose-Einstein Condensation & Cooper Pairs Superconductivity',
+        desc: 'การควบแน่นของอนุภาคโบซอนสู่สถานะควอนตัมพื้นมหภาค (p=0) เมื่อ T < T_c ทำให้เกิดยอดแหลมคมชัดในสเปกตรัมโมเมนตัม และในสภาพนำยิ่งยวด BCS อิเล็กตรอนจับคู่ผ่านโฟนอนกลายเป็นคู่คูเปอร์ (โบซอนประกอบ) เกิดช่องว่างพลังงาน 2Δ(T)',
+        facts: [['อุณหภูมิวิกฤต BEC', 'T_c = (2πℏ²/mk_B)(n/ζ(3/2))^(2/3)'], ['ยอดแหลมโมเมนตัม', 'การกระจายไบโมดัล (Bimodal Velocity Peak at p=0)'], ['คู่คูเปอร์ (BCS)', 'อิเล็กตรอน (k↑, -k↓) ดึงดูดกันผ่านโฟนอน'], ['ช่องว่างพลังงาน', '2Δ(0) = 3.52 k_B T_c (ปกป้องสภาพนำยิ่งยวด)']]
       },
       fig9: {
-        id: 'fig9', chapter: 7, short: 'บท 7 BEC', icon: 'fa-mountain', color: '#60a5fa', image: null,
+        id: 'fig9', chapter: 7, short: '7.6 BEC (เดิม)', icon: 'fa-mountain', color: '#60a5fa', image: 'target_fig7_6.png',
         title: 'บทที่ 7 การควบแน่นโบส-ไอน์สไตน์ (BEC)', subtitle: 'Bose-Einstein Condensate Density Peak',
         desc: 'พื้นผิวความหนาแน่นของอะตอมในกับดัก เมื่อลดอุณหภูมิต่ำกว่า T_c สัดส่วนอะตอมในสถานะพื้น N₀/N = 1 − (T/T_c)³ เพิ่มขึ้นจนเกิดยอดแหลมกลาง (แบบผลการทดลอง JILA 1995)',
         facts: [['สัดส่วนคอนเดนเสต', 'N₀/N = 1 − (T/T_c)³'], ['สถิติ', 'Bose-Einstein'], ['T_c (Rb-87)', '~170 nK'], ['รางวัลโนเบล', '2001']]
@@ -5066,6 +5097,379 @@
       return { group: g, update };
     }
 
+    // ==========================================================
+    // CHAPTER 7 3D BUILDER FUNCTIONS (Perturbation, Statistics & BEC)
+    // ==========================================================
+
+    // 1. Fig 7.1: Linear Stark Effect & Degenerate Perturbation (n=2 Splitting)
+    function buildStarkEffectModel() {
+      const g = new THREE.Group();
+
+      // Unperturbed n=2 level bar
+      const unpertBar = lineOf([new THREE.Vector3(-1.6, 0, 0), new THREE.Vector3(-0.8, 0, 0)], 0x94a3b8, 2.5);
+      const unpertNode = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), glowMat(0xfacc15, 1.0));
+      unpertNode.position.set(-1.2, 0, 0);
+      g.add(unpertBar, unpertNode);
+
+      // Splitting branches
+      const branchUpper = lineOf([new THREE.Vector3(-0.8, 0, 0), new THREE.Vector3(1.4, 0.9, 0)], 0xf43f5e, 2.0);
+      const branchMid = lineOf([new THREE.Vector3(-0.8, 0, 0), new THREE.Vector3(1.4, 0, 0)], 0x00f0ff, 2.5);
+      const branchLower = lineOf([new THREE.Vector3(-0.8, 0, 0), new THREE.Vector3(1.4, -0.9, 0)], 0x10b981, 2.0);
+      g.add(branchUpper, branchMid, branchLower);
+
+      // Electric field vector arrow
+      const eFieldVec = lineOf([new THREE.Vector3(-0.8, 1.3, 0), new THREE.Vector3(0.6, 1.3, 0)], 0xfacc15, 2.0);
+      const eFieldHead = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.15, 12), glowMat(0xfacc15, 1.0));
+      eFieldHead.rotation.z = -Math.PI / 2;
+      eFieldHead.position.set(0.6, 1.3, 0);
+      g.add(eFieldVec, eFieldHead);
+
+      // 3D Dipole visualization (sp-hybridized cloud lobes)
+      const dipoleGroup = new THREE.Group();
+      dipoleGroup.position.set(1.4, 0, 0);
+
+      const lobePos = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), glowMat(0x00f0ff, 0.7));
+      lobePos.position.set(0, 0.35, 0);
+      const lobeNeg = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), glowMat(0xf43f5e, 0.7));
+      lobeNeg.position.set(0, -0.35, 0);
+      const dipoleAxis = lineOf([new THREE.Vector3(0, -0.45, 0), new THREE.Vector3(0, 0.45, 0)], 0xfacc15, 1.2);
+      dipoleGroup.add(lobePos, lobeNeg, dipoleAxis);
+      g.add(dipoleGroup);
+
+      const lbl = makeLabel('ปรากฏการณ์สตาร์กเชิงเส้น n=2 (ΔE = ±3eℰa₀)', '#00f0ff', 0.68);
+      lbl.position.set(0, 1.75, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.2;
+        const eOsc = 0.9 + 0.25 * Math.sin(t * 2.0);
+        const upArr = branchUpper.geometry.attributes.position.array;
+        upArr[4] = eOsc;
+        branchUpper.geometry.attributes.position.needsUpdate = true;
+
+        const lowArr = branchLower.geometry.attributes.position.array;
+        lowArr[4] = -eOsc;
+        branchLower.geometry.attributes.position.needsUpdate = true;
+
+        dipoleGroup.rotation.z = Math.sin(t * 1.5) * 0.3;
+        lobePos.scale.setScalar(1.0 + 0.15 * Math.sin(t * 3));
+        lobeNeg.scale.setScalar(1.0 - 0.15 * Math.sin(t * 3));
+      }
+      return { group: g, update };
+    }
+
+    // 2. Fig 7.2: Variational Method & Helium Screening (Z_eff = 1.6875)
+    function buildVariationalHeliumModel() {
+      const g = new THREE.Group();
+
+      // Left: 3D Helium Atom with Screening
+      const atomSub = new THREE.Group();
+      atomSub.position.set(-1.0, 0, 0);
+
+      const nucleus = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), glowMat(0xef4444, 1.0));
+      atomSub.add(nucleus);
+
+      const orbit1 = new THREE.Mesh(new THREE.RingGeometry(0.68, 0.70, 36), new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.6 }));
+      orbit1.rotateX(Math.PI / 3);
+      const orbit2 = new THREE.Mesh(new THREE.RingGeometry(0.88, 0.90, 36), new THREE.MeshBasicMaterial({ color: 0xa855f7, side: THREE.DoubleSide, transparent: true, opacity: 0.6 }));
+      orbit2.rotateX(-Math.PI / 3);
+      atomSub.add(orbit1, orbit2);
+
+      const e1 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), glowMat(0x00f0ff, 1.0));
+      const e2 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), glowMat(0x00f0ff, 1.0));
+      atomSub.add(e1, e2);
+
+      const repulsionLine = lineOf([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)], 0xfacc15, 1.2);
+      atomSub.add(repulsionLine);
+      g.add(atomSub);
+
+      // Right: Variational Energy Curve E(alpha)
+      const curveSub = new THREE.Group();
+      curveSub.position.set(1.2, -0.2, 0);
+
+      const pts = [];
+      for (let x = -1.2; x <= 1.2; x += 0.08) {
+        const y = 0.8 * x * x - 0.5;
+        pts.push(new THREE.Vector3(x, y, 0));
+      }
+      const curveLine = lineOf(pts, 0x8b5cf6, 2.0);
+      curveSub.add(curveLine);
+
+      // Benchmark exact horizontal line
+      const benchLine = lineOf([new THREE.Vector3(-1.2, -0.75, 0), new THREE.Vector3(1.2, -0.75, 0)], 0xef4444, 1.2);
+      curveSub.add(benchLine);
+
+      // Minimum marker point
+      const minMarker = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), glowMat(0xfacc15, 1.0));
+      minMarker.position.set(0, -0.5, 0);
+      curveSub.add(minMarker);
+      g.add(curveSub);
+
+      const lbl = makeLabel('ระเบียบวิธีแปรผันฮีเลียม Z_eff = 1.6875 (-77.5 eV)', '#8b5cf6', 0.68);
+      lbl.position.set(0, 1.7, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.15;
+        const ang1 = t * 2.5;
+        const ang2 = t * 2.0 + Math.PI;
+        e1.position.set(0.69 * Math.cos(ang1), 0.69 * Math.sin(ang1) * 0.5, 0.69 * Math.sin(ang1) * 0.86);
+        e2.position.set(0.89 * Math.cos(ang2), -0.89 * Math.sin(ang2) * 0.5, 0.89 * Math.sin(ang2) * 0.86);
+
+        const rArr = repulsionLine.geometry.attributes.position.array;
+        rArr[0] = e1.position.x; rArr[1] = e1.position.y; rArr[2] = e1.position.z;
+        rArr[3] = e2.position.x; rArr[4] = e2.position.y; rArr[5] = e2.position.z;
+        repulsionLine.geometry.attributes.position.needsUpdate = true;
+      }
+      return { group: g, update };
+    }
+
+    // 3. Fig 7.3: Fermi's Golden Rule & Transition Rate to Continuum
+    function buildFermiGoldenRuleModel() {
+      const g = new THREE.Group();
+
+      // Left: Discrete initial state
+      const initLevel = lineOf([new THREE.Vector3(-1.6, -0.6, 0), new THREE.Vector3(-0.6, -0.6, 0)], 0x00f0ff, 2.5);
+      const initPart = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 12), glowMat(0x00f0ff, 1.0));
+      initPart.position.set(-1.1, -0.6, 0);
+      g.add(initLevel, initPart);
+
+      // Continuum ladder band
+      const contGroup = new THREE.Group();
+      for (let y = 0.4; y <= 1.4; y += 0.12) {
+        const rung = lineOf([new THREE.Vector3(-1.6, y, 0), new THREE.Vector3(-0.6, y, 0)], 0x64748b, 1.0);
+        contGroup.add(rung);
+      }
+      g.add(contGroup);
+
+      // Transition wave arrow
+      const photonWave = new THREE.Group();
+      const wavePts = [];
+      for (let s = 0; s <= 1.0; s += 0.05) {
+        wavePts.push(new THREE.Vector3(-1.1 + 0.15 * Math.sin(s * Math.PI * 6), -0.6 + s * 1.5, 0));
+      }
+      const waveLine = lineOf(wavePts, 0xfacc15, 1.5);
+      photonWave.add(waveLine);
+      g.add(photonWave);
+
+      // Right: Sinc-squared resonance 3D surface
+      const sincGroup = new THREE.Group();
+      sincGroup.position.set(1.0, 0, 0);
+
+      const sincPts = [];
+      for (let x = -1.4; x <= 1.4; x += 0.05) {
+        const arg = (x * Math.PI * 2.5) || 0.001;
+        const val = Math.pow(Math.sin(arg) / arg, 2) * 1.4 - 0.7;
+        sincPts.push(new THREE.Vector3(x, val, 0));
+      }
+      const sincLine = lineOf(sincPts, 0xf43f5e, 2.2);
+      sincGroup.add(sincLine);
+      g.add(sincGroup);
+
+      const lbl = makeLabel('กฎทองของแฟร์มี W_i→f = (2π/ℏ)|V_fi|² ρ(E_f)', '#f43f5e', 0.68);
+      lbl.position.set(0, 1.75, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.18;
+        const sProg = (t * 0.8) % 1.0;
+        initPart.position.y = -0.6 + sProg * 1.5;
+        initPart.material.opacity = 1.0 - sProg * 0.5;
+      }
+      return { group: g, update };
+    }
+
+    // 4. Fig 7.4: Quantum Statistics Comparison (MB, FD, BE)
+    function buildQuantumStatisticsModel() {
+      const g = new THREE.Group();
+
+      // FD Curve (Pink)
+      const fdPts = [];
+      for (let x = -1.6; x <= 1.6; x += 0.06) {
+        const y = (1.4 / (Math.exp(x * 2.0) + 1.0)) - 0.7;
+        fdPts.push(new THREE.Vector3(x, y, 0.4));
+      }
+      const fdLine = lineOf(fdPts, 0xec4899, 2.2);
+
+      // MB Curve (Gold)
+      const mbPts = [];
+      for (let x = -0.4; x <= 1.6; x += 0.06) {
+        const y = (1.4 * Math.exp(-x * 1.5)) - 0.7;
+        mbPts.push(new THREE.Vector3(x, y, 0));
+      }
+      const mbLine = lineOf(mbPts, 0xfacc15, 2.0);
+
+      // BE Curve (Cyan)
+      const bePts = [];
+      for (let x = 0.25; x <= 1.6; x += 0.06) {
+        const y = Math.min(1.4, 1.4 / (Math.exp(x * 2.0) - 1.0)) - 0.7;
+        bePts.push(new THREE.Vector3(x, y, -0.4));
+      }
+      const beLine = lineOf(bePts, 0x00f0ff, 2.2);
+
+      g.add(fdLine, mbLine, beLine);
+
+      // Pauli vs Condensation particle ladders
+      const fLadder = new THREE.Group();
+      fLadder.position.set(-1.8, 0, 0);
+      for (let i = 0; i < 4; i++) {
+        const rY = -0.6 + i * 0.4;
+        fLadder.add(lineOf([new THREE.Vector3(-0.3, rY, 0), new THREE.Vector3(0.3, rY, 0)], 0xec4899, 1.5));
+        const p1 = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 10), glowMat(0xec4899, 1.0));
+        p1.position.set(-0.12, rY, 0);
+        const p2 = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 10), glowMat(0xec4899, 1.0));
+        p2.position.set(0.12, rY, 0);
+        fLadder.add(p1, p2);
+      }
+      g.add(fLadder);
+
+      const lbl = makeLabel('สถิติควอนตัม 3 แบบ: FD (เพาลี), BE (ควบแน่น), MB', '#fbbf24', 0.68);
+      lbl.position.set(0, 1.75, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.2;
+      }
+      return { group: g, update };
+    }
+
+    // 5. Fig 7.5: Fermi Sphere in k-space & White Dwarf Degeneracy Pressure
+    function buildFermiSphereModel() {
+      const g = new THREE.Group();
+
+      // Left: 3D Fermi Sphere in k-space
+      const sphereSub = new THREE.Group();
+      sphereSub.position.set(-1.1, 0, 0);
+
+      const fSphere = new THREE.Mesh(new THREE.SphereGeometry(0.85, 24, 24), new THREE.MeshPhysicalMaterial({
+        color: 0x00f0ff,
+        transparent: true,
+        opacity: 0.35,
+        roughness: 0.2,
+        metalness: 0.5,
+        wireframe: false
+      }));
+      const fWire = new THREE.Mesh(new THREE.SphereGeometry(0.852, 16, 16), new THREE.MeshBasicMaterial({
+        color: 0x00f0ff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.25
+      }));
+      sphereSub.add(fSphere, fWire);
+
+      // Swarm of momentum points
+      const pCount = 80;
+      const pGeo = new THREE.BufferGeometry();
+      const pPos = new Float32Array(pCount * 3);
+      for (let i = 0; i < pCount; i++) {
+        const u = Math.random();
+        const r = 0.8 * Math.cbrt(u);
+        const theta = Math.acos(2 * Math.random() - 1);
+        const phi = Math.random() * Math.PI * 2;
+        pPos[i * 3] = r * Math.sin(theta) * Math.cos(phi);
+        pPos[i * 3 + 1] = r * Math.sin(theta) * Math.sin(phi);
+        pPos[i * 3 + 2] = r * Math.cos(theta);
+      }
+      pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+      const pMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05, transparent: true, opacity: 0.85 });
+      const fPoints = new THREE.Points(pGeo, pMat);
+      sphereSub.add(fPoints);
+
+      // Axes
+      const kAxes = new THREE.AxesHelper(1.1);
+      sphereSub.add(kAxes);
+      g.add(sphereSub);
+
+      // Right: White Dwarf Gravity vs Degeneracy Balance
+      const starSub = new THREE.Group();
+      starSub.position.set(1.2, 0, 0);
+
+      const wdCore = new THREE.Mesh(new THREE.SphereGeometry(0.55, 20, 20), glowMat(0x38bdf8, 0.9));
+      starSub.add(wdCore);
+
+      // Inward gravity arrows (Red) & outward pressure arrows (Green)
+      const arrowGroup = new THREE.Group();
+      for (let a = 0; a < 6; a++) {
+        const ang = (a * Math.PI * 2) / 6;
+        const gArr = lineOf([new THREE.Vector3(1.1 * Math.cos(ang), 1.1 * Math.sin(ang), 0), new THREE.Vector3(0.7 * Math.cos(ang), 0.7 * Math.sin(ang), 0)], 0xef4444, 1.5);
+        const pArr = lineOf([new THREE.Vector3(0.4 * Math.cos(ang), 0.4 * Math.sin(ang), 0), new THREE.Vector3(0.7 * Math.cos(ang), 0.7 * Math.sin(ang), 0)], 0x10b981, 1.5);
+        arrowGroup.add(gArr, pArr);
+      }
+      starSub.add(arrowGroup);
+      g.add(starSub);
+
+      const lbl = makeLabel('ทรงกลมแฟร์มี k_F และความดันดีเจเนอเรซีดาวแคระขาว', '#00f0ff', 0.68);
+      lbl.position.set(0, 1.7, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.15;
+        sphereSub.rotation.x = t * 0.1;
+        wdCore.scale.setScalar(1.0 + 0.04 * Math.sin(t * 3));
+      }
+      return { group: g, update };
+    }
+
+    // 6. Fig 7.6: Bose-Einstein Condensation & Cooper Pairs Superconductivity
+    function buildBoseEinsteinSuperconductivityModel() {
+      const g = new THREE.Group();
+
+      // Left: BEC Momentum Bimodal Peak
+      const becSub = new THREE.Group();
+      becSub.position.set(-1.1, 0, 0);
+
+      // Thermal broad base (Gold)
+      const thPts = [];
+      for (let x = -1.2; x <= 1.2; x += 0.08) {
+        const y = 0.35 * Math.exp(-(x * x) / 0.6) - 0.7;
+        thPts.push(new THREE.Vector3(x, y, 0));
+      }
+      const thLine = lineOf(thPts, 0xfacc15, 1.2);
+
+      // Sharp BEC Spike (Cyan)
+      const spkPts = [];
+      for (let x = -1.2; x <= 1.2; x += 0.04) {
+        const y = (1.5 / (1.0 + 25.0 * x * x)) - 0.7;
+        spkPts.push(new THREE.Vector3(x, y, 0));
+      }
+      const spkLine = lineOf(spkPts, 0x00f0ff, 2.5);
+      becSub.add(thLine, spkLine);
+      g.add(becSub);
+
+      // Right: Cooper Pair (k↑, -k↓) with Phonon Spring
+      const bcsSub = new THREE.Group();
+      bcsSub.position.set(1.1, 0, 0);
+
+      const eUp = new THREE.Mesh(new THREE.SphereGeometry(0.12, 14, 14), glowMat(0x00f0ff, 1.0));
+      eUp.position.set(-0.6, 0.25, 0);
+      const eDown = new THREE.Mesh(new THREE.SphereGeometry(0.12, 14, 14), glowMat(0xf43f5e, 1.0));
+      eDown.position.set(0.6, -0.25, 0);
+      bcsSub.add(eUp, eDown);
+
+      // Phonon spring wavy line
+      const springPts = [];
+      for (let s = 0; s <= 1.0; s += 0.05) {
+        const sx = -0.6 + s * 1.2;
+        const sy = (0.25 - s * 0.5) + 0.12 * Math.sin(s * Math.PI * 8);
+        springPts.push(new THREE.Vector3(sx, sy, 0));
+      }
+      const springLine = lineOf(springPts, 0xfacc15, 1.8);
+      bcsSub.add(springLine);
+      g.add(bcsSub);
+
+      const lbl = makeLabel('การควบแน่น BEC (p=0) และคู่คูเปอร์สภาพนำยิ่งยวด BCS', '#10b981', 0.68);
+      lbl.position.set(0, 1.7, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.2;
+        const osc = 0.08 * Math.sin(t * 4);
+        eUp.position.x = -0.6 + osc;
+        eDown.position.x = 0.6 - osc;
+      }
+      return { group: g, update };
+    }
+
     function buildChapterModels() {
       return {
         fig4: buildDoubleSlitModel(),
@@ -5134,10 +5538,19 @@
     models.fig6_5 = buildSpinPrecessionModel();
     models.fig6_6 = buildSpinOrbitSpintronicsModel();
 
+    // Chapter 7 Complete Suite
+    models.fig7_1 = buildStarkEffectModel();
+    models.fig7_2 = buildVariationalHeliumModel();
+    models.fig7_3 = buildFermiGoldenRuleModel();
+    models.fig7_4 = buildQuantumStatisticsModel();
+    models.fig7_5 = buildFermiSphereModel();
+    models.fig7_6 = buildBoseEinsteinSuperconductivityModel();
+
     Object.assign(models, buildChapterModels()); // Chapters 3-12 (fig5 ... fig14)
     models.fig5 = models.fig3_1; // Alias fig5 to fig3_1
     models.fig6 = models.fig4_6; // Alias legacy fig6 to fig4_6
     models.fig8 = models.fig6_3; // Alias legacy fig8 to fig6_3
+    models.fig9 = models.fig7_6; // Alias legacy fig9 to fig7_6
 
 
 
@@ -6401,12 +6814,58 @@
           `;
           break;
 
-        // --- CH 7: BEC ---
+        // --- CH 7: Perturbation Theory, Quantum Statistics & Condensed Matter (6 Targets) ---
+        case 'fig7_1':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ความเข้มสนามไฟฟ้าภายนอก ($\mathcal{E}$)</span><span class="param-val" id="disp-stark-e">5.0 kV/cm</span></div>
+              <input type="range" class="slider-custom" min="0" max="15" step="0.5" value="5" oninput="updateFig7_1Field(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig7_2':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>พารามิเตอร์ประจุยังผล ($Z_{\\text{eff}}$)</span><span class="param-val" id="disp-var-z">Z_eff = 1.6875</span></div>
+              <input type="range" class="slider-custom" min="1.0" max="2.4" step="0.05" value="1.6875" oninput="updateFig7_2Alpha(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig7_3':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>เวลาอันตรกิริยา ($t$) สัญญาณรบกวน</span><span class="param-val" id="disp-fgr-t">1.0 ps (sinc² → δ)</span></div>
+              <input type="range" class="slider-custom" min="0.2" max="3.0" step="0.1" value="1.0" oninput="updateFig7_3Time(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig7_4':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>อุณหภูมิสัมพัทธ์ ($k_B T$)</span><span class="param-val" id="disp-qs-t">1.00 ε₀</span></div>
+              <input type="range" class="slider-custom" min="0.1" max="2.5" step="0.1" value="1.0" oninput="updateFig7_4Temp(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig7_5':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ความหนาแน่นอิเล็กตรอน ($n$)</span><span class="param-val" id="disp-fs-n">5.0 × 10²⁸ m⁻³</span></div>
+              <input type="range" class="slider-custom" min="1.0" max="12.0" step="0.5" value="5.0" oninput="updateFig7_5Kf(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig7_6':
         case 'fig9':
           container.innerHTML = `
             <div class="param-group">
               <div class="param-label"><span>อุณหภูมิลดทอน ($T / T_c$)</span><span class="param-val" id="disp-bec-t">0.60 Tc</span></div>
-              <input type="range" class="slider-custom" min="0.0" max="1.5" step="0.05" value="0.60" oninput="updateFig9Temp(this.value)">
+              <input type="range" class="slider-custom" min="0.0" max="1.5" step="0.05" value="0.60" oninput="updateFig7_6Temp(this.value); updateFig9Temp(this.value)">
             </div>
             <div class="param-group">
               <div class="param-label"><span>จำนวนอะตอมในกับดัก ($N$)</span><span class="param-val" id="disp-bec-n">5 × 10⁵ ⁸⁷Rb</span></div>
@@ -6808,15 +7267,71 @@
           `;
           break;
 
-        // --- CH 7: BEC ---
+        // --- CH 7: Perturbation Theory, Quantum Statistics & Condensed Matter (6 Targets) ---
+        case 'fig7_1':
+          container.innerHTML = `
+            <div class="info-card"><h5>ระดับพลังงานหลัก</h5><p>n = 2 (4-fold degenerate)</p></div>
+            <div class="info-card"><h5>การแยกพลังงานสตาร์ก</h5><p id="t-stark-split" style="color:#00f0ff;">ΔE = ±0.079 meV</p></div>
+            <div class="info-card"><h5>ความเข้มสนามไฟฟ้า</h5><p id="t-stark-e">5.0 kV/cm</p></div>
+            <div class="info-card"><h5>ไดโพลโมเมนต์ถาวร</h5><p style="color:var(--gold);">p_z = 3e a₀ (0.159 e·nm)</p></div>
+            <div class="info-card"><h5>สถานะลูกผสม (Hybrid)</h5><p>(|2s⟩ ± |2p₀⟩) / √2</p></div>
+            <div class="info-card"><h5>สถานะไม่ถูกรบกวน</h5><p style="color:#10b981;">|2p₊₁⟩, |2p₋₁⟩ (ΔE = 0)</p></div>
+          `;
+          break;
+
+        case 'fig7_2':
+          container.innerHTML = `
+            <div class="info-card"><h5>ประจุยังผล ($Z_{\\text{eff}}$)</h5><p id="t-var-z" style="color:#8b5cf6;">1.6875 (Screening)</p></div>
+            <div class="info-card"><h5>พลังงานสถานะพื้นคำนวณ</h5><p id="t-var-e" style="color:var(--gold);">-77.49 eV</p></div>
+            <div class="info-card"><h5>พลังงานทดลองจริง</h5><p style="color:#10b981;">-79.005 eV</p></div>
+            <div class="info-card"><h5>ความคลาดเคลื่อนสัมพัทธ์</h5><p id="t-var-err" style="color:#10b981;">1.91%</p></div>
+            <div class="info-card"><h5>แฟกเตอร์การบดบัง</h5><p>ΔZ = 5/16 = 0.3125</p></div>
+            <div class="info-card"><h5>ทฤษฎีบทแปรผัน</h5><p style="color:#00f0ff;">⟨H⟩_trial ≥ E_ground</p></div>
+          `;
+          break;
+
+        case 'fig7_3':
+          container.innerHTML = `
+            <div class="info-card"><h5>อัตราการเปลี่ยนสถานะ ($W$)</h5><p id="t-fgr-rate" style="color:#f43f5e;">(2π/ℏ)|V_fi|² ρ(E_f)</p></div>
+            <div class="info-card"><h5>เวลาการวัด ($t$)</h5><p id="t-fgr-t">1.0 ps</p></div>
+            <div class="info-card"><h5>การอนุรักษ์พลังงาน</h5><p style="color:#10b981;">E_f = E_i ± ℏω (δ-peak)</p></div>
+            <div class="info-card"><h5>ความกว้างยอดการสั่นพ้อง</h5><p id="t-fgr-width" style="color:var(--gold);">Δω ~ 2π/t = 6.28 THz</p></div>
+            <div class="info-card"><h5>ฟังก์ชันเรโซแนนซ์</h5><p>sinc²(Δω t / 2) → 2πt δ</p></div>
+            <div class="info-card"><h5>ความหนาแน่นสถานะ</h5><p>Continuum ρ(E_f)</p></div>
+          `;
+          break;
+
+        case 'fig7_4':
+          container.innerHTML = `
+            <div class="info-card"><h5>เฟอร์มิ-ดิแรก (FD)</h5><p id="t-qs-fd" style="color:#ec4899;">n̄(ε_F) = 0.50 (n̄ ≤ 1)</p></div>
+            <div class="info-card"><h5>โบส-ไอน์สไตน์ (BE)</h5><p id="t-qs-be" style="color:#00f0ff;">n̄(ε) → ∞ เมื่อ ε → μ</p></div>
+            <div class="info-card"><h5>แมกซ์เวลล์-โบลต์ซมันน์</h5><p id="t-qs-mb" style="color:#facc15;">e^(-ε/kT) (คลาสสิก)</p></div>
+            <div class="info-card"><h5>อุณหภูมิ ($k_B T$)</h5><p id="t-qs-t">1.00 ε₀</p></div>
+            <div class="info-card"><h5>การจำแนกอนุภาค</h5><p>Fermion: สปินครึ่ง / Boson: สปินเต็ม</p></div>
+            <div class="info-card"><h5>ลิมิตคลาสสิก</h5><p style="color:#10b981;">(ε - μ) >> kT (ลู่เข้าสู่ MB)</p></div>
+          `;
+          break;
+
+        case 'fig7_5':
+          container.innerHTML = `
+            <div class="info-card"><h5>รัศมีแฟร์มี ($k_F$)</h5><p id="t-fs-kf" style="color:#00f0ff;">1.14 × 10¹⁰ m⁻¹</p></div>
+            <div class="info-card"><h5>พลังงานแฟร์มี ($E_F$)</h5><p id="t-fs-ef" style="color:var(--gold);">5.02 eV</p></div>
+            <div class="info-card"><h5>อุณหภูมิแฟร์มี ($T_F$)</h5><p id="t-fs-tf">58,200 K</p></div>
+            <div class="info-card"><h5>ความดันดีเจเนอเรซี ($P$)</h5><p id="t-fs-p" style="color:#10b981;">1.61 × 10¹¹ Pa</p></div>
+            <div class="info-card"><h5>เสถียรภาพดาวแคระขาว</h5><p style="color:#10b981;">M < 1.44 M_⊙ (ค้ำจุนได้)</p></div>
+            <div class="info-card"><h5>หลักการกีดกันเพาลี</h5><p>Δx Δp_x ≥ ℏ/2 (Quantum Pressure)</p></div>
+          `;
+          break;
+
+        case 'fig7_6':
         case 'fig9':
           container.innerHTML = `
             <div class="info-card"><h5>อุณหภูมิวิกฤต ($T_c$)</h5><p>~170 nK (⁸⁷Rb)</p></div>
             <div class="info-card"><h5>สัดส่วนคอนเดนเสต ($N_0/N$)</h5><p id="t-bec-f" style="color:var(--gold);">78%</p></div>
-            <div class="info-card"><h5>ฟังก์ชันสถิติควอนตัม</h5><p>Bose-Einstein</p></div>
-            <div class="info-card"><h5>ยอดแหลมความหนาแน่น</h5><p style="color:#10b981;">Macroscopic State</p></div>
-            <div class="info-card"><h5>สมการควบคุม</h5><p>Gross-Pitaevskii</p></div>
-            <div class="info-card"><h5>รางวัลโนเบลฟิสิกส์</h5><p>Cornell, Wieman, Ketterle</p></div>
+            <div class="info-card"><h5>ยอดแหลมโมเมนตัม</h5><p style="color:#00f0ff;">Macroscopic State (p=0)</p></div>
+            <div class="info-card"><h5>คู่คูเปอร์ (BCS)</h5><p style="color:#10b981;">(k↑, -k↓) ผ่านโฟนอน</p></div>
+            <div class="info-card"><h5>ช่องว่างพลังงาน ($2\Delta$)</h5><p style="color:var(--gold);">2Δ(0) = 3.52 k_B T_c</p></div>
+            <div class="info-card"><h5>สภาพนำยิ่งยวด</h5><p style="color:#10b981;">R = 0 และผลไมส์สเนอร์</p></div>
           `;
           break;
 
@@ -7292,6 +7807,88 @@
         if (tState) { tState.textContent = 'ตรงข้ามขนาน (Antiparallel)'; tState.style.color = '#ef4444'; }
         if (tR) { tR.textContent = 'R_AP สูงมาก (กระเจิงรุนแรง)'; tR.style.color = '#ef4444'; }
       }
+    }
+
+    // --- CH 7 Helper Functions ---
+    function updateFig7_1Field(val) {
+      const eKv = parseFloat(val);
+      const dispE = document.getElementById('disp-stark-e');
+      const tE = document.getElementById('t-stark-e');
+      const tSplit = document.getElementById('t-stark-split');
+      if (dispE) dispE.textContent = `${eKv.toFixed(1)} kV/cm`;
+      if (tE) tE.textContent = `${eKv.toFixed(1)} kV/cm`;
+      const deltaE_meV = (3 * (eKv * 1e5) * 5.29177e-11 * 1000).toFixed(3);
+      if (tSplit) tSplit.textContent = `ΔE = ±${deltaE_meV} meV`;
+    }
+
+    function updateFig7_2Alpha(val) {
+      const z = parseFloat(val);
+      const dispZ = document.getElementById('disp-var-z');
+      const tZ = document.getElementById('t-var-z');
+      const tE = document.getElementById('t-var-e');
+      const tErr = document.getElementById('t-var-err');
+      if (dispZ) dispZ.textContent = `Z_eff = ${z.toFixed(4)}`;
+      if (tZ) tZ.textContent = `${z.toFixed(4)} (${Math.abs(z - 1.6875) < 0.01 ? 'Optimal Min' : 'Trial Param'})`;
+      const eVal = (2 * z * z - 8 * z + 0.625 * z) * 13.606;
+      if (tE) tE.textContent = `${eVal.toFixed(2)} eV`;
+      const err = Math.abs((eVal - (-79.005)) / (-79.005) * 100).toFixed(2);
+      if (tErr) tErr.textContent = `${err}%`;
+    }
+
+    function updateFig7_3Time(val) {
+      const tPs = parseFloat(val);
+      const dispT = document.getElementById('disp-fgr-t');
+      const tTime = document.getElementById('t-fgr-t');
+      const tWidth = document.getElementById('t-fgr-width');
+      if (dispT) dispT.textContent = `${tPs.toFixed(1)} ps (sinc² → δ)`;
+      if (tTime) tTime.textContent = `${tPs.toFixed(1)} ps`;
+      const widthTHz = ((2 * Math.PI) / tPs).toFixed(2);
+      if (tWidth) tWidth.textContent = `Δω ~ 2π/t = ${widthTHz} THz`;
+    }
+
+    function updateFig7_4Temp(val) {
+      const tKt = parseFloat(val);
+      const dispT = document.getElementById('disp-qs-t');
+      const tTemp = document.getElementById('t-qs-t');
+      const tFd = document.getElementById('t-qs-fd');
+      const tBe = document.getElementById('t-qs-be');
+      const tMb = document.getElementById('t-qs-mb');
+      if (dispT) dispT.textContent = `${tKt.toFixed(2)} ε₀`;
+      if (tTemp) tTemp.textContent = `${tKt.toFixed(2)} ε₀`;
+      if (tFd) tFd.textContent = `n̄(ε_F) = 0.50 (T=${tKt.toFixed(1)})`;
+      if (tBe) tBe.textContent = tKt < 0.5 ? 'Condensate N₀ >> 1 (p=0)' : 'Thermal Excitations';
+      if (tMb) tMb.textContent = `e^(-ε/${tKt.toFixed(1)}kT)`;
+    }
+
+    function updateFig7_5Kf(val) {
+      const n10 = parseFloat(val);
+      const dispN = document.getElementById('disp-fs-n');
+      const tKf = document.getElementById('t-fs-kf');
+      const tEf = document.getElementById('t-fs-ef');
+      const tTf = document.getElementById('t-fs-tf');
+      const tP = document.getElementById('t-fs-p');
+      if (dispN) dispN.textContent = `${n10.toFixed(1)} × 10²⁸ m⁻³`;
+      const nReal = n10 * 1e28;
+      const kf = Math.cbrt(3 * Math.PI * Math.PI * nReal);
+      const hbar = 1.05457e-34;
+      const me = 9.10938e-31;
+      const ef_J = (hbar * hbar * kf * kf) / (2 * me);
+      const ef_eV = ef_J / 1.60218e-19;
+      const tf_K = ef_J / 1.38065e-23;
+      const p_Pa = (2 / 5) * nReal * ef_J;
+      if (tKf) tKf.textContent = `${(kf / 1e10).toFixed(2)} × 10¹⁰ m⁻¹`;
+      if (tEf) tEf.textContent = `${ef_eV.toFixed(2)} eV`;
+      if (tTf) tTf.textContent = `${Math.round(tf_K).toLocaleString()} K`;
+      if (tP) tP.textContent = `${(p_Pa / 1e11).toFixed(2)} × 10¹¹ Pa`;
+    }
+
+    function updateFig7_6Temp(val) {
+      const v = parseFloat(val);
+      const disp = document.getElementById('disp-bec-t');
+      if (disp) disp.textContent = `${v.toFixed(2)} Tc`;
+      const f = Math.max(0, 1 - Math.pow(Math.min(v, 1), 3));
+      const el = document.getElementById('t-bec-f');
+      if (el) el.textContent = `${Math.round(f * 100)}%`;
     }
 
     // Fig 9: BEC
