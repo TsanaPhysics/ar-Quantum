@@ -2113,11 +2113,35 @@
         desc: 'การเลี้ยวเบนของลำอิเล็กตรอนพลังงาน 54 eV จากระนาบผลึกนิกเกิล แทรกสอดเสริมกันที่มุม phi = 50 องศา',
         params: { voltage: 54, angle: 50, latticeD: 0.215 }
       },
+      fig2_2: {
+        id: 'fig2_2', chapter: 2, short: '2.2 ความเร็วเฟส/กลุ่ม', icon: 'fa-wave-square', color: '#7c3aed', image: 'target_fig2_2.png',
+        title: 'ภาพที่ 2.2 ความเร็วเฟสและความเร็วกลุ่ม', subtitle: 'Phase Velocity vs Group Velocity',
+        desc: 'เปลือกหุ้มกลุ่มคลื่นเคลื่อนที่ด้วยความเร็วกลุ่มเท่ากับอนุภาค v_g = v < c ขณะที่ยอดคลื่นเดี่ยวเคลื่อนที่ด้วยความเร็วเฟส v_p = c²/v > c โดยที่ v_p·v_g = c²',
+        facts: [['ความเร็วกลุ่ม', 'v_g = dω/dk = v < c'], ['ความเร็วเฟส', 'v_p = ω/k = c²/v > c'], ['ผลคูณคงที่', 'v_p · v_g = c²'], ['การส่งข้อมูล', 'จำกัดโดย v_g ≤ c']]
+      },
+      fig2_3: {
+        id: 'fig2_3', chapter: 2, short: '2.3 การกระจายตัวคลื่น', icon: 'fa-chart-area', color: '#0284c7', image: 'target_fig2_3.png',
+        title: 'ภาพที่ 2.3 การกระจายตัวของกลุ่มคลื่นเกาส์เซียน', subtitle: 'Gaussian Wave Packet Dispersion',
+        desc: 'วิวัฒนาการเชิงเวลาของกลุ่มคลื่นเกาส์เซียนอิสระ ศูนย์กลางเคลื่อนที่ด้วย v₀ = p₀/m และความกว้างแผ่ออกตาม σ(t) = σ₀√(1 + (ħt/2mσ₀²)²)',
+        facts: [['ความกว้างเริ่มต้น', 'Δx₀ = σ₀'], ['การแผ่กว้างตามเวลา', 'σ(t) = σ₀√(1 + (ħt/2mσ₀²)²)'], ['กลุ่มคลื่นต่ำสุด', 'Δx Δp = ħ/2'], ['การอนุรักษ์', '∫|ψ|² dx = 1']]
+      },
       fig4: {
-        id: 'fig4', chapter: 2, short: 'บท 2 สลิตคู่', icon: 'fa-grip-lines-vertical', color: '#38bdf8', image: null,
-        title: 'บทที่ 2 การแทรกสอดช่องคู่ของอิเล็กตรอนเดี่ยว', subtitle: 'Single-Electron Double-Slit Interference',
+        id: 'fig4', chapter: 2, short: '2.4 สลิตคู่อิเล็กตรอน', icon: 'fa-grip-lines-vertical', color: '#38bdf8', image: 'target_fig4.png',
+        title: 'ภาพที่ 2.4 การแทรกสอดช่องคู่ของอิเล็กตรอนเดี่ยว', subtitle: 'Single-Electron Double-Slit Interference (Tonomura)',
         desc: 'อิเล็กตรอนทีละตัวผ่านสลิตคู่ จุดตกกระทบบนฉากสะสมจนเกิดริ้วแทรกสอด I(y) ∝ cos²(πdy/λL)·sinc²(πay/λL) แสดงทวิภาวะคลื่น-อนุภาค',
         facts: [['ความยาวคลื่นเดอ บรอยล์', 'λ = h/p'], ['ระยะห่างริ้วสว่าง', 'Δy = λL/d'], ['ลักษณะ', 'สะสมทีละอนุภาค'], ['หลักการ', 'ทวิภาวะคลื่น-อนุภาค']]
+      },
+      fig2_5: {
+        id: 'fig2_5', chapter: 2, short: '2.5 เครื่องแทรกสอด COW', icon: 'fa-monument', color: '#f59e0b', image: 'target_fig2_5.png',
+        title: 'ภาพที่ 2.5 เครื่องแทรกสอดนิวตรอน COW ในสนามโน้มถ่วง', subtitle: 'Colella-Overhauser-Werner Gravitational Interferometer',
+        desc: 'เครื่องแทรกสอดผลึกเดี่ยวซิลิกอน 3 ใบมีด (Splitter, Mirror, Analyzer) ตรวจวัดการเลื่อนเฟสควอนตัม ΔΦ_g จากผลต่างศักย์โน้มถ่วง m_n g Δz',
+        facts: [['ผลต่างเฟสควอนตัม', 'ΔΦ_g = -(m_n² g λ A sin α) / ħ²'], ['ชนิดอนุภาค', 'นิวตรอนความร้อน'], ['การทดลอง', 'COW 1975'], ['ความสำคัญ', 'พิสูจน์ผลโน้มถ่วงต่อคลื่นควอนตัม']]
+      },
+      fig2_6: {
+        id: 'fig2_6', chapter: 2, short: '2.6 ทัศนศาสตร์ Cryo-EM', icon: 'fa-microscope', color: '#10b981', image: 'target_fig2_6.png',
+        title: 'ภาพที่ 2.6 ลำกล้องอิเล็กตรอน Cryo-EM และ Scherzer CTF', subtitle: 'Cryo-EM Column Optics & Scherzer Contrast Transfer',
+        desc: 'ระบบลำกล้องอิเล็กตรอน 300 kV ตัวอย่างแช่แข็งในน้ำแข็งอสัณฐาน 77 K และฟังก์ชันถ่ายโอนคอนทราสต์ CTF(k) ที่สภาวะเชอร์เซอร์โฟกัส',
+        facts: [['ความยาวคลื่นอิเล็กตรอน', 'λ = 1.97 pm (ที่ 300 kV)'], ['เชอร์เซอร์โฟกัส', 'Δf_Sch = √(4/3 C_s λ)'], ['ความละเอียด', '< 1.2 Å ระดับอะตอม'], ['รางวัลโนเบล', 'เคมี 2017 (Cryo-EM)']]
       },
       fig5: {
         id: 'fig5', chapter: 3, short: 'บท 3 แพ็กเก็ตคลื่น', icon: 'fa-wave-square', color: '#22d3ee', image: null,
@@ -3611,6 +3635,147 @@
       return { group: g, update };
     }
 
+    function buildPhaseGroupVelocityModel() {
+      const g = new THREE.Group();
+      // Wave packet curve
+      const points = [];
+      const numPts = 120;
+      for (let i = 0; i <= numPts; i++) {
+        const x = (i / numPts) * 6 - 3;
+        const env = Math.exp(-0.35 * x * x);
+        const y = env * Math.cos(7 * x) * 0.9;
+        const z = env * Math.sin(7 * x) * 0.45;
+        points.push(new THREE.Vector3(x, y, z));
+      }
+      const curveGeo = new THREE.BufferGeometry().setFromPoints(points);
+      const curveMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 3 });
+      const line = new THREE.Line(curveGeo, curveMat);
+      g.add(line);
+
+      // Envelope glow wireframe
+      const envGeo = new THREE.CylinderGeometry(0.9, 0.9, 6, 24, 16, true);
+      envGeo.rotateZ(Math.PI / 2);
+      const envMat = new THREE.MeshBasicMaterial({ color: 0x7c3aed, wireframe: true, transparent: true, opacity: 0.25 });
+      const envMesh = new THREE.Mesh(envGeo, envMat);
+      g.add(envMesh);
+
+      // Moving central particle
+      const partGeo = new THREE.SphereGeometry(0.18, 24, 24);
+      const partMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, roughness: 0.2 });
+      const particle = new THREE.Mesh(partGeo, partMat);
+      g.add(particle);
+
+      // Dual velocity vector arrows
+      const arrowVg = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, -0.6, 0), 1.6, 0x10b981, 0.35, 0.2);
+      const arrowVp = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1.1, 0), 2.2, 0xe11d48, 0.4, 0.25);
+      g.add(arrowVg);
+      g.add(arrowVp);
+
+      function update(t) {
+        particle.position.x = Math.sin(t * 1.5) * 1.2;
+        particle.position.y = Math.cos(t * 8.0) * 0.15;
+        envMesh.rotation.x = t * 0.8;
+        line.rotation.x = t * 2.0;
+        g.rotation.y = Math.sin(t * 0.3) * 0.2;
+      }
+      return { group: g, update };
+    }
+
+    function buildCOWInterferometerModel() {
+      const g = new THREE.Group();
+      // Monolithic silicon base block
+      const baseGeo = new THREE.BoxGeometry(4.0, 0.35, 1.8);
+      const baseMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.85, roughness: 0.25 });
+      const base = new THREE.Mesh(baseGeo, baseMat);
+      base.position.y = -0.5;
+      g.add(base);
+
+      // 3 Monolithic Silicon Blades (Splitter, Mirror, Analyzer)
+      const bladeMat = new THREE.MeshPhysicalMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.15, clearcoat: 0.8 });
+      const bladePositions = [-1.3, 0.0, 1.3];
+      bladePositions.forEach((bx, idx) => {
+        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.6, 1.4), bladeMat);
+        blade.position.set(bx, 0.4, 0);
+        g.add(blade);
+      });
+
+      // Split Neutron Ray paths (Path I red, Path II blue)
+      const pathIGeo = new THREE.CylinderGeometry(0.03, 0.03, 2.8, 16);
+      pathIGeo.rotateZ(Math.PI / 2);
+      const pathIMat = new THREE.MeshBasicMaterial({ color: 0xe11d48 });
+      const pathI = new THREE.Mesh(pathIGeo, pathIMat);
+      pathI.position.set(0, 0.8, 0);
+      g.add(pathI);
+
+      const pathIIGeo = new THREE.CylinderGeometry(0.03, 0.03, 2.8, 16);
+      pathIIGeo.rotateZ(Math.PI / 2);
+      const pathIIMat = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+      const pathII = new THREE.Mesh(pathIIGeo, pathIIMat);
+      pathII.position.set(0, 0.0, 0);
+      g.add(pathII);
+
+      // Detectors Det O and Det H
+      const detMat = new THREE.MeshStandardMaterial({ color: 0x7c3aed, emissive: 0x4c1d95 });
+      const detO = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), detMat);
+      detO.position.set(1.8, 0.8, 0.3);
+      const detH = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), detMat);
+      detH.position.set(1.8, 0.0, -0.3);
+      g.add(detO);
+      g.add(detH);
+
+      function update(t) {
+        g.rotation.z = Math.sin(t * 0.8) * 0.18; // Tilt angle alpha oscillation
+        g.rotation.y = Math.sin(t * 0.4) * 0.25;
+      }
+      return { group: g, update };
+    }
+
+    function buildCryoEMModel() {
+      const g = new THREE.Group();
+      // Column Outer Tube
+      const colGeo = new THREE.CylinderGeometry(0.7, 0.8, 3.6, 32);
+      const colMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.85, roughness: 0.3 });
+      const col = new THREE.Mesh(colGeo, colMat);
+      g.add(col);
+
+      // Rings (Magnetic lenses)
+      const ringMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.9, roughness: 0.2 });
+      [-1.0, 0.0, 1.0].forEach(ry => {
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.09, 16, 32), ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = ry;
+        g.add(ring);
+      });
+
+      // Sample Stage (Vitrified Ice chamber with biological molecule)
+      const sampleGeo = new THREE.BoxGeometry(1.2, 0.12, 1.2);
+      const sampleMat = new THREE.MeshPhysicalMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.65, roughness: 0.1 });
+      const sample = new THREE.Mesh(sampleGeo, sampleMat);
+      sample.position.y = 0.2;
+      g.add(sample);
+
+      // Spike protein model (Knot / Ribosome)
+      const proteinGeo = new THREE.TorusKnotGeometry(0.2, 0.06, 48, 12);
+      const proteinMat = new THREE.MeshStandardMaterial({ color: 0xec4899, emissive: 0xbe185d });
+      const protein = new THREE.Mesh(proteinGeo, proteinMat);
+      protein.position.y = 0.2;
+      g.add(protein);
+
+      // Direct Electron Detector grid at bottom
+      const dedGeo = new THREE.BoxGeometry(1.1, 0.15, 1.1);
+      const dedMat = new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x047857 });
+      const ded = new THREE.Mesh(dedGeo, dedMat);
+      ded.position.y = -1.8;
+      g.add(ded);
+
+      function update(t) {
+        protein.rotation.y = t * 1.2;
+        protein.rotation.x = t * 0.7;
+        g.rotation.y = t * 0.4;
+      }
+      return { group: g, update };
+    }
+
     function buildChapterModels() {
       return {
         fig4: buildDoubleSlitModel(),
@@ -3636,8 +3801,18 @@
     models.fig1_6 = buildComptonModel();
     models.fig1_7 = buildPairProductionModel();
     models.fig1_8 = buildKibbleSNSPDModel();
+
+    // Chapter 2 Complete Suite
     models.fig3 = buildFig3Model();
-    Object.assign(models, buildChapterModels()); // Chapters 2-12 (fig4 ... fig14)
+    models.fig2_1 = models.fig3;
+    models.fig2_2 = buildPhaseGroupVelocityModel();
+    models.fig2_3 = buildWavePacketModel();
+    models.fig4 = buildDoubleSlitModel();
+    models.fig2_4 = models.fig4;
+    models.fig2_5 = buildCOWInterferometerModel();
+    models.fig2_6 = buildCryoEMModel();
+
+    Object.assign(models, buildChapterModels()); // Chapters 3-12 (fig5 ... fig14)
 
     // Attach them to masterGroup
     Object.values(models).forEach(m => {
