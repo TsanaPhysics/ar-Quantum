@@ -2432,6 +2432,42 @@
         desc: 'การสร้างกุญแจลับสุ่มร่วมกันด้วยโฟตอนเดี่ยวในฐานสังยุค (BB84) หรือคู่พัวพัน (Ekert91) ผู้ดักฟังอีฟที่สุ่มวัดจะสร้างอัตราผิดพลาด QBER = 25% ซึ่งสูงกว่าเกณฑ์ 11% ทำให้อลิซและบ็อบตรวจพบได้ทันที',
         facts: [['ฐานวัด BB84', 'เรกติลิเนียร์ (+) และไดแอโกนัล (×)'], ['การคัดกรอง (Sifting)', 'เก็บเฉพาะรอบที่ฐานตรงกัน (~50%)'], ['QBER เมื่อมี Eve', '25% (Intercept-Resend)'], ['เกณฑ์ความปลอดภัยชอร์', 'QBER < 11% (ปลอดภัยสมบูรณ์)']]
       },
+      fig10_1: {
+        id: 'fig10_1', chapter: 10, short: '10.1 ดอยช์-โยซา', icon: 'fa-microchip', color: '#38bdf8', image: 'target_fig10_1.png',
+        title: 'ภาพที่ 10.1 การขนานควอนตัมและอัลกอริทึมดอยช์-โยซา', subtitle: 'Deutsch-Jozsa Algorithm & Phase Kickback Mechanism',
+        desc: 'การใช้การขนานควอนตัม (Quantum Parallelism) และกลไกการสะท้อนเฟส (Phase Kickback) เพื่อจำแนกฟังก์ชันคงตัว (Constant) ออกจากฟังก์ชันสมดุล (Balanced) ด้วยการเรียกออราเคิลเพียงครั้งเดียว O(1) เทียบกับคลาสสิก 2^(n-1)+1 ครั้ง',
+        facts: [['การเร่งความเร็ว', 'เอ็กซ์โพเนนเชียล: 1 ครั้ง vs 2^(n-1)+1'], ['กลไกหลัก', 'Phase Kickback: |x⟩|-⟩ → (-1)^f(x) |x⟩|-⟩'], ['ผลลัพธ์คงตัว', 'วัดได้ |0...0⟩ ด้วยความน่าจะเป็น 100%'], ['ผลลัพธ์สมดุล', 'วัดได้สถานะอื่นใดที่ไม่ใช่ศูนย์ล้วน (P=0 สำหรับ |0⟩)']]
+      },
+      fig10_2: {
+        id: 'fig10_2', chapter: 10, short: '10.2 การค้นหาโกรเวอร์', icon: 'fa-magnifying-glass-chart', color: '#facc15', image: 'target_fig10_2.png',
+        title: 'ภาพที่ 10.2 อัลกอริทึมการค้นหาของโกรเวอร์และการขยายแอมพลิจูดเชิงเรขาคณิต', subtitle: "Grover's Search Algorithm & Geometric Amplitude Amplification",
+        desc: 'การค้นหาข้อมูลในฐานข้อมูลไร้ระเบียบขนาด N ด้วยการหมุนเวกเตอร์สถานะในระนาบ 2 มิติ (|w⟩ และ |s_perp⟩) สองขั้นตอน: การสะท้อนเฟสออราเคิล และตัวกระจายการสะท้อนรอบค่าเฉลี่ย นำไปสู่อัตราเร่งแบบกำลังสอง O(√N)',
+        facts: [['ความซับซ้อน', 'O(√N) เทียบกับคลาสสิก O(N)'], ['จำนวนรอบที่เหมาะสม', 'R ≈ (π/4)√N'], ['มุมการหมุนต่อรอบ', '2θ โดย sin(θ) = 1/√N'], ['ตัวดำเนินการกระจาย', 'D = 2|s⟩⟨s| - I (Inversion about mean)']]
+      },
+      fig10_3: {
+        id: 'fig10_3', chapter: 10, short: '10.3 QFT และชอร์', icon: 'fa-wave-square', color: '#fb923c', image: 'target_fig10_3.png',
+        title: 'ภาพที่ 10.3 การแปลงฟูเรียร์ควอนตัมและอัลกอริทึมแยกตัวประกอบของชอร์', subtitle: "Quantum Fourier Transform (QFT) & Shor's Factoring Algorithm",
+        desc: 'การแปลงฟูเรียร์ควอนตัมเปลี่ยนสารสนเทศจากโดเมนฐานคำนวณสู่โดเมนเฟส e^(2πi x k / 2^n) เพื่อสกัดหาคาบ r ของฟังก์ชันเลขชี้กำลังมอดุโล f(x) = a^x mod N นำไปสู่การแยกตัวประกอบ RSA ในเวลาพหุนาม O((log N)³)',
+        facts: [['การเร่งความเร็ว', 'พหุนาม O((log N)³) ทลายรหัส RSA'], ['จำนวนเกต QFT', 'O(n²) เกต (Hadamard + Controlled-Phase)'], ['การแยกตัวประกอบ', 'gcd(a^(r/2) ± 1, N)'], ['การแทรกสอด', 'ความน่าจะเป็นเสริมกันเฉพาะจุด k = s·2^n / r']]
+      },
+      fig10_4: {
+        id: 'fig10_4', chapter: 10, short: '10.4 VQE เคมีควอนตัม', icon: 'fa-atom', color: '#10b981', image: 'target_fig10_4.png',
+        title: 'ภาพที่ 10.4 อัลกอริทึมแปรผันไอเกนควอนตัม (VQE) ในยุค NISQ', subtitle: 'Variational Quantum Eigensolver & Hybrid Classical-Quantum Computing',
+        desc: 'การทำงานร่วมกันระหว่าง QPU และ CPU คลาสสิกตามหลักการแปรผันของเรย์ลีห์-ริทซ์: QPU เตรียมสถานะอันซัทซ์ U(θ)|0⟩ และวัดค่าคาดหวังพลังงาน ⟨H⟩ ขณะที่ Classical Optimizer ปรับค่าพารามิเตอร์มุม θ เพื่อลู่เข้าสู่พลังงานสถานะพื้น E₀',
+        facts: [['หลักการทางฟิสิกส์', 'Rayleigh-Ritz: ⟨H⟩_θ ≥ E₀'], ['โครงสร้างไฮบริด', 'QPU (เตรียมสถานะ+วัด) ↔ CPU (หาค่าต่ำสุด)'], ['การประยุกต์หลัก', 'เคมีควอนตัม, วัสดุศาสตร์, พันธะโมเลกุล H₂/LiH'], ['ความทนทานใน NISQ', 'ทนทานต่อ Coherence time ที่สั้นด้วยวงจรตื้น']]
+      },
+      fig10_5: {
+        id: 'fig10_5', chapter: 10, short: '10.5 เซอร์เฟสโค้ด QEC', icon: 'fa-shield-halved', color: '#a855f7', image: 'target_fig10_5.png',
+        title: 'ภาพที่ 10.5 เซอร์เฟสโค้ดและรหัสแก้ความผิดพลาดควอนตัม', subtitle: 'Surface Codes, 2D Stabilizer Lattice & Fault-Tolerant Quantum Computing',
+        desc: 'การปกป้องสารสนเทศควอนตัมบนโครงตาข่าย 2 มิติ ประกอบด้วยคิวบิตข้อมูล (Data Qubits) และคิวบิตเสริมตรวจจับ (Syndrome Ancillas) วัดตัวดำเนินการสเตบิไลเซอร์ Z-Plaquette (ตรวจจับ Bit-flip) และ X-Star (ตรวจจับ Phase-flip) มีเกณฑ์ทนทานวิกฤตสูงถึง ~1%',
+        facts: [['เกณฑ์ความผิดพลาดวิกฤต', 'p_th ≈ 1% สูงสุดในบรรดา QEC'], ['การเชื่อมต่อคิวบิต', 'Nearest-Neighbor 2D Grid (สร้างได้จริง)'], ['ชนิดสเตบิไลเซอร์', 'Z-Plaquette (Bit-flip X), X-Star (Phase-flip Z)'], ['การทดลอง Google 2023', 'ระยะ d=5 ให้ข้อผิดพลาดต่ำกว่าระยะ d=3']]
+      },
+      fig10_6: {
+        id: 'fig10_6', chapter: 10, short: '10.6 ฮาร์ดแวร์และ NV Center', icon: 'fa-gem', color: '#ec4899', image: 'target_fig10_6.png',
+        title: 'ภาพที่ 10.6 สถาปัตยกรรมฮาร์ดแวร์ควอนตัมและเซนเซอร์ NV Center', subtitle: 'Superconducting Transmon Qubits & Diamond Nitrogen-Vacancy Sensors',
+        desc: 'การเปรียบเทียบสถาปัตยกรรมคิวบิตตัวนำยิ่งยวดทรานสมอนที่ควบคุมด้วยไมโครเวฟในโพรงคลื่นสะท้อน และจุดบกพร่องสปินไนโตรเจน-ช่องว่าง (NV Center) ในผลึกเพชรสำหรับการตรวจวัดสนามแม่เหล็กและธาตุอาหารพืชที่อุณหภูมิห้องตามขีดจำกัดไฮเซนเบิร์ก',
+        facts: [['คิวบิตทรานสมอน', 'Josephson Junction, E_J/E_C ≫ 50, ความเร็วเกต ~20 ns'], ['Diamond NV Center', 'สปิน S=1 ทริปเลต, เลเซอร์ 532 nm, วัด ODMR ที่ห้อง'], ['ขีดจำกัดความแม่นยำ', 'Heisenberg Limit: Δθ ≥ 1/N ทะลุคลาสสิก 1/√N'], ['การเกษตรแม่นยำ', 'ตรวจวัดไอออนสารอาหารในท่อน้ำเลี้ยงพืชระดับนาโน']]
+      },
       fig11: {
         id: 'fig11', chapter: 9, short: '9.2 อสมการเบลล์ (เดิม)', icon: 'fa-link', color: '#e879f9', image: 'target_fig9_2.png',
         title: 'บทที่ 9 คู่โฟตอนพัวพันควอนตัม (เดิม)', subtitle: 'Entangled Photon Pair (Bell State)',
@@ -2439,20 +2475,20 @@
         facts: [['สถานะเบลล์', '(|↑↓⟩ − |↓↑⟩)/√2'], ['ความสัมพันธ์', 'ตรงข้ามกัน 100%'], ['CHSH (ควอนตัม)', 'S = 2√2 > 2'], ['แหล่งกำเนิด', 'SPDC (BBO)']]
       },
       fig12: {
-        id: 'fig12', chapter: 10, short: 'บท 10 Grover', icon: 'fa-magnifying-glass-chart', color: '#facc15', image: null,
-        title: 'บทที่ 10 อัลกอริทึมค้นหาของโกรเวอร์', subtitle: "Grover's Search Amplitude Amplification (N = 8)",
+        id: 'fig12', chapter: 10, short: '10.2 การค้นหาโกรเวอร์ (เดิม)', icon: 'fa-magnifying-glass-chart', color: '#facc15', image: 'target_fig10_2.png',
+        title: 'ภาพที่ 10.2 อัลกอริทึมการค้นหาของโกรเวอร์ (เดิม)', subtitle: "Grover's Search Amplitude Amplification (N = 8)",
         desc: 'แท่งแอมพลิจูดของ 8 สถานะ ออราเคิลกลับเฟสสถานะเป้าหมาย |101⟩ แล้วตัวกระจาย (diffusion) สะท้อนรอบค่าเฉลี่ย (เส้นแนวนอน) ทำซ้ำ ~π√N/4 ≈ 2 รอบ ได้ความน่าจะเป็น ≈ 94.5%',
         facts: [['จำนวนรอบที่เหมาะสม', '⌊π√N / 4⌋ = 2'], ['P(เป้าหมาย) หลัง 2 รอบ', '≈ 0.945'], ['ความซับซ้อน', 'O(√N)'], ['สถานะเป้าหมาย', '|101⟩']]
       },
       fig13: {
-        id: 'fig13', chapter: 11, short: 'บท 11 QFT/Shor', icon: 'fa-clock', color: '#fb923c', image: null,
-        title: 'บทที่ 11 การแปลงฟูเรียร์ควอนตัมและอัลกอริทึมชอร์', subtitle: 'QFT Period Finding: f(x) = 7ˣ mod 15',
+        id: 'fig13', chapter: 10, short: '10.3 QFT และชอร์ (เดิม)', icon: 'fa-wave-square', color: '#fb923c', image: 'target_fig10_3.png',
+        title: 'ภาพที่ 10.3 การแปลงฟูเรียร์ควอนตัมและอัลกอริทึมชอร์ (เดิม)', subtitle: 'QFT Period Finding: f(x) = 7ˣ mod 15',
         desc: 'แถวหลัง: ฟังก์ชัน f(x) = 7ˣ mod 15 มีคาบ r = 4 แถวหน้า: หลัง QFT ความน่าจะเป็นรวมตัวที่ k = 0, 4, 8, 12 นาฬิกาเฟสแสดงการหมุนเฟส e^(2πi·k/2ⁿ) ของแต่ละคิวบิต นำไปสู่ 15 = 3 × 5',
         facts: [['ฟังก์ชัน', 'f(x) = 7ˣ mod 15'], ['คาบ', 'r = 4'], ['ตัวประกอบ', 'gcd(7²±1, 15) = 3, 5'], ['QFT', 'O(n²) เกต']]
       },
       fig14: {
-        id: 'fig14', chapter: 12, short: 'บท 12 QKD BB84', icon: 'fa-key', color: '#4ade80', image: 'target_fig9_6.png',
-        title: 'บทที่ 12 การแจกจ่ายกุญแจควอนตัม BB84', subtitle: 'BB84 Quantum Key Distribution',
+        id: 'fig14', chapter: 9, short: '9.6 รหัสลับ QKD (เดิม)', icon: 'fa-shield-halved', color: '#8b5cf6', image: 'target_fig9_6.png',
+        title: 'ภาพที่ 9.6 การแจกจ่ายกุญแจควอนตัม BB84 (เดิม)', subtitle: 'BB84 Quantum Key Distribution',
         desc: 'อลิซส่งโฟตอนโพลาไรซ์ 0°/90° (ฐาน +) หรือ 45°/135° (ฐาน ×) บ็อบสุ่มเลือกฐานวัด เก็บเฉพาะบิตที่ฐานตรงกัน (ไฟเขียว) เป็นกุญแจลับ การดักฟังจะเพิ่มอัตราผิดพลาด QBER',
         facts: [['ฐานการวัด', '+ (0°/90°), × (45°/135°)'], ['บิตที่เก็บ (sifting)', '≈ 50%'], ['QBER เมื่อมีผู้ดักฟัง', '≈ 25%'], ['ความปลอดภัย', 'No-cloning theorem']]
       }
@@ -6124,6 +6160,443 @@
       return { group: g, update, setEve: (v) => { eveActive = v; } };
     }
 
+    // ==========================================================
+    // CHAPTER 10 COMPLETE SUITE: QUANTUM ALGORITHMS & HARDWARE
+    // ==========================================================
+
+    // 1. Fig 10.1: Deutsch-Jozsa Algorithm & Phase Kickback
+    function buildDeutschJozsaModel() {
+      const g = new THREE.Group();
+
+      // Circuit Wire Rails (q0, q1, ancilla)
+      const rails = [-0.6, 0.0, 0.6];
+      rails.forEach(y => {
+        g.add(lineOf([new THREE.Vector3(-2.4, y, 0), new THREE.Vector3(2.4, y, 0)], 0x38bdf8, 1.8));
+      });
+
+      // Ket input labels
+      const l0 = makeLabel('|0⟩', '#38bdf8', 0.45); l0.position.set(-2.6, 0.6, 0);
+      const l1 = makeLabel('|0⟩', '#38bdf8', 0.45); l1.position.set(-2.6, 0.0, 0);
+      const la = makeLabel('|1⟩', '#ef4444', 0.45); la.position.set(-2.6, -0.6, 0);
+      g.add(l0, l1, la);
+
+      // Hadamard Gates Layer 1 (x = -1.6)
+      [-0.6, 0.0, 0.6].forEach(y => {
+        const hGate = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), stdMat(0x0284c7, { emissive: 0x0369a1, emissiveIntensity: 0.5 }));
+        hGate.position.set(-1.6, y, 0);
+        g.add(hGate);
+      });
+
+      // Central Oracle Box U_f (x = 0)
+      const oracleBox = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.8, 0.6), stdMat(0xa855f7, { transparent: true, opacity: 0.7, emissive: 0x7e22ce, emissiveIntensity: 0.5 }));
+      oracleBox.position.set(0, 0, 0);
+      g.add(oracleBox);
+
+      const oracleLabel = makeLabel('Oracle U_f\n(Constant)', '#ffd700', 0.55);
+      oracleLabel.position.set(0, 0, 0.4);
+      g.add(oracleLabel);
+
+      // Hadamard Gates Layer 2 (x = 1.3 on input qubits)
+      [0.0, 0.6].forEach(y => {
+        const hGate = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), stdMat(0x0284c7, { emissive: 0x0369a1, emissiveIntensity: 0.5 }));
+        hGate.position.set(1.3, y, 0);
+        g.add(hGate);
+      });
+
+      // Measurement Detectors (x = 2.0)
+      [0.0, 0.6].forEach(y => {
+        const mMeter = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.3, 16), stdMat(0x10b981, { emissive: 0x047857, emissiveIntensity: 0.6 }));
+        mMeter.position.set(2.0, y, 0);
+        mMeter.rotation.z = Math.PI / 2;
+        g.add(mMeter);
+      });
+
+      // Kickback Wave Pulse (Pulsing non-local arrow/wave)
+      const kickWave = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), glowMat(0xffd700, 1.0));
+      g.add(kickWave);
+
+      const statusLbl = makeLabel('ผลลัพธ์: Constant ⟹ วัดได้ |00⟩ 100% (Single Query O(1))', '#38bdf8', 0.65);
+      statusLbl.position.set(0, 1.6, 0);
+      g.add(statusLbl);
+
+      let currentMode = 'const0';
+
+      function setMode(m) {
+        currentMode = m;
+        const isConst = m.startsWith('const');
+        oracleLabel.setText(isConst ? 'Oracle U_f\n(Constant)' : 'Oracle U_f\n(Balanced)');
+        oracleBox.material.color.set(isConst ? 0x0284c7 : 0xa855f7);
+        if (isConst) {
+          statusLbl.setText('ผลลัพธ์: Constant ⟹ วัดได้ |00⟩ 100% (Single Query O(1))');
+          statusLbl.setColor('#38bdf8');
+        } else {
+          statusLbl.setText('ผลลัพธ์: Balanced ⟹ วัดได้ |11⟩ (Orthogonal, P(|00⟩)=0)');
+          statusLbl.setColor('#f43f5e');
+        }
+      }
+
+      function update(t) {
+        g.rotation.y = Math.sin(t * 0.4) * 0.15;
+        const kPhase = (t * 2.0) % 1.0;
+        kickWave.position.set(0, -0.6 + 1.2 * kPhase, 0.2);
+        kickWave.scale.setScalar(0.8 + 0.4 * Math.sin(kPhase * Math.PI));
+      }
+
+      return { group: g, update, setMode };
+    }
+
+    // 2. Fig 10.2: Grover's Search & Geometric Amplitude Amplification
+    function buildGroverSearchModel() {
+      const g = new THREE.Group();
+      const N = 8;
+      let targetIdx = 5;
+      let currentStep = 0;
+
+      const bars = [];
+      const labels = [];
+      const BASE = -0.6;
+      const SC = 1.8;
+
+      for (let i = 0; i < N; i++) {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(0.24, 1.0, 0.24), stdMat(i === targetIdx ? 0xfacc15 : 0x22d3ee, { emissive: i === targetIdx ? 0xca8a04 : 0x0e7490, emissiveIntensity: 0.4 }));
+        b.position.x = -1.4 + i * 0.4;
+        b.position.y = BASE;
+        g.add(b);
+        bars.push(b);
+
+        const l = makeLabel(`|${i.toString(2).padStart(3, '0')}⟩`, i === targetIdx ? '#facc15' : '#22d3ee', 0.4);
+        l.position.set(b.position.x, BASE - 0.25, 0.2);
+        g.add(l);
+        labels.push(l);
+      }
+
+      const meanBar = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.02, 0.3), glowMat(0xf472b6, 0.8));
+      meanBar.position.set(0, BASE, 0);
+      g.add(meanBar);
+
+      g.add(lineOf([new THREE.Vector3(-1.6, BASE, 0), new THREE.Vector3(1.6, BASE, 0)], 0x64748b, 1.5));
+
+      const rotGroup = new THREE.Group();
+      rotGroup.position.set(-1.8, 1.4, 0);
+      const circleMesh = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.54, 32), glowMat(0x38bdf8, 0.7));
+      const axisH = lineOf([new THREE.Vector3(-0.6, 0, 0), new THREE.Vector3(0.6, 0, 0)], 0x475569);
+      const axisV = lineOf([new THREE.Vector3(0, -0.6, 0), new THREE.Vector3(0, 0.6, 0)], 0x475569);
+      const vecLine = dynLine(2, 0xfacc15, 2.5);
+      rotGroup.add(circleMesh, axisH, axisV, vecLine.line);
+      const stateLbl = makeLabel('|ψ⟩', '#facc15', 0.45);
+      rotGroup.add(stateLbl);
+      g.add(rotGroup);
+
+      const titleLbl = makeLabel("Grover's Search: การสะท้อนเฟสและตัวกระจายสะท้อนรอบค่าเฉลี่ย", '#facc15', 0.65);
+      titleLbl.position.set(0, 1.85, 0);
+      g.add(titleLbl);
+
+      function calcAmplitudes(step, target) {
+        let a = new Array(N).fill(1 / Math.sqrt(N));
+        if (step >= 1) {
+          a[target] *= -1;
+        }
+        if (step >= 2) {
+          const mean1 = a.reduce((s, v) => s + v, 0) / N;
+          a = a.map(v => 2 * mean1 - v);
+        }
+        if (step >= 3) {
+          a[target] *= -1;
+          const mean2 = a.reduce((s, v) => s + v, 0) / N;
+          a = a.map(v => 2 * mean2 - v);
+        }
+        return a;
+      }
+
+      function setTarget(idx) {
+        targetIdx = parseInt(idx, 10);
+        bars.forEach((b, i) => {
+          const isTarget = i === targetIdx;
+          b.material.color.set(isTarget ? 0xfacc15 : 0x22d3ee);
+          b.material.emissive.set(isTarget ? 0xca8a04 : 0x0e7490);
+          labels[i].setColor(isTarget ? '#facc15' : '#22d3ee');
+        });
+      }
+
+      function setStep(s) {
+        currentStep = parseInt(s, 10);
+      }
+
+      function update(t) {
+        g.rotation.y = Math.sin(t * 0.3) * 0.1;
+        const amps = calcAmplitudes(currentStep, targetIdx);
+        let mean = 0;
+        bars.forEach((b, i) => {
+          const val = amps[i];
+          mean += val;
+          const h = Math.max(0.02, Math.abs(val) * SC);
+          b.scale.y = h;
+          b.position.y = BASE + (Math.sign(val || 1) * h) / 2;
+        });
+        meanBar.position.y = BASE + (mean / N) * SC;
+
+        const theta = Math.asin(1 / Math.sqrt(N));
+        const currentAngle = theta + currentStep * theta * 1.8;
+        const vx = 0.5 * Math.cos(currentAngle);
+        const vy = 0.5 * Math.sin(currentAngle);
+        vecLine.set(0, 0, 0, 0);
+        vecLine.set(1, vx, vy, 0);
+        stateLbl.position.set(vx * 1.2, vy * 1.2, 0.1);
+      }
+
+      return { group: g, update, setTarget, setStep };
+    }
+
+    // 3. Fig 10.3: Quantum Fourier Transform & Shor's Factoring Algorithm
+    function buildQftShorModel() {
+      const g = new THREE.Group();
+      let currentBase = 7;
+
+      const modBars = [];
+      for (let x = 0; x < 16; x++) {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.5, 0.14), stdMat(0xfb923c, { emissive: 0xc2410c, emissiveIntensity: 0.4 }));
+        b.position.set(-1.8 + x * 0.24, -0.6, -0.6);
+        g.add(b);
+        modBars.push(b);
+      }
+
+      const qftBars = [];
+      for (let k = 0; k < 16; k++) {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.5, 0.14), stdMat(0x38bdf8, { emissive: 0x0284c7, emissiveIntensity: 0.5 }));
+        b.position.set(-1.8 + k * 0.24, -0.6, 0.4);
+        g.add(b);
+        qftBars.push(b);
+      }
+
+      const clocks = [];
+      for (let q = 0; q < 4; q++) {
+        const cg = new THREE.Group();
+        cg.position.set(-1.2 + q * 0.8, 1.0, 0);
+        const ring = new THREE.Mesh(new THREE.RingGeometry(0.25, 0.28, 24), glowMat(0x38bdf8, 0.8));
+        const hand = dynLine(2, 0xffd700, 2.5);
+        cg.add(ring, hand.line);
+        g.add(cg);
+        clocks.push({ group: cg, hand });
+      }
+
+      const infoLbl = makeLabel('QFT สกัดคาบ r = 4 ⟹ 15 = 3 × 5 (gcd(7²±1, 15))', '#fb923c', 0.65);
+      infoLbl.position.set(0, 1.8, 0);
+      g.add(infoLbl);
+
+      function setBase(a) {
+        currentBase = parseInt(a, 10);
+        const r = (currentBase === 7 || currentBase === 2) ? 4 : 2;
+        infoLbl.setText(`QFT สกัดคาบ r = ${r} ⟹ gcd(${currentBase}^${r/2}±1, 15) = 3, 5`);
+      }
+
+      function update(t) {
+        g.rotation.y = Math.sin(t * 0.25) * 0.12;
+        const r = (currentBase === 7 || currentBase === 2) ? 4 : 2;
+
+        let v = 1;
+        for (let x = 0; x < 16; x++) {
+          const h = (v / 15) * 1.1 + 0.05;
+          modBars[x].scale.y = h;
+          modBars[x].position.y = -0.6 + h / 2;
+          v = (v * currentBase) % 15;
+        }
+
+        for (let k = 0; k < 16; k++) {
+          const isPeak = (k % (16 / r) === 0);
+          const targetH = isPeak ? 1.4 : 0.04;
+          qftBars[k].scale.y = targetH;
+          qftBars[k].position.y = -0.6 + targetH / 2;
+          qftBars[k].material.color.set(isPeak ? 0x10b981 : 0x1e293b);
+          qftBars[k].material.emissive.set(isPeak ? 0x059669 : 0x000000);
+        }
+
+        clocks.forEach((c, idx) => {
+          const angle = t * (idx + 1) * 1.5;
+          c.hand.set(0, 0, 0, 0);
+          c.hand.set(1, 0.24 * Math.cos(angle), 0.24 * Math.sin(angle), 0);
+        });
+      }
+
+      return { group: g, update, setBase };
+    }
+
+    // 4. Fig 10.4: Variational Quantum Eigensolver (VQE) & Hybrid Optimization
+    function buildVqeHybridModel() {
+      const g = new THREE.Group();
+      let thetaVal = 0.8;
+
+      const qpuBox = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.2, 0.3), stdMat(0x0f172a, { metalness: 0.8, roughness: 0.2 }));
+      qpuBox.position.set(-1.6, 0.4, 0);
+      const qpuWire = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.03, 16, 32), glowMat(0x00f0ff, 0.9));
+      qpuWire.position.set(-1.6, 0.4, 0.18);
+      g.add(qpuBox, qpuWire);
+
+      const cpuBox = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.2, 0.3), stdMat(0x1e1b4b, { metalness: 0.7 }));
+      cpuBox.position.set(1.6, 0.4, 0);
+      const cpuCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.3), glowMat(0x10b981, 0.85));
+      cpuCore.position.set(1.6, 0.4, 0.18);
+      g.add(cpuBox, cpuCore);
+
+      const arrowTop = dynLine(20, 0xffd700, 2.5);
+      const arrowBottom = dynLine(20, 0xa855f7, 2.5);
+      g.add(arrowTop.line, arrowBottom.line);
+
+      const pesCurve = dynLine(40, 0xef4444, 2.5);
+      g.add(pesCurve.line);
+      const energyBall = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), glowMat(0xffd700, 1.0));
+      g.add(energyBall);
+
+      const vqeLbl = makeLabel('VQE Closed Loop: QPU ⟨H⟩_θ ↔ CPU Optimizer (E_min ≈ -1.85 Ha)', '#10b981', 0.65);
+      vqeLbl.position.set(0, 1.7, 0);
+      g.add(vqeLbl);
+
+      function setTheta(val) {
+        thetaVal = parseFloat(val);
+      }
+
+      function update(t) {
+        g.rotation.y = Math.sin(t * 0.3) * 0.1;
+        qpuWire.rotation.z = t * 1.5;
+        cpuCore.rotation.y = t * 2.0;
+
+        const fPhase = (t * 1.5) % 1.0;
+        arrowTop.set(0, -0.8 + 1.6 * fPhase, 0.9, 0);
+        arrowTop.set(1, -0.6 + 1.6 * fPhase, 0.9, 0);
+        arrowBottom.set(0, 0.8 - 1.6 * fPhase, -0.1, 0);
+        arrowBottom.set(1, 0.6 - 1.6 * fPhase, -0.1, 0);
+
+        const currentE = -1.2 * Math.cos(thetaVal) - 0.65;
+        energyBall.position.set(-1.8 + (thetaVal / Math.PI) * 3.6, currentE, 0.2);
+
+        for (let i = 0; i < 40; i++) {
+          const th = (i / 39) * Math.PI;
+          const e = -1.2 * Math.cos(th) - 0.65;
+          pesCurve.set(i, -1.8 + (th / Math.PI) * 3.6, e, 0);
+        }
+      }
+
+      return { group: g, update, setTheta };
+    }
+
+    // 5. Fig 10.5: Surface Codes & 2D Stabilizer Lattice
+    function buildSurfaceCodeQecModel() {
+      const g = new THREE.Group();
+      let errorQubit = -1;
+
+      const dataQubits = [];
+      const plaquettes = [];
+
+      for (let ix = -1; ix <= 1; ix++) {
+        for (let iz = -1; iz <= 1; iz++) {
+          const qMesh = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 16), glowMat(0x00f0ff, 0.9));
+          qMesh.position.set(ix * 1.1, 0, iz * 1.1);
+          g.add(qMesh);
+          dataQubits.push(qMesh);
+        }
+      }
+
+      const p1 = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), stdMat(0x0284c7, { transparent: true, opacity: 0.6, emissive: 0x0369a1, emissiveIntensity: 0.4 }));
+      p1.position.set(-0.55, -0.02, 0.55); p1.rotation.x = -Math.PI / 2;
+      const p2 = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), stdMat(0x0284c7, { transparent: true, opacity: 0.6, emissive: 0x0369a1, emissiveIntensity: 0.4 }));
+      p2.position.set(0.55, -0.02, -0.55); p2.rotation.x = -Math.PI / 2;
+      const x1 = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), stdMat(0xfacc15, { transparent: true, opacity: 0.6, emissive: 0xca8a04, emissiveIntensity: 0.4 }));
+      x1.position.set(0.55, -0.02, 0.55); x1.rotation.x = -Math.PI / 2; x1.rotation.z = Math.PI / 4;
+      const x2 = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), stdMat(0xfacc15, { transparent: true, opacity: 0.6, emissive: 0xca8a04, emissiveIntensity: 0.4 }));
+      x2.position.set(-0.55, -0.02, -0.55); x2.rotation.x = -Math.PI / 2; x2.rotation.z = Math.PI / 4;
+
+      g.add(p1, p2, x1, x2);
+      plaquettes.push(p1, p2, x1, x2);
+
+      for (let i = -1; i <= 1; i++) {
+        g.add(lineOf([new THREE.Vector3(-1.1, 0, i * 1.1), new THREE.Vector3(1.1, 0, i * 1.1)], 0x475569, 1.2));
+        g.add(lineOf([new THREE.Vector3(i * 1.1, 0, -1.1), new THREE.Vector3(i * 1.1, 0, 1.1)], 0x475569, 1.2));
+      }
+
+      const statusLbl = makeLabel('เซอร์เฟสโค้ด QEC: สถานะปกติ (ไม่มีข้อผิดพลาด)', '#10b981', 0.65);
+      statusLbl.position.set(0, 1.7, 0);
+      g.add(statusLbl);
+
+      function injectError(type, qIdx) {
+        errorQubit = qIdx !== undefined ? qIdx : 4;
+        dataQubits[errorQubit].material.color.set(0xef4444);
+        dataQubits[errorQubit].material.emissive.set(0xb91c1c);
+        p1.material.color.set(0xf43f5e);
+        p1.material.emissive.set(0xe11d48);
+        statusLbl.setText('ตรวจพบอาการความผิดพลาด! Bit-Flip (X) ⟹ Z-Plaquette Syndrome Triggered');
+        statusLbl.setColor('#ef4444');
+      }
+
+      function correctError() {
+        if (errorQubit >= 0) {
+          dataQubits[errorQubit].material.color.set(0x00f0ff);
+          dataQubits[errorQubit].material.emissive.set(0x007799);
+        }
+        errorQubit = -1;
+        p1.material.color.set(0x0284c7);
+        p1.material.emissive.set(0x0369a1);
+        statusLbl.setText('แก้ไขสำเร็จ (Corrected by X Gate) ⟹ ปราศจากความผิดพลาด');
+        statusLbl.setColor('#10b981');
+      }
+
+      function update(t) {
+        g.rotation.y = t * 0.2;
+        g.rotation.x = 0.35 + Math.sin(t * 0.3) * 0.08;
+      }
+
+      return { group: g, update, injectError, correctError };
+    }
+
+    // 6. Fig 10.6: Quantum Hardware Architectures & NV Center Sensors
+    function buildQuantumHardwareNvSensorModel() {
+      const g = new THREE.Group();
+      let magFieldB = 1.0;
+
+      const transPlatform = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 1.6), stdMat(0x0f172a, { metalness: 0.9, roughness: 0.1 }));
+      transPlatform.position.set(-1.4, -0.6, 0);
+      const resWire = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.03, 16, 32), glowMat(0x38bdf8, 0.8));
+      resWire.position.set(-1.4, -0.52, 0);
+      resWire.rotation.x = Math.PI / 2;
+      const juncX = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.05), glowMat(0xef4444, 1.0));
+      juncX.position.set(-1.4, -0.52, 0);
+      g.add(transPlatform, resWire, juncX);
+
+      const nvPlatform = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 1.6), stdMat(0x1e1b4b, { metalness: 0.6 }));
+      nvPlatform.position.set(1.4, -0.6, 0);
+      
+      const nAtom = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 16), glowMat(0xa855f7, 0.95));
+      nAtom.position.set(1.2, 0.1, 0);
+      const vHole = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 16), stdMat(0xffffff, { transparent: true, opacity: 0.4, wireframe: true }));
+      vHole.position.set(1.6, 0.1, 0);
+      const spinVec = dynLine(2, 0x10b981, 3.0);
+      g.add(nvPlatform, nAtom, vHole, spinVec.line);
+
+      const greenLaser = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.2, 12), glowMat(0x22c55e, 0.95));
+      greenLaser.position.set(1.4, 0.9, 0);
+      const redFluo = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 12), glowMat(0xef4444, 0.9));
+      redFluo.position.set(1.4, -0.1, 0.3);
+      g.add(greenLaser, redFluo);
+
+      const hwLbl = makeLabel('ฮาร์ดแวร์ทรานสมอน ↔ เซนเซอร์ Diamond NV Center (Zeeman ODMR)', '#ec4899', 0.65);
+      hwLbl.position.set(0, 1.8, 0);
+      g.add(hwLbl);
+
+      function setMagField(b) {
+        magFieldB = parseFloat(b);
+        hwLbl.setText(`สนามแม่เหล็ก B = ${magFieldB.toFixed(2)} mT ⟹ Zeeman Splitting ΔE = ${(magFieldB * 28).toFixed(1)} MHz`);
+      }
+
+      function update(t) {
+        g.rotation.y = Math.sin(t * 0.25) * 0.15;
+        const precAngle = t * (2.0 + magFieldB * 2.0);
+        const sx = 0.25 * Math.sin(precAngle);
+        const sz = 0.25 * Math.cos(precAngle);
+        spinVec.set(0, 1.4, 0.1, 0);
+        spinVec.set(1, 1.4 + sx, 0.6, sz);
+      }
+
+      return { group: g, update, setMagField };
+    }
+
     function buildChapterModels() {
       return {
         fig4: buildDoubleSlitModel(),
@@ -6216,6 +6689,14 @@
     models.fig9_5 = buildSuperdenseCodingModel();
     models.fig9_6 = buildQkdProtocolsModel();
 
+    // Chapter 10 Complete Suite (Algorithms, VQE, QEC & Hardware/Sensors)
+    models.fig10_1 = buildDeutschJozsaModel();
+    models.fig10_2 = buildGroverSearchModel();
+    models.fig10_3 = buildQftShorModel();
+    models.fig10_4 = buildVqeHybridModel();
+    models.fig10_5 = buildSurfaceCodeQecModel();
+    models.fig10_6 = buildQuantumHardwareNvSensorModel();
+
     Object.assign(models, buildChapterModels()); // Chapters 3-12 (fig5 ... fig14)
     models.fig5 = models.fig3_1; // Alias fig5 to fig3_1
     models.fig6 = models.fig4_6; // Alias legacy fig6 to fig4_6
@@ -6223,6 +6704,8 @@
     models.fig9 = models.fig7_6; // Alias legacy fig9 to fig7_6
     models.fig10 = models.fig8_1; // Alias legacy fig10 to fig8_1
     models.fig11 = models.fig9_2; // Alias legacy fig11 to fig9_2 (Bell inequality)
+    models.fig12 = models.fig10_2; // Alias legacy fig12 to fig10_2 (Grover search)
+    models.fig13 = models.fig10_3; // Alias legacy fig13 to fig10_3 (QFT Shor)
     models.fig14 = models.fig9_6; // Alias legacy fig14 to fig9_6 (QKD BB84/Ekert91)
 
 
@@ -7750,21 +8233,49 @@
           `;
           break;
 
-        // --- CH 10: Grover Search ---
+        // --- CH 10 COMPLETE: Quantum Algorithms & Hardware ---
+        case 'fig10_1':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ชนิดฟังก์ชันควอนตัมออราเคิล $U_f$</span><span class="param-val" id="disp-dj-fn" style="color:#38bdf8;">Constant (คงตัว)</span></div>
+              <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                <button class="win-btn" style="font-weight:700; color:#38bdf8;" onclick="testDeutschJozsa('const0')"><i class="fa-solid fa-anchor"></i> ฟังก์ชันคงตัว $f(x) = 0$ ⟹ วัดได้ |00⟩ 100%</button>
+                <button class="win-btn" style="font-weight:700; color:#38bdf8;" onclick="testDeutschJozsa('const1')"><i class="fa-solid fa-anchor"></i> ฟังก์ชันคงตัว $f(x) = 1$ ⟹ วัดได้ |00⟩ 100%</button>
+                <button class="win-btn" style="font-weight:700; color:#f43f5e; border-color:#f43f5e;" onclick="testDeutschJozsa('balanced_xor')"><i class="fa-solid fa-scale-balanced"></i> ฟังก์ชันสมดุล $f(x) = x_0 \\oplus x_1$ ⟹ วัดได้ |11⟩</button>
+                <button class="win-btn" style="font-weight:700; color:#f43f5e; border-color:#f43f5e;" onclick="testDeutschJozsa('balanced_inv')"><i class="fa-solid fa-scale-balanced"></i> ฟังก์ชันสมดุล $f(x) = \\overline{x_0}$ ⟹ วัดได้ |01⟩</button>
+              </div>
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความเร็วการสะท้อนเฟส (Phase Kickback)</span><span class="param-val" id="disp-speed">${animSpeed.toFixed(1)}×</span></div>
+              <input type="range" class="slider-custom" min="0" max="3" step="0.1" value="${animSpeed}" oninput="setAnimSpeed(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig10_2':
         case 'fig12':
           container.innerHTML = `
             <div class="param-group">
-              <div class="param-label"><span>สถานะเป้าหมายที่ค้นหา ($|m\\rangle$)</span><span class="param-val" id="disp-gr-target">|101⟩ (5)</span></div>
-              <select class="slider-custom" style="height:32px; background:rgba(15,23,42,0.8); color:#ffd000; padding:4px 8px; border:1px solid #ffd000;" onchange="setFig12Target(this.value)">
+              <div class="param-label"><span>สถานะเป้าหมายที่ค้นหา ($|w\\rangle$)</span><span class="param-val" id="disp-gr-target">|101⟩ (5)</span></div>
+              <select class="slider-custom" style="height:32px; background:rgba(15,23,42,0.8); color:#ffd000; padding:4px 8px; border:1px solid #ffd000;" onchange="setFig10_2GroverTarget(this.value)">
                 <option value="0">|000⟩</option>
                 <option value="1">|001⟩</option>
                 <option value="2">|010⟩</option>
                 <option value="3">|011⟩</option>
                 <option value="4">|100⟩</option>
-                <option value="5" selected>|101⟩ (เป้าหมาย)</option>
+                <option value="5" selected>|101⟩ (เป้าหมายหลัก)</option>
                 <option value="6">|110⟩</option>
                 <option value="7">|111⟩</option>
               </select>
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ขั้นตอนการขยายแอมพลิจูด (Iteration Step)</span><span class="param-val" id="disp-gr-step">รอบ 2 (พีคสูงสุด 94.5%)</span></div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem;" onclick="updateFig10_2GroverStep(0)">0: |s⟩</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem;" onclick="updateFig10_2GroverStep(1)">1: Flip</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem;" onclick="updateFig10_2GroverStep(2)">2: Diffuse</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem; color:#ffd700;" onclick="updateFig10_2GroverStep(3)">3: Iter 2</button>
+              </div>
             </div>
             <div class="param-group">
               <div class="param-label"><span>ความเร็วการขยายแอมพลิจูด</span><span class="param-val" id="disp-speed">${animSpeed.toFixed(1)}×</span></div>
@@ -7773,21 +8284,66 @@
           `;
           break;
 
-        // --- CH 11: Shor / QFT ---
+        case 'fig10_3':
         case 'fig13':
           container.innerHTML = `
             <div class="param-group">
               <div class="param-label"><span>ฟังก์ชันมอดุโล $f(x) = a^x \\bmod 15$</span><span class="param-val" id="disp-sh-a">a = 7 (คาบ r = 4)</span></div>
-              <select class="slider-custom" style="height:32px; background:rgba(15,23,42,0.8); color:#ffd000; padding:4px 8px; border:1px solid #ffd000;" onchange="setFig13Base(this.value)">
-                <option value="7" selected>a = 7 (คาบ r = 4)</option>
-                <option value="2">a = 2 (คาบ r = 4)</option>
-                <option value="4">a = 4 (คาบ r = 2)</option>
-                <option value="11">a = 11 (คาบ r = 2)</option>
+              <select class="slider-custom" style="height:32px; background:rgba(15,23,42,0.8); color:#ffd000; padding:4px 8px; border:1px solid #ffd000;" onchange="setFig10_3ShorBase(this.value)">
+                <option value="7" selected>a = 7 (คาบ r = 4 ⟹ แยกได้ 3, 5)</option>
+                <option value="2">a = 2 (คาบ r = 4 ⟹ แยกได้ 3, 5)</option>
+                <option value="4">a = 4 (คาบ r = 2 ⟹ แยกได้ 3, 5)</option>
+                <option value="11">a = 11 (คาบ r = 2 ⟹ แยกได้ 3, 5)</option>
               </select>
             </div>
             <div class="param-group">
               <div class="param-label"><span>ความเร็วการหมุนเฟสนาฬิกา QFT</span><span class="param-val" id="disp-speed">${animSpeed.toFixed(1)}×</span></div>
               <input type="range" class="slider-custom" min="0" max="3" step="0.1" value="${animSpeed}" oninput="setAnimSpeed(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig10_4':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>มุมพารามิเตอร์อันซัทซ์ $\\theta$</span><span class="param-val" id="disp-vqe-th">0.80 rad</span></div>
+              <input type="range" class="slider-custom" min="0" max="3.1415" step="0.05" value="0.80" oninput="updateFig10_4VqeTheta(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ระบบคำนวณไฮบริด NISQ</span></div>
+              <div style="display:flex; gap:8px; margin-top:6px;">
+                <button class="win-btn" style="flex:1; width:auto; font-weight:700; color:#10b981;" onclick="optimizeFig10_4Vqe()"><i class="fa-solid fa-bolt"></i> Auto-Optimize (COBYLA)</button>
+                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="resetFig10_4Vqe()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+              </div>
+            </div>
+          `;
+          break;
+
+        case 'fig10_5':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>การจำลองสัญญาณรบกวนควอนตัม (Noise / Error)</span></div>
+              <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                <button class="win-btn" style="font-weight:700; color:#ef4444;" onclick="toggleFig10_5QecError('X')"><i class="fa-solid fa-triangle-exclamation"></i> สุ่มเกิด Bit-flip ($X$) ⟹ วัด Z-Plaquette</button>
+                <button class="win-btn" style="font-weight:700; color:#a855f7;" onclick="toggleFig10_5QecError('Z')"><i class="fa-solid fa-triangle-exclamation"></i> สุ่มเกิด Phase-flip ($Z$) ⟹ วัด X-Star</button>
+                <button class="win-btn" style="font-weight:700; color:#10b981;" onclick="correctFig10_5Qec()"><i class="fa-solid fa-circle-check"></i> ถอดรหัส &amp; แก้ไขความผิดพลาด (MWPM Decode)</button>
+              </div>
+            </div>
+          `;
+          break;
+
+        case 'fig10_6':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>สนามแม่เหล็กภายนอก $B$</span><span class="param-val" id="disp-nv-b">1.00 mT</span></div>
+              <input type="range" class="slider-custom" min="0.0" max="3.0" step="0.1" value="1.0" oninput="tuneFig10_6MagField(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>โหมดการตรวจวัด</span></div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem;" onclick="tuneFig10_6MagField(0.5)">Low B (0.5 mT)</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem;" onclick="tuneFig10_6MagField(2.5)">High B (2.5 mT)</button>
+              </div>
             </div>
           `;
           break;
@@ -8311,27 +8867,72 @@
           `;
           break;
 
-        // --- CH 10: Grover ---
+        // --- CH 10: Complete Suite ---
+        case 'fig10_1':
+          container.innerHTML = `
+            <div class="info-card"><h5>ชนิดของฟังก์ชันออราเคิล</h5><p id="t-dj-type" style="color:#38bdf8;">Constant Function f(x)=c</p></div>
+            <div class="info-card"><h5>ผลลัพธ์การวัด 2 คิวบิตแรก</h5><p id="t-dj-res" style="color:#10b981;">|00⟩ (P = 100%)</p></div>
+            <div class="info-card"><h5>จำนวนครั้งที่เรียกออราเคิล</h5><p style="color:var(--gold);">1 ครั้ง (O(1)) เทียบกับคลาสสิก 3 ครั้ง</p></div>
+            <div class="info-card"><h5>กลไกควอนตัมสำคัญ</h5><p>Phase Kickback (-1)^{f(x)}</p></div>
+            <div class="info-card"><h5>การขนานควอนตัม</h5><p>H^{⊗n} สร้าง 2^n สถานะพร้อมกัน</p></div>
+            <div class="info-card"><h5>อัตราเร่งความเร็ว</h5><p style="color:#10b981;">เอ็กซ์โพเนนเชียลสำหรับ n คิวบิต</p></div>
+          `;
+          break;
+
+        case 'fig10_2':
         case 'fig12':
           container.innerHTML = `
-            <div class="info-card"><h5>สถานะเป้าหมาย ($|m\\rangle$)</h5><p id="t-gr-m" style="color:var(--gold);">|101⟩ (Item 5)</p></div>
+            <div class="info-card"><h5>สถานะเป้าหมาย ($|w\\rangle$)</h5><p id="t-gr-m" style="color:var(--gold);">|101⟩ (Item 5)</p></div>
             <div class="info-card"><h5>ความน่าจะเป็นพบเป้าหมาย</h5><p id="t-gr-prob" style="color:#10b981;">≈ 94.5%</p></div>
             <div class="info-card"><h5>จำนวนรอบที่เหมาะสม ($R$)</h5><p>⌊π√8 / 4⌋ = 2 รอบ</p></div>
-            <div class="info-card"><h5>ความซับซ้อนเชิงขั้นตอน</h5><p>O(√N) ควอนตัมสปีดอัป</p></div>
-            <div class="info-card"><h5>ตัวดำเนินการออราเคิล</h5><p>I - 2|m⟩⟨m|</p></div>
+            <div class="info-card"><h5>ความซับซ้อนเชิงขั้นตอน</h5><p style="color:#38bdf8;">O(√N) ควอนตัมสปีดอัป</p></div>
+            <div class="info-card"><h5>ตัวดำเนินการออราเคิล</h5><p>I - 2|w⟩⟨w|</p></div>
             <div class="info-card"><h5>ตัวดำเนินการกระจาย</h5><p>2|s⟩⟨s| - I (Diffusion)</p></div>
           `;
           break;
 
-        // --- CH 11: Shor / QFT ---
+        case 'fig10_3':
         case 'fig13':
           container.innerHTML = `
             <div class="info-card"><h5>ฟังก์ชันมอดุโล</h5><p id="t-sh-fn">7ˣ mod 15</p></div>
-            <div class="info-card"><h5>คาบที่ค้นพบ ($r$)</h5><p style="color:var(--gold);">r = 4</p></div>
-            <div class="info-card"><h5>พีค QFT ความถี่</h5><p>k = 0, 4, 8, 12</p></div>
-            <div class="info-card"><h5>การแยกตัวประกอบ 15</h5><p style="color:#10b981;">gcd(7²±1, 15) = 3, 5</p></div>
-            <div class="info-card"><h5>ความซับซ้อน QFT</h5><p>O((log N)²) เกต</p></div>
-            <div class="info-card"><h5>บทสรุปทางควอนตัม</h5><p>15 = 3 × 5 สำเร็จ</p></div>
+            <div class="info-card"><h5>คาบที่ค้นพบ ($r$)</h5><p id="t-sh-r" style="color:var(--gold);">r = 4</p></div>
+            <div class="info-card"><h5>พีค QFT ความถี่</h5><p id="t-sh-peaks">k = 0, 4, 8, 12</p></div>
+            <div class="info-card"><h5>การแยกตัวประกอบ 15</h5><p id="t-sh-fact" style="color:#10b981;">gcd(7²±1, 15) = 3, 5</p></div>
+            <div class="info-card"><h5>ความซับซ้อน QFT</h5><p>O((log N)³) ทลาย RSA</p></div>
+            <div class="info-card"><h5>บทสรุปทางควอนตัม</h5><p style="color:#10b981;">15 = 3 × 5 สำเร็จ</p></div>
+          `;
+          break;
+
+        case 'fig10_4':
+          container.innerHTML = `
+            <div class="info-card"><h5>พลังงานสถานะพื้นประมาณ ($E_0$)</h5><p id="t-vqe-e" style="color:#10b981;">-1.850 Ha (Hartree)</p></div>
+            <div class="info-card"><h5>มุมพารามิเตอร์อันซัทซ์ ($\\theta$)</h5><p id="t-vqe-th" style="color:var(--gold);">θ = 0.80 rad</p></div>
+            <div class="info-card"><h5>สถาปัตยกรรมไฮบริด</h5><p>QPU (State Prep) ↔ CPU (Optimizer)</p></div>
+            <div class="info-card"><h5>อัลกอริทึมคลาสสิก</h5><p>COBYLA / SPSA / Gradient Descent</p></div>
+            <div class="info-card"><h5>ขอบเขตแปรผันเรย์ลีห์-ริทซ์</h5><p>⟨H⟩_θ ≥ E₀ เสมอ</p></div>
+            <div class="info-card"><h5>ความทนทานต่อสัญญาณรบกวน</h5><p style="color:#38bdf8;">ทนทานในยุค NISQ ด้วยวงจรตื้น</p></div>
+          `;
+          break;
+
+        case 'fig10_5':
+          container.innerHTML = `
+            <div class="info-card"><h5>สถานะความทนทานต่อข้อผิดพลาด</h5><p id="t-qec-stat" style="color:#10b981;">Normal / Zero Syndrome</p></div>
+            <div class="info-card"><h5>สเตบิไลเซอร์ Z-Plaquette</h5><p id="t-qec-z">Z₁Z₂Z₃Z₄ = +1 (No Bit-flip)</p></div>
+            <div class="info-card"><h5>สเตบิไลเซอร์ X-Star</h5><p id="t-qec-x">X₁X₂X₃X₄ = +1 (No Phase-flip)</p></div>
+            <div class="info-card"><h5>เกณฑ์ความผิดพลาดวิกฤต ($p_{\\text{th}}$)</h5><p style="color:var(--gold);">~1% (สูงที่สุดในตระกูล QEC)</p></div>
+            <div class="info-card"><h5>การเชื่อมต่อคิวบิตกายภาพ</h5><p>Nearest-Neighbor 2D Grid</p></div>
+            <div class="info-card"><h5>ระยะรหัส (Code Distance)</h5><p style="color:#38bdf8;">d = 3 (ทนทานความผิดพลาด 1 ตัว)</p></div>
+          `;
+          break;
+
+        case 'fig10_6':
+          container.innerHTML = `
+            <div class="info-card"><h5>สนามแม่เหล็กที่วัดได้ ($B$)</h5><p id="t-nv-b" style="color:var(--gold);">1.00 mT</p></div>
+            <div class="info-card"><h5>การแยกซีมาน (Zeeman Splitting)</h5><p id="t-nv-z" style="color:#38bdf8;">ΔE = 28.0 MHz</p></div>
+            <div class="info-card"><h5>ความถี่การสั่นพ้องศูนย์สนาม</h5><p>D = 2.87 GHz (S=1 Triplet)</p></div>
+            <div class="info-card"><h5>ขีดจำกัดความไวไฮเซนเบิร์ก</h5><p style="color:#10b981;">Δθ ≥ 1/N (เหนือกว่าคลาสสิก 1/√N)</p></div>
+            <div class="info-card"><h5>คิวบิตทรานสมอน</h5><p>E_J / E_C ≫ 50 (ป้องกัน Charge Noise)</p></div>
+            <div class="info-card"><h5>การประยุกต์เกษตรแม่นยำ</h5><p>ตรวจวัดไอออนในท่อน้ำเลี้ยงพืช</p></div>
           `;
           break;
 
@@ -9272,37 +9873,169 @@
       setFig9_6Eve(present);
     }
 
-    // Fig 12: Grover
-    function setFig12Target(m) {
+    // ==========================================================
+    // CHAPTER 10 INTERACTIVE CONTROLLERS & PHYSICS SIMULATION
+    // ==========================================================
+
+    // Fig 10.1: Deutsch-Jozsa
+    function testDeutschJozsa(mode) {
+      const dFn = document.getElementById('disp-dj-fn');
+      const tType = document.getElementById('t-dj-type');
+      const tRes = document.getElementById('t-dj-res');
+      if (mode === 'const0') {
+        if (dFn) { dFn.textContent = 'Constant f(x)=0'; dFn.style.color = '#38bdf8'; }
+        if (tType) tType.textContent = 'Constant f(x) = 0 (คงตัว)';
+        if (tRes) { tRes.textContent = '|00⟩ (P = 100%)'; tRes.style.color = '#10b981'; }
+      } else if (mode === 'const1') {
+        if (dFn) { dFn.textContent = 'Constant f(x)=1'; dFn.style.color = '#38bdf8'; }
+        if (tType) tType.textContent = 'Constant f(x) = 1 (คงตัว)';
+        if (tRes) { tRes.textContent = '|00⟩ (P = 100%)'; tRes.style.color = '#10b981'; }
+      } else if (mode === 'balanced_xor') {
+        if (dFn) { dFn.textContent = 'Balanced f(x)=x0 ⊕ x1'; dFn.style.color = '#f43f5e'; }
+        if (tType) tType.textContent = 'Balanced f(x) = x0 ⊕ x1 (สมดุล)';
+        if (tRes) { tRes.textContent = '|11⟩ (Orthogonal, P(|00⟩)=0)'; tRes.style.color = '#f43f5e'; }
+      } else if (mode === 'balanced_inv') {
+        if (dFn) { dFn.textContent = 'Balanced f(x)=NOT(x0)'; dFn.style.color = '#f43f5e'; }
+        if (tType) tType.textContent = 'Balanced f(x) = NOT(x0) (สมดุล)';
+        if (tRes) { tRes.textContent = '|01⟩ (Orthogonal, P(|00⟩)=0)'; tRes.style.color = '#f43f5e'; }
+      }
+      if (models.fig10_1 && models.fig10_1.setMode) {
+        models.fig10_1.setMode(mode);
+      }
+    }
+
+    // Fig 10.2 / Legacy Fig 12: Grover Search
+    function setFig10_2GroverTarget(m) {
       const el = document.getElementById('disp-gr-target');
       const tEl = document.getElementById('t-gr-m');
       const bin = parseInt(m).toString(2).padStart(3, '0');
       if (el) el.textContent = `|${bin}⟩ (${m})`;
       if (tEl) tEl.textContent = `|${bin}⟩ (Item ${m})`;
+      if (models.fig10_2 && models.fig10_2.setTarget) {
+        models.fig10_2.setTarget(m);
+      }
+      if (models.fig12 && models.fig12.setTarget) {
+        models.fig12.setTarget(m);
+      }
+    }
+    function updateFig10_2GroverStep(step) {
+      const s = parseInt(step);
+      const disp = document.getElementById('disp-gr-step');
+      const tProb = document.getElementById('t-gr-prob');
+      const names = ['รอบ 0: เตรียมสถานะสม่ำเสมอ |s⟩ (P = 12.5%)', 'รอบ 1: ออราเคิลกลับเฟสเป้าหมาย (Flip)', 'รอบ 1: ตัวกระจายสะท้อนรอบค่าเฉลี่ย (P = 78.1%)', 'รอบ 2: ขยายแอมพลิจูดรอบที่สอง (พีค 94.5%)'];
+      const probs = ['12.5% (1/N)', '12.5% (Inverted Phase)', '78.1%', '≈ 94.5% (Max Peak)'];
+      if (disp) disp.textContent = names[s] || `Step ${s}`;
+      if (tProb) tProb.textContent = probs[s] || '≈ 94.5%';
+      if (models.fig10_2 && models.fig10_2.setStep) {
+        models.fig10_2.setStep(s);
+      }
+    }
+    function setFig12Target(m) {
+      setFig10_2GroverTarget(m);
     }
 
-    // Fig 13: Shor
-    function setFig13Base(a) {
+    // Fig 10.3 / Legacy Fig 13: Shor / QFT
+    function setFig10_3ShorBase(a) {
       const el = document.getElementById('disp-sh-a');
       const fn = document.getElementById('t-sh-fn');
-      if (el) el.textContent = `a = ${a} (คาบ r = ${a === '4' || a === '11' ? 2 : 4})`;
+      const rEl = document.getElementById('t-sh-r');
+      const pEl = document.getElementById('t-sh-peaks');
+      const fEl = document.getElementById('t-sh-fact');
+      const r = (a === '4' || a === '11') ? 2 : 4;
+      if (el) el.textContent = `a = ${a} (คาบ r = ${r})`;
       if (fn) fn.textContent = `${a}ˣ mod 15`;
+      if (rEl) rEl.textContent = `r = ${r}`;
+      if (pEl) pEl.textContent = r === 4 ? 'k = 0, 4, 8, 12' : 'k = 0, 8';
+      if (fEl) fEl.textContent = `gcd(${a}^${r/2}±1, 15) = 3, 5`;
+      if (models.fig10_3 && models.fig10_3.setBase) {
+        models.fig10_3.setBase(a);
+      }
+      if (models.fig13 && models.fig13.setBase) {
+        models.fig13.setBase(a);
+      }
+    }
+    function setFig13Base(a) {
+      setFig10_3ShorBase(a);
     }
 
-    // Fig 14: BB84
-    function setFig14Eve(present) {
-      const d = document.getElementById('disp-bb-eve');
-      const sec = document.getElementById('t-bb-sec');
-      const qber = document.getElementById('t-bb-qber');
-      if (present) {
-        if (d) { d.textContent = 'มี Eve ดักฟัง!'; d.style.color = '#ef4444'; }
-        if (sec) { sec.textContent = 'ดักฟังตรวจพบ! (INSECURE)'; sec.style.color = '#ef4444'; }
-        if (qber) { qber.textContent = '25.0% (เกินเกณฑ์ 11%)'; qber.style.color = '#ef4444'; }
-      } else {
-        if (d) { d.textContent = 'ไม่มี (SAFE)'; d.style.color = '#10b981'; }
-        if (sec) { sec.textContent = 'SECURE (ปลอดภัย)'; sec.style.color = '#10b981'; }
-        if (qber) { qber.textContent = '0.0% (ต่ำกว่า 11%)'; qber.style.color = '#10b981'; }
+    // Fig 10.4: VQE
+    function updateFig10_4VqeTheta(v) {
+      const val = parseFloat(v);
+      const disp = document.getElementById('disp-vqe-th');
+      const tTh = document.getElementById('t-vqe-th');
+      const tE = document.getElementById('t-vqe-e');
+      if (disp) disp.textContent = `${val.toFixed(2)} rad`;
+      if (tTh) tTh.textContent = `θ = ${val.toFixed(2)} rad`;
+      const e = -1.2 * Math.cos(val) - 0.65;
+      if (tE) tE.textContent = `${e.toFixed(3)} Ha (Hartree)`;
+      if (models.fig10_4 && models.fig10_4.setTheta) {
+        models.fig10_4.setTheta(val);
       }
+    }
+    function optimizeFig10_4Vqe() {
+      // Animate convergence to ground state theta = Math.PI, E = -1.85 Ha
+      let cur = 0.8;
+      const target = Math.PI;
+      const interval = setInterval(() => {
+        cur += (target - cur) * 0.25;
+        updateFig10_4VqeTheta(cur);
+        const slider = document.querySelector('input[oninput*="updateFig10_4VqeTheta"]');
+        if (slider) slider.value = cur;
+        if (Math.abs(cur - target) < 0.02) {
+          clearInterval(interval);
+          updateFig10_4VqeTheta(target);
+          if (slider) slider.value = target;
+        }
+      }, 60);
+    }
+    function resetFig10_4Vqe() {
+      updateFig10_4VqeTheta(0.8);
+      const slider = document.querySelector('input[oninput*="updateFig10_4VqeTheta"]');
+      if (slider) slider.value = 0.8;
+    }
+
+    // Fig 10.5: Surface Codes & QEC
+    function toggleFig10_5QecError(type) {
+      const stat = document.getElementById('t-qec-stat');
+      const zEl = document.getElementById('t-qec-z');
+      const xEl = document.getElementById('t-qec-x');
+      if (type === 'X') {
+        if (stat) { stat.textContent = 'ตรวจพบ Bit-flip Error (X)'; stat.style.color = '#ef4444'; }
+        if (zEl) { zEl.textContent = 'Z₁Z₂Z₃Z₄ = -1 (Syndrome Triggered!)'; zEl.style.color = '#ef4444'; }
+      } else {
+        if (stat) { stat.textContent = 'ตรวจพบ Phase-flip Error (Z)'; stat.style.color = '#a855f7'; }
+        if (xEl) { xEl.textContent = 'X₁X₂X₃X₄ = -1 (Syndrome Triggered!)'; xEl.style.color = '#a855f7'; }
+      }
+      if (models.fig10_5 && models.fig10_5.injectError) {
+        models.fig10_5.injectError(type, 4);
+      }
+    }
+    function correctFig10_5Qec() {
+      const stat = document.getElementById('t-qec-stat');
+      const zEl = document.getElementById('t-qec-z');
+      const xEl = document.getElementById('t-qec-x');
+      if (stat) { stat.textContent = 'แก้ไขเรียบร้อย (Fault-Tolerant Corrected)'; stat.style.color = '#10b981'; }
+      if (zEl) { zEl.textContent = 'Z₁Z₂Z₃Z₄ = +1 (Syndrome Restored)'; zEl.style.color = '#10b981'; }
+      if (xEl) { xEl.textContent = 'X₁X₂X₃X₄ = +1 (Syndrome Restored)'; xEl.style.color = '#10b981'; }
+      if (models.fig10_5 && models.fig10_5.correctError) {
+        models.fig10_5.correctError();
+      }
+    }
+
+    // Fig 10.6: Quantum Hardware & NV Center
+    function tuneFig10_6MagField(b) {
+      const val = parseFloat(b);
+      const disp = document.getElementById('disp-nv-b');
+      const tB = document.getElementById('t-nv-b');
+      const tZ = document.getElementById('t-nv-z');
+      if (disp) disp.textContent = `${val.toFixed(2)} mT`;
+      if (tB) tB.textContent = `${val.toFixed(2)} mT`;
+      if (tZ) tZ.textContent = `ΔE = ${(val * 28.0).toFixed(1)} MHz`;
+      if (models.fig10_6 && models.fig10_6.setMagField) {
+        models.fig10_6.setMagField(val);
+      }
+      const slider = document.querySelector('input[oninput*="tuneFig10_6MagField"]');
+      if (slider) slider.value = val;
     }
 
     // ==========================================================
