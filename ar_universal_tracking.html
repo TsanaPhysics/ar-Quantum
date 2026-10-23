@@ -1130,10 +1130,10 @@
        ========================================================== */
     :root {
       --gold-neon: #ffd000;
-      --gold-glow: rgba(255, 208, 0, 0.35);
+      --gold-glow: rgba(255, 208, 0, 0.40);
       --gold-dim: rgba(255, 208, 0, 0.12);
-      --gold-glass: rgba(5, 10, 20, 0.30); /* 70% Transparent Glassmorphic Background */
-      --gold-border: rgba(255, 208, 0, 0.75);
+      --gold-glass: rgba(2, 6, 23, 0.18); /* Crystal-clear translucent glassmorphic background so 3D scene & camera feed are clearly visible */
+      --gold-border: rgba(255, 208, 0, 0.65);
     }
 
     .cyber-sidebar {
@@ -1142,10 +1142,10 @@
       bottom: 84px;
       z-index: 46;
       background: var(--gold-glass);
-      backdrop-filter: blur(8px) saturate(160%);
-      -webkit-backdrop-filter: blur(8px) saturate(160%);
-      border: 1.5px solid var(--gold-neon);
-      box-shadow: 0 0 18px var(--gold-glow), inset 0 0 14px rgba(255, 208, 0, 0.05);
+      backdrop-filter: blur(10px) saturate(160%);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+      border: 1.5px solid var(--gold-border);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.20), 0 0 16px rgba(255, 208, 0, 0.15);
       display: flex;
       flex-direction: column;
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
@@ -1158,8 +1158,8 @@
     /* Left Sidebar: Chamfer top-left & bottom-right */
     .cyber-sidebar-left {
       left: 10px;
-      width: 270px;
-      max-width: 78vw;
+      width: 280px;
+      max-width: 82vw;
       clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 24px), calc(100% - 24px) 100%, 0 100%, 0 18px);
     }
     .cyber-sidebar-left.closed {
@@ -1168,20 +1168,20 @@
       opacity: 0;
     }
     .cyber-sidebar-left.collapsed {
-      width: 42px;
+      width: 44px;
       clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-      background: rgba(5, 10, 20, 0.38);
+      background: rgba(2, 6, 23, 0.22);
     }
     .cyber-sidebar-left.expanded {
-      width: 390px;
+      width: 410px;
       max-width: calc(100vw - 20px);
     }
 
     /* Right Sidebar: Chamfer top-right & bottom-left */
     .cyber-sidebar-right {
       right: 10px;
-      width: 270px;
-      max-width: 78vw;
+      width: 280px;
+      max-width: 82vw;
       clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 24px 100%, 0 calc(100% - 24px));
     }
     .cyber-sidebar-right.closed {
@@ -1190,12 +1190,12 @@
       opacity: 0;
     }
     .cyber-sidebar-right.collapsed {
-      width: 42px;
+      width: 44px;
       clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
-      background: rgba(5, 10, 20, 0.38);
+      background: rgba(2, 6, 23, 0.22);
     }
     .cyber-sidebar-right.expanded {
-      width: 390px;
+      width: 410px;
       max-width: calc(100vw - 20px);
     }
 
@@ -1423,15 +1423,16 @@
       font-weight: 600;
     }
 
-    /* Parameters Sliders (Gold Cyber Aesthetic) */
+    /* Parameters Sliders (Gold Cyber Glass Aesthetic) */
     .param-group {
       margin-bottom: 12px;
-      background: rgba(3, 7, 18, 0.45);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      background: rgba(15, 23, 42, 0.22);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       padding: 10px 12px;
       border-radius: 8px;
-      border: 1px solid rgba(255, 208, 0, 0.22);
+      border: 1px solid rgba(255, 208, 0, 0.28);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
     }
     .param-label {
       display: flex;
@@ -1450,7 +1451,7 @@
       width: 100%;
       height: 6px;
       border-radius: 3px;
-      background: rgba(30, 41, 59, 0.7);
+      background: rgba(30, 41, 59, 0.65);
       outline: none;
       -webkit-appearance: none;
     }
@@ -1465,7 +1466,7 @@
       border: 1.5px solid #fff;
     }
 
-    /* Telemetry Info Cards (Gold Cyber Aesthetic) */
+    /* Telemetry Info Cards (Gold Cyber Glass Aesthetic) */
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1475,13 +1476,14 @@
       grid-template-columns: 1fr 1fr 1fr;
     }
     .info-card {
-      background: rgba(3, 7, 18, 0.45);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      border: 1px solid rgba(255, 208, 0, 0.24);
+      background: rgba(15, 23, 42, 0.22);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 208, 0, 0.28);
       border-radius: 8px;
       padding: 9px 11px;
       position: relative;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
     }
     .info-card::before {
       content: '';
@@ -1513,19 +1515,27 @@
       top: 50%;
       transform: translateY(-50%);
       z-index: 44;
-      background: rgba(8, 14, 26, 0.92);
+      background: rgba(8, 14, 26, 0.50);
       border: 1.5px solid var(--gold-neon);
-      box-shadow: 0 0 18px var(--gold-glow);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      padding: 12px 6px;
+      box-shadow: 0 0 18px rgba(255, 208, 0, 0.25);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 12px 7px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       cursor: pointer;
       color: var(--gold-neon);
       transition: all 0.25s ease;
+      touch-action: none;
+      user-select: none;
+    }
+    .edge-dock-trigger.active {
+      background: rgba(255, 208, 0, 0.25);
+      border-color: #fff;
+      color: #fff;
+      box-shadow: 0 0 22px var(--gold-neon);
     }
     .edge-dock-trigger:hover, .edge-dock-trigger:active {
       background: var(--gold-neon);
@@ -1555,6 +1565,23 @@
       font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 1.5px;
+    }
+    .dock-slide-cue {
+      font-size: 0.6rem;
+      color: var(--gold-neon);
+      opacity: 0.85;
+      animation: cueNudgeRight 1.5s infinite ease-in-out;
+    }
+    .edge-dock-right .dock-slide-cue {
+      animation-name: cueNudgeLeft;
+    }
+    @keyframes cueNudgeRight {
+      0%, 100% { transform: translateX(0); opacity: 0.5; }
+      50% { transform: translateX(3px); opacity: 1; text-shadow: 0 0 8px var(--gold-neon); }
+    }
+    @keyframes cueNudgeLeft {
+      0%, 100% { transform: translateX(0); opacity: 0.5; }
+      50% { transform: translateX(-3px); opacity: 1; text-shadow: 0 0 8px var(--gold-neon); }
     }
 
     /* Drawer Fallback compatibility */
@@ -1891,15 +1918,17 @@
     </div>
   </aside>
 
-  <!-- Floating Screen-Edge Dock Triggers (Pinned to Left & Right screen edges for quick open/close) -->
-  <button class="edge-dock-trigger edge-dock-left" id="btnDockTabLeft" onclick="toggleSidebar('left')" title="เปิด/ปิด ข้อมูลการทดลอง (ซ้าย)">
+  <!-- Floating Screen-Edge Dock Triggers (Pinned to Left & Right screen edges for quick open/close & slide gestures) -->
+  <button class="edge-dock-trigger edge-dock-left" id="btnDockTabLeft" onclick="toggleSidebar('left')" title="แตะหรือสไลด์ไปทางขวา เพื่อเปิด/ปิด ข้อมูล DATA">
     <i class="fa-solid fa-chart-line"></i>
     <span>DATA</span>
+    <div class="dock-slide-cue"><i class="fa-solid fa-angles-right"></i></div>
   </button>
 
-  <button class="edge-dock-trigger edge-dock-right" id="btnDockTabRight" onclick="toggleSidebar('right')" title="เปิด/ปิด ชุดควบคุม (ขวา)">
+  <button class="edge-dock-trigger edge-dock-right" id="btnDockTabRight" onclick="toggleSidebar('right')" title="แตะหรือสไลด์ไปทางซ้าย เพื่อเปิด/ปิด แผงควบคุม CTRL">
     <i class="fa-solid fa-sliders"></i>
     <span>CTRL</span>
+    <div class="dock-slide-cue"><i class="fa-solid fa-angles-left"></i></div>
   </button>
 
   <!-- Target Preview Modal -->
@@ -2189,9 +2218,12 @@
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.6));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.2)); // Ultra-crisp high-DPI rendering
+    if (THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.25;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -2202,21 +2234,39 @@
     const masterGroup = new THREE.Group();
     scene.add(masterGroup);
 
-    // Lights
-    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-    const mainDirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    // Studio & Holographic Lighting Setup for photorealistic depth
+    scene.add(new THREE.AmbientLight(0xfffbeb, 0.65));
+    
+    // Key Light
+    const mainDirLight = new THREE.DirectionalLight(0xffffff, 1.25);
     mainDirLight.position.set(5, 8, 5);
     scene.add(mainDirLight);
 
-    // Fill lights: prevent pitch-black silhouettes (e.g. the Nickel block) when viewed from below/side in AR
-    scene.add(new THREE.HemisphereLight(0xe0f2fe, 0x1e293b, 0.75));
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.55);
-    fillLight.position.set(-4, -3, 6);
+    // Natural Sky/Ground Fill Light
+    scene.add(new THREE.HemisphereLight(0xe0f2fe, 0x0f172a, 0.85));
+    
+    // Front-Left Fill
+    const fillLight = new THREE.DirectionalLight(0xbae6fd, 0.65);
+    fillLight.position.set(-4, -2, 6);
     scene.add(fillLight);
 
-    const cyanPoint = new THREE.PointLight(0x00f0ff, 1.5, 12);
-    cyanPoint.position.set(-3, 2, 2);
+    // Dual Rim Backlights for specular edge contours (Cyan & Warm Gold)
+    const rimLightCyan = new THREE.DirectionalLight(0x00f0ff, 0.95);
+    rimLightCyan.position.set(-5, 6, -5);
+    scene.add(rimLightCyan);
+
+    const rimLightGold = new THREE.DirectionalLight(0xffd000, 0.80);
+    rimLightGold.position.set(5, -2, -4);
+    scene.add(rimLightGold);
+
+    // Local Glow Point Lights
+    const cyanPoint = new THREE.PointLight(0x00f0ff, 1.6, 12);
+    cyanPoint.position.set(-2.5, 2, 2.5);
     scene.add(cyanPoint);
+
+    const goldPoint = new THREE.PointLight(0xffd000, 1.3, 10);
+    goldPoint.position.set(2.5, 1.5, 2);
+    scene.add(goldPoint);
 
     // Tactical Holographic Polar Grid Base Platform (Sci-Fi Holo Projection)
     const holoPlatform = new THREE.Group();
@@ -2241,34 +2291,44 @@
     const models = {};
 
     // --- MODEL 1: Blackbody Cavity (Fig 1.1) ---
+    // --- MODEL 1: Blackbody Cavity (Fig 1.1) ---
     function buildFig1Model() {
       const g = new THREE.Group();
       
-      // Spherical outer cavity cutaway
-      const cavityGeo = new THREE.SphereGeometry(1.6, 48, 48, 0, Math.PI * 1.5, 0, Math.PI);
+      // Spherical outer cavity cutaway (Higher 64 segments for silky-smooth curves)
+      const cavityGeo = new THREE.SphereGeometry(1.6, 64, 64, 0, Math.PI * 1.5, 0, Math.PI);
       const cavityMat = new THREE.MeshStandardMaterial({
-        color: 0x1e293b,
-        metalness: 0.8,
-        roughness: 0.25,
+        color: 0x0a0f1d,
+        metalness: 0.25,
+        roughness: 0.90,
         side: THREE.BackSide
       });
       const cavity = new THREE.Mesh(cavityGeo, cavityMat);
       g.add(cavity);
 
-      // Outer golden shell
-      const outerMat = new THREE.MeshStandardMaterial({
-        color: 0xd97706,
-        metalness: 0.9,
-        roughness: 0.2,
+      // Outer polished golden/brass shell
+      const outerMat = new THREE.MeshPhysicalMaterial({
+        color: 0xf59e0b,
+        metalness: 0.95,
+        roughness: 0.16,
+        clearcoat: 0.85,
+        clearcoatRoughness: 0.10,
         side: THREE.FrontSide
       });
       const outer = new THREE.Mesh(cavityGeo, outerMat);
       g.add(outer);
 
-      // Hole ring
+      // Aperture Gold Bezel Ring
+      const bezelGeo = new THREE.TorusGeometry(0.36, 0.04, 24, 48);
+      const bezelMat = new THREE.MeshStandardMaterial({ color: 0xffd000, metalness: 0.95, roughness: 0.15, emissive: 0xffd000, emissiveIntensity: 0.25 });
+      const bezel = new THREE.Mesh(bezelGeo, bezelMat);
+      bezel.position.set(0, 0, 1.6);
+      g.add(bezel);
+
+      // Hole absorption disk
       const holeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-      const hole = new THREE.Mesh(new THREE.CircleGeometry(0.35, 32), holeMat);
-      hole.position.set(0, 0, 1.6);
+      const hole = new THREE.Mesh(new THREE.CircleGeometry(0.35, 48), holeMat);
+      hole.position.set(0, 0, 1.59);
       g.add(hole);
 
       // Glowing Ray Lines
@@ -2281,15 +2341,20 @@
         new THREE.Vector3(0, 0, 1.6)
       ];
       const rayGeo = new THREE.BufferGeometry().setFromPoints(rayPoints);
-      const rayMat = new THREE.LineBasicMaterial({ color: 0xf59e0b, linewidth: 2 });
+      const rayMat = new THREE.LineBasicMaterial({ color: 0xffd000, linewidth: 2 });
       const rayLine = new THREE.Line(rayGeo, rayMat);
       g.add(rayLine);
 
-      // Heated core glow
-      const coreGeo = new THREE.SphereGeometry(0.6, 24, 24);
-      const coreMat = new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.45 });
+      // Heated core glow with outer corona
+      const coreGeo = new THREE.SphereGeometry(0.65, 48, 48);
+      const coreMat = new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.65, blending: THREE.AdditiveBlending });
       const core = new THREE.Mesh(coreGeo, coreMat);
       g.add(core);
+
+      const coronaGeo = new THREE.SphereGeometry(0.85, 32, 32);
+      const coronaMat = new THREE.MeshBasicMaterial({ color: 0xffd000, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending, depthWrite: false });
+      const corona = new THREE.Mesh(coronaGeo, coronaMat);
+      g.add(corona);
 
       g.scale.set(1.0, 1.0, 1.0);
       return { group: g, rayLine, coreMat };
@@ -2299,76 +2364,106 @@
     function buildFig2Model() {
       const g = new THREE.Group();
 
-      // Vacuum Tube Cylinder
-      const tubeGeo = new THREE.CylinderGeometry(0.9, 0.9, 3.0, 32, 1, true);
+      // Vacuum Tube Cylinder with photorealistic glass transmission
+      const tubeGeo = new THREE.CylinderGeometry(0.92, 0.92, 3.2, 48, 1, true);
       tubeGeo.rotateZ(Math.PI / 2);
       const tubeMat = new THREE.MeshPhysicalMaterial({
-        color: 0x93c5fd,
+        color: 0xbae6fd,
         transparent: true,
-        opacity: 0.28,
-        transmission: 0.85,
-        roughness: 0.05,
-        metalness: 0.1,
+        opacity: 0.35,
+        transmission: 0.92,
+        roughness: 0.04,
+        metalness: 0.05,
+        ior: 1.52,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.04,
         side: THREE.DoubleSide
       });
       g.add(new THREE.Mesh(tubeGeo, tubeMat));
 
-      // Quartz Window
-      const quartzGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.1, 24);
+      // Metal Tube Caps (Brushed Stainless Steel Endings)
+      const capGeo = new THREE.CylinderGeometry(0.94, 0.94, 0.12, 48);
+      capGeo.rotateZ(Math.PI / 2);
+      const capMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.9, roughness: 0.25 });
+      const capL = new THREE.Mesh(capGeo, capMat); capL.position.set(-1.6, 0, 0); g.add(capL);
+      const capR = new THREE.Mesh(capGeo, capMat); capR.position.set(1.6, 0, 0); g.add(capR);
+
+      // Quartz Window with Refractive Cyan Rim
+      const quartzGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.12, 32);
       quartzGeo.rotateX(Math.PI / 4);
-      const quartzMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.75, emissive: 0x00f0ff, emissiveIntensity: 0.4 });
+      const quartzMat = new THREE.MeshPhysicalMaterial({
+        color: 0x00f0ff,
+        transparent: true,
+        opacity: 0.85,
+        transmission: 0.75,
+        emissive: 0x00f0ff,
+        emissiveIntensity: 0.45,
+        roughness: 0.05,
+        clearcoat: 1.0
+      });
       const quartz = new THREE.Mesh(quartzGeo, quartzMat);
       quartz.position.set(-1.1, 0.75, 0.35);
       g.add(quartz);
 
-      // Cathode plate
-      const catGeo = new THREE.CylinderGeometry(0.7, 0.7, 0.06, 32);
+      // Cathode plate (Pure Polished Copper Electrode)
+      const catGeo = new THREE.CylinderGeometry(0.72, 0.72, 0.08, 48);
       catGeo.rotateZ(Math.PI / 2);
-      const catMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9, roughness: 0.2 });
+      const catMat = new THREE.MeshPhysicalMaterial({
+        color: 0xd97706,
+        metalness: 0.94,
+        roughness: 0.16,
+        clearcoat: 0.65
+      });
       const cathode = new THREE.Mesh(catGeo, catMat);
-      cathode.position.set(-0.9, 0, 0);
+      cathode.position.set(-0.95, 0, 0);
       g.add(cathode);
 
-      // Anode Ring
-      const anGeo = new THREE.RingGeometry(0.2, 0.7, 32);
+      // Anode Ring (Polished Platinum/Chrome Wire Ring)
+      const anGeo = new THREE.TorusGeometry(0.55, 0.04, 24, 48);
       anGeo.rotateY(Math.PI / 2);
-      const anMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.3, side: THREE.DoubleSide });
+      const anMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.12 });
       const anode = new THREE.Mesh(anGeo, anMat);
-      anode.position.set(0.9, 0, 0);
+      anode.position.set(0.95, 0, 0);
       g.add(anode);
 
       // Photon Beam
-      const beamGeo = new THREE.CylinderGeometry(0.04, 0.15, 1.3, 16);
+      const beamGeo = new THREE.CylinderGeometry(0.04, 0.18, 1.35, 24);
       beamGeo.rotateZ(-Math.PI / 3.3);
       beamGeo.translate(-1.3, 0.55, 0.18);
-      const beamMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.75 });
+      const beamMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending });
       const beam = new THREE.Mesh(beamGeo, beamMat);
       g.add(beam);
 
-      // Electron Particles
-      const eCount = 60;
+      // Electron Particles with glowing additive blending
+      const eCount = 70;
       const eGeo = new THREE.BufferGeometry();
       const ePos = new Float32Array(eCount * 3);
       const eSpeed = new Float32Array(eCount);
       for (let i = 0; i < eCount; i++) {
-        ePos[i * 3] = -0.85 + Math.random() * 1.7;
+        ePos[i * 3] = -0.90 + Math.random() * 1.8;
         ePos[i * 3 + 1] = (Math.random() - 0.5) * 0.9;
         ePos[i * 3 + 2] = (Math.random() - 0.5) * 0.9;
-        eSpeed[i] = 0.01 + Math.random() * 0.025;
+        eSpeed[i] = 0.012 + Math.random() * 0.028;
       }
       eGeo.setAttribute('position', new THREE.BufferAttribute(ePos, 3));
-      const eMat = new THREE.PointsMaterial({ color: 0xec4899, size: 0.07, transparent: true, blending: THREE.AdditiveBlending });
+      const eMat = new THREE.PointsMaterial({ color: 0xec4899, size: 0.08, transparent: true, blending: THREE.AdditiveBlending });
       const particles = new THREE.Points(eGeo, eMat);
       g.add(particles);
 
       // Circuit Wire and Meter Dial
-      const meter = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.12, 32), new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8 }));
-      meter.rotateX(Math.PI / 2);
+      const meterGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.14, 48);
+      meterGeo.rotateX(Math.PI / 2);
+      const meter = new THREE.Mesh(meterGeo, new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.85, roughness: 0.25 }));
       meter.position.set(0, -1.4, 0);
       g.add(meter);
 
-      const needleGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0.07), new THREE.Vector3(0, 0.3, 0.07)]);
-      const needle = new THREE.Line(needleGeo, new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 2 }));
+      // Dial face ring
+      const dialRing = new THREE.Mesh(new THREE.RingGeometry(0.32, 0.40, 48), new THREE.MeshBasicMaterial({ color: 0xffd000 }));
+      dialRing.position.set(0, -1.4, 0.075);
+      g.add(dialRing);
+
+      const needleGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0.08), new THREE.Vector3(0, 0.32, 0.08)]);
+      const needle = new THREE.Line(needleGeo, new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 3 }));
       needle.position.set(0, -1.4, 0);
       g.add(needle);
 
@@ -2379,62 +2474,72 @@
     function buildFig3Model() {
       const g = new THREE.Group();
 
-      // Nickel Crystal Base Block
-      const crystalGeo = new THREE.BoxGeometry(2.6, 0.6, 1.8);
-      const crystalMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.35, roughness: 0.45, emissive: 0x0f172a, emissiveIntensity: 0.35 });
+      // Nickel Crystal Base Block (Polished Specular Finish)
+      const crystalGeo = new THREE.BoxGeometry(2.6, 0.65, 1.8);
+      const crystalMat = new THREE.MeshPhysicalMaterial({
+        color: 0x64748b,
+        metalness: 0.88,
+        roughness: 0.20,
+        clearcoat: 0.75,
+        clearcoatRoughness: 0.15
+      });
       const crystal = new THREE.Mesh(crystalGeo, crystalMat);
       crystal.position.set(0.4, -0.6, 0);
       g.add(crystal);
 
-      // Crystal Atoms (Lattice Points)
-      const atomMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.2 });
+      // Crystal Atoms (Lattice Points with Golden Specular Sheen)
+      const atomMat = new THREE.MeshPhysicalMaterial({
+        color: 0xf59e0b,
+        metalness: 0.95,
+        roughness: 0.15,
+        clearcoat: 0.90
+      });
       for (let x = -0.7; x <= 1.5; x += 0.4) {
         for (let z = -0.6; z <= 0.6; z += 0.4) {
-          const atom = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), atomMat);
-          atom.position.set(x, -0.3, z);
+          const atom = new THREE.Mesh(new THREE.SphereGeometry(0.09, 24, 24), atomMat);
+          atom.position.set(x, -0.28, z);
           g.add(atom);
         }
       }
 
-      // Electron Gun
-      const gunGeo = new THREE.CylinderGeometry(0.18, 0.24, 0.9, 24);
+      // Electron Gun with dual ceramic & brass housing
+      const gunGeo = new THREE.CylinderGeometry(0.18, 0.24, 0.95, 32);
       gunGeo.rotateZ(Math.PI / 3);
-      const gunMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.7, roughness: 0.3 });
+      const gunMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.85, roughness: 0.25 });
       const gun = new THREE.Mesh(gunGeo, gunMat);
       gun.position.set(-1.4, 1.4, 0);
       g.add(gun);
 
       // Incident Beam
-      const inBeamGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.8, 16);
+      const inBeamGeo = new THREE.CylinderGeometry(0.035, 0.035, 1.85, 24);
       inBeamGeo.rotateZ(Math.PI / 3);
-      const inBeamMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.85 });
+      const inBeamMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
       const inBeam = new THREE.Mesh(inBeamGeo, inBeamMat);
       inBeam.position.set(-0.6, 0.6, 0);
       g.add(inBeam);
 
-      // Movable Detector
-      const detRingGeo = new THREE.TorusGeometry(1.8, 0.03, 16, 48, Math.PI / 1.5);
+      // Movable Detector Track with Graduated Arc
+      const detRingGeo = new THREE.TorusGeometry(1.8, 0.035, 20, 64, Math.PI / 1.5);
       detRingGeo.rotateZ(-Math.PI / 4);
-      const detRingMat = new THREE.LineBasicMaterial({ color: 0x64748b });
-      const detRing = new THREE.Line(detRingGeo, detRingMat);
+      const detRingMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.3 });
+      const detRing = new THREE.Mesh(detRingGeo, detRingMat);
       detRing.position.set(0.4, -0.3, 0);
       g.add(detRing);
 
-      const detCupGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.4, 20);
+      // Electrostatic Faraday Collector Cup
+      const detCupGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.42, 32);
       detCupGeo.rotateZ(Math.PI / 4);
-      const detCupMat = new THREE.MeshStandardMaterial({ color: 0xec4899, emissive: 0xec4899, emissiveIntensity: 0.3 });
+      const detCupMat = new THREE.MeshStandardMaterial({ color: 0xec4899, emissive: 0xec4899, emissiveIntensity: 0.45, metalness: 0.8, roughness: 0.2 });
       const detCup = new THREE.Mesh(detCupGeo, detCupMat);
       detCup.position.set(1.6, 1.3, 0);
       g.add(detCup);
 
       // Scattered Interference Beam (phi = 50 deg)
-      const scatBeamGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.9, 16);
+      const scatBeamGeo = new THREE.CylinderGeometry(0.045, 0.045, 1.95, 24);
       scatBeamGeo.rotateZ(-Math.PI / 3.6);
-      const scatBeamMat = new THREE.MeshBasicMaterial({ color: 0xec4899, transparent: true, opacity: 0.9 });
+      const scatBeamMat = new THREE.MeshBasicMaterial({ color: 0xec4899, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending });
       const scatBeam = new THREE.Mesh(scatBeamGeo, scatBeamMat);
       scatBeam.position.set(1.0, 0.5, 0);
-      g.add(scatBeam);
-
       return { group: g, detCup, scatBeam };
     }
 
@@ -4023,20 +4128,26 @@
 
     function updateSidebarDOM(side) {
       const el = document.getElementById(side === 'left' ? 'sidebarLeft' : 'sidebarRight');
+      const trig = document.getElementById(side === 'left' ? 'btnDockTabLeft' : 'btnDockTabRight');
       if (!el) return;
       const st = sidebarState[side];
       el.classList.remove('closed', 'collapsed', 'expanded');
       if (st === 'closed') {
         el.classList.add('closed');
+        if (trig) trig.classList.remove('active');
       } else if (st === 'collapsed') {
         el.classList.add('collapsed');
+        if (trig) trig.classList.remove('active');
       } else if (st === 'expanded') {
         el.classList.add('expanded');
+        if (trig) trig.classList.add('active');
+      } else {
+        if (trig) trig.classList.add('active');
       }
     }
 
     function toggleSidebar(side) {
-      if (sidebarState[side] === 'closed') {
+      if (sidebarState[side] === 'closed' || sidebarState[side] === 'collapsed') {
         sidebarState[side] = 'open';
       } else {
         sidebarState[side] = 'closed';
@@ -4061,7 +4172,7 @@
         // On narrow mobile screens, collapse opposite bar if open so AR scene stays clear
         if (window.innerWidth < 768) {
           const other = side === 'left' ? 'right' : 'left';
-          if (sidebarState[other] === 'open') {
+          if (sidebarState[other] === 'open' || sidebarState[other] === 'expanded') {
             sidebarState[other] = 'collapsed';
             updateSidebarDOM(other);
           }
@@ -4094,6 +4205,85 @@
     updateSidebarDOM('left');
     updateSidebarDOM('right');
 
+    // ==========================================================
+    // TOUCH & SLIDE GESTURE ENGINE (Touch/Slide on DATA & CTRL)
+    // ==========================================================
+    (function initSidebarGestures() {
+      function attachSwipe(el, onSwipeRight, onSwipeLeft) {
+        if (!el) return;
+        let startX = 0, startY = 0, isDragging = false;
+        el.addEventListener('pointerdown', (e) => {
+          if (e.target.closest('input, button, select, textarea')) return;
+          startX = e.clientX;
+          startY = e.clientY;
+          isDragging = true;
+        }, { passive: true });
+
+        el.addEventListener('pointerup', (e) => {
+          if (!isDragging) return;
+          isDragging = false;
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy) * 1.05) {
+            if (dx > 0 && onSwipeRight) onSwipeRight();
+            else if (dx < 0 && onSwipeLeft) onSwipeLeft();
+          }
+        }, { passive: true });
+      }
+
+      // Left Dock Trigger (DATA): Slide right to open, slide left to close
+      const btnLeft = document.getElementById('btnDockTabLeft');
+      attachSwipe(btnLeft, 
+        () => expandSidebar('left', 'open'), 
+        () => closeSidebar('left')
+      );
+
+      // Left Sidebar & Protruding tab: Slide left to close/collapse, slide right to expand
+      const sideLeft = document.getElementById('sidebarLeft');
+      attachSwipe(sideLeft, 
+        () => expandSidebar('left', 'expanded'), 
+        () => closeSidebar('left')
+      );
+
+      // Right Dock Trigger (CTRL): Slide left to open, slide right to close
+      const btnRight = document.getElementById('btnDockTabRight');
+      attachSwipe(btnRight, 
+        () => closeSidebar('right'), 
+        () => expandSidebar('right', 'open')
+      );
+
+      // Right Sidebar & Protruding tab: Slide right to close/collapse, slide left to expand
+      const sideRight = document.getElementById('sidebarRight');
+      attachSwipe(sideRight, 
+        () => closeSidebar('right'), 
+        () => expandSidebar('right', 'expanded')
+      );
+
+      // Screen edge gesture detection (Swipe from screen boundaries)
+      let edgeStartX = 0, edgeStartY = 0, isEdgeTracking = false;
+      window.addEventListener('pointerdown', (e) => {
+        if (e.clientX <= 35 || e.clientX >= window.innerWidth - 35) {
+          edgeStartX = e.clientX;
+          edgeStartY = e.clientY;
+          isEdgeTracking = true;
+        }
+      }, { passive: true });
+
+      window.addEventListener('pointerup', (e) => {
+        if (!isEdgeTracking) return;
+        isEdgeTracking = false;
+        const dx = e.clientX - edgeStartX;
+        const dy = e.clientY - edgeStartY;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+          if (edgeStartX <= 35 && dx > 0) {
+            expandSidebar('left', 'open'); // Swiped from left edge inwards
+          } else if (edgeStartX >= window.innerWidth - 35 && dx < 0) {
+            expandSidebar('right', 'open'); // Swiped from right edge inwards
+          }
+        }
+      }, { passive: true });
+    })();
+
     // Tap canvas to auto-minimize sidebars on mobile so 3D model is fully visible
     const canvasWrap = document.getElementById('webgl-canvas-container');
     if (canvasWrap) {
@@ -4110,102 +4300,691 @@
     }
 
     // ==========================================================
-    // 8. DYNAMIC PARAMETER & TELEMETRY CONTROLS
+    // 8. DYNAMIC PARAMETER & TELEMETRY CONTROLS FOR ALL 20 SIMULATORS
     // ==========================================================
     function renderParamControls(targetId) {
       const container = document.getElementById('paramControlsContent');
-      if (targetId === 'fig1') {
-        container.innerHTML = `
-          <div class="param-group">
-            <div class="param-label"><span>อุณหภูมิโพรงรังสี (Temperature $T$)</span><span class="param-val" id="disp-t">5000 K</span></div>
-            <input type="range" class="slider-custom" min="1500" max="9000" step="100" value="5000" oninput="updateFig1Temp(this.value)">
-          </div>
-          <div class="param-group">
-            <div class="param-label"><span>จำนวนการสะท้อนของคลื่นภายใน ($N$)</span><span class="param-val" id="disp-n">8 ครั้ง</span></div>
-            <input type="range" class="slider-custom" min="2" max="20" step="1" value="8" oninput="updateFig1Reflect(this.value)">
-          </div>
-        `;
-      } else if (targetId === 'fig2') {
-        container.innerHTML = `
-          <div class="param-group">
-            <div class="param-label"><span>ความยาวคลื่นแสง ($\lambda$)</span><span class="param-val" id="disp-lambda">350 nm (UV)</span></div>
-            <input type="range" class="slider-custom" min="200" max="750" step="5" value="350" oninput="updateFig2Lambda(this.value)">
-          </div>
-          <div class="param-group">
-            <div class="param-label"><span>ความต่างศักย์ปรับค่าได้ ($V$)</span><span class="param-val" id="disp-v">0.00 V</span></div>
-            <input type="range" class="slider-custom" min="-3.0" max="3.0" step="0.1" value="0.0" oninput="updateFig2Voltage(this.value)">
-          </div>
-          <div class="param-group">
-            <div class="param-label"><span>ความเข้มแสงโฟตอน</span><span class="param-val" id="disp-int">80%</span></div>
-            <input type="range" class="slider-custom" min="10" max="100" step="5" value="80" oninput="updateFig2Intensity(this.value)">
-          </div>
-        `;
-      } else if (targetId === 'fig3') {
-        container.innerHTML = `
-          <div class="param-group">
-            <div class="param-label"><span>ความต่างศักย์เร่งอิเล็กตรอน ($V$)</span><span class="param-val" id="disp-dg-v">54 V (เดอ บรอยล์)</span></div>
-            <input type="range" class="slider-custom" min="20" max="100" step="1" value="54" oninput="updateFig3Voltage(this.value)">
-          </div>
-          <div class="param-group">
-            <div class="param-label"><span>มุมการกระเจิงสังเกตการณ์ ($\phi$)</span><span class="param-val" id="disp-dg-phi">50.0°</span></div>
-            <input type="range" class="slider-custom" min="20" max="90" step="1" value="50" oninput="updateFig3Angle(this.value)">
-          </div>
-        `;
-      } else {
-        const cfg = TARGET_CATALOG[targetId];
-        container.innerHTML = `
-          <div class="param-group">
-            <div class="param-label"><span>ความเร็วการจำลอง (Simulation speed)</span><span class="param-val" id="disp-speed">${animSpeed.toFixed(1)}×</span></div>
-            <input type="range" class="slider-custom" min="0" max="3" step="0.1" value="${animSpeed}" oninput="setAnimSpeed(this.value)">
-          </div>
-          <p style="font-size:0.8rem; color:#cbd5e1; line-height:1.55;">${cfg.desc}</p>
-        `;
+      if (!container) return;
+
+      switch(targetId) {
+        // --- CH 1.1: UV Catastrophe ---
+        case 'fig1_1':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>อุณหภูมิวัตถุดำ ($T$)</span><span class="param-val" id="disp-u-t">5500 K</span></div>
+              <input type="range" class="slider-custom" min="2000" max="8500" step="100" value="5500" oninput="updateFig1_1Temp(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ช่วงความยาวคลื่นรังสี UV ($\lambda_{\\text{cut}}$)</span><span class="param-val" id="disp-u-cut">220 nm</span></div>
+              <input type="range" class="slider-custom" min="100" max="500" step="10" value="220" oninput="updateFig1_1Cut(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความเร็วการสแกนความถี่</span><span class="param-val" id="disp-speed">${animSpeed.toFixed(1)}×</span></div>
+              <input type="range" class="slider-custom" min="0" max="3" step="0.1" value="${animSpeed}" oninput="setAnimSpeed(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 1.2: Blackbody Cavity ---
+        case 'fig1':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>อุณหภูมิโพรงรังสี ($T$)</span><span class="param-val" id="disp-t">5000 K</span></div>
+              <input type="range" class="slider-custom" min="1500" max="9000" step="100" value="5000" oninput="updateFig1Temp(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>จำนวนการสะท้อนภายใน ($N$)</span><span class="param-val" id="disp-n">8 ครั้ง</span></div>
+              <input type="range" class="slider-custom" min="2" max="24" step="1" value="8" oninput="updateFig1Reflect(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>รัศมีรูเปิดรับรังสี ($r_{\\text{hole}}$)</span><span class="param-val" id="disp-r">0.35</span></div>
+              <input type="range" class="slider-custom" min="0.15" max="0.65" step="0.05" value="0.35" oninput="updateFig1Hole(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 1.3: Planck Energy Ladder ---
+        case 'fig1_3':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ระดับพลังงานควอนตัม ($n$)</span><span class="param-val" id="disp-p-n">n = 3</span></div>
+              <input type="range" class="slider-custom" min="0" max="4" step="1" value="3" oninput="updateFig1_3Level(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความถี่ตัวแกว่งกวัด ($\nu$)</span><span class="param-val" id="disp-p-nu">3.5 × 10¹³ Hz</span></div>
+              <input type="range" class="slider-custom" min="1.0" max="8.0" step="0.5" value="3.5" oninput="updateFig1_3Freq(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความเร็วการเปลี่ยนระดับ</span><span class="param-val" id="disp-speed">${animSpeed.toFixed(1)}×</span></div>
+              <input type="range" class="slider-custom" min="0" max="3" step="0.1" value="${animSpeed}" oninput="setAnimSpeed(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 1.4: Wien Displacement ---
+        case 'fig1_4':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>อุณหภูมิผิวดาวฤกษ์ ($T$)</span><span class="param-val" id="disp-w-t">5800 K (ดวงอาทิตย์)</span></div>
+              <input type="range" class="slider-custom" min="2500" max="9500" step="100" value="5800" oninput="updateFig1_4Temp(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>รัศมีทรงกลมดาว ($R/R_\\odot$)</span><span class="param-val" id="disp-w-r">1.0 R☉</span></div>
+              <input type="range" class="slider-custom" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateFig1_4Radius(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 1.5: Photoelectric Effect ---
+        case 'fig2':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ความยาวคลื่นแสง ($\lambda$)</span><span class="param-val" id="disp-lambda">350 nm (UV)</span></div>
+              <input type="range" class="slider-custom" min="200" max="750" step="5" value="350" oninput="updateFig2Lambda(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความต่างศักย์ปรับค่าได้ ($V$)</span><span class="param-val" id="disp-v">0.00 V</span></div>
+              <input type="range" class="slider-custom" min="-3.0" max="3.0" step="0.1" value="0.0" oninput="updateFig2Voltage(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความเข้มแสงโฟตอน</span><span class="param-val" id="disp-int">80%</span></div>
+              <input type="range" class="slider-custom" min="10" max="100" step="5" value="80" oninput="updateFig2Intensity(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>โลหะแคโทด (Work Function $\\Phi$)</span></div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.7rem; padding:4px 6px;" onclick="setFig2Metal(2.14, 'Cs (2.14 eV)')">Cs</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.7rem; padding:4px 6px;" onclick="setFig2Metal(2.30, 'K (2.30 eV)')">K</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.7rem; padding:4px 6px;" onclick="setFig2Metal(2.36, 'Na (2.36 eV)')">Na</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.7rem; padding:4px 6px;" onclick="setFig2Metal(4.70, 'Cu (4.70 eV)')">Cu</button>
+              </div>
+            </div>
+          `;
+          break;
+
+        // --- CH 1.6: Compton Scattering ---
+        case 'fig1_6':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>พลังงานโฟตอนรังสีเอกซ์ ($E_0$)</span><span class="param-val" id="disp-c-e">50 keV</span></div>
+              <input type="range" class="slider-custom" min="20" max="150" step="5" value="50" oninput="updateFig1_6Energy(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>มุมการกระเจิงโฟตอน ($\\theta$)</span><span class="param-val" id="disp-c-th">45.0°</span></div>
+              <input type="range" class="slider-custom" min="0" max="180" step="5" value="45" oninput="updateFig1_6Angle(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 1.7: Pair Production & Annihilation ---
+        case 'fig1_7':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>พลังงานโฟตอนรังสีแกมมา ($E_\\gamma$)</span><span class="param-val" id="disp-pp-e">2.50 MeV</span></div>
+              <input type="range" class="slider-custom" min="0.8" max="4.0" step="0.1" value="2.5" oninput="updateFig1_7Energy(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>สนามแม่เหล็กดัดวิถี ($B$)</span><span class="param-val" id="disp-pp-b">1.2 T</span></div>
+              <input type="range" class="slider-custom" min="0.2" max="2.5" step="0.1" value="1.2" oninput="updateFig1_7B(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 1.8: Kibble Balance & SNSPD ---
+        case 'fig1_8':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>มวลทดสอบ ($m$)</span><span class="param-val" id="disp-kb-m">500 mg</span></div>
+              <input type="range" class="slider-custom" min="100" max="1000" step="50" value="500" oninput="updateFig1_8Mass(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>กระแสไบอัส SNSPD ($I_b / I_c$)</span><span class="param-val" id="disp-kb-ib">0.85</span></div>
+              <input type="range" class="slider-custom" min="0.50" max="0.98" step="0.02" value="0.85" oninput="updateFig1_8Bias(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 2.1: Davisson-Germer ---
+        case 'fig3':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ความต่างศักย์เร่งอิเล็กตรอน ($V$)</span><span class="param-val" id="disp-dg-v">54 V (เดอ บรอยล์)</span></div>
+              <input type="range" class="slider-custom" min="20" max="100" step="1" value="54" oninput="updateFig3Voltage(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>มุมการกระเจิงสังเกตการณ์ ($\phi$)</span><span class="param-val" id="disp-dg-phi">50.0°</span></div>
+              <input type="range" class="slider-custom" min="20" max="90" step="1" value="50" oninput="updateFig3Angle(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 2: Double Slit ---
+        case 'fig4':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>อัตราการยิงอิเล็กตรอน (Rate)</span><span class="param-val" id="disp-ds-rate">25 e⁻/s</span></div>
+              <input type="range" class="slider-custom" min="5" max="60" step="5" value="25" oninput="updateFig4Rate(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ระยะห่างสลิตคู่ ($d$)</span><span class="param-val" id="disp-ds-d">0.50 μm</span></div>
+              <input type="range" class="slider-custom" min="0.20" max="0.90" step="0.05" value="0.50" oninput="updateFig4SlitD(this.value)">
+            </div>
+            <div class="param-group">
+              <button class="win-btn" style="width:100%; height:32px; font-weight:700;" onclick="clearFig4Screen()"><i class="fa-solid fa-trash-can"></i> ล้างฉากรับอนุภาค (Reset Hits)</button>
+            </div>
+          `;
+          break;
+
+        // --- CH 3: Wave Packet ---
+        case 'fig5':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ความกว้างเริ่มต้น ($\\sigma_0$)</span><span class="param-val" id="disp-wp-sig">0.22</span></div>
+              <input type="range" class="slider-custom" min="0.10" max="0.50" step="0.02" value="0.22" oninput="updateFig5Width(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>เลขคลื่นศูนย์กลาง ($k_0$)</span><span class="param-val" id="disp-wp-k0">12.0 rad/m</span></div>
+              <input type="range" class="slider-custom" min="6.0" max="24.0" step="1.0" value="12.0" oninput="updateFig5K0(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 4: STM Tunneling ---
+        case 'fig6':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ระยะห่างหัวเข็ม-ผิวหน้า ($d$)</span><span class="param-val" id="disp-stm-d">0.22 nm</span></div>
+              <input type="range" class="slider-custom" min="0.12" max="0.55" step="0.02" value="0.22" oninput="updateFig6Gap(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความต่างศักย์ไบอัส ($V$)</span><span class="param-val" id="disp-stm-v">1.00 V</span></div>
+              <input type="range" class="slider-custom" min="0.2" max="2.5" step="0.1" value="1.0" oninput="updateFig6Bias(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 5: Quantum Harmonic Oscillator ---
+        case 'fig7':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ระดับพลังงาน ($n$)</span><span class="param-val" id="disp-qho-n">n = 0..4</span></div>
+              <input type="range" class="slider-custom" min="0" max="4" step="1" value="0" oninput="updateFig7Level(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความถี่เชิงมุมบ่อศักย์ ($\\omega$)</span><span class="param-val" id="disp-qho-w">1.8 rad/s</span></div>
+              <input type="range" class="slider-custom" min="0.8" max="3.5" step="0.1" value="1.8" oninput="updateFig7Omega(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 6: Hydrogen Orbitals ---
+        case 'fig8':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>เลือกออร์บิทัลอะตอม</span><span class="param-val" id="disp-orb">3d_z² (n=3, ℓ=2, m=0)</span></div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.7rem; padding:4px 6px;" onclick="setFig8Orbital('3dz2')">3d_z²</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.7rem; padding:4px 6px;" onclick="setFig8Orbital('2pz')">2p_z</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.7rem; padding:4px 6px;" onclick="setFig8Orbital('1s')">1s</button>
+              </div>
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความหนาแน่นจุดเมฆความน่าจะเป็น</span><span class="param-val" id="disp-orb-pts">4,000 จุด</span></div>
+              <input type="range" class="slider-custom" min="1500" max="6000" step="500" value="4000" oninput="updateFig8Points(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 7: BEC ---
+        case 'fig9':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>อุณหภูมิลดทอน ($T / T_c$)</span><span class="param-val" id="disp-bec-t">0.60 Tc</span></div>
+              <input type="range" class="slider-custom" min="0.0" max="1.5" step="0.05" value="0.60" oninput="updateFig9Temp(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>จำนวนอะตอมในกับดัก ($N$)</span><span class="param-val" id="disp-bec-n">5 × 10⁵ ⁸⁷Rb</span></div>
+              <input type="range" class="slider-custom" min="1" max="10" step="1" value="5" oninput="updateFig9N(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 8: Bloch Sphere ---
+        case 'fig10':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>มุมพิกัดโพลาร์ ($\\theta$)</span><span class="param-val" id="disp-bl-th">90.0°</span></div>
+              <input type="range" class="slider-custom" min="0" max="180" step="2" value="90" oninput="updateFig10Theta(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>มุมเฟสแอซิมัท ($\\phi$)</span><span class="param-val" id="disp-bl-ph">45.0°</span></div>
+              <input type="range" class="slider-custom" min="0" max="360" step="5" value="45" oninput="updateFig10Phi(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ควอนตัมเกต (Quantum Gates)</span></div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="applyFig10Gate('X')">X</button>
+                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="applyFig10Gate('Y')">Y</button>
+                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="applyFig10Gate('Z')">Z</button>
+                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="applyFig10Gate('H')">H</button>
+              </div>
+            </div>
+          `;
+          break;
+
+        // --- CH 9: Quantum Entanglement ---
+        case 'fig11':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>มุมโพลาไรเซอร์ Alice ($\\alpha$)</span><span class="param-val" id="disp-ent-a">0.0°</span></div>
+              <input type="range" class="slider-custom" min="0" max="180" step="5" value="0" oninput="updateFig11ThetaA(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>มุมโพลาไรเซอร์ Bob ($\\beta$)</span><span class="param-val" id="disp-ent-b">90.0°</span></div>
+              <input type="range" class="slider-custom" min="0" max="180" step="5" value="90" oninput="updateFig11ThetaB(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 10: Grover Search ---
+        case 'fig12':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>สถานะเป้าหมายที่ค้นหา ($|m\\rangle$)</span><span class="param-val" id="disp-gr-target">|101⟩ (5)</span></div>
+              <select class="slider-custom" style="height:32px; background:rgba(15,23,42,0.8); color:#ffd000; padding:4px 8px; border:1px solid #ffd000;" onchange="setFig12Target(this.value)">
+                <option value="0">|000⟩</option>
+                <option value="1">|001⟩</option>
+                <option value="2">|010⟩</option>
+                <option value="3">|011⟩</option>
+                <option value="4">|100⟩</option>
+                <option value="5" selected>|101⟩ (เป้าหมาย)</option>
+                <option value="6">|110⟩</option>
+                <option value="7">|111⟩</option>
+              </select>
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความเร็วการขยายแอมพลิจูด</span><span class="param-val" id="disp-speed">${animSpeed.toFixed(1)}×</span></div>
+              <input type="range" class="slider-custom" min="0" max="3" step="0.1" value="${animSpeed}" oninput="setAnimSpeed(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 11: Shor / QFT ---
+        case 'fig13':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ฟังก์ชันมอดุโล $f(x) = a^x \\bmod 15$</span><span class="param-val" id="disp-sh-a">a = 7 (คาบ r = 4)</span></div>
+              <select class="slider-custom" style="height:32px; background:rgba(15,23,42,0.8); color:#ffd000; padding:4px 8px; border:1px solid #ffd000;" onchange="setFig13Base(this.value)">
+                <option value="7" selected>a = 7 (คาบ r = 4)</option>
+                <option value="2">a = 2 (คาบ r = 4)</option>
+                <option value="4">a = 4 (คาบ r = 2)</option>
+                <option value="11">a = 11 (คาบ r = 2)</option>
+              </select>
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความเร็วการหมุนเฟสนาฬิกา QFT</span><span class="param-val" id="disp-speed">${animSpeed.toFixed(1)}×</span></div>
+              <input type="range" class="slider-custom" min="0" max="3" step="0.1" value="${animSpeed}" oninput="setAnimSpeed(this.value)">
+            </div>
+          `;
+          break;
+
+        // --- CH 12: BB84 QKD ---
+        case 'fig14':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ผู้ดักฟัง (Eavesdropper Eve)</span><span class="param-val" id="disp-bb-eve" style="color:#10b981;">ไม่มี (SAFE)</span></div>
+              <div style="display:flex; gap:8px; margin-top:6px;">
+                <button class="win-btn" style="flex:1; width:auto; height:32px; font-weight:700;" onclick="setFig14Eve(false)"><i class="fa-solid fa-shield-halved"></i> ไม่มี Eve</button>
+                <button class="win-btn" style="flex:1; width:auto; height:32px; font-weight:700; color:#ef4444; border-color:#ef4444;" onclick="setFig14Eve(true)"><i class="fa-solid fa-user-secret"></i> มี Eve ดักฟัง</button>
+              </div>
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความเร็วการส่งโฟตอน</span><span class="param-val" id="disp-speed">${animSpeed.toFixed(1)}×</span></div>
+              <input type="range" class="slider-custom" min="0" max="3" step="0.1" value="${animSpeed}" oninput="setAnimSpeed(this.value)">
+            </div>
+          `;
+          break;
+
+        default:
+          const cfg = TARGET_CATALOG[targetId] || {};
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ความเร็วการจำลอง (Simulation speed)</span><span class="param-val" id="disp-speed">${animSpeed.toFixed(1)}×</span></div>
+              <input type="range" class="slider-custom" min="0" max="3" step="0.1" value="${animSpeed}" oninput="setAnimSpeed(this.value)">
+            </div>
+            <p style="font-size:0.8rem; color:#cbd5e1; line-height:1.55;">${cfg.desc || ''}</p>
+          `;
       }
     }
 
     function renderTelemetry(targetId) {
       const container = document.getElementById('telemetryContent');
-      if (targetId === 'fig1') {
-        container.innerHTML = `
-          <div class="info-card"><h5>ยอดคลื่นวีน ($\lambda_{\\max}$)</h5><p id="t-wien">579.6 nm</p></div>
-          <div class="info-card"><h5>กำลังสเปกตรัมรวม ($u$)</h5><p id="t-power">35.4 kW/m²</p></div>
-          <div class="info-card"><h5>สถานะความร้อน</h5><p style="color:var(--gold);">สมดุลทางความร้อน</p></div>
-          <div class="info-card"><h5>กฎการแผ่รังสี</h5><p>พลังค์ (Planck 1900)</p></div>
-        `;
-      } else if (targetId === 'fig2') {
-        container.innerHTML = `
-          <div class="info-card"><h5>พลังงานโฟตอน ($h\\nu$)</h5><p id="t-pe-e">3.54 eV</p></div>
-          <div class="info-card"><h5>ฟังก์ชันงาน ($\Phi$)</h5><p>2.14 eV (ซีเซียม)</p></div>
-          <div class="info-card"><h5>พลังงานจลน์สูงสุด ($K_{\\max}$)</h5><p id="t-pe-kmax">1.40 eV</p></div>
-          <div class="info-card"><h5>ความต่างศักย์หยุดยั้ง ($V_0$)</h5><p id="t-pe-v0">-1.40 V</p></div>
-        `;
-      } else if (targetId === 'fig3') {
-        container.innerHTML = `
-          <div class="info-card"><h5>ความยาวคลื่นเดอ บรอยล์</h5><p id="t-dg-lam">0.167 nm</p></div>
-          <div class="info-card"><h5>ระยะห่างแลตทิซผลึก ($D$)</h5><p>0.215 nm</p></div>
-          <div class="info-card"><h5>มุมเสริมกัน ($D\\sin\\phi$)</h5><p id="t-dg-diff">0.165 nm (1st)</p></div>
-          <div class="info-card"><h5>ความคลาดเคลื่อน</h5><p style="color:var(--emerald);">&lt; 1.0%</p></div>
-        `;
-      } else {
-        const cfg = TARGET_CATALOG[targetId];
-        container.innerHTML = (cfg.facts || [])
-          .map(([k, v]) => `<div class="info-card"><h5>${k}</h5><p>${v}</p></div>`)
-          .join('');
+      if (!container) return;
+
+      switch(targetId) {
+        // --- CH 1.1: UV Catastrophe ---
+        case 'fig1_1':
+          container.innerHTML = `
+            <div class="info-card"><h5>อุณหภูมิ ($T$)</h5><p id="t-uv-t">5500 K</p></div>
+            <div class="info-card"><h5>จุดยอดวีน ($\lambda_{\\max}$)</h5><p id="t-uv-lam">526.9 nm</p></div>
+            <div class="info-card"><h5>ความเข้มพลังค์ $u(\\lambda)$</h5><p id="t-uv-up">41.8 kW/m²</p></div>
+            <div class="info-card"><h5>เรย์ลีห์-จีนส์ (UV)</h5><p style="color:#ef4444;" id="t-uv-rj">ลู่สู่อนันต์ (∞)</p></div>
+            <div class="info-card"><h5>พลังงานเฉลี่ยคลาสสิก</h5><p>⟨ε⟩ = kT</p></div>
+            <div class="info-card"><h5>พลังงานควอนตัมพลังค์</h5><p style="color:var(--gold);">ε = nhν</p></div>
+          `;
+          break;
+
+        // --- CH 1.2: Blackbody Cavity ---
+        case 'fig1':
+          container.innerHTML = `
+            <div class="info-card"><h5>ยอดคลื่นวีน ($\lambda_{\\max}$)</h5><p id="t-wien">579.6 nm</p></div>
+            <div class="info-card"><h5>กำลังสเปกตรัมรวม ($u$)</h5><p id="t-power">35.4 kW/m²</p></div>
+            <div class="info-card"><h5>สภาพดูดกลืนแสง ($\alpha$)</h5><p style="color:#10b981;">1.000 (วัตถุดำสมบูรณ์)</p></div>
+            <div class="info-card"><h5>กฎการแผ่รังสี</h5><p>พลังค์ (Planck 1900)</p></div>
+            <div class="info-card"><h5>โหมดคลื่นนิ่ง</h5><p>g(ν) = 8πν²/c³</p></div>
+            <div class="info-card"><h5>สถานะความร้อน</h5><p style="color:var(--gold);">สมดุลทางความร้อน</p></div>
+          `;
+          break;
+
+        // --- CH 1.3: Planck Energy Ladder ---
+        case 'fig1_3':
+          container.innerHTML = `
+            <div class="info-card"><h5>สถานะควอนตัม ($n$)</h5><p id="t-p-n">|3⟩</p></div>
+            <div class="info-card"><h5>พลังงานระดับ ($E_n$)</h5><p id="t-p-e">0.435 eV</p></div>
+            <div class="info-card"><h5>พลังงานโฟตอน ($\Delta E$)</h5><p id="t-p-de">0.145 eV</p></div>
+            <div class="info-card"><h5>ความยาวคลื่นโฟตอน</h5><p id="t-p-lam">8.55 μm (IR)</p></div>
+            <div class="info-card"><h5>ค่าคงตัวพลังค์</h5><p>6.626×10⁻³⁴ J·s</p></div>
+            <div class="info-card"><h5>พลังงานเฉลี่ย ⟨ε⟩</h5><p>hν/(e^{hν/kT}-1)</p></div>
+          `;
+          break;
+
+        // --- CH 1.4: Wien Displacement ---
+        case 'fig1_4':
+          container.innerHTML = `
+            <div class="info-card"><h5>อุณหภูมิผิวดาว ($T$)</h5><p id="t-w-t">5800 K</p></div>
+            <div class="info-card"><h5>ยอดคลื่นสูงสุด ($\lambda_{\\max}$)</h5><p id="t-w-lam">499.7 nm (เขียว)</p></div>
+            <div class="info-card"><h5>ฟลักซ์รังสี ($j^* = \\sigma T^4$)</h5><p id="t-w-flux">64.2 MW/m²</p></div>
+            <div class="info-card"><h5>สเปกตรัมดาราศาสตร์</h5><p id="t-w-sp" style="color:var(--gold);">Type G2V (เหลือง)</p></div>
+            <div class="info-card"><h5>ค่าคงที่วีน ($b$)</h5><p>2.898×10⁻³ m·K</p></div>
+            <div class="info-card"><h5>กำลังส่องสว่าง ($L/L_\\odot$)</h5><p id="t-w-lum">1.00 L☉</p></div>
+          `;
+          break;
+
+        // --- CH 1.5: Photoelectric Effect ---
+        case 'fig2':
+          container.innerHTML = `
+            <div class="info-card"><h5>พลังงานโฟตอน ($h\\nu$)</h5><p id="t-pe-e">3.54 eV</p></div>
+            <div class="info-card"><h5>ฟังก์ชันงาน ($\Phi$)</h5><p id="t-pe-phi">2.14 eV (ซีเซียม)</p></div>
+            <div class="info-card"><h5>พลังงานจลน์สูงสุด ($K_{\\max}$)</h5><p id="t-pe-kmax">1.40 eV</p></div>
+            <div class="info-card"><h5>ความต่างศักย์หยุดยั้ง ($V_0$)</h5><p id="t-pe-v0">-1.40 V</p></div>
+            <div class="info-card"><h5>กระแสโฟโตอิเล็กตรอน</h5><p id="t-pe-i" style="color:#10b981;">มีกระแส (14.2 μA)</p></div>
+            <div class="info-card"><h5>สมการไอน์สไตน์</h5><p>K_max = hν - Φ</p></div>
+          `;
+          break;
+
+        // --- CH 1.6: Compton Scattering ---
+        case 'fig1_6':
+          container.innerHTML = `
+            <div class="info-card"><h5>พลังงานโฟตอนปฐมภูมิ</h5><p id="t-c-e0">50.0 keV</p></div>
+            <div class="info-card"><h5>มุมการกระเจิง ($\theta$)</h5><p id="t-c-th">45.0°</p></div>
+            <div class="info-card"><h5>ความยาวคลื่นเลื่อน ($\Delta\lambda$)</h5><p id="t-c-dlam">0.710 pm</p></div>
+            <div class="info-card"><h5>พลังงานโฟตอนกระเจิง ($E'$)</h5><p id="t-c-ep">48.6 keV</p></div>
+            <div class="info-card"><h5>พลังงานจลน์อิเล็กตรอน</h5><p id="t-c-ke">1.40 keV</p></div>
+            <div class="info-card"><h5>ความยาวคลื่นคอมป์ตัน</h5><p>λ_C = 2.426 pm</p></div>
+          `;
+          break;
+
+        // --- CH 1.7: Pair Production & Annihilation ---
+        case 'fig1_7':
+          container.innerHTML = `
+            <div class="info-card"><h5>พลังงานโฟตอนรังสีแกมมา</h5><p id="t-pp-e">2.50 MeV</p></div>
+            <div class="info-card"><h5>พลังงานขีดเริ่ม ($2m_e c^2$)</h5><p style="color:#10b981;">1.022 MeV</p></div>
+            <div class="info-card"><h5>พลังงานจลน์คู่ e⁻ + e⁺</h5><p id="t-pp-ke">1.478 MeV</p></div>
+            <div class="info-card"><h5>โฟตอนการประลัย (2γ)</h5><p>2 × 511 keV</p></div>
+            <div class="info-card"><h5>มุมการประลัย (กรอบนิ่ง)</h5><p>180.0° (ตรงข้ามกัน)</p></div>
+            <div class="info-card"><h5>การประยุกต์ใช้งาน</h5><p>PET Scan Medical</p></div>
+          `;
+          break;
+
+        // --- CH 1.8: Kibble Balance & SNSPD ---
+        case 'fig1_8':
+          container.innerHTML = `
+            <div class="info-card"><h5>มวลทดสอบ ($m$)</h5><p id="t-kb-m">500 mg</p></div>
+            <div class="info-card"><h5>แรงโน้มถ่วง ($mg$)</h5><p id="t-kb-f">4.903 mN</p></div>
+            <div class="info-card"><h5>โหมดชั่ง / โหมดความเร็ว</h5><p style="color:var(--gold);">mgv = VI</p></div>
+            <div class="info-card"><h5>ค่าคงตัวพลังค์ ($h$)</h5><p>6.62607015×10⁻³⁴</p></div>
+            <div class="info-card"><h5>SNSPD Jitter</h5><p style="color:#10b981;">&lt; 2.8 พิโกวินาที</p></div>
+            <div class="info-card"><h5>ประสิทธิภาพตรวจจับ</h5><p>&gt; 98% ที่ 1550 nm</p></div>
+          `;
+          break;
+
+        // --- CH 2.1: Davisson-Germer ---
+        case 'fig3':
+          container.innerHTML = `
+            <div class="info-card"><h5>ความยาวคลื่นเดอ บรอยล์</h5><p id="t-dg-lam">0.167 nm</p></div>
+            <div class="info-card"><h5>ระยะห่างแลตทิซผลึก ($D$)</h5><p>0.215 nm</p></div>
+            <div class="info-card"><h5>มุมเสริมกัน ($D\\sin\\phi$)</h5><p id="t-dg-diff">0.165 nm (1st)</p></div>
+            <div class="info-card"><h5>ความคลาดเคลื่อน</h5><p style="color:#10b981;">&lt; 0.8%</p></div>
+            <div class="info-card"><h5>พลังงานอิเล็กตรอน</h5><p id="t-dg-vdisp">54 eV</p></div>
+            <div class="info-card"><h5>ผลการทดลองประวัติศาสตร์</h5><p>1927 Nobel Prize</p></div>
+          `;
+          break;
+
+        // --- CH 2: Double Slit ---
+        case 'fig4':
+          container.innerHTML = `
+            <div class="info-card"><h5>จำนวนอนุภาคที่ตรวจพบ</h5><p id="t-ds-hits" style="color:var(--gold);">0 อนุภาค</p></div>
+            <div class="info-card"><h5>ความยาวคลื่นเดอ บรอยล์</h5><p>λ = h/p</p></div>
+            <div class="info-card"><h5>ระยะห่างริ้วสว่าง ($\Delta y$)</h5><p id="t-ds-dy">1.48 mm</p></div>
+            <div class="info-card"><h5>การสะสมริ้วแทรกสอด</h5><p style="color:#10b981;">สะสมทีละอนุภาค</p></div>
+            <div class="info-card"><h5>ฟังก์ชันคลื่นรวม</h5><p>ψ = ψ₁ + ψ₂</p></div>
+            <div class="info-card"><h5>หลักทวิภาวะคลื่น-อนุภาค</h5><p>Wave-Particle Duality</p></div>
+          `;
+          break;
+
+        // --- CH 3: Wave Packet ---
+        case 'fig5':
+          container.innerHTML = `
+            <div class="info-card"><h5>ความเร็วกลุ่ม ($v_g$)</h5><p id="t-wp-vg">0.60 c_unit</p></div>
+            <div class="info-card"><h5>ความเร็วเฟส ($v_p$)</h5><p id="t-wp-vp">0.30 c_unit (vg/2)</p></div>
+            <div class="info-card"><h5>การแผ่กว้าง ($\sigma(t)$)</h5><p style="color:var(--gold);">σ₀√(1+(t/τ)²)</p></div>
+            <div class="info-card"><h5>หลักความไม่แน่นอน</h5><p style="color:#10b981;">Δx·Δp ≥ ℏ/2</p></div>
+            <div class="info-card"><h5>ส่วนจริง / ส่วนจินตภาพ</h5><p>Re ψ + i Im ψ</p></div>
+            <div class="info-card"><h5>ความหนาแน่นน่าจะเป็น</h5><p>|ψ(x,t)|²</p></div>
+          `;
+          break;
+
+        // --- CH 4: STM Tunneling ---
+        case 'fig6':
+          container.innerHTML = `
+            <div class="info-card"><h5>กระแสทันเนลลิง ($I$)</h5><p id="t-stm-i" style="color:var(--gold);">1.85 nA</p></div>
+            <div class="info-card"><h5>สัมประสิทธิ์ลดทอน ($\kappa$)</h5><p>10.2 nm⁻¹</p></div>
+            <div class="info-card"><h5>ความไวต่อระยะห่าง</h5><p style="color:#10b981;">10 เท่า ต่อ 0.1 nm</p></div>
+            <div class="info-card"><h5>ความละเอียดแนวตั้ง</h5><p>~0.01 nm (ระดับอะตอม)</p></div>
+            <div class="info-card"><h5>สูตรกระแสควอนตัม</h5><p>I ∝ V e^(−2κd)</p></div>
+            <div class="info-card"><h5>โหมดการทำงาน</h5><p>Constant Current</p></div>
+          `;
+          break;
+
+        // --- CH 5: QHO ---
+        case 'fig7':
+          container.innerHTML = `
+            <div class="info-card"><h5>ระดับพลังงาน ($E_n$)</h5><p id="t-qho-e">E₀ = 0.275 eV</p></div>
+            <div class="info-card"><h5>พลังงานจุดศูนย์ ($E_0$)</h5><p style="color:#10b981;">½ℏω (Non-zero)</p></div>
+            <div class="info-card"><h5>ระยะห่างระหว่างระดับ ($\Delta E$)</h5><p>ℏω (ห่างเท่ากัน)</p></div>
+            <div class="info-card"><h5>ฟังก์ชันพหุนามแอร์มีต</h5><p>H_n(ξ) e^(−ξ²/2)</p></div>
+            <div class="info-card"><h5>สถานะโคฮีเรนต์</h5><p>Glauber Coherent</p></div>
+            <div class="info-card"><h5>ความน่าจะเป็นอุโมงค์</h5><p>ทะลุเขตห้ามคลาสสิก</p></div>
+          `;
+          break;
+
+        // --- CH 6: Hydrogen Orbitals ---
+        case 'fig8':
+          container.innerHTML = `
+            <div class="info-card"><h5>เลขควอนตัมหลัก ($n, \ell, m$)</h5><p id="t-orb-nlm">n=3, ℓ=2, m=0</p></div>
+            <div class="info-card"><h5>พลังงานระดับ ($E_3$)</h5><p>-1.51 eV</p></div>
+            <div class="info-card"><h5>ระนาบโหนด (Nodal Cones)</h5><p>cos²θ = 1/3 (2 ระนาบ)</p></div>
+            <div class="info-card"><h5>เครื่องหมายเฟส (+ / -)</h5><p style="color:var(--gold);">Cyan (+) / Pink (-)</p></div>
+            <div class="info-card"><h5>รัศมีบอห์ร ($a_0$)</h5><p>0.0529 nm</p></div>
+            <div class="info-card"><h5>ฟังก์ชันคลื่นเชิงมุม</h5><p>Y₂₀(θ,φ) Spherical</p></div>
+          `;
+          break;
+
+        // --- CH 7: BEC ---
+        case 'fig9':
+          container.innerHTML = `
+            <div class="info-card"><h5>อุณหภูมิวิกฤต ($T_c$)</h5><p>~170 nK (⁸⁷Rb)</p></div>
+            <div class="info-card"><h5>สัดส่วนคอนเดนเสต ($N_0/N$)</h5><p id="t-bec-f" style="color:var(--gold);">78%</p></div>
+            <div class="info-card"><h5>ฟังก์ชันสถิติควอนตัม</h5><p>Bose-Einstein</p></div>
+            <div class="info-card"><h5>ยอดแหลมความหนาแน่น</h5><p style="color:#10b981;">Macroscopic State</p></div>
+            <div class="info-card"><h5>สมการควบคุม</h5><p>Gross-Pitaevskii</p></div>
+            <div class="info-card"><h5>รางวัลโนเบลฟิสิกส์</h5><p>Cornell, Wieman, Ketterle</p></div>
+          `;
+          break;
+
+        // --- CH 8: Bloch Sphere ---
+        case 'fig10':
+          container.innerHTML = `
+            <div class="info-card"><h5>สถานะคิวบิต ($|\\psi\\rangle$)</h5><p id="t-bl-state">cos(θ/2)|0⟩ + e^{iφ}sin(θ/2)|1⟩</p></div>
+            <div class="info-card"><h5>ความน่าจะเป็น $P(|0\\rangle)$</h5><p id="t-bl-p0" style="color:#10b981;">0.50</p></div>
+            <div class="info-card"><h5>ความน่าจะเป็น $P(|1\\rangle)$</h5><p id="t-bl-p1" style="color:#ec4899;">0.50</p></div>
+            <div class="info-card"><h5>การหมุนควงลาร์มอร์</h5><p>φ(t) = ω_L t</p></div>
+            <div class="info-card"><h5>ความบริสุทธิ์ของสถานะ</h5><p>Tr(ρ²) = 1.0 (Pure)</p></div>
+            <div class="info-card"><h5>พิกัดเวกเตอร์บลอค</h5><p id="t-bl-coords">(0.0, 1.0, 0.0)</p></div>
+          `;
+          break;
+
+        // --- CH 9: Entanglement ---
+        case 'fig11':
+          container.innerHTML = `
+            <div class="info-card"><h5>สถานะเบลล์ (Bell State)</h5><p style="color:var(--gold);">|Ψ⁻⟩ = (|↑↓⟩ - |↓↑⟩)/√2</p></div>
+            <div class="info-card"><h5>สหสัมพันธ์การวัด</h5><p style="color:#10b981;">ตรงข้ามกัน 100%</p></div>
+            <div class="info-card"><h5>อสมการเบลล์ (CHSH)</h5><p id="t-ent-chsh">S = 2√2 ≈ 2.828 &gt; 2</p></div>
+            <div class="info-card"><h5>การละเมิดความจริงเฉพาะที่</h5><p style="color:#10b981;">Quantum Non-locality</p></div>
+            <div class="info-card"><h5>แหล่งกำเนิดคู่โฟตอน</h5><p>SPDC (BBO Crystal)</p></div>
+            <div class="info-card"><h5>คู่ที่วัดสะสมแล้ว</h5><p id="t-ent-count">0 คู่</p></div>
+          `;
+          break;
+
+        // --- CH 10: Grover ---
+        case 'fig12':
+          container.innerHTML = `
+            <div class="info-card"><h5>สถานะเป้าหมาย ($|m\\rangle$)</h5><p id="t-gr-m" style="color:var(--gold);">|101⟩ (Item 5)</p></div>
+            <div class="info-card"><h5>ความน่าจะเป็นพบเป้าหมาย</h5><p id="t-gr-prob" style="color:#10b981;">≈ 94.5%</p></div>
+            <div class="info-card"><h5>จำนวนรอบที่เหมาะสม ($R$)</h5><p>⌊π√8 / 4⌋ = 2 รอบ</p></div>
+            <div class="info-card"><h5>ความซับซ้อนเชิงขั้นตอน</h5><p>O(√N) ควอนตัมสปีดอัป</p></div>
+            <div class="info-card"><h5>ตัวดำเนินการออราเคิล</h5><p>I - 2|m⟩⟨m|</p></div>
+            <div class="info-card"><h5>ตัวดำเนินการกระจาย</h5><p>2|s⟩⟨s| - I (Diffusion)</p></div>
+          `;
+          break;
+
+        // --- CH 11: Shor / QFT ---
+        case 'fig13':
+          container.innerHTML = `
+            <div class="info-card"><h5>ฟังก์ชันมอดุโล</h5><p id="t-sh-fn">7ˣ mod 15</p></div>
+            <div class="info-card"><h5>คาบที่ค้นพบ ($r$)</h5><p style="color:var(--gold);">r = 4</p></div>
+            <div class="info-card"><h5>พีค QFT ความถี่</h5><p>k = 0, 4, 8, 12</p></div>
+            <div class="info-card"><h5>การแยกตัวประกอบ 15</h5><p style="color:#10b981;">gcd(7²±1, 15) = 3, 5</p></div>
+            <div class="info-card"><h5>ความซับซ้อน QFT</h5><p>O((log N)²) เกต</p></div>
+            <div class="info-card"><h5>บทสรุปทางควอนตัม</h5><p>15 = 3 × 5 สำเร็จ</p></div>
+          `;
+          break;
+
+        // --- CH 12: BB84 QKD ---
+        case 'fig14':
+          container.innerHTML = `
+            <div class="info-card"><h5>สถานะความปลอดภัย</h5><p id="t-bb-sec" style="color:#10b981;">SECURE (ปลอดภัย)</p></div>
+            <div class="info-card"><h5>อัตราความผิดพลาด (QBER)</h5><p id="t-bb-qber">0.0% (Threshold &lt; 11%)</p></div>
+            <div class="info-card"><h5>ฐานการวัด (Bases)</h5><p>+ (0°/90°), × (45°/135°)</p></div>
+            <div class="info-card"><h5>การคัดกรองกุญแจ (Sift)</h5><p>≈ 50% เก็บเฉพาะฐานตรงกัน</p></div>
+            <div class="info-card"><h5>ทฤษฎีบทการห้ามโคลน</h5><p>No-Cloning Theorem</p></div>
+            <div class="info-card"><h5>กุญแจลับที่แลกเปลี่ยน</h5><p id="t-bb-keys" style="color:var(--gold);">10110011...</p></div>
+          `;
+          break;
+
+        default:
+          const cfg = TARGET_CATALOG[targetId] || {};
+          container.innerHTML = (cfg.facts || [])
+            .map(([k, v]) => `<div class="info-card"><h5>${k}</h5><p>${v}</p></div>`)
+            .join('');
       }
     }
 
-    // Dynamic parameter listeners
+    // ==========================================================
+    // DYNAMIC PARAMETER UPDATER LISTENERS & REAL PHYSICS INTEGRATIONS
+    // ==========================================================
+    // Fig 1.1: UV Catastrophe
+    function updateFig1_1Temp(v) {
+      document.getElementById('disp-u-t').textContent = `${v} K`;
+      const lam = (2.898e6 / v).toFixed(1);
+      document.getElementById('t-uv-t').textContent = `${v} K`;
+      document.getElementById('t-uv-lam').textContent = `${lam} nm`;
+      const up = (1.28e-5 * Math.pow(v, 4) / 1e9).toFixed(1);
+      document.getElementById('t-uv-up').textContent = `${up} kW/m²`;
+    }
+    function updateFig1_1Cut(v) {
+      document.getElementById('disp-u-cut').textContent = `${v} nm`;
+      const rjFactor = Math.round(Math.pow(500 / v, 4));
+      const el = document.getElementById('t-uv-rj');
+      if (el) el.textContent = `ลู่เข้าสู่อนันต์ (×${rjFactor})`;
+    }
+
+    // Fig 1: Blackbody Cavity
     function updateFig1Temp(v) {
       document.getElementById('disp-t').textContent = `${v} K`;
       const lamMax = (2.898e-3 / v * 1e9).toFixed(1);
       document.getElementById('t-wien').textContent = `${lamMax} nm`;
-      models.fig1.coreMat.color.setHSL(0.08 + (v / 15000), 1.0, 0.5);
+      const p = (5.67e-8 * Math.pow(v, 4) / 1e6).toFixed(1);
+      document.getElementById('t-power').textContent = `${p} kW/m²`;
+      if (models.fig1 && models.fig1.coreMat) {
+        models.fig1.coreMat.color.setHSL(0.08 + (v / 18000), 1.0, 0.5);
+      }
     }
     function updateFig1Reflect(v) {
       document.getElementById('disp-n').textContent = `${v} ครั้ง`;
     }
+    function updateFig1Hole(v) {
+      document.getElementById('disp-r').textContent = `${v}`;
+    }
 
-    let f2Lambda = 350, f2Volt = 0.0, f2Int = 80;
+    // Fig 1.3: Planck Ladder
+    function updateFig1_3Level(n) {
+      document.getElementById('disp-p-n').textContent = `n = ${n}`;
+      const e = (n * 0.145).toFixed(3);
+      document.getElementById('t-p-n').textContent = `|${n}⟩`;
+      document.getElementById('t-p-e').textContent = `${e} eV`;
+    }
+    function updateFig1_3Freq(v) {
+      document.getElementById('disp-p-nu').textContent = `${v} × 10¹³ Hz`;
+      const de = (v * 0.0414).toFixed(3);
+      document.getElementById('t-p-de').textContent = `${de} eV`;
+      const lam = (300 / v).toFixed(2);
+      document.getElementById('t-p-lam').textContent = `${lam} μm (IR)`;
+    }
+
+    // Fig 1.4: Wien Displacement
+    function updateFig1_4Temp(v) {
+      document.getElementById('disp-w-t').textContent = `${v} K`;
+      const lam = (2.898e6 / v).toFixed(1);
+      document.getElementById('t-w-t').textContent = `${v} K`;
+      document.getElementById('t-w-lam').textContent = `${lam} nm`;
+      const flux = (5.67e-8 * Math.pow(v, 4) / 1e6).toFixed(1);
+      document.getElementById('t-w-flux').textContent = `${flux} MW/m²`;
+      let sp = 'Type G2V (เหลือง)';
+      if (v > 7500) sp = 'Type A0V (ขาวอมฟ้า)';
+      else if (v > 6000) sp = 'Type F5V (ขาวอมเหลือง)';
+      else if (v < 3500) sp = 'Type M2V (แดงยักษ์)';
+      else if (v < 5000) sp = 'Type K0V (ส้ม)';
+      document.getElementById('t-w-sp').textContent = sp;
+    }
+    function updateFig1_4Radius(v) {
+      document.getElementById('disp-w-r').textContent = `${v} R☉`;
+      const lum = Math.pow(v, 2).toFixed(2);
+      document.getElementById('t-w-lum').textContent = `${lum} L☉`;
+    }
+
+    // Fig 2: Photoelectric Effect
+    let f2Lambda = 350, f2Volt = 0.0, f2Int = 80, f2Phi = 2.14, f2MetalName = 'Cs (2.14 eV)';
     function updateFig2Lambda(v) {
       f2Lambda = parseFloat(v);
       document.getElementById('disp-lambda').textContent = `${f2Lambda} nm`;
@@ -4221,32 +5000,243 @@
       document.getElementById('disp-int').textContent = `${f2Int}%`;
       updateFig2Physics();
     }
+    function setFig2Metal(phi, name) {
+      f2Phi = phi;
+      f2MetalName = name;
+      const el = document.getElementById('t-pe-phi');
+      if (el) el.textContent = `${phi.toFixed(2)} eV (${name})`;
+      updateFig2Physics();
+    }
     function updateFig2Physics() {
       const photonE = 1240 / f2Lambda;
-      const kmax = Math.max(0, photonE - 2.14);
+      const kmax = Math.max(0, photonE - f2Phi);
       const v0 = kmax;
-      document.getElementById('t-pe-e').textContent = `${photonE.toFixed(2)} eV`;
-      document.getElementById('t-pe-kmax').textContent = `${kmax.toFixed(2)} eV`;
-      document.getElementById('t-pe-v0').textContent = `-${v0.toFixed(2)} V`;
+      const eEl = document.getElementById('t-pe-e');
+      if (eEl) eEl.textContent = `${photonE.toFixed(2)} eV`;
+      const kEl = document.getElementById('t-pe-kmax');
+      if (kEl) kEl.textContent = `${kmax.toFixed(2)} eV`;
+      const vEl = document.getElementById('t-pe-v0');
+      if (vEl) vEl.textContent = `-${v0.toFixed(2)} V`;
 
-      // Needle deflect
-      let current = (kmax > 0 && f2Volt >= -v0) ? (f2Int * 0.15) * Math.min(1.0, (f2Volt + v0 + 0.2)) : 0;
-      const targetAngle = -Math.PI / 4 + (current / 20) * (Math.PI / 2);
-      models.fig2.needle.rotation.z = -targetAngle;
+      const iEl = document.getElementById('t-pe-i');
+      if (kmax <= 0) {
+        if (iEl) { iEl.textContent = 'ไม่มีกระแส (hν < Φ)'; iEl.style.color = '#ef4444'; }
+      } else if (f2Volt < -v0) {
+        if (iEl) { iEl.textContent = 'ศักย์หยุดยั้ง (I = 0)'; iEl.style.color = '#f59e0b'; }
+      } else {
+        const cur = (f2Int * 0.18 * (f2Volt + v0 + 0.3)).toFixed(1);
+        if (iEl) { iEl.textContent = `มีกระแส (${cur} μA)`; iEl.style.color = '#10b981'; }
+      }
+
+      if (models.fig2 && models.fig2.needle) {
+        let current = (kmax > 0 && f2Volt >= -v0) ? (f2Int * 0.15) * Math.min(1.0, (f2Volt + v0 + 0.2)) : 0;
+        const targetAngle = -Math.PI / 4 + (current / 20) * (Math.PI / 2);
+        models.fig2.needle.rotation.z = -targetAngle;
+      }
     }
 
+    // Fig 1.6: Compton
+    function updateFig1_6Energy(v) {
+      document.getElementById('disp-c-e').textContent = `${v} keV`;
+      document.getElementById('t-c-e0').textContent = `${v}.0 keV`;
+    }
+    function updateFig1_6Angle(v) {
+      document.getElementById('disp-c-th').textContent = `${v}.0°`;
+      document.getElementById('t-c-th').textContent = `${v}.0°`;
+      const rad = v * Math.PI / 180;
+      const dlam = (2.426 * (1 - Math.cos(rad))).toFixed(3);
+      document.getElementById('t-c-dlam').textContent = `${dlam} pm`;
+    }
+
+    // Fig 1.7: Pair Production
+    function updateFig1_7Energy(v) {
+      document.getElementById('disp-pp-e').textContent = `${v} MeV`;
+      document.getElementById('t-pp-e').textContent = `${v} MeV`;
+      const ke = Math.max(0, v - 1.022).toFixed(3);
+      document.getElementById('t-pp-ke').textContent = `${ke} MeV`;
+    }
+    function updateFig1_7B(v) {
+      document.getElementById('disp-pp-b').textContent = `${v} T`;
+    }
+
+    // Fig 1.8: Kibble
+    function updateFig1_8Mass(v) {
+      document.getElementById('disp-kb-m').textContent = `${v} mg`;
+      document.getElementById('t-kb-m').textContent = `${v} mg`;
+      const f = (v * 9.80665 / 1000).toFixed(3);
+      document.getElementById('t-kb-f').textContent = `${f} mN`;
+    }
+    function updateFig1_8Bias(v) {
+      document.getElementById('disp-kb-ib').textContent = `${v}`;
+    }
+
+    // Fig 3: Davisson-Germer
     function updateFig3Voltage(v) {
       document.getElementById('disp-dg-v').textContent = `${v} V`;
       const lam = (1.226 / Math.sqrt(v)).toFixed(3);
       document.getElementById('t-dg-lam').textContent = `${lam} nm`;
+      const vdisp = document.getElementById('t-dg-vdisp');
+      if (vdisp) vdisp.textContent = `${v} eV`;
     }
     function updateFig3Angle(v) {
       document.getElementById('disp-dg-phi').textContent = `${v}.0°`;
       const rad = v * Math.PI / 180;
       const dSin = (0.215 * Math.sin(rad)).toFixed(3);
       document.getElementById('t-dg-diff').textContent = `${dSin} nm`;
-      models.fig3.detCup.position.x = 0.4 + 1.8 * Math.cos(rad);
-      models.fig3.detCup.position.y = -0.3 + 1.8 * Math.sin(rad);
+      if (models.fig3 && models.fig3.detCup) {
+        models.fig3.detCup.position.x = 0.4 + 1.8 * Math.cos(rad);
+        models.fig3.detCup.position.y = -0.3 + 1.8 * Math.sin(rad);
+      }
+    }
+
+    // Fig 4: Double slit
+    function updateFig4Rate(v) {
+      document.getElementById('disp-ds-rate').textContent = `${v} e⁻/s`;
+    }
+    function updateFig4SlitD(v) {
+      document.getElementById('disp-ds-d').textContent = `${v} μm`;
+      const dy = (0.74 / v).toFixed(2);
+      const dyEl = document.getElementById('t-ds-dy');
+      if (dyEl) dyEl.textContent = `${dy} mm`;
+    }
+    function clearFig4Screen() {
+      const hitsEl = document.getElementById('t-ds-hits');
+      if (hitsEl) hitsEl.textContent = '0 อนุภาค';
+    }
+
+    // Fig 5: Wave Packet
+    function updateFig5Width(v) {
+      document.getElementById('disp-wp-sig').textContent = `${v}`;
+    }
+    function updateFig5K0(v) {
+      document.getElementById('disp-wp-k0').textContent = `${v} rad/m`;
+      const vg = (v * 0.05).toFixed(2);
+      const el = document.getElementById('t-wp-vg');
+      if (el) el.textContent = `${vg} c_unit`;
+      const vp = (vg / 2).toFixed(2);
+      const elP = document.getElementById('t-wp-vp');
+      if (elP) elP.textContent = `${vp} c_unit`;
+    }
+
+    // Fig 6: STM
+    function updateFig6Gap(v) {
+      document.getElementById('disp-stm-d').textContent = `${v} nm`;
+      const cur = (12.0 * Math.exp(-2 * 10.2 * (v - 0.15))).toFixed(2);
+      const el = document.getElementById('t-stm-i');
+      if (el) el.textContent = `${cur} nA`;
+    }
+    function updateFig6Bias(v) {
+      document.getElementById('disp-stm-v').textContent = `${v} V`;
+    }
+
+    // Fig 7: QHO
+    function updateFig7Level(n) {
+      document.getElementById('disp-qho-n').textContent = `n = ${n}`;
+      const e = ((parseInt(n) + 0.5) * 0.55).toFixed(3);
+      const el = document.getElementById('t-qho-e');
+      if (el) el.textContent = `E_${n} = ${e} eV`;
+    }
+    function updateFig7Omega(v) {
+      document.getElementById('disp-qho-w').textContent = `${v} rad/s`;
+    }
+
+    // Fig 8: Orbitals
+    function setFig8Orbital(type) {
+      const el = document.getElementById('disp-orb');
+      const nlm = document.getElementById('t-orb-nlm');
+      if (type === '3dz2') {
+        if (el) el.textContent = '3d_z² (n=3, ℓ=2, m=0)';
+        if (nlm) nlm.textContent = 'n=3, ℓ=2, m=0';
+      } else if (type === '2pz') {
+        if (el) el.textContent = '2p_z (n=2, ℓ=1, m=0)';
+        if (nlm) nlm.textContent = 'n=2, ℓ=1, m=0';
+      } else {
+        if (el) el.textContent = '1s (n=1, ℓ=0, m=0)';
+        if (nlm) nlm.textContent = 'n=1, ℓ=0, m=0';
+      }
+    }
+    function updateFig8Points(v) {
+      document.getElementById('disp-orb-pts').textContent = `${parseInt(v).toLocaleString()} จุด`;
+    }
+
+    // Fig 9: BEC
+    function updateFig9Temp(v) {
+      document.getElementById('disp-bec-t').textContent = `${v} Tc`;
+      const f = Math.max(0, 1 - Math.pow(Math.min(v, 1), 3));
+      const el = document.getElementById('t-bec-f');
+      if (el) el.textContent = `${Math.round(f * 100)}%`;
+    }
+    function updateFig9N(v) {
+      document.getElementById('disp-bec-n').textContent = `${v} × 10⁵ ⁸⁷Rb`;
+    }
+
+    // Fig 10: Bloch
+    function updateFig10Theta(v) {
+      document.getElementById('disp-bl-th').textContent = `${v}.0°`;
+      const rad = v * Math.PI / 180;
+      const p0 = Math.pow(Math.cos(rad / 2), 2).toFixed(2);
+      const p1 = (1 - p0).toFixed(2);
+      const el0 = document.getElementById('t-bl-p0');
+      const el1 = document.getElementById('t-bl-p1');
+      if (el0) el0.textContent = p0;
+      if (el1) el1.textContent = p1;
+    }
+    function updateFig10Phi(v) {
+      document.getElementById('disp-bl-ph').textContent = `${v}.0°`;
+    }
+    function applyFig10Gate(gate) {
+      const st = document.getElementById('t-bl-state');
+      if (st) st.textContent = `หลังเกต ${gate}: สถานะหมุนสมบูรณ์`;
+    }
+
+    // Fig 11: Entanglement
+    function updateFig11ThetaA(v) {
+      document.getElementById('disp-ent-a').textContent = `${v}.0°`;
+      updateFig11Correlation();
+    }
+    function updateFig11ThetaB(v) {
+      document.getElementById('disp-ent-b').textContent = `${v}.0°`;
+      updateFig11Correlation();
+    }
+    function updateFig11Correlation() {
+      const a = parseFloat(document.getElementById('disp-ent-a')?.textContent || 0);
+      const b = parseFloat(document.getElementById('disp-ent-b')?.textContent || 90);
+      const chsh = (2 * Math.sqrt(2) * Math.cos((a - b) * Math.PI / 180)).toFixed(3);
+      const el = document.getElementById('t-ent-chsh');
+      if (el) el.textContent = `E(a,b) = -cos 2(a-b)`;
+    }
+
+    // Fig 12: Grover
+    function setFig12Target(m) {
+      const el = document.getElementById('disp-gr-target');
+      const tEl = document.getElementById('t-gr-m');
+      const bin = parseInt(m).toString(2).padStart(3, '0');
+      if (el) el.textContent = `|${bin}⟩ (${m})`;
+      if (tEl) tEl.textContent = `|${bin}⟩ (Item ${m})`;
+    }
+
+    // Fig 13: Shor
+    function setFig13Base(a) {
+      const el = document.getElementById('disp-sh-a');
+      const fn = document.getElementById('t-sh-fn');
+      if (el) el.textContent = `a = ${a} (คาบ r = ${a === '4' || a === '11' ? 2 : 4})`;
+      if (fn) fn.textContent = `${a}ˣ mod 15`;
+    }
+
+    // Fig 14: BB84
+    function setFig14Eve(present) {
+      const d = document.getElementById('disp-bb-eve');
+      const sec = document.getElementById('t-bb-sec');
+      const qber = document.getElementById('t-bb-qber');
+      if (present) {
+        if (d) { d.textContent = 'มี Eve ดักฟัง!'; d.style.color = '#ef4444'; }
+        if (sec) { sec.textContent = 'ดักฟังตรวจพบ! (INSECURE)'; sec.style.color = '#ef4444'; }
+        if (qber) { qber.textContent = '25.0% (เกินเกณฑ์ 11%)'; qber.style.color = '#ef4444'; }
+      } else {
+        if (d) { d.textContent = 'ไม่มี (SAFE)'; d.style.color = '#10b981'; }
+        if (sec) { sec.textContent = 'SECURE (ปลอดภัย)'; sec.style.color = '#10b981'; }
+        if (qber) { qber.textContent = '0.0% (ต่ำกว่า 11%)'; qber.style.color = '#10b981'; }
+      }
     }
 
     // ==========================================================
