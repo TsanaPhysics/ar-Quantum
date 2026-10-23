@@ -3806,26 +3806,51 @@
     let candidateId = null;
     let lastHint = '';
 
-    // Template fingerprints (28x28, zero-mean, unit-norm grayscale) for all registered figures
-    const FP = 28;
+    // Template fingerprints (40x40, Hybrid Ink + Edge-Gradient Descriptor, zero-mean, unit-norm)
+    const FP = 40;
     const fpCanvas = document.createElement('canvas');
     fpCanvas.width = FP; fpCanvas.height = FP;
     const fpCtx = fpCanvas.getContext('2d', { willReadFrequently: true });
     const fingerprints = {};
 
-    function toFingerprint(px) {
-      const v = new Float32Array(FP * FP);
-      let mean = 0;
-      for (let i = 0; i < FP * FP; i++) {
-        v[i] = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
-        mean += v[i];
+    function computeHybridDescriptor(lumGrid, W = FP) {
+      const v = new Float32Array(W * W);
+      let sum = 0;
+      for (let y = 0; y < W; y++) {
+        const yPrev = Math.max(0, y - 1);
+        const yNext = Math.min(W - 1, y + 1);
+        const row = y * W;
+        const rowPrev = yPrev * W;
+        const rowNext = yNext * W;
+        for (let x = 0; x < W; x++) {
+          const xPrev = Math.max(0, x - 1);
+          const xNext = Math.min(W - 1, x + 1);
+          const dx = lumGrid[row + xNext] - lumGrid[row + xPrev];
+          const dy = lumGrid[rowNext + x] - lumGrid[rowPrev + x];
+          const grad = Math.abs(dx) + Math.abs(dy);
+          const ink = Math.max(0, 255 - lumGrid[row + x]);
+          const val = 0.35 * ink + 0.65 * (grad * 2.0);
+          v[row + x] = val;
+          sum += val;
+        }
       }
-      mean /= (FP * FP);
+      const mean = sum / (W * W);
       let norm = 0;
-      for (let i = 0; i < v.length; i++) { v[i] -= mean; norm += v[i] * v[i]; }
+      for (let i = 0; i < v.length; i++) {
+        v[i] -= mean;
+        norm += v[i] * v[i];
+      }
       norm = Math.sqrt(norm) || 1;
       for (let i = 0; i < v.length; i++) v[i] /= norm;
       return v;
+    }
+
+    function toFingerprint(px) {
+      const lumGrid = new Float32Array(FP * FP);
+      for (let i = 0; i < FP * FP; i++) {
+        lumGrid[i] = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
+      }
+      return computeHybridDescriptor(lumGrid, FP);
     }
     function ncc(a, b) {
       let s = 0;
@@ -3841,7 +3866,7 @@
       img.onload = () => {
         fpCtx.fillStyle = '#ffffff';
         fpCtx.fillRect(0, 0, FP, FP);
-        const s = Math.min((FP - 2) / img.width, (FP - 2) / img.height);
+        const s = Math.min((FP - 4) / img.width, (FP - 4) / img.height);
         const w = img.width * s, h = img.height * s;
         fpCtx.drawImage(img, (FP - w) / 2, (FP - h) / 2, w, h);
         fingerprints[cfg.id] = toFingerprint(fpCtx.getImageData(0, 0, FP, FP).data);
@@ -3893,13 +3918,12 @@
     // High-Accuracy Multi-scale template correlation optimized for A4 cards & book figures (100% accuracy)
     const MATCH_SCALES = [0.45, 0.60, 0.75, 0.90];
     function sampleFingerprintFromBuffer(data, scale, yOff = -0.02) {
-      const v = new Float32Array(FP * FP);
+      const lumGrid = new Float32Array(FP * FP);
       const boxW = Math.round(120 * scale);
       const startX = (120 - boxW) >> 1;
       let startY = Math.round((120 - boxW) / 2 + yOff * 120);
       startY = Math.max(0, Math.min(120 - boxW, startY));
       const step = boxW / FP;
-      let mean = 0;
       let idx = 0;
       for (let py = 0; py < FP; py++) {
         const srcY = Math.min(119, Math.max(0, Math.round(startY + py * step)));
@@ -3907,20 +3931,10 @@
         for (let px = 0; px < FP; px++) {
           const srcX = Math.min(119, Math.max(0, Math.round(startX + px * step)));
           const p = (rowOffset + srcX) << 2;
-          const lum = 0.299 * data[p] + 0.587 * data[p + 1] + 0.114 * data[p + 2];
-          v[idx++] = lum;
-          mean += lum;
+          lumGrid[idx++] = 0.299 * data[p] + 0.587 * data[p + 1] + 0.114 * data[p + 2];
         }
       }
-      mean /= (FP * FP);
-      let norm = 0;
-      for (let i = 0; i < idx; i++) {
-        v[i] -= mean;
-        norm += v[i] * v[i];
-      }
-      norm = Math.sqrt(norm) || 1;
-      for (let i = 0; i < idx; i++) v[i] /= norm;
-      return v;
+      return computeHybridDescriptor(lumGrid, FP);
     }
 
     function matchTemplates(frameData) {
@@ -5460,6 +5474,23 @@
 
     // Initialize HUD Layout Style (Default: Style 0 Quiet HUD)
     setHudStyle(0, true);
+
+    // URL Deep-Linking Support (?target=fig1_1, ?target=fig3, ?ar=1)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetParam = urlParams.get('target') || urlParams.get('id');
+      const arParam = urlParams.get('ar');
+      if (targetParam && TARGET_CATALOG[targetParam]) {
+        setTargetMode(targetParam);
+        const cap = document.getElementById('capsuleText');
+        if (cap) cap.textContent = `🎯 ล็อกเป้าหมาย: ${TARGET_CATALOG[targetParam].short || TARGET_CATALOG[targetParam].title}`;
+        if (arParam === '1' || arParam === 'true') {
+          setTimeout(() => {
+            if (!isARMode) toggleARMode();
+          }, 400);
+        }
+      }
+    } catch(e) {}
 
     // Start Loop
     animate();
