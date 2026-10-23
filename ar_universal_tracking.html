@@ -2186,12 +2186,50 @@
         desc: 'เกลียว 3 มิติของ Re ψ และ Im ψ เคลื่อนที่ด้วยความเร็วกลุ่ม v_g = ħk₀/m ขณะที่เฟสเคลื่อนที่ด้วย v_p = v_g/2 และกลุ่มคลื่นแผ่กว้างขึ้นตามเวลา σ(t) = σ₀√(1+(t/τ)²)',
         facts: [['ความเร็วกลุ่ม', 'v_g = ħk₀/m'], ['ความเร็วเฟส', 'v_p = v_g / 2'], ['การแผ่กว้าง', 'σ(t)=σ₀√(1+(t/τ)²)'], ['หลักความไม่แน่นอน', 'Δx·Δp ≥ ħ/2']]
       },
+      // ---------- Chapter 4: 6 Complete Sub-Topics ----------
+      fig4_1: {
+        id: 'fig4_1', chapter: 4, short: '4.1 ศักย์ขั้นบันได', icon: 'fa-stairs', color: '#00f0ff', image: 'target_fig4_1.png',
+        title: 'ภาพที่ 4.1 รอยต่อศักย์แบบขั้นบันไดและการอนุรักษ์กระแส', subtitle: 'Step Potential & Evanescent Penetration',
+        desc: 'ลำอนุภาคกระทบรอยต่อศักย์ V(x) = V₀Θ(x) กรณี E < V₀ ฟังก์ชันคลื่นแทรกซึมลึก δ_p = 1/(2κ) ในบริเวณต้องห้ามคลาสสิกโดยไม่มีฟลักซ์สุทธิ J = 0 และ R = 1',
+        facts: [['ฟังก์ชันศักย์', 'V(x) = V₀ Θ(x)'], ['สัมประสิทธิ์สะท้อน', 'R = ((k₁-k₂)/(k₁+k₂))²'], ['ระยะแทรกซึม', 'δ_p = ℏ / (2√(2m(V₀-E)))'], ['กระแสสุทธิในกำแพง', 'J_{II} = 0 (คลื่นระเหยหาย)']]
+      },
+      fig4_2: {
+        id: 'fig4_2', chapter: 4, short: '4.2 บ่อศักย์จำกัด', icon: 'fa-square-full', color: '#38bdf8', image: 'target_fig4_2.png',
+        title: 'ภาพที่ 4.2 บ่อศักย์ลึกอนันต์และจำกัดหนึ่งมิติ', subtitle: 'Infinite & Finite Potential Wells (Parity & Bound States)',
+        desc: 'ระดับพลังงานควอนไตซ์ Eₙ ในบ่อลึกจำกัดความกว้าง 2a การแยกพาริตีคู่ (η = ξ tan ξ) และพาริตีคี่ (η = -ξ cot ξ) พร้อมหางคลื่นเอกซ์โพเนนเชียลแทรกซึมออกนอกบ่อ',
+        facts: [['บ่ออนันต์', 'Eₙ = n²π²ℏ²/(8ma²)'], ['สมการอดิศัยคู่', 'η = ξ tan ξ'], ['สมการอดิศัยคี่', 'η = -ξ cot ξ'], ['จำนวนสถานะผูกพัน', 'N = 1 + ⌊2R/π⌋']]
+      },
+      fig4_3: {
+        id: 'fig4_3', chapter: 4, short: '4.3 ควอนตัมทันเนลลิง', icon: 'fa-shield-halved', color: '#fbbf24', image: 'target_fig4_3.png',
+        title: 'ภาพที่ 4.3 ปรากฏการณ์ควอนตัมทันเนลลิงผ่านกำแพงศักย์', subtitle: 'Quantum Barrier Tunneling & Transmission',
+        desc: 'การทะลุผ่านกำแพงศักย์สี่เหลี่ยมความสูง V₀ ความหนา a สัมประสิทธิ์การทะลุผ่าน T ≈ 16(E/V₀)(1-E/V₀)e^{-2κa} ลดลงแบบเอกซ์โพเนนเชียลตามความหนา',
+        facts: [['สัมประสิทธิ์ทะลุผ่าน', 'T ≈ 16(E/V₀)(1 - E/V₀) e^{-2κa}'], ['เวกเตอร์สลายตัว', 'κ = √(2m(V₀-E)) / ℏ'], ['ขีดจำกัดคลาสสิก', 'T_classical = 0 (เมื่อ E < V₀)'], ['การแทรกสอด', 'แรมเซาเออร์-ทาวน์เซนด์ T = 1']]
+      },
+      fig4_4: {
+        id: 'fig4_4', chapter: 4, short: '4.4 ไดโอด RTD', icon: 'fa-bolt', color: '#ec4899', image: 'target_fig4_4.png',
+        title: 'ภาพที่ 4.4 ไดโอดทันเนลลิงแบบสั่นพ้อง (RTD)', subtitle: 'Resonant Tunneling Diode & NDR Characteristic',
+        desc: 'โครงสร้างดับเบิลแบริเออร์กักขังสถานะเสมือนผูกพัน E_R เมื่อปรับแรงดันไบแอสให้ตรงแถบนำไฟฟ้า คลื่นแทรกสอดเสริมจน T ≈ 1 ก่อเกิดความต้านทานเชิงลบ NDR สำหรับสร้างสัญญาณเทระเฮิร์ตซ์',
+        facts: [['สูตรไบรต์-วิกเนอร์', 'T(E) ≈ (Γ/2)² / ((E-E_R)² + (Γ/2)²)'], ['ความต้านทานเชิงลบ', 'NDR: dI/dV < 0'], ['ความถี่ใช้งาน', 'ย่านเทระเฮิร์ตซ์ f > 1.5 THz'], ['โครงสร้าง', 'Double Barrier Quantum Well (DBQW)']]
+      },
+      fig4_5: {
+        id: 'fig4_5', chapter: 4, short: '4.5 การสลายตัวแอลฟา', icon: 'fa-atom', color: '#10b981', image: 'target_fig4_5.png',
+        title: 'ภาพที่ 4.5 ทฤษฎีการสลายตัวแอลฟาของกามอฟและ WKB', subtitle: 'Gamow Alpha Decay & WKB Coulomb Barrier',
+        desc: 'อนุภาคแอลฟาทันเนลลิงข้ามกำแพงศักย์คูลอมบ์ของนิวเคลียส อธิบายเหตุผลที่การเพิ่มพลังงานแอลฟา 2 เท่า ส่งผลให้ครึ่งชีวิตลดลงถึง 10²⁴ เท่าตามกฎไกเกอร์-นัททอลล์',
+        facts: [['อินทิกรัลกามอฟ', '2γ = (2/ℏ) ∫ √(2m(V_C - E)) dr'], ['กฎไกเกอร์-นัททอลล์', 'log₁₀ t_{1/2} = A(Z/√E_α) + B'], ['ความถี่ชนผนัง', 'ν₀ ≈ 10²¹ s⁻¹'], ['จุดวกกลับ', 'R₀ (รัศมีนิวเคลียส) ถึง r_c']]
+      },
+      fig4_6: {
+        id: 'fig4_6', chapter: 4, short: '4.6 กล้อง STM ระดับอะตอม', icon: 'fa-location-arrow', color: '#f59e0b', image: 'target_fig4_6.png',
+        title: 'ภาพที่ 4.6 กล้องจุลทรรศน์ส่องกราดแบบอุโมงค์ (STM)', subtitle: 'Scanning Tunneling Microscopy & LDOS Spectroscopy',
+        desc: 'หัวเข็มอะตอมเดี่ยวสแกนเหนือผิวผลึก กระแสทันเนลลิง I ∝ V e^{-2κd} ไวต่อระยะทางระดับ 0.01 nm และสเปกโทรสโกปี STS (dI/dV) วัดความหนาแน่นสถานะเฉพาะที่ LDOS',
+        facts: [['กระแสทันเนลลิง', 'I ∝ V e^{-2κd}'], ['ทฤษฎีเทอร์ซอฟฟ์-ฮามันน์', 'I ∝ V ρ_s(r₀, E_F)'], ['สเปกโทรสโกปี STS', '(dI/dV)/(I/V) ∝ LDOS(E)'], ['ความละเอียดแนวดิ่ง', 'ระดับพิโกเมตร (~0.01 nm)']]
+      },
       fig6: {
-        id: 'fig6', chapter: 4, short: 'บท 4 STM ทันเนลลิง', icon: 'fa-location-arrow', color: '#fbbf24', image: null,
+        id: 'fig6', chapter: 4, short: 'บท 4 STM ทันเนลลิง', icon: 'fa-location-arrow', color: '#fbbf24', image: 'target_fig4_6.png',
         title: 'บทที่ 4 กล้องจุลทรรศน์แบบส่องกราดอุโมงค์ (STM)', subtitle: 'Quantum Tunneling Microscope',
         desc: 'หัวเข็มโลหะสแกนเหนือผิวอะตอมแบบกระแสคงที่ กระแสทันเนลลิง I ∝ V·e^(−2κd) ไวต่อระยะห่างระดับ 0.1 นาโนเมตร เส้นสีทองคือภาพความสูงที่บันทึกได้',
         facts: [['กระแสทันเนลลิง', 'I ∝ V e^(−2κd)'], ['κ', '√(2mφ)/ħ ≈ 10 nm⁻¹'], ['ความละเอียดแนวดิ่ง', '~0.01 nm'], ['โหมด', 'Constant current']]
       },
+
       fig7: {
         id: 'fig7', chapter: 5, short: 'บท 5 ตัวกวัดแกว่ง', icon: 'fa-chart-area', color: '#a78bfa', image: null,
         title: 'บทที่ 5 ตัวกวัดแกว่งฮาร์มอนิกควอนตัม', subtitle: 'Quantum Harmonic Oscillator ψₙ(x)',
@@ -4031,6 +4069,335 @@
       return { group: g, update };
     }
 
+    // ==========================================================
+    // CHAPTER 4 COMPLETE 3D AR MODELS (TUNNELING & WELLS SUITE)
+    // ==========================================================
+    function buildStepPotentialModel() {
+      const g = new THREE.Group();
+      // Step Potential glass barrier at x >= 0
+      const stepGeo = new THREE.BoxGeometry(2.4, 2.0, 2.0);
+      const stepMat = new THREE.MeshPhysicalMaterial({
+        color: 0x0284c7, transparent: true, opacity: 0.28,
+        roughness: 0.1, transmission: 0.65, thickness: 0.5
+      });
+      const step = new THREE.Mesh(stepGeo, stepMat);
+      step.position.set(1.2, 0, 0);
+      g.add(step);
+
+      const stepEdges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(stepGeo),
+        new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 })
+      );
+      stepEdges.position.copy(step.position);
+      g.add(stepEdges);
+
+      // Penetration depth marker plane
+      const deltaGeo = new THREE.PlaneGeometry(2.0, 1.9);
+      const deltaMat = new THREE.MeshBasicMaterial({ color: 0xec4899, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
+      const deltaPlane = new THREE.Mesh(deltaGeo, deltaMat);
+      deltaPlane.rotation.y = Math.PI / 2;
+      deltaPlane.position.set(0.45, 0, 0);
+      g.add(deltaPlane);
+
+      // Wave curves
+      const wavePoints = 180;
+      const waveGeo = new THREE.BufferGeometry();
+      const wavePos = new Float32Array(wavePoints * 3);
+      waveGeo.setAttribute('position', new THREE.BufferAttribute(wavePos, 3));
+      const waveMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 3 });
+      const waveLine = new THREE.Line(waveGeo, waveMat);
+      g.add(waveLine);
+
+      const lbl = makeLabel('V(x) = V₀ Θ(x) | δ_p = 1/(2κ)', '#00f0ff', 0.75);
+      lbl.position.set(0, 1.45, 0);
+      g.add(lbl);
+
+      function update(t) {
+        const arr = waveLine.geometry.attributes.position.array;
+        for (let i = 0; i < wavePoints; i++) {
+          const x = -2.4 + (i / wavePoints) * 4.8;
+          let y = 0;
+          if (x < 0) {
+            // Standing wave interference: cos(kx - wt) + cos(-kx - wt + phi)
+            y = 0.55 * Math.cos(5.0 * x - t * 4.0) + 0.55 * Math.cos(-5.0 * x - t * 4.0 + 1.2);
+          } else {
+            // Evanescent decay
+            y = 1.1 * Math.exp(-2.2 * x) * Math.cos(t * 4.0 - 0.6);
+          }
+          arr[i * 3] = x;
+          arr[i * 3 + 1] = y;
+          arr[i * 3 + 2] = 0;
+        }
+        waveLine.geometry.attributes.position.needsUpdate = true;
+        g.rotation.y = Math.sin(t * 0.3) * 0.25;
+      }
+      return { group: g, update };
+    }
+
+    function buildFiniteWellModel() {
+      const g = new THREE.Group();
+      // Side walls of finite well (|x| >= 1.2)
+      const wallMat = new THREE.MeshPhysicalMaterial({ color: 0x334155, transparent: true, opacity: 0.35, roughness: 0.2 });
+      const wall1 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 1.8), wallMat);
+      wall1.position.set(-1.8, 0, 0);
+      const wall2 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 1.8), wallMat);
+      wall2.position.set(1.8, 0, 0);
+      g.add(wall1);
+      g.add(wall2);
+
+      // Quantized energy levels: E1, E2, E3
+      const levels = [-0.6, 0.0, 0.65];
+      const colors = [0x00f0ff, 0xef4444, 0xf59e0b];
+      const waveLines = [];
+
+      levels.forEach((ly, idx) => {
+        // Level plane
+        const pLine = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-2.2, ly, 0), new THREE.Vector3(2.2, ly, 0)]),
+          new THREE.LineDashedMaterial({ color: colors[idx], dashSize: 0.1, gapSize: 0.05 })
+        );
+        pLine.computeLineDistances();
+        g.add(pLine);
+
+        // Wave curve
+        const wGeo = new THREE.BufferGeometry();
+        const wPos = new Float32Array(150 * 3);
+        wGeo.setAttribute('position', new THREE.BufferAttribute(wPos, 3));
+        const wLine = new THREE.Line(wGeo, new THREE.LineBasicMaterial({ color: colors[idx], linewidth: 2 }));
+        g.add(wLine);
+        waveLines.push({ line: wLine, levelY: ly, n: idx + 1 });
+      });
+
+      const lbl = makeLabel('บ่อศักย์จำกัด: E_n & พาริตีคู่/คี่', '#38bdf8', 0.75);
+      lbl.position.set(0, 1.45, 0);
+      g.add(lbl);
+
+      function update(t) {
+        waveLines.forEach(wl => {
+          const arr = wl.line.geometry.attributes.position.array;
+          const a = 1.2;
+          for (let i = 0; i < 150; i++) {
+            const x = -2.2 + (i / 150) * 4.4;
+            let val = 0;
+            if (Math.abs(x) <= a) {
+              if (wl.n % 2 === 1) {
+                val = 0.35 * Math.cos((wl.n * Math.PI * x) / (2 * a));
+              } else {
+                val = 0.35 * Math.sin((wl.n * Math.PI * x) / (2 * a));
+              }
+            } else {
+              const dx = Math.abs(x) - a;
+              const sign = (wl.n % 2 === 0 && x < -a) ? -1 : 1;
+              val = 0.35 * Math.cos(wl.n * Math.PI / 2) * Math.exp(-2.5 * dx) * sign;
+              if (wl.n === 2) val = (x > a ? 1 : -1) * 0.35 * Math.exp(-2.5 * dx);
+            }
+            arr[i * 3] = x;
+            arr[i * 3 + 1] = wl.levelY + val * Math.cos(t * (2.0 + wl.n));
+            arr[i * 3 + 2] = 0;
+          }
+          wl.line.geometry.attributes.position.needsUpdate = true;
+        });
+        g.rotation.y = Math.sin(t * 0.35) * 0.25;
+      }
+      return { group: g, update };
+    }
+
+    function buildBarrierTunnelingModel() {
+      const g = new THREE.Group();
+      // Barrier box
+      const bGeo = new THREE.BoxGeometry(0.8, 2.2, 1.8);
+      const bMat = new THREE.MeshPhysicalMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.32, roughness: 0.1 });
+      const barrier = new THREE.Mesh(bGeo, bMat);
+      g.add(barrier);
+
+      const bEdges = new THREE.LineSegments(new THREE.EdgesGeometry(bGeo), new THREE.LineBasicMaterial({ color: 0xfbbf24, linewidth: 2 }));
+      g.add(bEdges);
+
+      // 3D Wave Helix before, inside, after barrier
+      const nPts = 200;
+      const helixGeo = new THREE.BufferGeometry();
+      const helixPos = new Float32Array(nPts * 3);
+      helixGeo.setAttribute('position', new THREE.BufferAttribute(helixPos, 3));
+      const helixMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 3 });
+      const helixLine = new THREE.Line(helixGeo, helixMat);
+      g.add(helixLine);
+
+      // Tunneling particle stream
+      const partCount = 40;
+      const partGeo = new THREE.BufferGeometry();
+      const partPos = new Float32Array(partCount * 3);
+      for (let i = 0; i < partCount; i++) {
+        partPos[i * 3] = -2.2 + Math.random() * 4.4;
+        partPos[i * 3 + 1] = (Math.random() - 0.5) * 0.4;
+        partPos[i * 3 + 2] = (Math.random() - 0.5) * 0.4;
+      }
+      partGeo.setAttribute('position', new THREE.BufferAttribute(partPos, 3));
+      const partMat = new THREE.PointsMaterial({ color: 0x38bdf8, size: 0.08, transparent: true, opacity: 0.85 });
+      const particles = new THREE.Points(partGeo, partMat);
+      g.add(particles);
+
+      const lbl = makeLabel('ควอนตัมทันเนลลิง: T ≈ 16(E/V₀)(1-E/V₀)e^{-2κa}', '#fbbf24', 0.75);
+      lbl.position.set(0, 1.45, 0);
+      g.add(lbl);
+
+      function update(t) {
+        const arr = helixLine.geometry.attributes.position.array;
+        for (let i = 0; i < nPts; i++) {
+          const x = -2.4 + (i / nPts) * 4.8;
+          let amp = 0.55;
+          let phase = 6.0 * x - t * 5.0;
+          if (x < -0.4) {
+            amp = 0.55;
+          } else if (x <= 0.4) {
+            amp = 0.55 * Math.exp(-3.2 * (x + 0.4));
+          } else {
+            amp = 0.55 * Math.exp(-3.2 * 0.8) * 0.8;
+          }
+          arr[i * 3] = x;
+          arr[i * 3 + 1] = amp * Math.cos(phase);
+          arr[i * 3 + 2] = amp * Math.sin(phase);
+        }
+        helixLine.geometry.attributes.position.needsUpdate = true;
+
+        // Particle motion with tunneling filter
+        const pArr = particles.geometry.attributes.position.array;
+        for (let i = 0; i < partCount; i++) {
+          pArr[i * 3] += 0.035;
+          if (pArr[i * 3] > -0.4 && pArr[i * 3] < 0.4 && Math.random() < 0.06) {
+            // bounced back
+            pArr[i * 3] = -2.2;
+          }
+          if (pArr[i * 3] > 2.4) pArr[i * 3] = -2.4;
+        }
+        particles.geometry.attributes.position.needsUpdate = true;
+        g.rotation.y = t * 0.2;
+      }
+      return { group: g, update };
+    }
+
+    function buildRTDModel() {
+      const g = new THREE.Group();
+      // Double barrier slabs
+      const barMat = new THREE.MeshPhysicalMaterial({ color: 0xec4899, transparent: true, opacity: 0.35, roughness: 0.1 });
+      const b1 = new THREE.Mesh(new THREE.BoxGeometry(0.35, 2.0, 1.6), barMat);
+      b1.position.set(-0.75, 0, 0);
+      const b2 = new THREE.Mesh(new THREE.BoxGeometry(0.35, 2.0, 1.6), barMat);
+      b2.position.set(0.75, 0, 0);
+      g.add(b1);
+      g.add(b2);
+
+      // Central resonant well standing wave
+      const resGeo = new THREE.BufferGeometry();
+      const resPos = new Float32Array(80 * 3);
+      resGeo.setAttribute('position', new THREE.BufferAttribute(resPos, 3));
+      const resLine = new THREE.Line(resGeo, new THREE.LineBasicMaterial({ color: 0x00f0ff, linewidth: 3 }));
+      g.add(resLine);
+
+      // Inset NDR I-V Curve board
+      const boardGeo = new THREE.PlaneGeometry(1.4, 1.2);
+      const boardMat = new THREE.MeshBasicMaterial({ color: 0x0f172a, side: THREE.DoubleSide });
+      const board = new THREE.Mesh(boardGeo, boardMat);
+      board.position.set(1.9, 0.4, -0.4);
+      board.rotation.y = -0.3;
+      g.add(board);
+
+      // NDR curve
+      const ndrPts = [];
+      for (let s = -0.6; s <= 0.6; s += 0.04) {
+        const v = (s + 0.6) / 1.2;
+        // N-shape
+        const cur = (Math.sin(v * Math.PI * 1.5) * 0.4 + (v > 0.6 ? (v - 0.6) * 0.6 : 0));
+        ndrPts.push(new THREE.Vector3(s, cur - 0.1, 0.02));
+      }
+      const ndrLine = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(ndrPts),
+        new THREE.LineBasicMaterial({ color: 0xec4899, linewidth: 2 })
+      );
+      board.add(ndrLine);
+
+      const operatingPoint = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 12), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+      board.add(operatingPoint);
+
+      const lbl = makeLabel('RTD: การสั่นพ้องในบ่อคู่ & NDR', '#ec4899', 0.75);
+      lbl.position.set(0, 1.45, 0);
+      g.add(lbl);
+
+      function update(t) {
+        // High amplitude resonant wave in well [-0.55, 0.55]
+        const arr = resLine.geometry.attributes.position.array;
+        for (let i = 0; i < 80; i++) {
+          const x = -0.55 + (i / 80) * 1.1;
+          const y = 0.75 * Math.cos(Math.PI * x / 1.1) * Math.sin(t * 6.0);
+          arr[i * 3] = x;
+          arr[i * 3 + 1] = y;
+          arr[i * 3 + 2] = 0;
+        }
+        resLine.geometry.attributes.position.needsUpdate = true;
+
+        // Operating point sweeps across NDR peak
+        const opX = Math.sin(t * 1.2) * 0.45;
+        const opV = (opX + 0.6) / 1.2;
+        const opY = (Math.sin(opV * Math.PI * 1.5) * 0.4 + (opV > 0.6 ? (opV - 0.6) * 0.6 : 0)) - 0.1;
+        operatingPoint.position.set(opX, opY, 0.03);
+        g.rotation.y = Math.sin(t * 0.4) * 0.2;
+      }
+      return { group: g, update };
+    }
+
+    function buildGamowModel() {
+      const g = new THREE.Group();
+      // Central nucleus sphere
+      const nuc = new THREE.Mesh(
+        new THREE.SphereGeometry(0.65, 24, 24),
+        new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3, emissive: 0x991b1b, emissiveIntensity: 0.4 })
+      );
+      g.add(nuc);
+
+      // Coulomb Barrier 3D wireframe funnel (1/r surface)
+      const funnelGeo = new THREE.CylinderGeometry(0.7, 2.2, 1.4, 24, 6, true);
+      const funnelMat = new THREE.MeshBasicMaterial({ color: 0x10b981, wireframe: true, transparent: true, opacity: 0.45 });
+      const funnel = new THREE.Mesh(funnelGeo, funnelMat);
+      funnel.rotation.z = Math.PI / 2;
+      funnel.position.set(1.4, 0, 0);
+      g.add(funnel);
+
+      // Bouncing alpha particle inside nucleus
+      const alphaIn = new THREE.Mesh(
+        new THREE.SphereGeometry(0.12, 16, 16),
+        new THREE.MeshBasicMaterial({ color: 0xfbbf24 })
+      );
+      g.add(alphaIn);
+
+      // Escaping alpha particle
+      const alphaOut = new THREE.Mesh(
+        new THREE.SphereGeometry(0.14, 16, 16),
+        glowMat(0x00f0ff, 0.9)
+      );
+      g.add(alphaOut);
+
+      const lbl = makeLabel('กามอฟ WKB: log₁₀ t_{1/2} = A(Z/√E_α) + B', '#10b981', 0.75);
+      lbl.position.set(0, 1.45, 0);
+      g.add(lbl);
+
+      function update(t) {
+        // Fast oscillation inside nucleus (collision frequency nu0 ~ 10^21)
+        alphaIn.position.x = Math.sin(t * 18.0) * 0.45;
+        alphaIn.position.y = Math.cos(t * 14.0) * 0.35;
+
+        // Escape trajectory every ~3 seconds
+        const cycle = (t * 0.6) % 3.0;
+        if (cycle > 0.8) {
+          const r = 0.6 + (cycle - 0.8) * 2.2;
+          alphaOut.visible = true;
+          alphaOut.position.set(r, 0, 0);
+        } else {
+          alphaOut.visible = false;
+        }
+        g.rotation.y = t * 0.3;
+      }
+      return { group: g, update };
+    }
+
     function buildChapterModels() {
       return {
         fig4: buildDoubleSlitModel(),
@@ -4075,8 +4442,18 @@
     models.fig3_5 = buildPINNsModel();
     models.fig3_6 = buildFiniteDifferenceModel();
 
+    // Chapter 4 Complete Suite
+    models.fig4_1 = buildStepPotentialModel();
+    models.fig4_2 = buildFiniteWellModel();
+    models.fig4_3 = buildBarrierTunnelingModel();
+    models.fig4_4 = buildRTDModel();
+    models.fig4_5 = buildGamowModel();
+    models.fig4_6 = buildSTMModel();
+
     Object.assign(models, buildChapterModels()); // Chapters 3-12 (fig5 ... fig14)
     models.fig5 = models.fig3_1; // Alias fig5 to fig3_1
+    models.fig6 = models.fig4_6; // Alias legacy fig6 to fig4_6
+
 
 
     // Attach them to masterGroup
@@ -5135,6 +5512,65 @@
           break;
 
         // --- CH 4: STM Tunneling ---
+        // --- CH 4: 6 Complete Sub-Topics ---
+        case 'fig4_1':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>พลังงานอนุภาค ($E$)</span><span class="param-val" id="disp-sp-e">0.90 eV</span></div>
+              <input type="range" class="slider-custom" min="0.3" max="2.5" step="0.05" value="0.90" oninput="updateFig4_1Energy(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความสูงขั้นบันได ($V_0$)</span><span class="param-val" id="disp-sp-v0">1.50 eV</span></div>
+              <input type="range" class="slider-custom" min="0.8" max="3.0" step="0.1" value="1.50" oninput="updateFig4_1V0(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig4_2':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ความกว้างบ่อ ($2a$)</span><span class="param-val" id="disp-fw-a">1.20 nm</span></div>
+              <input type="range" class="slider-custom" min="0.5" max="2.5" step="0.1" value="1.20" oninput="updateFig4_2Width(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความลึกบ่อศักย์ ($V_0$)</span><span class="param-val" id="disp-fw-v0">5.00 eV</span></div>
+              <input type="range" class="slider-custom" min="2.0" max="12.0" step="0.5" value="5.00" oninput="updateFig4_2Depth(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig4_3':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ความหนากำแพง ($a$)</span><span class="param-val" id="disp-tb-a">0.60 nm</span></div>
+              <input type="range" class="slider-custom" min="0.20" max="1.50" step="0.05" value="0.60" oninput="updateFig4_3Width(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ความสูงกำแพงศักย์ ($V_0$)</span><span class="param-val" id="disp-tb-v0">3.00 eV</span></div>
+              <input type="range" class="slider-custom" min="1.5" max="6.0" step="0.2" value="3.00" oninput="updateFig4_3Height(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig4_4':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>แรงดันไบแอส RTD ($V_{\\text{bias}}$)</span><span class="param-val" id="disp-rtd-v">0.45 V (ย่าน NDR)</span></div>
+              <input type="range" class="slider-custom" min="0.0" max="1.5" step="0.05" value="0.45" oninput="updateFig4_4Bias(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig4_5':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>พลังงานอนุภาคแอลฟา ($E_\\alpha$)</span><span class="param-val" id="disp-ga-e">4.20 MeV (²³⁸U)</span></div>
+              <input type="range" class="slider-custom" min="4.0" max="9.0" step="0.1" value="4.20" oninput="updateFig4_5AlphaE(this.value)">
+            </div>
+          `;
+          break;
+
+        case 'fig4_6':
         case 'fig6':
           container.innerHTML = `
             <div class="param-group">
@@ -5147,6 +5583,7 @@
             </div>
           `;
           break;
+
 
         // --- CH 5: Quantum Harmonic Oscillator ---
         case 'fig7':
@@ -5763,8 +6200,44 @@
       if (elP) elP.textContent = `${vp} c_unit`;
     }
 
+    // Chapter 4 Helper Functions
+    function updateFig4_1Energy(v) {
+      document.getElementById('disp-sp-e').textContent = `${parseFloat(v).toFixed(2)} eV`;
+    }
+    function updateFig4_1V0(v) {
+      document.getElementById('disp-sp-v0').textContent = `${parseFloat(v).toFixed(2)} eV`;
+    }
+    function updateFig4_2Width(v) {
+      document.getElementById('disp-fw-a').textContent = `${parseFloat(v).toFixed(2)} nm`;
+    }
+    function updateFig4_2Depth(v) {
+      document.getElementById('disp-fw-v0').textContent = `${parseFloat(v).toFixed(2)} eV`;
+    }
+    function updateFig4_3Width(v) {
+      document.getElementById('disp-tb-a').textContent = `${parseFloat(v).toFixed(2)} nm`;
+    }
+    function updateFig4_3Height(v) {
+      document.getElementById('disp-tb-v0').textContent = `${parseFloat(v).toFixed(2)} eV`;
+    }
+    function updateFig4_4Bias(v) {
+      const val = parseFloat(v);
+      let desc = 'ย่านเชิงเส้น';
+      if (val >= 0.35 && val <= 0.65) desc = 'ย่าน NDR (Peak -> Valley)';
+      else if (val > 0.65) desc = 'หลังแวลเลย์';
+      document.getElementById('disp-rtd-v').textContent = `${val.toFixed(2)} V (${desc})`;
+    }
+    function updateFig4_5AlphaE(v) {
+      const val = parseFloat(v);
+      let tHalf = '4.5 × 10⁹ ปี (²³⁸U)';
+      if (val >= 8.0) tHalf = '0.3 μs (²¹²Po)';
+      else if (val >= 6.0) tHalf = '1600 ปี (²²⁶Ra)';
+      else if (val >= 5.0) tHalf = '2.4 × 10⁵ ปี (²³⁴U)';
+      document.getElementById('disp-ga-e').textContent = `${val.toFixed(2)} MeV (${tHalf})`;
+    }
+
     // Fig 6: STM
     function updateFig6Gap(v) {
+
       document.getElementById('disp-stm-d').textContent = `${v} nm`;
       const cur = (12.0 * Math.exp(-2 * 10.2 * (v - 0.15))).toFixed(2);
       const el = document.getElementById('t-stm-i');
