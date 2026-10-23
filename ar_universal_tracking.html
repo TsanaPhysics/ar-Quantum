@@ -2352,8 +2352,45 @@
         desc: 'พื้นผิวความหนาแน่นของอะตอมในกับดัก เมื่อลดอุณหภูมิต่ำกว่า T_c สัดส่วนอะตอมในสถานะพื้น N₀/N = 1 − (T/T_c)³ เพิ่มขึ้นจนเกิดยอดแหลมกลาง (แบบผลการทดลอง JILA 1995)',
         facts: [['สัดส่วนคอนเดนเสต', 'N₀/N = 1 − (T/T_c)³'], ['สถิติ', 'Bose-Einstein'], ['T_c (Rb-87)', '~170 nK'], ['รางวัลโนเบล', '2001']]
       },
+      // --- CH 8: Quantum Information, Qubits & Quantum Computing (6 Targets) ---
+      fig8_1: {
+        id: 'fig8_1', chapter: 8, short: '8.1 ทรงกลมบล็อค/คิวบิต', icon: 'fa-globe', color: '#00d2ff', image: 'target_fig8_1.png',
+        title: 'ภาพที่ 8.1 การแทนสถานะคิวบิตเชิงเรขาคณิตสามมิติบนทรงกลมบล็อค', subtitle: 'Bloch Sphere & Qubit State Vector',
+        desc: 'สถานะควอนตัมสองระดับ |ψ⟩ = cos(θ/2)|0⟩ + e^(iϕ)sin(θ/2)|1⟩ แสดงเป็นจุดและเวกเตอร์หนึ่งหน่วย r บนพื้นผิวทรงกลมบล็อค ขั้วเหนือ |0⟩ ขั้วใต้ |1⟩ เส้นศูนย์สูตร |+⟩, |-⟩, |+y⟩, |-y⟩',
+        facts: [['เวกเตอร์บล็อค', 'r = (sinθ cosϕ, sinθ sinϕ, cosθ)'], ['กฎของบอร์น', 'P(|0⟩) = cos²(θ/2), P(|1⟩) = sin²(θ/2)'], ['เฟสสัมพัทธ์', 'ϕ ควบคุมการแทรกสอดเชิงควอนตัม'], ['ค่าคาดหวังเพาลี', 'r_i = ⟨ψ|σ_i|ψ⟩']]
+      },
+      fig8_2: {
+        id: 'fig8_2', chapter: 8, short: '8.2 เมทริกซ์ความหนาแน่น', icon: 'fa-cubes-stacked', color: '#8b5cf6', image: 'target_fig8_2.png',
+        title: 'ภาพที่ 8.2 เมทริกซ์ความหนาแน่นและสถานะผสมภายในลูกบอลบล็อค', subtitle: 'Density Matrix & Mixed States in Bloch Ball',
+        desc: 'เมทริกซ์ความหนาแน่น ρ = ½(I + r·σ) จำแนกสถานะบริสุทธิ์บนผิว |r|=1 (Tr(ρ²)=1) และสถานะผสมเนื้อใน |r|<1 (Tr(ρ²)<1) จนถึงจุดศูนย์กลาง r=0 สถานะผสมสูงสุด ρ = ½I',
+        facts: [['เมทริกซ์ความหนาแน่น', 'ρ = ½(I + r·σ)'], ['ระดับความบริสุทธิ์', 'γ = Tr(ρ²) = ½(1 + |r|²)'], ['เอนโทรปีฟอนนอยมันน์', 'S(ρ) = -Tr(ρ log₂ ρ)'], ['สถิติผสมสูงสุด', 'r = 0, S = 1 bit, Tr(ρ²) = 0.5']]
+      },
+      fig8_3: {
+        id: 'fig8_3', chapter: 8, short: '8.3 เกต 1 คิวบิต/การหมุน', icon: 'fa-arrows-rotate', color: '#f59e0b', image: 'target_fig8_3.png',
+        title: 'ภาพที่ 8.3 เกตควอนตัมหนึ่งคิวบิตและการหมุน SU(2) บนทรงกลมบล็อค', subtitle: 'Single-Qubit Unitary Gates & SU(2) Rotations',
+        desc: 'การแปลงสภาพเอกภาพ U บนคิวบิตเทียบเท่ากับการหมุนสามมิติ R_n̂(θ) เกตเพาลี X พลิกบิตรอบแกน x, Z พลิกเฟสรอบแกน z, และฮาดามาร์ด H หมุน 180° รอบแกนทแยง (x̂+ẑ)/√2 เปลี่ยน |0⟩ เป็น |+⟩',
+        facts: [['การหมุนสากล', 'R_n̂(θ) = exp(-iθ n̂·σ / 2)'], ['เกตฮาดามาร์ด', 'H = (X + Z)/√2, H|0⟩ = |+⟩'], ['เกตเปลี่ยนเฟส', 'S = diag(1, i), T = diag(1, e^(iπ/4))'], ['ทฤษฎีโซโลเวย์-คิเทียฟ', 'เซต {H, S, T, CNOT} สากลโดยสมบูรณ์']]
+      },
+      fig8_4: {
+        id: 'fig8_4', chapter: 8, short: '8.4 การวัด/ซีโนควอนตัม', icon: 'fa-stopwatch', color: '#10b981', image: 'target_fig8_4.png',
+        title: 'ภาพที่ 8.4 การวัดควอนตัม สัจพจน์การฉายภาพ และปรากฏการณ์ซีโนควอนตัม', subtitle: 'Quantum Measurement, Collapse & Zeno Effect',
+        desc: 'การวัดแบบฉายภาพ P₀ = |0⟩⟨0| บังคับให้ฟังก์ชันคลื่นยุบตัว หากสังเกตซ้ำๆ ด้วยความถี่สูงมาก ช่วงเวลา τ = t/N → 0 ความน่าจะเป็นรอดชีวิต P_survive(t) ≈ [1 - (Ωτ/2)²]^N → 1 หยุดยั้งการเปลี่ยนสถานะได้อย่างสิ้นเชิง',
+        facts: [['สัจพจน์การฉายภาพ', 'P_m = |m⟩⟨m|, ρ → P_m ρ P_m / Tr(...)'], ['การสั่นราบีอิสระ', 'P₀(t) = cos²(Ωt/2)'], ['ขีดจำกัดซีโน', 'lim_{N→∞} P_survive = 1 (Watched pot never boils)'], ['การทดลองยืนยัน', 'Wineland et al. 1990 (Trapped Ions)']]
+      },
+      fig8_5: {
+        id: 'fig8_5', chapter: 8, short: '8.5 สองคิวบิต/CNOT/เบลล์', icon: 'fa-network-wired', color: '#ec4899', image: 'target_fig8_5.png',
+        title: 'ภาพที่ 8.5 ระบบสองคิวบิต เกตควบคุม CNOT และการสร้างสถานะพัวพันเบลล์', subtitle: 'Two-Qubit Systems, CNOT Gate & Bell Entanglement',
+        desc: 'ปริภูมิฮิลเบิร์ตผลคูณเทนเซอร์ H₂ ⊗ H₂ ขนาด 4 มิติ เกต CNOT สลับสถานะเป้าหมายเมื่อคิวบิตควบคุมเป็น 1 เมื่อต่ออนุกรมกับเกตฮาดามาร์ดจะเปลี่ยน |00⟩ ให้กลายเป็นสถานะพัวพันสูงสุด |Φ⁺⟩ = (|00⟩+|11⟩)/√2',
+        facts: [['เกต CNOT', '|c, t⟩ → |c, c ⊕ t⟩'], ['สถานะพัวพันเบลล์', '|Φ⁺⟩ = (|00⟩ + |11⟩)/√2'], ['มิติปริภูมิ', 'dim(H_n) = 2ⁿ (2⁵⁰ ≈ 1.1×10¹⁵)'], ['ความเป็นสากล', 'CNOT + 1-Qubit Gates ครอบคลุมวงจรควอนตัมทุกชนิด']]
+      },
+      fig8_6: {
+        id: 'fig8_6', chapter: 8, short: '8.6 ดีโคฮีเรนซ์ T1/T2', icon: 'fa-hourglass-half', color: '#f43f5e', image: 'target_fig8_6.png',
+        title: 'ภาพที่ 8.6 การสูญเสียความพร้อมเพรียงเชิงควอนตัมและเวลาผ่อนคลาย T₁, T₂', subtitle: 'Quantum Decoherence, Relaxation T₁ & Dephasing T₂',
+        desc: 'อันตรกิริยากับสิ่งแวดล้อมลดทอนพลังงาน (T₁) ดึงเวกเตอร์บล็อคสู่สถานะพื้น |0⟩ และทำลายเฟสสัมพันธ์ (T₂) ทำให้เวกเตอร์หดตัวเข้าสู่แกนกลางตามความสัมพันธ์ 1/T₂ = 1/(2T₁) + 1/T_ϕ (T₂ ≤ 2T₁)',
+        facts: [['เวลาผ่อนคลายตามยาว', 'T₁ (Energy Relaxation, Amplitude Damping)'], ['เวลาสูญเสียเฟสตามขวาง', 'T₂ (Phase Damping, Coherence Time)'], ['อสมการความพร้อมเพรียง', '1/T₂ = 1/(2T₁) + 1/T_ϕ ⟹ T₂ ≤ 2T₁'], ['ฮาร์ดแวร์จริง', 'Transmon ~ 100-300 μs, Trapped Ions > วินาที']]
+      },
       fig10: {
-        id: 'fig10', chapter: 8, short: 'บท 8 ทรงกลมบลอค', icon: 'fa-globe', color: '#34d399', image: null,
+        id: 'fig10', chapter: 8, short: '8.1 ทรงกลมบลอค (เดิม)', icon: 'fa-globe', color: '#00d2ff', image: 'target_fig8_1.png',
         title: 'บทที่ 8 คิวบิตบนทรงกลมบลอค', subtitle: 'Qubit State on the Bloch Sphere',
         desc: 'สถานะ |ψ⟩ = cos(θ/2)|0⟩ + e^(iφ)sin(θ/2)|1⟩ แสดงเป็นเวกเตอร์บนทรงกลมบลอค หมุนควงรอบแกน z (Larmor precession) พร้อมการหมุนราบี (Rabi) ระหว่าง |0⟩ และ |1⟩',
         facts: [['สถานะ', 'cos(θ/2)|0⟩ + e^{iφ}sin(θ/2)|1⟩'], ['P(|0⟩)', 'cos²(θ/2)'], ['การหมุนควง', 'φ(t) = ωt'], ['ขั้วเหนือ/ใต้', '|0⟩ / |1⟩']]
@@ -5470,6 +5507,287 @@
       return { group: g, update };
     }
 
+    // ==========================================================
+    // CHAPTER 8 3D BUILDER FUNCTIONS (Quantum Information & Qubits)
+    // ==========================================================
+
+    // 1. Fig 8.1: Bloch Sphere & Qubit State Vector
+    function buildBlochSphereQubitModel() {
+      const g = new THREE.Group();
+
+      // Translucent Sphere
+      const sphereMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true, transparent: true, opacity: 0.22 });
+      const sphere = new THREE.Mesh(new THREE.SphereGeometry(1.2, 24, 24), sphereMat);
+      g.add(sphere);
+
+      // Equator Ring
+      const eqMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+      const equator = new THREE.Mesh(new THREE.RingGeometry(1.19, 1.21, 48), eqMat);
+      equator.rotateX(Math.PI / 2);
+      g.add(equator);
+
+      // Coordinate Axes (X, Y, Z)
+      const axZ = lineOf([new THREE.Vector3(0, -1.6, 0), new THREE.Vector3(0, 1.7, 0)], 0x94a3b8, 1.5);
+      const axY = lineOf([new THREE.Vector3(0, 0, -1.6), new THREE.Vector3(0, 0, 1.6)], 0x94a3b8, 1.5);
+      const axX = lineOf([new THREE.Vector3(-1.6, 0, 0), new THREE.Vector3(1.6, 0, 0)], 0x94a3b8, 1.5);
+      g.add(axZ, axY, axX);
+
+      // Poles (|0> North, |1> South)
+      const p0 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), glowMat(0x00f0ff, 1.0));
+      p0.position.set(0, 1.2, 0);
+      const p1 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), glowMat(0x00f0ff, 1.0));
+      p1.position.set(0, -1.2, 0);
+
+      // Equator Points (|+>, |->, |+y>, |-y>)
+      const pPlus = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 12), glowMat(0x10b981, 1.0));
+      pPlus.position.set(1.2, 0, 0);
+      const pMinus = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 12), glowMat(0x10b981, 1.0));
+      pMinus.position.set(-1.2, 0, 0);
+      g.add(p0, p1, pPlus, pMinus);
+
+      // State Vector |psi>
+      const vecGroup = new THREE.Group();
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.2, 12), glowMat(0xf59e0b, 1.0));
+      shaft.position.y = 0.6;
+      const head = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.18, 12), glowMat(0xf59e0b, 1.0));
+      head.position.y = 1.2;
+      vecGroup.add(shaft, head);
+      g.add(vecGroup);
+
+      // Projection line onto equator
+      const projLine = lineOf([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0.8, 0, 0.6)], 0x00f0ff, 1.2);
+      g.add(projLine);
+
+      const lbl = makeLabel('ทรงกลมบล็อค |ψ⟩ = cos(θ/2)|0⟩ + e^(iϕ)sin(θ/2)|1⟩', '#00f0ff', 0.68);
+      lbl.position.set(0, 1.85, 0);
+      g.add(lbl);
+
+      let currentTheta = 1.0, currentPhi = 0.8;
+      function update(t) {
+        g.rotation.y = t * 0.15;
+        const th = currentTheta + 0.15 * Math.sin(t * 1.5);
+        const ph = currentPhi + t * 0.5;
+        const x = 1.2 * Math.sin(th) * Math.cos(ph);
+        const y = 1.2 * Math.cos(th);
+        const z = 1.2 * Math.sin(th) * Math.sin(ph);
+
+        vecGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(x, y, z).normalize());
+        const arr = projLine.geometry.attributes.position.array;
+        arr[3] = x; arr[4] = 0; arr[5] = z;
+        projLine.geometry.attributes.position.needsUpdate = true;
+      }
+      return { group: g, update, setAngles: (th, ph) => { currentTheta = th; currentPhi = ph; } };
+    }
+
+    // 2. Fig 8.2: Density Matrix & Mixed States in Bloch Ball
+    function buildDensityMatrixMixedStateModel() {
+      const g = new THREE.Group();
+
+      // Outer Pure State Shell
+      const outerSphere = new THREE.Mesh(new THREE.SphereGeometry(1.2, 20, 20), new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true, transparent: true, opacity: 0.18 }));
+      g.add(outerSphere);
+
+      // Concentric Inner Mixed State Shells
+      const midSphere = new THREE.Mesh(new THREE.SphereGeometry(0.8, 16, 16), new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe: true, transparent: true, opacity: 0.3 }));
+      const coreSphere = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 12), new THREE.MeshBasicMaterial({ color: 0xec4899, wireframe: true, transparent: true, opacity: 0.4 }));
+      g.add(midSphere, coreSphere);
+
+      // Maximally Mixed Center Point (r=0, rho = 1/2 I)
+      const centerPoint = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), glowMat(0xf43f5e, 1.0));
+      g.add(centerPoint);
+
+      // Pure State Pointer on Surface (|r| = 1)
+      const pureVec = lineOf([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0.7, 0.9, 0.3)], 0x00f0ff, 2.0);
+      const pureNode = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), glowMat(0x00f0ff, 1.0));
+      pureNode.position.set(0.7, 0.9, 0.3);
+      g.add(pureVec, pureNode);
+
+      // Mixed State Vector inside Ball (|r| < 1)
+      const mixVec = lineOf([new THREE.Vector3(0, 0, 0), new THREE.Vector3(-0.4, -0.3, 0.5)], 0xf59e0b, 2.5);
+      const mixNode = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), glowMat(0xf59e0b, 1.0));
+      mixNode.position.set(-0.4, -0.3, 0.5);
+      g.add(mixVec, mixNode);
+
+      const lbl = makeLabel('ลูกบอลบล็อค: ผิว |r|=1 (บริสุทธิ์) vs ภายใน |r|<1 (ผสม)', '#8b5cf6', 0.68);
+      lbl.position.set(0, 1.75, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.2;
+        const pulse = 0.55 + 0.15 * Math.sin(t * 2);
+        mixNode.position.set(-0.4 * pulse / 0.6, -0.3 * pulse / 0.6, 0.5 * pulse / 0.6);
+        const mArr = mixVec.geometry.attributes.position.array;
+        mArr[3] = mixNode.position.x;
+        mArr[4] = mixNode.position.y;
+        mArr[5] = mixNode.position.z;
+        mixVec.geometry.attributes.position.needsUpdate = true;
+      }
+      return { group: g, update };
+    }
+
+    // 3. Fig 8.3: Single-Qubit Unitary Gates & SU(2) Rotations
+    function buildQuantumGatesModel() {
+      const g = new THREE.Group();
+
+      // Sphere Outline
+      const sphere = new THREE.Mesh(new THREE.SphereGeometry(1.15, 18, 18), new THREE.MeshBasicMaterial({ color: 0x64748b, wireframe: true, transparent: true, opacity: 0.15 }));
+      g.add(sphere);
+
+      // Z-Rotation Ring (Blue)
+      const ringZ = new THREE.Mesh(new THREE.RingGeometry(1.13, 1.17, 36), new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.7 }));
+      ringZ.rotateX(Math.PI / 2);
+      g.add(ringZ);
+
+      // X-Rotation Ring (Red)
+      const ringX = new THREE.Mesh(new THREE.RingGeometry(1.13, 1.17, 36), new THREE.MeshBasicMaterial({ color: 0xf43f5e, side: THREE.DoubleSide, transparent: true, opacity: 0.7 }));
+      ringX.rotateY(Math.PI / 2);
+      g.add(ringX);
+
+      // Hadamard Diagonal Axis and Ring (Gold)
+      const hadAxis = lineOf([new THREE.Vector3(-1.0, -1.0, 0), new THREE.Vector3(1.0, 1.0, 0)], 0xf59e0b, 2.0);
+      g.add(hadAxis);
+
+      // Active state tracer
+      const tracer = new THREE.Mesh(new THREE.SphereGeometry(0.09, 16, 16), glowMat(0xf59e0b, 1.0));
+      g.add(tracer);
+
+      const lbl = makeLabel('เกต 1 คิวบิต: Pauli X, Z, Hadamard H, Phase S, T', '#f59e0b', 0.68);
+      lbl.position.set(0, 1.75, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.15;
+        // Cycle tracer along Hadamard rotation
+        const phase = t * 2.0;
+        tracer.position.set(1.15 * Math.sin(phase), 1.15 * Math.cos(phase), 0);
+      }
+      return { group: g, update };
+    }
+
+    // 4. Fig 8.4: Quantum Measurement & Zeno Effect
+    function buildQuantumMeasurementZenoModel() {
+      const g = new THREE.Group();
+
+      // Two quantum levels |0> and |1>
+      const bar0 = lineOf([new THREE.Vector3(-1.2, 0.8, 0), new THREE.Vector3(1.2, 0.8, 0)], 0x00f0ff, 3.0);
+      const bar1 = lineOf([new THREE.Vector3(-1.2, -0.8, 0), new THREE.Vector3(1.2, -0.8, 0)], 0xec4899, 3.0);
+      g.add(bar0, bar1);
+
+      // Level labels
+      const l0 = makeLabel('|0⟩ (Ground)', '#00f0ff', 0.45);
+      l0.position.set(-1.4, 0.8, 0);
+      const l1 = makeLabel('|1⟩ (Excited)', '#ec4899', 0.45);
+      l1.position.set(-1.4, -0.8, 0);
+      g.add(l0, l1);
+
+      // Quantum State Wavepacket / Bead
+      const stateBead = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), glowMat(0x10b981, 1.0));
+      stateBead.position.set(0, 0.8, 0);
+      g.add(stateBead);
+
+      // Laser Measurement Probes (Zeno Flash Beam)
+      const flashBeam = lineOf([new THREE.Vector3(0, 1.6, 0), new THREE.Vector3(0, 0.8, 0)], 0xf43f5e, 2.5);
+      const flashHead = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.2, 12), glowMat(0xf43f5e, 1.0));
+      flashHead.position.set(0, 0.9, 0);
+      g.add(flashBeam, flashHead);
+
+      const lbl = makeLabel('ปรากฏการณ์ซีโนควอนตัม: การวัดถี่สูงแช่แข็งสถานะที่ |0⟩', '#10b981', 0.68);
+      lbl.position.set(0, 1.85, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.15;
+        // Periodic Zeno collapse flash
+        const flash = Math.abs(Math.sin(t * 5.0));
+        flashHead.scale.setScalar(1.0 + flash * 0.5);
+        // State trapped tightly at y=0.8 with minute oscillation
+        stateBead.position.y = 0.8 - 0.05 * Math.pow(Math.sin(t * 5.0), 2);
+      }
+      return { group: g, update };
+    }
+
+    // 5. Fig 8.5: Two-Qubit Circuit, CNOT & Bell Entanglement
+    function buildTwoQubitBellCnotModel() {
+      const g = new THREE.Group();
+
+      // Qubit 1 rail (top)
+      const rail1 = lineOf([new THREE.Vector3(-1.8, 0.6, 0), new THREE.Vector3(1.8, 0.6, 0)], 0x00f0ff, 2.0);
+      // Qubit 2 rail (bottom)
+      const rail2 = lineOf([new THREE.Vector3(-1.8, -0.6, 0), new THREE.Vector3(1.8, -0.6, 0)], 0xec4899, 2.0);
+      g.add(rail1, rail2);
+
+      // Hadamard Gate Box on Qubit 1
+      const hBox = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), glowMat(0x00f0ff, 0.8));
+      hBox.position.set(-0.8, 0.6, 0);
+      g.add(hBox);
+
+      // CNOT Bridge
+      const cnotLine = lineOf([new THREE.Vector3(0.5, 0.6, 0), new THREE.Vector3(0.5, -0.6, 0)], 0xf59e0b, 2.5);
+      const ctrlDot = new THREE.Mesh(new THREE.SphereGeometry(0.09, 14, 14), glowMat(0xf59e0b, 1.0));
+      ctrlDot.position.set(0.5, 0.6, 0);
+      const tgtRing = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.03, 8, 24), glowMat(0xf59e0b, 1.0));
+      tgtRing.position.set(0.5, -0.6, 0);
+      g.add(cnotLine, ctrlDot, tgtRing);
+
+      // Entangled Bell Photon Pairs Flowing Out
+      const p1 = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 12), glowMat(0x00f0ff, 1.0));
+      const p2 = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 12), glowMat(0xec4899, 1.0));
+      g.add(p1, p2);
+
+      const lbl = makeLabel('สร้างสถานะพัวพันเบลล์ |Φ⁺⟩ = (|00⟩+|11⟩)/√2 ด้วยเกต CNOT', '#ec4899', 0.68);
+      lbl.position.set(0, 1.65, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.15;
+        const xOut = 0.5 + ((t * 1.5) % 1.2);
+        p1.position.set(xOut, 0.6, 0.05 * Math.sin(t * 6));
+        p2.position.set(xOut, -0.6, -0.05 * Math.sin(t * 6));
+      }
+      return { group: g, update };
+    }
+
+    // 6. Fig 8.6: Quantum Decoherence & Relaxation T1, T2
+    function buildDecoherenceT1T2Model() {
+      const g = new THREE.Group();
+
+      // Bloch sphere reference
+      const sphere = new THREE.Mesh(new THREE.SphereGeometry(1.15, 18, 18), new THREE.MeshBasicMaterial({ color: 0x475569, wireframe: true, transparent: true, opacity: 0.15 }));
+      g.add(sphere);
+
+      // Inward Spiraling Decoherence Trajectory
+      const spiralPts = [];
+      for (let s = 0; s <= 1.0; s += 0.01) {
+        const rad = 1.15 * Math.exp(-1.5 * s);
+        const theta = s * Math.PI;
+        const phi = s * 6 * Math.PI;
+        const x = rad * Math.sin(theta) * Math.cos(phi);
+        const y = 1.15 * (1 - 2 * s) * 0.7; // T1 longitudinal relaxation towards south pole
+        const z = rad * Math.sin(theta) * Math.sin(phi);
+        spiralPts.push(new THREE.Vector3(x, y, z));
+      }
+      const spiralLine = lineOf(spiralPts, 0xf43f5e, 2.0);
+      g.add(spiralLine);
+
+      // Active Decaying Vector Head
+      const decHead = new THREE.Mesh(new THREE.SphereGeometry(0.08, 14, 14), glowMat(0xf43f5e, 1.0));
+      g.add(decHead);
+
+      const lbl = makeLabel('ดีโคฮีเรนซ์ควอนตัม: ผ่อนคลายพลังงาน T₁ และการสูญเสียเฟส T₂', '#f43f5e', 0.68);
+      lbl.position.set(0, 1.75, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.2;
+        const s = (t * 0.25) % 1.0;
+        const rad = 1.15 * Math.exp(-1.5 * s);
+        const theta = s * Math.PI;
+        const phi = s * 6 * Math.PI;
+        decHead.position.set(rad * Math.sin(theta) * Math.cos(phi), 1.15 * (1 - 2 * s) * 0.7, rad * Math.sin(theta) * Math.sin(phi));
+      }
+      return { group: g, update };
+    }
+
     function buildChapterModels() {
       return {
         fig4: buildDoubleSlitModel(),
@@ -5546,11 +5864,20 @@
     models.fig7_5 = buildFermiSphereModel();
     models.fig7_6 = buildBoseEinsteinSuperconductivityModel();
 
+    // Chapter 8 Complete Suite
+    models.fig8_1 = buildBlochSphereQubitModel();
+    models.fig8_2 = buildDensityMatrixMixedStateModel();
+    models.fig8_3 = buildQuantumGatesModel();
+    models.fig8_4 = buildQuantumMeasurementZenoModel();
+    models.fig8_5 = buildTwoQubitBellCnotModel();
+    models.fig8_6 = buildDecoherenceT1T2Model();
+
     Object.assign(models, buildChapterModels()); // Chapters 3-12 (fig5 ... fig14)
     models.fig5 = models.fig3_1; // Alias fig5 to fig3_1
     models.fig6 = models.fig4_6; // Alias legacy fig6 to fig4_6
     models.fig8 = models.fig6_3; // Alias legacy fig8 to fig6_3
     models.fig9 = models.fig7_6; // Alias legacy fig9 to fig7_6
+    models.fig10 = models.fig8_1; // Alias legacy fig10 to fig8_1
 
 
 
@@ -6874,25 +7201,102 @@
           `;
           break;
 
-        // --- CH 8: Bloch Sphere ---
+        // --- CH 8: Quantum Information, Qubits & Quantum Computing (6 Targets) ---
+        case 'fig8_1':
         case 'fig10':
           container.innerHTML = `
             <div class="param-group">
               <div class="param-label"><span>มุมพิกัดโพลาร์ ($\\theta$)</span><span class="param-val" id="disp-bl-th">90.0°</span></div>
-              <input type="range" class="slider-custom" min="0" max="180" step="2" value="90" oninput="updateFig10Theta(this.value)">
+              <input type="range" class="slider-custom" min="0" max="180" step="2" value="90" oninput="updateFig8_1Theta(this.value); updateFig10Theta(this.value)">
             </div>
             <div class="param-group">
               <div class="param-label"><span>มุมเฟสแอซิมัท ($\\phi$)</span><span class="param-val" id="disp-bl-ph">45.0°</span></div>
-              <input type="range" class="slider-custom" min="0" max="360" step="5" value="45" oninput="updateFig10Phi(this.value)">
+              <input type="range" class="slider-custom" min="0" max="360" step="5" value="45" oninput="updateFig8_1Phi(this.value); updateFig10Phi(this.value)">
             </div>
             <div class="param-group">
-              <div class="param-label"><span>ควอนตัมเกต (Quantum Gates)</span></div>
+              <div class="param-label"><span>พรีเซ็ตสถานะฐาน (Basis States)</span></div>
               <div style="display:flex; gap:6px; margin-top:4px;">
-                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="applyFig10Gate('X')">X</button>
-                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="applyFig10Gate('Y')">Y</button>
-                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="applyFig10Gate('Z')">Z</button>
-                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="applyFig10Gate('H')">H</button>
+                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="presetFig8_1State('0')">|0⟩</button>
+                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="presetFig8_1State('1')">|1⟩</button>
+                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="presetFig8_1State('+')">|+⟩</button>
+                <button class="win-btn" style="flex:1; width:auto; font-weight:700;" onclick="presetFig8_1State('-')">|-⟩</button>
               </div>
+            </div>
+          `;
+          break;
+
+        case 'fig8_2':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ความยาวเวกเตอร์บล็อค ($|\\mathbf{r}|$)</span><span class="param-val" id="disp-dm-r">1.00 (Pure State)</span></div>
+              <input type="range" class="slider-custom" min="0.0" max="1.0" step="0.05" value="1.0" oninput="updateFig8_2Purity(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ระดับสถานะผสม</span></div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem; padding:4px 6px;" onclick="updateFig8_2Purity(1.0)">บริสุทธิ์ (1.0)</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem; padding:4px 6px;" onclick="updateFig8_2Purity(0.6)">ผสม (0.6)</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem; padding:4px 6px;" onclick="updateFig8_2Purity(0.0)">ผสมสูงสุด (0.0)</button>
+              </div>
+            </div>
+          `;
+          break;
+
+        case 'fig8_3':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ควอนตัมเกตเดี่ยว (Single-Qubit Unitary Gates)</span></div>
+              <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-top:4px;">
+                <button class="win-btn" style="font-weight:700;" onclick="applyFig8_3Gate('X')">X (Bit Flip)</button>
+                <button class="win-btn" style="font-weight:700;" onclick="applyFig8_3Gate('Y')">Y (Phase+Bit)</button>
+                <button class="win-btn" style="font-weight:700;" onclick="applyFig8_3Gate('Z')">Z (Phase Flip)</button>
+                <button class="win-btn" style="font-weight:700;" onclick="applyFig8_3Gate('H')">H (Hadamard)</button>
+                <button class="win-btn" style="font-weight:700;" onclick="applyFig8_3Gate('S')">S (π/2 Phase)</button>
+                <button class="win-btn" style="font-weight:700;" onclick="applyFig8_3Gate('T')">T (π/4 Phase)</button>
+              </div>
+            </div>
+          `;
+          break;
+
+        case 'fig8_4':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ความถี่การสังเกต/วัด ($N$ ครั้งต่อคาบ)</span><span class="param-val" id="disp-zeno-n">N = 12 (Zeno Trap)</span></div>
+              <input type="range" class="slider-custom" min="1" max="30" step="1" value="12" oninput="updateFig8_4Interval(this.value)">
+            </div>
+            <div class="param-group">
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem; padding:4px 6px;" onclick="updateFig8_4Interval(1)">N=1 (Free Rabi)</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem; padding:4px 6px;" onclick="updateFig8_4Interval(6)">N=6 (Partial)</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem; padding:4px 6px;" onclick="updateFig8_4Interval(25)">N=25 (Frozen)</button>
+              </div>
+            </div>
+          `;
+          break;
+
+        case 'fig8_5':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>สถานะสองคิวบิตเบลล์ (Bell States)</span><span class="param-val" id="disp-cnot-state">|Φ⁺⟩ = (|00⟩+|11⟩)/√2</span></div>
+              <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-top:4px;">
+                <button class="win-btn" style="font-weight:700;" onclick="setFig8_5Bell('phi_plus')">|Φ⁺⟩ (|00⟩+|11⟩)</button>
+                <button class="win-btn" style="font-weight:700;" onclick="setFig8_5Bell('phi_minus')">|Φ⁻⟩ (|00⟩-|11⟩)</button>
+                <button class="win-btn" style="font-weight:700;" onclick="setFig8_5Bell('psi_plus')">|Ψ⁺⟩ (|01⟩+|10⟩)</button>
+                <button class="win-btn" style="font-weight:700;" onclick="setFig8_5Bell('psi_minus')">|Ψ⁻⟩ (|01⟩-|10⟩)</button>
+              </div>
+            </div>
+          `;
+          break;
+
+        case 'fig8_6':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>เวลาที่ผ่านไป ($t / T_1$)</span><span class="param-val" id="disp-dec-t">0.50 T₁</span></div>
+              <input type="range" class="slider-custom" min="0.0" max="3.0" step="0.1" value="0.5" oninput="updateFig8_6Time(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>อัตราส่วนเวลา $T_2 / T_1$ (Dephasing)</span><span class="param-val" id="disp-dec-ratio">T₂ = 1.20 T₁</span></div>
+              <input type="range" class="slider-custom" min="0.2" max="2.0" step="0.1" value="1.2" oninput="updateFig8_6Ratio(this.value)">
             </div>
           `;
           break;
@@ -7335,15 +7739,71 @@
           `;
           break;
 
-        // --- CH 8: Bloch Sphere ---
+        // --- CH 8: Quantum Information, Qubits & Quantum Computing (6 Targets) ---
+        case 'fig8_1':
         case 'fig10':
           container.innerHTML = `
             <div class="info-card"><h5>สถานะคิวบิต ($|\\psi\\rangle$)</h5><p id="t-bl-state">cos(θ/2)|0⟩ + e^{iφ}sin(θ/2)|1⟩</p></div>
             <div class="info-card"><h5>ความน่าจะเป็น $P(|0\\rangle)$</h5><p id="t-bl-p0" style="color:#10b981;">0.50</p></div>
             <div class="info-card"><h5>ความน่าจะเป็น $P(|1\\rangle)$</h5><p id="t-bl-p1" style="color:#ec4899;">0.50</p></div>
-            <div class="info-card"><h5>การหมุนควงลาร์มอร์</h5><p>φ(t) = ω_L t</p></div>
-            <div class="info-card"><h5>ความบริสุทธิ์ของสถานะ</h5><p>Tr(ρ²) = 1.0 (Pure)</p></div>
-            <div class="info-card"><h5>พิกัดเวกเตอร์บลอค</h5><p id="t-bl-coords">(0.0, 1.0, 0.0)</p></div>
+            <div class="info-card"><h5>พิกัดเวกเตอร์บล็อค $\\mathbf{r}$</h5><p id="t-bl-coords" style="color:var(--gold);">(0.71, 0.71, 0.00)</p></div>
+            <div class="info-card"><h5>ความบริสุทธิ์ของสถานะ</h5><p style="color:#00f0ff;">Tr(ρ²) = 1.00 (Pure State)</p></div>
+            <div class="info-card"><h5>ค่าคาดหวังเพาลี $\\langle \\sigma_z \\rangle$</h5><p id="t-bl-sz">0.00</p></div>
+          `;
+          break;
+
+        case 'fig8_2':
+          container.innerHTML = `
+            <div class="info-card"><h5>ความยาวเวกเตอร์ $|\\mathbf{r}|$</h5><p id="t-dm-r" style="color:#8b5cf6;">1.00 (บนพื้นผิว)</p></div>
+            <div class="info-card"><h5>ระดับความบริสุทธิ์ ($\\gamma$)</h5><p id="t-dm-purity" style="color:#10b981;">Tr(ρ²) = 1.00</p></div>
+            <div class="info-card"><h5>เอนโทรปีฟอนนอยมันน์</h5><p id="t-dm-entropy" style="color:var(--gold);">S(ρ) = 0.00 bits</p></div>
+            <div class="info-card"><h5>ประเภทสถานะ</h5><p id="t-dm-type" style="color:#00f0ff;">สถานะบริสุทธิ์ (Pure State)</p></div>
+            <div class="info-card"><h5>เมทริกซ์ความหนาแน่น</h5><p>ρ = ½(I + r·σ)</p></div>
+            <div class="info-card"><h5>จุดกึ่งกลางลูกบอล</h5><p style="color:#f43f5e;">r=0 (ผสมสูงสุด, S=1 bit)</p></div>
+          `;
+          break;
+
+        case 'fig8_3':
+          container.innerHTML = `
+            <div class="info-card"><h5>เกตที่ถูกกระตุ้นล่าสุด</h5><p id="t-qg-last" style="color:var(--gold);">เกตฮาดามาร์ด (H)</p></div>
+            <div class="info-card"><h5>การแปลงสถานะ</h5><p id="t-qg-trans" style="color:#10b981;">|0⟩ → (|0⟩+|1⟩)/√2 = |+⟩</p></div>
+            <div class="info-card"><h5>แกนการหมุนเชิงเรขาคณิต</h5><p id="t-qg-axis">(x̂ + ẑ)/√2 (มุม π)</p></div>
+            <div class="info-card"><h5>สมบัติเอกภาพ</h5><p style="color:#00f0ff;">U† U = I, det(U) = ±1</p></div>
+            <div class="info-card"><h5>เกตเปลี่ยนเฟส ($S, T$)</h5><p>S² = Z, T⁴ = Z</p></div>
+            <div class="info-card"><h5>เซตเกตสากล</h5><p style="color:#8b5cf6;">Clifford+T ทฤษฎีโซโลเวย์</p></div>
+          `;
+          break;
+
+        case 'fig8_4':
+          container.innerHTML = `
+            <div class="info-card"><h5>ความถี่การวัด ($N$)</h5><p id="t-zeno-n" style="color:#10b981;">12 ครั้งต่อคาบ</p></div>
+            <div class="info-card"><h5>โอกาสรอดชีวิต ($P_{\\text{survive}}$)</h5><p id="t-zeno-prob" style="color:var(--gold);">96.8% (แช่แข็งสถานะ)</p></div>
+            <div class="info-card"><h5>สภาวะระบบควอนตัม</h5><p id="t-zeno-status" style="color:#10b981;">Zeno Trapped (ยับยั้งการเปลี่ยน)</p></div>
+            <div class="info-card"><h5>ช่วงเวลาสังเกต ($\\tau$)</h5><p id="t-zeno-tau">τ = T/N → 0</p></div>
+            <div class="info-card"><h5>การยุบตัวของฟังก์ชันคลื่น</h5><p style="color:#f43f5e;">P₀ = |0⟩⟨0| Projection</p></div>
+            <div class="info-card"><h5>สุภาษิตควอนตัม</h5><p>Watched pot never boils</p></div>
+          `;
+          break;
+
+        case 'fig8_5':
+          container.innerHTML = `
+            <div class="info-card"><h5>สถานะเอาต์พุตสองคิวบิต</h5><p id="t-cnot-state" style="color:#ec4899;">|Φ⁺⟩ = (|00⟩+|11⟩)/√2</p></div>
+            <div class="info-card"><h5>ระดับความพัวพัน (Concurrence)</h5><p id="t-cnot-conc" style="color:var(--gold);">C = 1.00 (พัวพันสูงสุด)</p></div>
+            <div class="info-card"><h5>วงจรสร้างสถานะ</h5><p style="color:#00f0ff;">H₁ ต่อด้วย CNOT₁₂</p></div>
+            <div class="info-card"><h5>ตารางค่าความจริง CNOT</h5><p>|c, t⟩ → |c, c ⊕ t⟩</p></div>
+            <div class="info-card"><h5>สมบัติความไม่เฉพาะที่</h5><p style="color:#10b981;">ละเมิดอสมการเบลล์ S > 2</p></div>
+            <div class="info-card"><h5>การประยุกต์ใช้งาน</h5><p>Superdense Coding, Teleportation</p></div>
+          `;
+          break;
+
+        case 'fig8_6':
+          container.innerHTML = `
+            <div class="info-card"><h5>เวลาสลายตัว ($t/T_1$)</h5><p id="t-dec-t">0.50 T₁</p></div>
+            <div class="info-card"><h5>ประชากรสเตตกระตุ้น ($P_1$)</h5><p id="t-dec-p1" style="color:#f43f5e;">e^(-t/T₁) = 0.61</p></div>
+            <div class="info-card"><h5>โคฮีเรนซ์ตามขวาง ($\\rho_{01}$)</h5><p id="t-dec-coh" style="color:var(--gold);">e^(-t/T₂) = 0.66</p></div>
+            <div class="info-card"><h5>เวลาสูญเสียเฟส ($T_2$)</h5><p id="t-dec-t2" style="color:#00f0ff;">1.20 T₁</p></div>
+            <div class="info-card"><h5>อสมการขีดจำกัด</h5><p style="color:#10b981;">T₂ ≤ 2T₁ (1/T₂ = 1/2T₁ + 1/T_ϕ)</p></div>
+            <div class="info-card"><h5>ฮาร์ดแวร์ยุคปัจจุบัน</h5><p>Transmon ~ 100-300 μs</p></div>
           `;
           break;
 
@@ -7900,6 +8360,201 @@
     }
     function updateFig9N(v) {
       document.getElementById('disp-bec-n').textContent = `${v} × 10⁵ ⁸⁷Rb`;
+    }
+
+    // --- CH 8: Quantum Information, Qubits & Bloch Sphere ---
+    // Fig 8.1: Bloch Sphere Qubit
+    let currentFig8_1Theta = 90.0, currentFig8_1Phi = 45.0;
+    function updateFig8_1Theta(v) {
+      currentFig8_1Theta = parseFloat(v);
+      const disp = document.getElementById('disp-bl-th');
+      if (disp) disp.textContent = `${currentFig8_1Theta.toFixed(1)}°`;
+      updateFig8_1Telemetry();
+      if (models.fig8_1 && models.fig8_1.setAngles) {
+        models.fig8_1.setAngles(currentFig8_1Theta * Math.PI / 180, currentFig8_1Phi * Math.PI / 180);
+      }
+    }
+    function updateFig8_1Phi(v) {
+      currentFig8_1Phi = parseFloat(v);
+      const disp = document.getElementById('disp-bl-ph');
+      if (disp) disp.textContent = `${currentFig8_1Phi.toFixed(1)}°`;
+      updateFig8_1Telemetry();
+      if (models.fig8_1 && models.fig8_1.setAngles) {
+        models.fig8_1.setAngles(currentFig8_1Theta * Math.PI / 180, currentFig8_1Phi * Math.PI / 180);
+      }
+    }
+    function updateFig8_1Telemetry() {
+      const thRad = currentFig8_1Theta * Math.PI / 180;
+      const phRad = currentFig8_1Phi * Math.PI / 180;
+      const p0 = Math.pow(Math.cos(thRad / 2), 2);
+      const p1 = Math.pow(Math.sin(thRad / 2), 2);
+      const sz = Math.cos(thRad);
+      const rx = Math.sin(thRad) * Math.cos(phRad);
+      const ry = Math.sin(thRad) * Math.sin(phRad);
+      const rz = Math.cos(thRad);
+
+      const el0 = document.getElementById('t-bl-p0');
+      const el1 = document.getElementById('t-bl-p1');
+      const elSz = document.getElementById('t-bl-sz');
+      const elCoords = document.getElementById('t-bl-coords');
+      const elSt = document.getElementById('t-bl-state');
+      if (el0) el0.textContent = p0.toFixed(2);
+      if (el1) el1.textContent = p1.toFixed(2);
+      if (elSz) elSz.textContent = sz.toFixed(2);
+      if (elCoords) elCoords.textContent = `(${rx.toFixed(2)}, ${ry.toFixed(2)}, ${rz.toFixed(2)})`;
+      if (elSt) {
+        elSt.textContent = `${Math.cos(thRad/2).toFixed(2)}|0⟩ + e^{i${currentFig8_1Phi.toFixed(0)}°}${Math.sin(thRad/2).toFixed(2)}|1⟩`;
+      }
+    }
+    function presetFig8_1State(st) {
+      if (st === '0') {
+        updateFig8_1Theta(0);
+        updateFig8_1Phi(0);
+      } else if (st === '1') {
+        updateFig8_1Theta(180);
+        updateFig8_1Phi(0);
+      } else if (st === '+') {
+        updateFig8_1Theta(90);
+        updateFig8_1Phi(0);
+      } else if (st === '-') {
+        updateFig8_1Theta(90);
+        updateFig8_1Phi(180);
+      }
+      const stEl = document.getElementById('t-bl-state');
+      if (stEl) stEl.textContent = `พรีเซ็ตสถานะ |${st}⟩`;
+    }
+
+    // Fig 8.2: Density Matrix & Mixed States
+    function updateFig8_2Purity(rVal) {
+      const r = parseFloat(rVal);
+      const disp = document.getElementById('disp-dm-r');
+      const elR = document.getElementById('t-dm-r');
+      const elPurity = document.getElementById('t-dm-purity');
+      const elEntropy = document.getElementById('t-dm-entropy');
+      const elType = document.getElementById('t-dm-type');
+
+      const purity = (1 + r * r) / 2;
+      let entropy = 0;
+      if (r >= 0.999) {
+        entropy = 0;
+      } else if (r <= 0.001) {
+        entropy = 1.0;
+      } else {
+        const pPlus = (1 + r) / 2;
+        const pMinus = (1 - r) / 2;
+        entropy = - (pPlus * Math.log2(pPlus) + pMinus * Math.log2(pMinus));
+      }
+
+      if (disp) disp.textContent = `${r.toFixed(2)} (${r >= 0.99 ? 'Pure State' : r <= 0.05 ? 'Maximally Mixed' : 'Mixed State'})`;
+      if (elR) elR.textContent = `${r.toFixed(2)} (${r >= 0.99 ? 'บนพื้นผิว' : 'ภายในทรงกลม'})`;
+      if (elPurity) elPurity.textContent = `Tr(ρ²) = ${purity.toFixed(2)}`;
+      if (elEntropy) elEntropy.textContent = `S(ρ) = ${entropy.toFixed(2)} bits`;
+      if (elType) {
+        elType.textContent = r >= 0.99 ? 'สถานะบริสุทธิ์ (Pure State)' : r <= 0.05 ? 'สถานะผสมสูงสุด (Maximally Mixed)' : 'สถานะผสม (Mixed State)';
+      }
+    }
+
+    // Fig 8.3: Unitary Quantum Gates
+    function applyFig8_3Gate(g) {
+      const elLast = document.getElementById('t-qg-last');
+      const elTrans = document.getElementById('t-qg-trans');
+      const elAxis = document.getElementById('t-qg-axis');
+      const gateNames = {
+        'X': 'เกตเพาลี-X (Bit Flip)',
+        'Y': 'เกตเพาลี-Y (Bit + Phase Flip)',
+        'Z': 'เกตเพาลี-Z (Phase Flip)',
+        'H': 'เกตฮาดามาร์ด (Hadamard H)',
+        'S': 'เกตปรับเฟส π/2 (Phase S)',
+        'T': 'เกตปรับเฟส π/4 (T Gate)'
+      };
+      const transDesc = {
+        'X': '|0⟩ ↔ |1⟩',
+        'Y': '|0⟩ → i|1⟩, |1⟩ → -i|0⟩',
+        'Z': '|0⟩ → |0⟩, |1⟩ → -|1⟩',
+        'H': '|0⟩ → |+⟩, |1⟩ → |-⟩',
+        'S': '|0⟩ → |0⟩, |1⟩ → i|1⟩',
+        'T': '|0⟩ → |0⟩, |1⟩ → e^{iπ/4}|1⟩'
+      };
+      const axisDesc = {
+        'X': 'แกน X̂ (มุม π)',
+        'Y': 'แกน Ŷ (มุม π)',
+        'Z': 'แกน Ẑ (มุม π)',
+        'H': 'แกน (X̂ + Ẑ)/√2 (มุม π)',
+        'S': 'แกน Ẑ (มุม π/2)',
+        'T': 'แกน Ẑ (มุม π/4)'
+      };
+      if (elLast) elLast.textContent = gateNames[g] || `เกต ${g}`;
+      if (elTrans) elTrans.textContent = transDesc[g] || `U|ψ⟩`;
+      if (elAxis) elAxis.textContent = axisDesc[g] || `แกนการหมุน`;
+    }
+
+    // Fig 8.4: Quantum Measurement & Zeno Effect
+    function updateFig8_4Interval(nVal) {
+      const n = parseInt(nVal);
+      const disp = document.getElementById('disp-zeno-n');
+      const elN = document.getElementById('t-zeno-n');
+      const elProb = document.getElementById('t-zeno-prob');
+      const elStatus = document.getElementById('t-zeno-status');
+
+      const dtheta = (Math.PI / 2) / n;
+      const prob = Math.pow(Math.cos(dtheta), 2 * n);
+
+      if (disp) {
+        disp.textContent = `N = ${n} (${n >= 20 ? 'Frozen/Zeno Trap' : n >= 8 ? 'Strong Inhibition' : 'Free Rabi'})`;
+      }
+      if (elN) elN.textContent = `${n} ครั้งต่อคาบ`;
+      if (elProb) elProb.textContent = `${(prob * 100).toFixed(1)}% (แช่แข็งสถานะ)`;
+      if (elStatus) {
+        elStatus.textContent = n >= 20 ? 'Zeno Frozen (ไม่เปลี่ยนแปลง)' : n >= 8 ? 'Zeno Trapped (ยับยั้งการเปลี่ยน)' : 'Rabi Transition (เกิดการเปลี่ยนระดับ)';
+      }
+    }
+
+    // Fig 8.5: Two-Qubit Circuit, CNOT & Bell States
+    function setFig8_5Bell(bState) {
+      const disp = document.getElementById('disp-cnot-state');
+      const elState = document.getElementById('t-cnot-state');
+      const elConc = document.getElementById('t-cnot-conc');
+
+      const bellMap = {
+        'phi_plus': '|Φ⁺⟩ = (|00⟩+|11⟩)/√2',
+        'phi_minus': '|Φ⁻⟩ = (|00⟩-|11⟩)/√2',
+        'psi_plus': '|Ψ⁺⟩ = (|01⟩+|10⟩)/√2',
+        'psi_minus': '|Ψ⁻⟩ = (|01⟩-|10⟩)/√2'
+      };
+      const text = bellMap[bState] || '|Φ⁺⟩';
+      if (disp) disp.textContent = text;
+      if (elState) elState.textContent = text;
+      if (elConc) elConc.textContent = 'C = 1.00 (พัวพันสูงสุด)';
+    }
+
+    // Fig 8.6: Quantum Decoherence T1, T2
+    let currentDecT = 0.5, currentDecRatio = 1.2;
+    function updateFig8_6Time(tVal) {
+      currentDecT = parseFloat(tVal);
+      const disp = document.getElementById('disp-dec-t');
+      const elT = document.getElementById('t-dec-t');
+      const elP1 = document.getElementById('t-dec-p1');
+      const elCoh = document.getElementById('t-dec-coh');
+
+      if (disp) disp.textContent = `${currentDecT.toFixed(2)} T₁`;
+      if (elT) elT.textContent = `${currentDecT.toFixed(2)} T₁`;
+
+      const p1 = Math.exp(-currentDecT);
+      const coh = Math.exp(-currentDecT / currentDecRatio);
+      if (elP1) elP1.textContent = `e^(-t/T₁) = ${p1.toFixed(2)}`;
+      if (elCoh) elCoh.textContent = `e^(-t/T₂) = ${coh.toFixed(2)}`;
+    }
+    function updateFig8_6Ratio(rVal) {
+      currentDecRatio = parseFloat(rVal);
+      const disp = document.getElementById('disp-dec-ratio');
+      const elT2 = document.getElementById('t-dec-t2');
+      const elCoh = document.getElementById('t-dec-coh');
+
+      if (disp) disp.textContent = `T₂ = ${currentDecRatio.toFixed(2)} T₁`;
+      if (elT2) elT2.textContent = `${currentDecRatio.toFixed(2)} T₁`;
+
+      const coh = Math.exp(-currentDecT / currentDecRatio);
+      if (elCoh) elCoh.textContent = `e^(-t/T₂) = ${coh.toFixed(2)}`;
     }
 
     // Fig 10: Bloch
