@@ -721,6 +721,7 @@
     let isARMode = true;
     let isTargetLocked = false;
     let lockHoldFrames = 0;
+    let lostFrames = 0;
 
     // WebGL Scene
     const container = document.getElementById('webgl-canvas-container');
@@ -967,21 +968,33 @@
       trackerCtx.drawImage(video, (vw - cropSize)/2, (vh - cropSize)/2, cropSize, cropSize, 0, 0, 120, 120);
       const data = trackerCtx.getImageData(0, 0, 120, 120).data;
 
-      let outerLuma = 0, innerLuma = 0, outerCount = 0, innerCount = 0;
-      for (let y = 0; y < 120; y += 2) {
-        for (let x = 0; x < 120; x += 2) {
+      // Strict printed-figure gate: white paper ring + ink contrast + line-art edge density
+      let oS = 0, oQ = 0, oN = 0, iS = 0, iN = 0, edges = 0, eN = 0;
+      for (let y = 0; y < 118; y += 2) {
+        for (let x = 0; x < 118; x += 2) {
           const dx = x - 60, dy = y - 60;
           const r2 = dx*dx + dy*dy;
-          const luma = 0.299*data[(y*120+x)*4] + 0.587*data[(y*120+x)*4+1] + 0.114*data[(y*120+x)*4+2];
-          if (r2 > 46*46) { outerLuma += luma; outerCount++; }
-          else if (r2 < 34*34) { innerLuma += luma; innerCount++; }
+          const i = (y*120+x)*4;
+          const luma = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+          const lR = 0.299*data[i+8] + 0.587*data[i+9] + 0.114*data[i+10];
+          const j = ((y+2)*120+x)*4;
+          const lD = 0.299*data[j] + 0.587*data[j+1] + 0.114*data[j+2];
+          if (Math.abs(lR - luma) + Math.abs(lD - luma) > 40) edges++;
+          eN++;
+          if (r2 > 46*46) { oS += luma; oQ += luma*luma; oN++; }
+          else if (r2 < 34*34) { iS += luma; iN++; }
         }
       }
-      const diff = (outerLuma/outerCount) - (innerLuma/innerCount);
-      // Figure 1.2 has light page with darker box frame
-      if ((outerLuma/outerCount) > 50 && diff > 14) {
+      const avgO = oS / (oN || 1);
+      const stdO = Math.sqrt(Math.max(0, oQ / (oN || 1) - avgO * avgO));
+      const diff = avgO - iS / (iN || 1);
+      const edge = edges / (eN || 1);
+      const isPage = avgO > 130 && stdO < 50 && diff > 25 && edge > 0.04 && edge < 0.45;
+
+      if (isPage) {
+        lostFrames = 0;
         lockHoldFrames++;
-        if (lockHoldFrames >= 2 && !isTargetLocked) {
+        if (lockHoldFrames >= 8 && !isTargetLocked) {
           isTargetLocked = true;
           apparatusRootGroup.visible = true;
           apparatusRootGroup.scale.set(0.08, 0.08, 0.08);
@@ -990,7 +1003,15 @@
           playLockChime();
         }
       } else {
-        if (lockHoldFrames > 0) lockHoldFrames--;
+        lockHoldFrames = 0;
+        // Hide the model again once the figure has left the view for ~0.8 s
+        if (isTargetLocked && ++lostFrames >= 25) {
+          isTargetLocked = false;
+          lostFrames = 0;
+          apparatusRootGroup.visible = false;
+          reticle.classList.remove('locked');
+          document.querySelector('.reticle-tag').textContent = '🎯 นำกล้องส่องไปที่ ภาพที่ 1.2 ในหนังสือ';
+        }
       }
     }
 

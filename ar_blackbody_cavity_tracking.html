@@ -1862,6 +1862,7 @@
 
     let isTargetLocked = false;
     let lockHoldFrames = 0;
+    let lostFrames = 0;
     let deviceOrientation = { beta: 45, gamma: 0, alpha: 0 };
     let hasOrientationSupport = false;
 
@@ -1936,19 +1937,24 @@
       trackerCtx.drawImage(video, sx, sy, cropSize, cropSize, 0, 0, 120, 120);
       const imgData = trackerCtx.getImageData(0, 0, 120, 120).data;
 
-      let outerLumaSum = 0, outerCount = 0;
+      let outerLumaSum = 0, outerSq = 0, outerCount = 0;
       let innerLumaSum = 0, innerCount = 0;
+      let edges = 0, edgeN = 0;
+      const lumaAt = (i) => 0.299 * imgData[i] + 0.587 * imgData[i + 1] + 0.114 * imgData[i + 2];
 
-      for (let y = 0; y < 120; y += 2) {
-        for (let x = 0; x < 120; x += 2) {
+      for (let y = 0; y < 118; y += 2) {
+        for (let x = 0; x < 118; x += 2) {
           const dx = x - 60;
           const dy = y - 60;
           const r2 = dx * dx + dy * dy;
           const idx = (y * 120 + x) * 4;
-          const luma = 0.299 * imgData[idx] + 0.587 * imgData[idx + 1] + 0.114 * imgData[idx + 2];
+          const luma = lumaAt(idx);
+          if (Math.abs(lumaAt(idx + 8) - luma) + Math.abs(lumaAt(idx + 960) - luma) > 40) edges++;
+          edgeN++;
 
           if (r2 > 46 * 46) {
             outerLumaSum += luma;
+            outerSq += luma * luma;
             outerCount++;
           } else if (r2 < 34 * 34) {
             innerLumaSum += luma;
@@ -1958,16 +1964,20 @@
       }
 
       const avgOuter = outerLumaSum / (outerCount || 1);
+      const stdOuter = Math.sqrt(Math.max(0, outerSq / (outerCount || 1) - avgOuter * avgOuter));
       const avgInner = innerLumaSum / (innerCount || 1);
       const contrastDiff = avgOuter - avgInner;
+      const edgeDensity = edges / (edgeN || 1);
 
-      // Figure 1.1 match condition:
-      // The outer paper page is brighter than the dark blackbody cavity interior!
-      const isCavityMatch = (avgOuter > 50 && contrastDiff > 16);
+      // Figure 1.1 match condition (strict): white, uniform paper ring + dark printed cavity + line-art edges.
+      // The old gate (avgOuter > 50 && diff > 16) accepted sofas, walls and bed sheets.
+      const isCavityMatch = avgOuter > 130 && stdOuter < 50 && contrastDiff > 25 &&
+                            edgeDensity > 0.04 && edgeDensity < 0.45;
 
       if (isCavityMatch) {
+        lostFrames = 0;
         lockHoldFrames++;
-        if (lockHoldFrames >= 2 && !isTargetLocked) {
+        if (lockHoldFrames >= 8 && !isTargetLocked) {
           isTargetLocked = true;
           cavityRootGroup.visible = true;
           cavityRootGroup.scale.set(0.08, 0.08, 0.08); // materialization scale burst
@@ -1975,10 +1985,13 @@
           playLockChime();
         }
       } else {
-        if (lockHoldFrames > 0) lockHoldFrames--;
-        // If lost target for more than ~2.5 seconds
-        if (lockHoldFrames === 0 && isTargetLocked && !isHandTracking) {
-          // Keep lock if user prefers or unlock gracefully
+        lockHoldFrames = 0;
+        // Hide again once the figure has left the view for ~0.8 s (hand-tracking keeps it)
+        if (isTargetLocked && !isHandTracking && ++lostFrames >= 25) {
+          isTargetLocked = false;
+          lostFrames = 0;
+          cavityRootGroup.visible = false;
+          updateReticleStatus(false);
         }
       }
     }
