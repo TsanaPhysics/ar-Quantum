@@ -2395,9 +2395,46 @@
         desc: 'สถานะ |ψ⟩ = cos(θ/2)|0⟩ + e^(iφ)sin(θ/2)|1⟩ แสดงเป็นเวกเตอร์บนทรงกลมบลอค หมุนควงรอบแกน z (Larmor precession) พร้อมการหมุนราบี (Rabi) ระหว่าง |0⟩ และ |1⟩',
         facts: [['สถานะ', 'cos(θ/2)|0⟩ + e^{iφ}sin(θ/2)|1⟩'], ['P(|0⟩)', 'cos²(θ/2)'], ['การหมุนควง', 'φ(t) = ωt'], ['ขั้วเหนือ/ใต้', '|0⟩ / |1⟩']]
       },
+      // --- Chapter 9: Quantum Entanglement & Quantum Communication ---
+      fig9_1: {
+        id: 'fig9_1', chapter: 9, short: '9.1 ปฏิทรรศน์ EPR', icon: 'fa-link', color: '#ec4899', image: 'target_fig9_1.png',
+        title: 'ภาพที่ 9.1 ปฏิทรรศน์ EPR และคู่โฟตอนพัวพันสถานะซิงเกลต์', subtitle: 'EPR Paradox, Singlet State & Instantaneous Collapse',
+        desc: 'การสลายตัวของโฟตอนคู่ผ่านผลึก SPDC สร้างสถานะพัวพันซิงเกลต์ |Ψ⁻⟩ = (|↑↓⟩ - |↓↑⟩)/√2 ผลการวัดสปินของอลิซและบ็อบมีความสัมพันธ์เชิงลบ 100% สอดคล้องกับ E(α, β) = -cos(α - β)',
+        facts: [['สถานะซิงเกลต์', '|Ψ⁻⟩ = (|↑↓⟩ - |↓↑⟩)/√2'], ['ฟังก์ชันสหสัมพันธ์', 'E(α, β) = -cos(α - β)'], ['ความเป็นจริงเฉพาะที่', 'EPR ถือว่าทฤษฎีไม่สมบูรณ์'], ['การวัด', 'ยุบตัวพร้อมกันข้ามระยะทาง']]
+      },
+      fig9_2: {
+        id: 'fig9_2', chapter: 9, short: '9.2 อสมการเบลล์ CHSH', icon: 'fa-scale-unbalanced-flip', color: '#00d2ff', image: 'target_fig9_2.png',
+        title: 'ภาพที่ 9.2 ทฤษฎีบทของเบลล์และการทดสอบอสมการ CHSH', subtitle: "Bell's Theorem, CHSH Test & Tsirelson Bound 2√2",
+        desc: 'การเปรียบเทียบการทดสอบสหสัมพันธ์ 4 มุมตรวจจับ (a, a\', b, b\') ขอบเขตคลาสสิกของตัวแปรแฝงเฉพาะที่ถูกจำกัดที่ |S| ≤ 2 แต่กลศาสตร์ควอนตัมทำนายและยืนยันค่าสูงสุดของซิเรลสัน S = 2√2 ≈ 2.828',
+        facts: [['ขอบเขตคลาสสิก (CHSH)', '|S| ≤ 2'], ['ขอบเขตควอนตัม (ซิเรลสัน)', 'S = 2√2 ≈ 2.8284'], ['มุมที่เหมาะสมที่สุด', 'Δθ = 22.5° (π/8)'], ['รางวัลโนเบลฟิสิกส์ 2022', 'Aspect, Clauser, Zeilinger']]
+      },
+      fig9_3: {
+        id: 'fig9_3', chapter: 9, short: '9.3 ทฤษฎีบทห้ามโคลน', icon: 'fa-ban', color: '#f43f5e', image: 'target_fig9_3.png',
+        title: 'ภาพที่ 9.3 ทฤษฎีบทห้ามโคลนสถานะควอนตัมและความเป็นเชิงเส้น', subtitle: 'No-Cloning Theorem, Unitary Linearity & QKD Security',
+        desc: 'ความเป็นเชิงเส้นของตัวดำเนินการเอกภาพและการอนุรักษ์ผลคูณภายใน ไม่อนุญาตให้สร้างสำเนาสถานะควอนตัมที่ไม่รู้จักล่วงหน้า U(|ψ⟩|0⟩) ≠ |ψ⟩|ψ⟩ เป็นเกราะป้องกันความปลอดภัยของวิทยาการรหัสลับควอนตัม',
+        facts: [['เงื่อนไขการโคลน', '⟨ψ|ϕ⟩(1 - ⟨ψ|ϕ⟩) = 0'], ['สถานะที่โคลนได้', 'เฉพาะสถานะที่ตั้งฉากกัน'], ['ผลต่อการสื่อสาร', 'ห้ามใช้ตัวขยายสัญญาณแสงแบบดั้งเดิม'], ['ความปลอดภัย', 'การดักฟังต้องรบกวนสถานะเสมอ']]
+      },
+      fig9_4: {
+        id: 'fig9_4', chapter: 9, short: '9.4 โทรเลขควอนตัม', icon: 'fa-satellite-dish', color: '#10b981', image: 'target_fig9_4.png',
+        title: 'ภาพที่ 9.4 โพรโทคอลการส่งผ่านสถานะควอนตัมทางไกล', subtitle: 'Quantum Teleportation: Bell Measurement & Unitary Correction',
+        desc: 'การส่งผ่านสถานะคิวบิตที่ไม่รู้จัก |ψ⟩₁ จากอลิซไปยังบ็อบ โดยอาศัยคู่พัวพันที่แชร์ล่วงหน้า |Φ⁺⟩₂₃ การวัดฐานเบลล์ของอลิซส่งผลลัพธ์คลาสสิก 2 บิตให้บ็อบดำเนินการแก้สถานะด้วยเกต X^(m2) Z^(m1)',
+        facts: [['ทรัพยากรที่ใช้', '1 EPR pair + 2 บิตคลาสสิก'], ['การวัดของอลิซ', 'BSM ยุบตัวสู่ 1 ใน 4 สถานะเบลล์'], ['เกตแก้ของบ็อบ', 'U = X^{m₂} Z^{m₁}'], ['ความเร็ว', 'จำกัดด้วยแสง (ช่องคลาสสิก)']]
+      },
+      fig9_5: {
+        id: 'fig9_5', chapter: 9, short: '9.5 โค้ดความหนาแน่นสูง', icon: 'fa-compress', color: '#f59e0b', image: 'target_fig9_5.png',
+        title: 'ภาพที่ 9.5 การเข้ารหัสข้อมูลความหนาแน่นยิ่งยวด (Superdense Coding)', subtitle: 'Transmitting 2 Classical Bits Using 1 Qubit & 1 EPR Pair',
+        desc: 'อลิซกระทำเกตเอกภาพเดี่ยว {I, X, Z, iY} ลงบนคิวบิต A ของคู่เบลล์ แล้วส่งคิวบิตเพียงตัวเดียวไปให้บ็อบ บ็อบทำการวัดแบบเบลล์เพื่อถอดรหัสข้อความคลาสสิก 2 บิตได้อย่างสมบูรณ์แบบ',
+        facts: [['ข้อมูลที่ส่งได้', '2 บิตคลาสสิกต่อ 1 คิวบิต'], ['เกตเข้ารหัสของอลิซ', '00→I, 01→X, 10→Z, 11→iY'], ['การวัดของบ็อบ', 'Bell State Measurement (BSM)'], ['ขอบเขตโฮเลโว', 'C ≤ 1 bit ขยายเป็น 2 bits ด้วย ebit']]
+      },
+      fig9_6: {
+        id: 'fig9_6', chapter: 9, short: '9.6 รหัสลับควอนตัม QKD', icon: 'fa-shield-halved', color: '#8b5cf6', image: 'target_fig9_6.png',
+        title: 'ภาพที่ 9.6 การแจกจ่ายกุญแจรหัสลับควอนตัม BB84 และ Ekert91', subtitle: 'Quantum Key Distribution, Conjugate Bases & QBER Eavesdropping Detection',
+        desc: 'การสร้างกุญแจลับสุ่มร่วมกันด้วยโฟตอนเดี่ยวในฐานสังยุค (BB84) หรือคู่พัวพัน (Ekert91) ผู้ดักฟังอีฟที่สุ่มวัดจะสร้างอัตราผิดพลาด QBER = 25% ซึ่งสูงกว่าเกณฑ์ 11% ทำให้อลิซและบ็อบตรวจพบได้ทันที',
+        facts: [['ฐานวัด BB84', 'เรกติลิเนียร์ (+) และไดแอโกนัล (×)'], ['การคัดกรอง (Sifting)', 'เก็บเฉพาะรอบที่ฐานตรงกัน (~50%)'], ['QBER เมื่อมี Eve', '25% (Intercept-Resend)'], ['เกณฑ์ความปลอดภัยชอร์', 'QBER < 11% (ปลอดภัยสมบูรณ์)']]
+      },
       fig11: {
-        id: 'fig11', chapter: 9, short: 'บท 9 พัวพันควอนตัม', icon: 'fa-link', color: '#e879f9', image: null,
-        title: 'บทที่ 9 คู่โฟตอนพัวพันควอนตัม', subtitle: 'Entangled Photon Pair (Bell State)',
+        id: 'fig11', chapter: 9, short: '9.2 อสมการเบลล์ (เดิม)', icon: 'fa-link', color: '#e879f9', image: 'target_fig9_2.png',
+        title: 'บทที่ 9 คู่โฟตอนพัวพันควอนตัม (เดิม)', subtitle: 'Entangled Photon Pair (Bell State)',
         desc: 'ผลึกไม่เชิงเส้นสร้างคู่อนุภาคในสถานะ |Ψ⁻⟩ = (|↑↓⟩ − |↓↑⟩)/√2 ผลการวัดแต่ละฝั่งสุ่ม 50/50 แต่สองฝั่งตรงข้ามกันเสมอ (anti-correlated)',
         facts: [['สถานะเบลล์', '(|↑↓⟩ − |↓↑⟩)/√2'], ['ความสัมพันธ์', 'ตรงข้ามกัน 100%'], ['CHSH (ควอนตัม)', 'S = 2√2 > 2'], ['แหล่งกำเนิด', 'SPDC (BBO)']]
       },
@@ -2414,7 +2451,7 @@
         facts: [['ฟังก์ชัน', 'f(x) = 7ˣ mod 15'], ['คาบ', 'r = 4'], ['ตัวประกอบ', 'gcd(7²±1, 15) = 3, 5'], ['QFT', 'O(n²) เกต']]
       },
       fig14: {
-        id: 'fig14', chapter: 12, short: 'บท 12 QKD BB84', icon: 'fa-key', color: '#4ade80', image: null,
+        id: 'fig14', chapter: 12, short: 'บท 12 QKD BB84', icon: 'fa-key', color: '#4ade80', image: 'target_fig9_6.png',
         title: 'บทที่ 12 การแจกจ่ายกุญแจควอนตัม BB84', subtitle: 'BB84 Quantum Key Distribution',
         desc: 'อลิซส่งโฟตอนโพลาไรซ์ 0°/90° (ฐาน +) หรือ 45°/135° (ฐาน ×) บ็อบสุ่มเลือกฐานวัด เก็บเฉพาะบิตที่ฐานตรงกัน (ไฟเขียว) เป็นกุญแจลับ การดักฟังจะเพิ่มอัตราผิดพลาด QBER',
         facts: [['ฐานการวัด', '+ (0°/90°), × (45°/135°)'], ['บิตที่เก็บ (sifting)', '≈ 50%'], ['QBER เมื่อมีผู้ดักฟัง', '≈ 25%'], ['ความปลอดภัย', 'No-cloning theorem']]
@@ -5788,6 +5825,305 @@
       return { group: g, update };
     }
 
+    // ==========================================================
+    // CHAPTER 9 COMPLETE 3D MODELS (6 TARGETS)
+    // ==========================================================
+
+    // 1. Fig 9.1: EPR Paradox & Entangled Singlet Pair
+    function buildEprSingletPairModel() {
+      const g = new THREE.Group();
+
+      // SPDC BBO Crystal
+      const crystal = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), stdMat(0xec4899, { transparent: true, opacity: 0.8, emissive: 0xbe185d, emissiveIntensity: 0.6 }));
+      g.add(crystal);
+
+      // Pump Laser Cylinder
+      const pump = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.4, 12), glowMat(0x8b5cf6, 0.9));
+      pump.position.set(0, -1.0, 0);
+      g.add(pump);
+
+      // Alice Detector Platform (Left)
+      const detA = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, 0.8), stdMat(0x0284c7, { metalness: 0.6 }));
+      detA.position.set(-2.2, 0, 0);
+      const lampA = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), glowMat(0x00f0ff, 1.0));
+      lampA.position.set(-2.2, 0.6, 0);
+      const needleA = lineOf([new THREE.Vector3(-2.2, 0, 0), new THREE.Vector3(-2.2, 0.4, 0)], 0x00f0ff, 2.5);
+      g.add(detA, lampA, needleA);
+
+      // Bob Detector Platform (Right)
+      const detB = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, 0.8), stdMat(0xbe123c, { metalness: 0.6 }));
+      detB.position.set(2.2, 0, 0);
+      const lampB = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), glowMat(0xf43f5e, 1.0));
+      lampB.position.set(2.2, 0.6, 0);
+      const needleB = lineOf([new THREE.Vector3(2.2, 0, 0), new THREE.Vector3(2.2, -0.4, 0)], 0xf43f5e, 2.5);
+      g.add(detB, lampB, needleB);
+
+      // Entangled Photons Flying Apart
+      const photonA = new THREE.Mesh(new THREE.SphereGeometry(0.1, 14, 14), glowMat(0x00f0ff, 1.0));
+      const photonB = new THREE.Mesh(new THREE.SphereGeometry(0.1, 14, 14), glowMat(0xf43f5e, 1.0));
+      g.add(photonA, photonB);
+
+      // Quantum Entanglement Non-Local Wave Thread
+      const entLink = dynLine(80, 0xec4899, 0.6);
+      g.add(entLink.line);
+
+      const lbl = makeLabel('คู่พัวพัน EPR: |Ψ⁻⟩ = (|↑↓⟩ - |↓↑⟩)/√2 สหสัมพันธ์ตรงกันข้าม 100%', '#ec4899', 0.68);
+      lbl.position.set(0, 1.8, 0);
+      g.add(lbl);
+
+      let angleA = 0.0, angleB = Math.PI / 2;
+      function update(t) {
+        g.rotation.y = t * 0.15;
+        const progress = (t * 0.5) % 1.0;
+        const dist = 0.3 + progress * 1.8;
+        photonA.position.set(-dist, 0, 0);
+        photonB.position.set(dist, 0, 0);
+
+        // Spin arrow oscillation (anti-correlated)
+        const spinPhase = t * 4.0;
+        const up = Math.sin(spinPhase) > 0;
+        lampA.material.color.set(up ? 0x00f0ff : 0xf43f5e);
+        lampB.material.color.set(up ? 0xf43f5e : 0x00f0ff);
+
+        // Update entangled thread
+        for (let i = 0; i < 80; i++) {
+          const s = i / 79;
+          const xx = -dist + 2 * dist * s;
+          entLink.pos[i * 3] = xx;
+          entLink.pos[i * 3 + 1] = 0.1 * Math.sin(s * Math.PI * 8 + t * 8);
+          entLink.pos[i * 3 + 2] = 0.05 * Math.cos(s * Math.PI * 6 + t * 6);
+        }
+        entLink.geo.attributes.position.needsUpdate = true;
+      }
+      return { group: g, update, setAngles: (a, b) => { angleA = a; angleB = b; } };
+    }
+
+    // 2. Fig 9.2: Bell's Theorem & CHSH Inequality Test
+    function buildBellChshInequalityModel() {
+      const g = new THREE.Group();
+
+      // Classical Boundary Circle (|S| = 2)
+      const classCircle = new THREE.Mesh(new THREE.RingGeometry(1.39, 1.41, 48), new THREE.MeshBasicMaterial({ color: 0xf43f5e, side: THREE.DoubleSide, transparent: true, opacity: 0.7 }));
+      classCircle.rotateX(Math.PI / 2);
+      g.add(classCircle);
+
+      // Quantum Tsirelson Boundary Circle (|S| = 2*sqrt(2) approx 2.828)
+      const qCircle = new THREE.Mesh(new THREE.RingGeometry(1.98, 2.02, 64), new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }));
+      qCircle.rotateX(Math.PI / 2);
+      g.add(qCircle);
+
+      // 4 Analyzer Vectors (a, b, a', b')
+      const va = lineOf([new THREE.Vector3(0, 0, 0), new THREE.Vector3(2.0, 0, 0)], 0x00f0ff, 2.5);
+      const vb = lineOf([new THREE.Vector3(0, 0, 0), new THREE.Vector3(1.85, 0, 0.76)], 0xf59e0b, 2.5);
+      const vap = lineOf([new THREE.Vector3(0, 0, 0), new THREE.Vector3(1.41, 0, 1.41)], 0x8b5cf6, 2.5);
+      const vbp = lineOf([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0.76, 0, 1.85)], 0xec4899, 2.5);
+      g.add(va, vb, vap, vbp);
+
+      // Active Correlation Test Bead
+      const testBead = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), glowMat(0x10b981, 1.0));
+      testBead.position.set(2.0, 0, 0);
+      g.add(testBead);
+
+      const lbl = makeLabel('อสมการ CHSH: ขอบเขตคลาสสิก |S|≤2 vs ซิเรลสันควอนตัม S=2√2≈2.828', '#00f0ff', 0.68);
+      lbl.position.set(0, 1.8, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.15;
+        const phi = t * 1.5;
+        testBead.position.set(2.0 * Math.cos(phi), 0.15 * Math.sin(t * 3), 2.0 * Math.sin(phi));
+      }
+      return { group: g, update };
+    }
+
+    // 3. Fig 9.3: No-Cloning Theorem & Linearity
+    function buildNoCloningTheoremModel() {
+      const g = new THREE.Group();
+
+      // Input Qubit (|psi> left)
+      const qInput = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), glowMat(0x00f0ff, 1.0));
+      qInput.position.set(-1.8, 0.6, 0);
+      // Blank Target (|0> left)
+      const qBlank = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), glowMat(0x94a3b8, 0.6));
+      qBlank.position.set(-1.8, -0.6, 0);
+      g.add(qInput, qBlank);
+
+      // Hypothetical Cloner Box
+      const clonerBox = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.6, 0.8), stdMat(0x1e293b, { transparent: true, opacity: 0.6, wireframe: true }));
+      g.add(clonerBox);
+
+      // Red Prohibition Ring and Slash
+      const redRing = new THREE.Mesh(new THREE.RingGeometry(0.7, 0.85, 32), new THREE.MeshBasicMaterial({ color: 0xf43f5e, side: THREE.DoubleSide }));
+      const redSlash = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.5, 0.05), new THREE.MeshBasicMaterial({ color: 0xf43f5e }));
+      redSlash.rotation.z = Math.PI / 4;
+      const noCloneGroup = new THREE.Group();
+      noCloneGroup.add(redRing, redSlash);
+      noCloneGroup.position.set(0, 0, 0.45);
+      g.add(noCloneGroup);
+
+      // Output Qubits (Entangled linear state, NOT cloned)
+      const qOut1 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), glowMat(0xf59e0b, 1.0));
+      qOut1.position.set(1.8, 0.6, 0);
+      const qOut2 = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), glowMat(0xec4899, 1.0));
+      qOut2.position.set(1.8, -0.6, 0);
+      g.add(qOut1, qOut2);
+
+      const lbl = makeLabel('ทฤษฎีบทห้ามโคลน: U(|ψ⟩|0⟩) ≠ |ψ⟩|ψ⟩ ความเป็นเชิงเส้นห้ามการทำสำเนา', '#f43f5e', 0.68);
+      lbl.position.set(0, 1.8, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.15;
+        const s = 1.0 + 0.1 * Math.sin(t * 4);
+        noCloneGroup.scale.set(s, s, s);
+      }
+      return { group: g, update };
+    }
+
+    // 4. Fig 9.4: Quantum Teleportation Protocol
+    function buildQuantumTeleportationModel() {
+      const g = new THREE.Group();
+
+      // Base Platforms
+      const pAlice = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.15, 24), stdMat(0x0284c7, { metalness: 0.5 }));
+      pAlice.position.set(-1.8, -0.6, 0);
+      const pBob = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.15, 24), stdMat(0x059669, { metalness: 0.5 }));
+      pBob.position.set(1.8, -0.6, 0);
+      g.add(pAlice, pBob);
+
+      // Alice Input Qubit 1 (|psi>)
+      const q1 = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 16), glowMat(0x00f0ff, 1.0));
+      q1.position.set(-1.8, 0.8, 0);
+      // Entangled Pair Source (Center)
+      const eprSource = new THREE.Mesh(new THREE.OctahedronGeometry(0.22), glowMat(0xf59e0b, 1.0));
+      eprSource.position.set(0, -0.2, 0);
+      g.add(q1, eprSource);
+
+      // Bob Receiving Qubit 3
+      const q3 = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 16), glowMat(0x10b981, 1.0));
+      q3.position.set(1.8, 0.8, 0);
+      g.add(q3);
+
+      // Classical Channel Wires
+      const cWires = lineOf([new THREE.Vector3(-1.8, 1.4, 0), new THREE.Vector3(1.8, 1.4, 0)], 0x94a3b8, 2.0);
+      g.add(cWires);
+
+      // Classical Bit Particles Pulse
+      const bitA = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.08), glowMat(0xf59e0b, 1.0));
+      const bitB = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.08), glowMat(0xf59e0b, 1.0));
+      g.add(bitA, bitB);
+
+      const lbl = makeLabel('การส่งผ่านสถานะทางไกล: ส่งคิวบิต |ψ⟩ ผ่านคู่เบลล์ + 2 บิตคลาสสิก', '#10b981', 0.68);
+      lbl.position.set(0, 1.85, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.15;
+        const p = (t * 0.5) % 1.0;
+        bitA.position.set(-1.8 + 3.6 * p, 1.45, 0);
+        bitB.position.set(-1.8 + 3.6 * ((p + 0.5) % 1.0), 1.35, 0);
+
+        const telePhase = Math.sin(t * 2);
+        q1.scale.setScalar(0.5 + 0.5 * Math.max(0, telePhase));
+        q3.scale.setScalar(0.5 + 0.5 * Math.max(0, -telePhase));
+      }
+      return { group: g, update };
+    }
+
+    // 5. Fig 9.5: Superdense Coding Protocol
+    function buildSuperdenseCodingModel() {
+      const g = new THREE.Group();
+
+      // Alice Station
+      const stAlice = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.8), stdMat(0x0284c7, { metalness: 0.6 }));
+      stAlice.position.set(-1.8, 0, 0);
+      // Bob Station
+      const stBob = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.8), stdMat(0xd97706, { metalness: 0.6 }));
+      stBob.position.set(1.8, 0, 0);
+      g.add(stAlice, stBob);
+
+      // Quantum Bridge
+      const bridge = lineOf([new THREE.Vector3(-1.8, 0.6, 0), new THREE.Vector3(1.8, 0.6, 0)], 0xf59e0b, 2.5);
+      g.add(bridge);
+
+      // Single Transmitted Qubit
+      const carrierQubit = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), glowMat(0x00f0ff, 1.0));
+      g.add(carrierQubit);
+
+      // 2 Output Decoded Bits Floating at Bob
+      const bit1 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.15), glowMat(0x10b981, 1.0));
+      const bit2 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.15), glowMat(0x10b981, 1.0));
+      bit1.position.set(1.8, 1.2, 0.2);
+      bit2.position.set(1.8, 1.2, -0.2);
+      g.add(bit1, bit2);
+
+      const lbl = makeLabel('Superdense Coding: ส่งคิวบิตเดี่ยวเพื่อรับส่งข้อมูลคลาสสิก 2 บิต', '#f59e0b', 0.68);
+      lbl.position.set(0, 1.8, 0);
+      g.add(lbl);
+
+      function update(t) {
+        g.rotation.y = t * 0.15;
+        const progress = (t * 0.6) % 1.0;
+        carrierQubit.position.set(-1.8 + 3.6 * progress, 0.6 + 0.15 * Math.sin(progress * Math.PI), 0);
+      }
+      return { group: g, update };
+    }
+
+    // 6. Fig 9.6: Quantum Key Distribution (BB84 & Ekert91)
+    function buildQkdProtocolsModel() {
+      const g = new THREE.Group();
+
+      // Alice Sender
+      const alBox = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.2, 0.6), stdMat(0x0284c7, { metalness: 0.5 }));
+      alBox.position.set(-2.2, 0, 0);
+      // Bob Receiver
+      const bobBox = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.2, 0.6), stdMat(0x059669, { metalness: 0.5 }));
+      bobBox.position.set(2.2, 0, 0);
+      g.add(alBox, bobBox);
+
+      // Eve Spy Node
+      const eveNode = new THREE.Mesh(new THREE.OctahedronGeometry(0.3), glowMat(0xf43f5e, 1.0));
+      eveNode.position.set(0, 0.8, 0);
+      g.add(eveNode);
+
+      // Optical Fiber
+      const fiber = lineOf([new THREE.Vector3(-2.2, 0, 0), new THREE.Vector3(2.2, 0, 0)], 0x8b5cf6, 2.0);
+      g.add(fiber);
+
+      // Flying Polarized Photon
+      const photon = new THREE.Mesh(new THREE.SphereGeometry(0.12, 14, 14), glowMat(0x10b981, 1.0));
+      g.add(photon);
+
+      // Basis Reticle
+      const crossH = lineOf([new THREE.Vector3(-0.15, 0, 0), new THREE.Vector3(0.15, 0, 0)], 0x00f0ff, 2.0);
+      const crossV = lineOf([new THREE.Vector3(0, -0.15, 0), new THREE.Vector3(0, 0.15, 0)], 0x00f0ff, 2.0);
+      const reticle = new THREE.Group();
+      reticle.add(crossH, crossV);
+      reticle.position.set(-2.2, 0.9, 0);
+      g.add(reticle);
+
+      const lbl = makeLabel('รหัสลับควอนตัม BB84 & Ekert91: ป้องกันและตรวจจับการดักฟังด้วย QBER', '#8b5cf6', 0.68);
+      lbl.position.set(0, 1.8, 0);
+      g.add(lbl);
+
+      let eveActive = false;
+      function update(t) {
+        g.rotation.y = t * 0.15;
+        const progress = (t * 0.7) % 1.0;
+        const xPos = -2.2 + 4.4 * progress;
+        photon.position.set(xPos, 0, 0);
+
+        reticle.rotation.z = Math.floor(t * 2) % 2 === 0 ? 0 : Math.PI / 4;
+
+        if (xPos > 0 && eveActive) {
+          photon.material.color.set(0xf43f5e);
+        } else {
+          photon.material.color.set(0x10b981);
+        }
+      }
+      return { group: g, update, setEve: (v) => { eveActive = v; } };
+    }
+
     function buildChapterModels() {
       return {
         fig4: buildDoubleSlitModel(),
@@ -5872,12 +6208,22 @@
     models.fig8_5 = buildTwoQubitBellCnotModel();
     models.fig8_6 = buildDecoherenceT1T2Model();
 
+    // Chapter 9 Complete Suite (Entanglement, Bell, Teleportation & QKD)
+    models.fig9_1 = buildEprSingletPairModel();
+    models.fig9_2 = buildBellChshInequalityModel();
+    models.fig9_3 = buildNoCloningTheoremModel();
+    models.fig9_4 = buildQuantumTeleportationModel();
+    models.fig9_5 = buildSuperdenseCodingModel();
+    models.fig9_6 = buildQkdProtocolsModel();
+
     Object.assign(models, buildChapterModels()); // Chapters 3-12 (fig5 ... fig14)
     models.fig5 = models.fig3_1; // Alias fig5 to fig3_1
     models.fig6 = models.fig4_6; // Alias legacy fig6 to fig4_6
     models.fig8 = models.fig6_3; // Alias legacy fig8 to fig6_3
     models.fig9 = models.fig7_6; // Alias legacy fig9 to fig7_6
     models.fig10 = models.fig8_1; // Alias legacy fig10 to fig8_1
+    models.fig11 = models.fig9_2; // Alias legacy fig11 to fig9_2 (Bell inequality)
+    models.fig14 = models.fig9_6; // Alias legacy fig14 to fig9_6 (QKD BB84/Ekert91)
 
 
 
@@ -7301,16 +7647,105 @@
           `;
           break;
 
-        // --- CH 9: Quantum Entanglement ---
+        // --- CH 9: Quantum Entanglement, Bell's Theorem & Quantum Information (6 Targets) ---
+        case 'fig9_1':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>มุมโพลาไรเซอร์ Alice ($\\theta_A$)</span><span class="param-val" id="disp-epr-a">0.0°</span></div>
+              <input type="range" class="slider-custom" min="0" max="180" step="5" value="0" oninput="updateFig9_1ThetaA(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>มุมโพลาไรเซอร์ Bob ($\\theta_B$)</span><span class="param-val" id="disp-epr-b">90.0°</span></div>
+              <input type="range" class="slider-custom" min="0" max="180" step="5" value="90" oninput="updateFig9_1ThetaB(this.value)">
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>พรีเซ็ตมุมสังเกต</span></div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem; padding:4px 4px;" onclick="presetFig9_1Angles(0, 0)">ขนาน (0°, 0°)</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem; padding:4px 4px;" onclick="presetFig9_1Angles(0, 90)">ตั้งฉาก (0°, 90°)</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem; padding:4px 4px;" onclick="presetFig9_1Angles(0, 45)">มุม 45°</button>
+              </div>
+            </div>
+          `;
+          break;
+
+        case 'fig9_2':
         case 'fig11':
           container.innerHTML = `
             <div class="param-group">
-              <div class="param-label"><span>มุมโพลาไรเซอร์ Alice ($\\alpha$)</span><span class="param-val" id="disp-ent-a">0.0°</span></div>
-              <input type="range" class="slider-custom" min="0" max="180" step="5" value="0" oninput="updateFig11ThetaA(this.value)">
+              <div class="param-label"><span>การทดสอบอสมการ Bell CHSH</span><span class="param-val" id="disp-bell-s" style="color:#10b981;">S = 2.828 (ละเมิดสูงสุด)</span></div>
+              <div style="display:grid; grid-template-columns:1fr; gap:6px; margin-top:6px;">
+                <button class="win-btn" style="font-weight:700; color:#10b981; border-color:#10b981;" onclick="setFig9_2Preset('optimal')"><i class="fa-solid fa-bolt"></i> CHSH มุมสูงสุด (S = 2√2 ≈ 2.828)</button>
+                <button class="win-btn" style="font-weight:700; color:#94a3b8;" onclick="setFig9_2Preset('classical')"><i class="fa-solid fa-scale-balanced"></i> มุมคลาสสิก (S = 2.000 ขีดจำกัด)</button>
+                <button class="win-btn" style="font-weight:700; color:#38bdf8;" onclick="setFig9_2Preset('random')"><i class="fa-solid fa-shuffle"></i> สุ่มมุมตรวจวัด (Random Angles)</button>
+              </div>
             </div>
             <div class="param-group">
-              <div class="param-label"><span>มุมโพลาไรเซอร์ Bob ($\\beta$)</span><span class="param-val" id="disp-ent-b">90.0°</span></div>
-              <input type="range" class="slider-custom" min="0" max="180" step="5" value="90" oninput="updateFig11ThetaB(this.value)">
+              <div class="param-label"><span>มุมทดสอบ: <span id="disp-bell-angles" style="font-size:0.75rem; color:#cbd5e1;">a=0°, a'=45°, b=22.5°, b'=67.5°</span></span></div>
+            </div>
+          `;
+          break;
+
+        case 'fig9_3':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>สถานะควอนตัมนำเข้า ($|\\psi\\rangle = \\cos(\\theta/2)|0\\rangle + \\sin(\\theta/2)|1\\rangle$)</span><span class="param-val" id="disp-clone-th">θ = 60.0°</span></div>
+              <input type="range" class="slider-custom" min="0" max="180" step="5" value="60" oninput="updateFig9_3Theta(this.value)">
+            </div>
+            <div class="param-group">
+              <button class="win-btn" style="width:100%; height:36px; font-weight:700; color:#ef4444; border-color:#ef4444;" onclick="testFig9_3Clone()"><i class="fa-solid fa-copy"></i> สั่งคัดลอกสถานะควอนตัม (Attempt Clone)</button>
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>ผลลัพธ์: <span id="disp-clone-res" style="color:#ef4444;">Fidelity F ≤ 5/6 (เกิดการบิดเบือน)</span></span></div>
+            </div>
+          `;
+          break;
+
+        case 'fig9_4':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ขั้นตอนการเทเลพอร์ต ($|\\psi\\rangle \\to$ Bob)</span><span class="param-val" id="disp-tele-step" style="color:#38bdf8;">ขั้นตอนที่ 1 / 4</span></div>
+              <div style="display:flex; gap:6px; margin-top:6px;">
+                <button class="win-btn" style="flex:2; width:auto; height:36px; font-weight:700; color:#38bdf8; border-color:#38bdf8;" onclick="stepFig9_4Teleport()"><i class="fa-solid fa-forward-step"></i> ก้าวต่อไป (Step Next)</button>
+                <button class="win-btn" style="flex:1; width:auto; height:36px; font-weight:700;" onclick="resetFig9_4Teleport()"><i class="fa-solid fa-rotate-left"></i> รีเซ็ต</button>
+              </div>
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>สถานะปัจจุบัน: <span id="disp-tele-desc" style="color:#cbd5e1; font-size:0.78rem;">เตรียมคู่พัวพัน EPR และสถานะเป้าหมาย |ψ⟩</span></span></div>
+            </div>
+          `;
+          break;
+
+        case 'fig9_5':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ส่งข้อมูลคลาสสิก 2 บิต ผ่าน 1 คิวบิต</span><span class="param-val" id="disp-sd-bits" style="color:#10b981;">00 (เกต I)</span></div>
+              <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-top:6px;">
+                <button class="win-btn" style="font-weight:700;" onclick="sendFig9_5DenseBits('00')">ส่ง '00' (Alice ทำเกต I)</button>
+                <button class="win-btn" style="font-weight:700;" onclick="sendFig9_5DenseBits('01')">ส่ง '01' (Alice ทำเกต X)</button>
+                <button class="win-btn" style="font-weight:700;" onclick="sendFig9_5DenseBits('10')">ส่ง '10' (Alice ทำเกต Z)</button>
+                <button class="win-btn" style="font-weight:700;" onclick="sendFig9_5DenseBits('11')">ส่ง '11' (Alice ทำเกต XZ)</button>
+              </div>
+            </div>
+          `;
+          break;
+
+        case 'fig9_6':
+        case 'fig14':
+          container.innerHTML = `
+            <div class="param-group">
+              <div class="param-label"><span>ผู้ดักฟัง (Eavesdropper Eve)</span><span class="param-val" id="disp-bb-eve" style="color:#10b981;">ไม่มี (SAFE)</span></div>
+              <div style="display:flex; gap:8px; margin-top:6px;">
+                <button class="win-btn" style="flex:1; width:auto; height:32px; font-weight:700;" onclick="setFig9_6Eve(false)"><i class="fa-solid fa-shield-halved"></i> ปลอดภัย (No Eve)</button>
+                <button class="win-btn" style="flex:1; width:auto; height:32px; font-weight:700; color:#ef4444; border-color:#ef4444;" onclick="setFig9_6Eve(true)"><i class="fa-solid fa-user-secret"></i> มี Eve ดักฟัง</button>
+              </div>
+            </div>
+            <div class="param-group">
+              <div class="param-label"><span>โปรโตคอลแจกจ่ายกุญแจ</span></div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem; padding:4px 6px;" onclick="setFig9_6Protocol('bb84')">BB84 (Single Photons)</button>
+                <button class="win-btn" style="flex:1; width:auto; font-size:0.75rem; padding:4px 6px;" onclick="setFig9_6Protocol('ekert')">Ekert91 (Entangled Pairs)</button>
+              </div>
             </div>
           `;
           break;
@@ -7807,15 +8242,72 @@
           `;
           break;
 
-        // --- CH 9: Entanglement ---
+        // --- CH 9: Quantum Entanglement, Bell's Theorem & Quantum Information (6 Targets) ---
+        case 'fig9_1':
+          container.innerHTML = `
+            <div class="info-card"><h5>สถานะคู่พัวพัน (Singlet)</h5><p style="color:var(--gold);">|Ψ⁻⟩ = (|↑↓⟩ - |↓↑⟩)/√2</p></div>
+            <div class="info-card"><h5>สหสัมพันธ์เชิงควอนตัม</h5><p id="t-epr-corr" style="color:#10b981;">E(θ_A, θ_B) = -cos(Δθ) = 0.00</p></div>
+            <div class="info-card"><h5>ระดับความพัวพัน (Concurrence)</h5><p style="color:#00f0ff;">C = 1.00 (Maximal Entanglement)</p></div>
+            <div class="info-card"><h5>ความบริสุทธิ์ระบบย่อย Alice</h5><p style="color:#ec4899;">Tr(ρ_A²) = 0.50 (ผสมสูงสุด)</p></div>
+            <div class="info-card"><h5>ทฤษฎีบทการสื่อสาร</h5><p>No-Signaling (ไม่เร็วกว่าแสง)</p></div>
+            <div class="info-card"><h5>ปรากฏการณ์ไอน์สไตน์</h5><p>Spooky Action at a Distance</p></div>
+          `;
+          break;
+
+        case 'fig9_2':
         case 'fig11':
           container.innerHTML = `
-            <div class="info-card"><h5>สถานะเบลล์ (Bell State)</h5><p style="color:var(--gold);">|Ψ⁻⟩ = (|↑↓⟩ - |↓↑⟩)/√2</p></div>
-            <div class="info-card"><h5>สหสัมพันธ์การวัด</h5><p style="color:#10b981;">ตรงข้ามกัน 100%</p></div>
-            <div class="info-card"><h5>อสมการเบลล์ (CHSH)</h5><p id="t-ent-chsh">S = 2√2 ≈ 2.828 &gt; 2</p></div>
-            <div class="info-card"><h5>การละเมิดความจริงเฉพาะที่</h5><p style="color:#10b981;">Quantum Non-locality</p></div>
-            <div class="info-card"><h5>แหล่งกำเนิดคู่โฟตอน</h5><p>SPDC (BBO Crystal)</p></div>
-            <div class="info-card"><h5>คู่ที่วัดสะสมแล้ว</h5><p id="t-ent-count">0 คู่</p></div>
+            <div class="info-card"><h5>พารามิเตอร์ CHSH ($S$)</h5><p id="t-bell-s" style="color:#10b981; font-weight:700;">S = 2.828 (ละเมิดขอบเขต)</p></div>
+            <div class="info-card"><h5>ขีดจำกัดคลาสสิกเบลล์</h5><p style="color:#f43f5e;">|S| ≤ 2 (Local Realism Bound)</p></div>
+            <div class="info-card"><h5>ขีดจำกัดซิเรลสัน (Tsirelson)</h5><p style="color:#00f0ff;">|S| ≤ 2√2 ≈ 2.828</p></div>
+            <div class="info-card"><h5>สถานะการละเมิด</h5><p id="t-bell-viol" style="color:#10b981;">ละเมิดความจริงเฉพาะที่ (Non-local)</p></div>
+            <div class="info-card"><h5>ผลลัพธ์ทางปรัชญาฟิสิกส์</h5><p>ปฏิเสธ Local Hidden Variables</p></div>
+            <div class="info-card"><h5>รางวัลโนเบลฟิสิกส์ 2022</h5><p>Aspect, Clauser, Zeilinger</p></div>
+          `;
+          break;
+
+        case 'fig9_3':
+          container.innerHTML = `
+            <div class="info-card"><h5>ทฤษฎีบทการห้ามโคลน</h5><p style="color:#ef4444;">No-Cloning Theorem (1982)</p></div>
+            <div class="info-card"><h5>สมบัติเอกภาพ (Unitary)</h5><p>U(ψ⊗e) ≠ ψ⊗ψ ทุกสถานะ</p></div>
+            <div class="info-card"><h5>ฟิเดลิตีสูงสุด (Max Fidelity)</h5><p id="t-clone-fid" style="color:var(--gold);">F_max = 5/6 ≈ 83.33%</p></div>
+            <div class="info-card"><h5>สภาพพัวพันกับเครื่องโคลน</h5><p style="color:#00f0ff;">เกิด Entanglement กับ Ancilla</p></div>
+            <div class="info-card"><h5>ความปลอดภัยเชิงควอนตัม</h5><p style="color:#10b981;">รากฐานความปลอดภัย QKD</p></div>
+            <div class="info-card"><h5>ข้อสรุปสารสนเทศ</h5><p>ข้อมูลควอนตัมทำซ้ำไม่ได้</p></div>
+          `;
+          break;
+
+        case 'fig9_4':
+          container.innerHTML = `
+            <div class="info-card"><h5>ขั้นตอนการส่งผ่านควอนตัม</h5><p id="t-tele-step" style="color:#38bdf8; font-weight:700;">ขั้นตอนที่ 1 / 4</p></div>
+            <div class="info-card"><h5>สถานะคิวบิตเป้าหมาย ($|\\psi\\rangle$)</h5><p id="t-tele-target" style="color:var(--gold);">α|0⟩ + β|1⟩</p></div>
+            <div class="info-card"><h5>ช่องทางควอนตัม (Resource)</h5><p style="color:#00f0ff;">คู่พัวพันเบลล์ 1 คู่ (|Φ⁺⟩)</p></div>
+            <div class="info-card"><h5>การวัดของ Alice (BSM)</h5><p id="t-tele-alice">Bell-State Measurement</p></div>
+            <div class="info-card"><h5>ข้อมูลคลาสสิกที่ส่ง ($m_1 m_2$)</h5><p id="t-tele-bits" style="color:#ec4899;">2 Classical Bits</p></div>
+            <div class="info-card"><h5>การแปลงสถานะของ Bob</h5><p id="t-tele-bob" style="color:#10b981;">เกต Pauli: Z^{m1} X^{m2}</p></div>
+          `;
+          break;
+
+        case 'fig9_5':
+          container.innerHTML = `
+            <div class="info-card"><h5>บิตคลาสสิกที่ส่ง (Alice $\\to$ Bob)</h5><p id="t-sd-bits" style="color:var(--gold); font-weight:700;">00 (ข้อมูล 2 บิต)</p></div>
+            <div class="info-card"><h5>จำนวนคิวบิตที่ส่งผ่านจริง</h5><p style="color:#10b981;">1 Physical Qubit</p></div>
+            <div class="info-card"><h5>การแปลงสถานะของ Alice</h5><p id="t-sd-op" style="color:#38bdf8;">เกตเอกลักษณ์ (I)</p></div>
+            <div class="info-card"><h5>สถานะเบลล์ที่สร้างได้</h5><p id="t-sd-bell" style="color:#ec4899;">|Φ⁺⟩ = (|00⟩+|11⟩)/√2</p></div>
+            <div class="info-card"><h5>การถอดรหัสของ Bob</h5><p>CNOT ต่อด้วย H</p></div>
+            <div class="info-card"><h5>ประสิทธิภาพความหนาแน่น</h5><p style="color:#00f0ff;">จุข้อมูล 200% เทียบกับคลาสสิก</p></div>
+          `;
+          break;
+
+        case 'fig9_6':
+        case 'fig14':
+          container.innerHTML = `
+            <div class="info-card"><h5>สถานะความปลอดภัย (Security)</h5><p id="t-bb-sec" style="color:#10b981;">SECURE (ปลอดภัย ไร้ดักฟัง)</p></div>
+            <div class="info-card"><h5>อัตราความผิดพลาดควอนตัม</h5><p id="t-bb-qber" style="color:#10b981;">QBER = 0.0% (&lt; 11% เกณฑ์)</p></div>
+            <div class="info-card"><h5>โปรโตคอล QKD ที่ใช้งาน</h5><p id="t-bb-proto" style="color:var(--gold);">BB84 (Bennett-Brassard 1984)</p></div>
+            <div class="info-card"><h5>ฐานการวัด (Measurement Bases)</h5><p>Rectilinear (+) &amp; Diagonal (×)</p></div>
+            <div class="info-card"><h5>การคัดกรองกุญแจ (Sifting)</h5><p>≈ 50% คัดเลือกเฉพาะฐานตรงกัน</p></div>
+            <div class="info-card"><h5>กุญแจลับที่สกัดได้</h5><p id="t-bb-keys" style="color:#00f0ff;">10110011... (OTP Key)</p></div>
           `;
           break;
 
@@ -8576,21 +9068,208 @@
       if (st) st.textContent = `หลังเกต ${gate}: สถานะหมุนสมบูรณ์`;
     }
 
-    // Fig 11: Entanglement
-    function updateFig11ThetaA(v) {
-      document.getElementById('disp-ent-a').textContent = `${v}.0°`;
-      updateFig11Correlation();
+    // --- CH 9: Quantum Entanglement, Bell's Theorem & Quantum Teleportation (Complete Suite) ---
+    // Fig 9.1: EPR Singlet Pair
+    let currentFig9_1ThetaA = 0.0, currentFig9_1ThetaB = 90.0;
+    function updateFig9_1ThetaA(v) {
+      currentFig9_1ThetaA = parseFloat(v);
+      const d = document.getElementById('disp-epr-a');
+      if (d) d.textContent = `${currentFig9_1ThetaA.toFixed(1)}°`;
+      updateFig9_1Correlation();
+      if (models.fig9_1 && models.fig9_1.setAngles) {
+        models.fig9_1.setAngles(currentFig9_1ThetaA * Math.PI / 180, currentFig9_1ThetaB * Math.PI / 180);
+      }
     }
-    function updateFig11ThetaB(v) {
-      document.getElementById('disp-ent-b').textContent = `${v}.0°`;
-      updateFig11Correlation();
+    function updateFig9_1ThetaB(v) {
+      currentFig9_1ThetaB = parseFloat(v);
+      const d = document.getElementById('disp-epr-b');
+      if (d) d.textContent = `${currentFig9_1ThetaB.toFixed(1)}°`;
+      updateFig9_1Correlation();
+      if (models.fig9_1 && models.fig9_1.setAngles) {
+        models.fig9_1.setAngles(currentFig9_1ThetaA * Math.PI / 180, currentFig9_1ThetaB * Math.PI / 180);
+      }
     }
-    function updateFig11Correlation() {
-      const a = parseFloat(document.getElementById('disp-ent-a')?.textContent || 0);
-      const b = parseFloat(document.getElementById('disp-ent-b')?.textContent || 90);
-      const chsh = (2 * Math.sqrt(2) * Math.cos((a - b) * Math.PI / 180)).toFixed(3);
-      const el = document.getElementById('t-ent-chsh');
-      if (el) el.textContent = `E(a,b) = -cos 2(a-b)`;
+    function presetFig9_1Angles(a, b) {
+      updateFig9_1ThetaA(a);
+      updateFig9_1ThetaB(b);
+      const inputA = document.querySelector("#disp-epr-a")?.parentElement?.nextElementSibling;
+      const inputB = document.querySelector("#disp-epr-b")?.parentElement?.nextElementSibling;
+      if (inputA) inputA.value = a;
+      if (inputB) inputB.value = b;
+    }
+    function updateFig9_1Correlation() {
+      const deltaDeg = currentFig9_1ThetaA - currentFig9_1ThetaB;
+      const deltaRad = deltaDeg * Math.PI / 180;
+      const corr = -Math.cos(deltaRad);
+      const el = document.getElementById('t-epr-corr');
+      if (el) el.textContent = `E(θ_A, θ_B) = -cos(${Math.abs(deltaDeg).toFixed(0)}°) = ${corr.toFixed(2)}`;
+    }
+
+    // Fig 9.2 / Legacy Fig 11: Bell CHSH Inequality
+    let bellAngles = { a: 0, aPr: 45, b: 22.5, bPr: 67.5 };
+    function setFig9_2Preset(mode) {
+      if (mode === 'optimal') {
+        bellAngles = { a: 0, aPr: 45, b: 22.5, bPr: 67.5 };
+      } else if (mode === 'classical') {
+        bellAngles = { a: 0, aPr: 90, b: 0, bPr: 90 };
+      } else {
+        bellAngles = {
+          a: Math.floor(Math.random() * 90),
+          aPr: Math.floor(Math.random() * 90),
+          b: Math.floor(Math.random() * 90),
+          bPr: Math.floor(Math.random() * 90)
+        };
+      }
+      updateFig9_2Display();
+      if (models.fig9_2 && models.fig9_2.setAngles) {
+        models.fig9_2.setAngles(bellAngles.a, bellAngles.aPr, bellAngles.b, bellAngles.bPr);
+      }
+    }
+    function updateFig9_2Display() {
+      const { a, aPr, b, bPr } = bellAngles;
+      const toRad = deg => deg * Math.PI / 180;
+      const E = (thA, thB) => -Math.cos(toRad(thA - thB));
+      const S = Math.abs(E(a, b) - E(a, bPr) + E(aPr, b) + E(aPr, bPr));
+      
+      const dispS = document.getElementById('disp-bell-s');
+      const dispAng = document.getElementById('disp-bell-angles');
+      const tS = document.getElementById('t-bell-s');
+      const tViol = document.getElementById('t-bell-viol');
+
+      if (dispS) {
+        dispS.textContent = `S = ${S.toFixed(3)} ${S > 2.01 ? '(ละเมิดขอบเขตคลาสสิก!)' : '(อยู่ในกรอบคลาสสิก)'}`;
+        dispS.style.color = S > 2.01 ? '#10b981' : '#f43f5e';
+      }
+      if (dispAng) {
+        dispAng.textContent = `a=${a}°, a'=${aPr}°, b=${b}°, b'=${bPr}°`;
+      }
+      if (tS) {
+        tS.textContent = `S = ${S.toFixed(3)} ${S > 2.01 ? '(ละเมิด |S| ≤ 2)' : '(≤ 2)'}`;
+        tS.style.color = S > 2.01 ? '#10b981' : '#f43f5e';
+      }
+      if (tViol) {
+        tViol.textContent = S > 2.01 ? 'ละเมิดความจริงเฉพาะที่ (Non-local)' : 'สอดคล้องกับ Classical LHV';
+        tViol.style.color = S > 2.01 ? '#10b981' : '#f43f5e';
+      }
+    }
+
+    // Aliases for legacy fig11
+    function updateFig11ThetaA(v) { updateFig9_1ThetaA(v); }
+    function updateFig11ThetaB(v) { updateFig9_1ThetaB(v); }
+
+    // Fig 9.3: No-Cloning Theorem
+    let currentCloneTheta = 60.0;
+    function updateFig9_3Theta(v) {
+      currentCloneTheta = parseFloat(v);
+      const disp = document.getElementById('disp-clone-th');
+      if (disp) disp.textContent = `θ = ${currentCloneTheta.toFixed(1)}°`;
+      if (models.fig9_3 && models.fig9_3.setTargetTheta) {
+        models.fig9_3.setTargetTheta(currentCloneTheta * Math.PI / 180);
+      }
+    }
+    function testFig9_3Clone() {
+      const res = document.getElementById('disp-clone-res');
+      const fid = document.getElementById('t-clone-fid');
+      if (models.fig9_3 && models.fig9_3.testClone) {
+        models.fig9_3.testClone();
+      }
+      if (res) res.textContent = '🚨 ล้มเหลว! เกิดการบิดเบือนสถานะ (Fidelity < 1)';
+      if (fid) fid.textContent = 'F_actual ≈ 0.833 < 1.000 (ตรวจพบ Error)';
+    }
+
+    // Fig 9.4: Quantum Teleportation
+    let teleportStepIndex = 1;
+    function stepFig9_4Teleport() {
+      teleportStepIndex = (teleportStepIndex % 4) + 1;
+      updateFig9_4UI();
+      if (models.fig9_4 && models.fig9_4.stepTeleport) {
+        models.fig9_4.stepTeleport(teleportStepIndex);
+      }
+    }
+    function resetFig9_4Teleport() {
+      teleportStepIndex = 1;
+      updateFig9_4UI();
+      if (models.fig9_4 && models.fig9_4.stepTeleport) {
+        models.fig9_4.stepTeleport(1);
+      }
+    }
+    function updateFig9_4UI() {
+      const stepNames = [
+        'ขั้นตอนที่ 1 / 4: สร้างคู่พัวพัน EPR และเตรียม |ψ⟩',
+        'ขั้นตอนที่ 2 / 4: Alice ทำการวัด Bell-State Measurement (BSM)',
+        'ขั้นตอนที่ 3 / 4: Alice ส่งข้อมูลคลาสสิก 2 บิต (m₁, m₂) ให้ Bob',
+        'ขั้นตอนที่ 4 / 4: Bob ใช้เกตเพาลี Z^{m1} X^{m2} กู้คืน |ψ⟩ สมบูรณ์!'
+      ];
+      const dispStep = document.getElementById('disp-tele-step');
+      const dispDesc = document.getElementById('disp-tele-desc');
+      const tStep = document.getElementById('t-tele-step');
+      const tBob = document.getElementById('t-tele-bob');
+      if (dispStep) dispStep.textContent = `ขั้นตอนที่ ${teleportStepIndex} / 4`;
+      if (dispDesc) dispDesc.textContent = stepNames[teleportStepIndex - 1];
+      if (tStep) tStep.textContent = `ขั้นตอนที่ ${teleportStepIndex} / 4`;
+      if (tBob && teleportStepIndex === 4) {
+        tBob.textContent = 'ฟื้นฟู |ψ⟩ สำเร็จ 100% (Fidelity=1)';
+      }
+    }
+
+    // Fig 9.5: Superdense Coding
+    function sendFig9_5DenseBits(bits) {
+      const disp = document.getElementById('disp-sd-bits');
+      const tBits = document.getElementById('t-sd-bits');
+      const tOp = document.getElementById('t-sd-op');
+      const tBell = document.getElementById('t-sd-bell');
+
+      const opMap = {
+        '00': { op: 'เกตเอกลักษณ์ (I)', bell: '|Φ⁺⟩ = (|00⟩+|11⟩)/√2' },
+        '01': { op: 'เกตเพาลี-X (Bit Flip)', bell: '|Ψ⁺⟩ = (|01⟩+|10⟩)/√2' },
+        '10': { op: 'เกตเพาลี-Z (Phase Flip)', bell: '|Φ⁻⟩ = (|00⟩-|11⟩)/√2' },
+        '11': { op: 'เกตเพาลี XZ / iY', bell: '|Ψ⁻⟩ = (|01⟩-|10⟩)/√2' }
+      };
+      const info = opMap[bits] || opMap['00'];
+      if (disp) disp.textContent = `${bits} (${info.op})`;
+      if (tBits) tBits.textContent = `${bits} (ข้อมูลคลาสสิก 2 บิต)`;
+      if (tOp) tOp.textContent = info.op;
+      if (tBell) tBell.textContent = info.bell;
+
+      if (models.fig9_5 && models.fig9_5.sendBits) {
+        models.fig9_5.sendBits(bits[0], bits[1]);
+      }
+    }
+
+    // Fig 9.6 / Legacy Fig 14: QKD Protocols (BB84 / Ekert91)
+    let isQkdEveActive = false;
+    let currentQkdProtocol = 'bb84';
+    function setFig9_6Eve(present) {
+      isQkdEveActive = present;
+      updateFig9_6Display();
+      if (models.fig9_6 && models.fig9_6.toggleEve) {
+        models.fig9_6.toggleEve(present);
+      }
+    }
+    function setFig9_6Protocol(proto) {
+      currentQkdProtocol = proto;
+      const tProto = document.getElementById('t-bb-proto');
+      if (tProto) {
+        tProto.textContent = proto === 'bb84' ? 'BB84 (Prepare & Measure)' : 'Ekert91 (Entangled EPR Pairs)';
+      }
+      updateFig9_6Display();
+    }
+    function updateFig9_6Display() {
+      const d = document.getElementById('disp-bb-eve');
+      const sec = document.getElementById('t-bb-sec');
+      const qber = document.getElementById('t-bb-qber');
+      if (isQkdEveActive) {
+        if (d) { d.textContent = 'มี Eve ดักฟัง!'; d.style.color = '#ef4444'; }
+        if (sec) { sec.textContent = 'ตรวจพบการดักฟัง! (COMPROMISED)'; sec.style.color = '#ef4444'; }
+        if (qber) { qber.textContent = '25.0% (> 11% ขีดจำกัดความปลอดภัย)'; qber.style.color = '#ef4444'; }
+      } else {
+        if (d) { d.textContent = 'ไม่มี (SAFE)'; d.style.color = '#10b981'; }
+        if (sec) { sec.textContent = 'SECURE (ปลอดภัย ไร้ดักฟัง)'; sec.style.color = '#10b981'; }
+        if (qber) { qber.textContent = '0.0% (< 11% เกณฑ์ปลอดภัย)'; qber.style.color = '#10b981'; }
+      }
+    }
+    function setFig14Eve(present) {
+      setFig9_6Eve(present);
     }
 
     // Fig 12: Grover
