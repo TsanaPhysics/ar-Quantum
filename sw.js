@@ -1,10 +1,12 @@
 // Service Worker for RBRU Quantum AR Simulation (Smart Network-First for HTML, Cache-First for Assets)
-const CACHE_NAME = 'rbru-quantum-ar-v26';
+const CACHE_NAME = 'rbru-quantum-ar-v27';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './ar_universal_tracking.html',
+  './aruco_dictionary_6x6.js',
+  './aruco_tracker.js',
   './ar_blackbody_cavity_tracking.html',
   './target_fig1_blackbody_cavity.png',
   './ar_photoelectric_tracking.html',

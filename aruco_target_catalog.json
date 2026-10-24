@@ -1,0 +1,498 @@
+{
+  "0": {
+    "target_id": "fig1_1",
+    "aruco_id": 0,
+    "chapter": 1,
+    "title": "วิกฤตการณ์อัลตราไวโอเลต",
+    "short": "1.1 วิกฤต UV",
+    "image": "aruco_fig1_1.png"
+  },
+  "1": {
+    "target_id": "fig1",
+    "aruco_id": 1,
+    "chapter": 1,
+    "title": "แบบจำลองโพรงรังสีวัตถุดำ",
+    "short": "1.2 โพรงวัตถุดำ",
+    "image": "aruco_fig1.png"
+  },
+  "2": {
+    "target_id": "fig1_3",
+    "aruco_id": 2,
+    "chapter": 1,
+    "title": "การควอนไตซ์พลังงานของพลังค์",
+    "short": "1.3 ขั้นพลังค์",
+    "image": "aruco_fig1_3.png"
+  },
+  "3": {
+    "target_id": "fig1_4",
+    "aruco_id": 3,
+    "chapter": 1,
+    "title": "กฎการกระจัดของวีนและสเตฟาน-โบลทซ์มัน",
+    "short": "1.4 กฎวีน",
+    "image": "aruco_fig1_4.png"
+  },
+  "4": {
+    "target_id": "fig2",
+    "aruco_id": 4,
+    "chapter": 1,
+    "title": "หลอดทดลองโฟโตอิเล็กทริก",
+    "short": "1.5 โฟโตอิเล็กทริก",
+    "image": "aruco_fig2.png"
+  },
+  "5": {
+    "target_id": "fig1_6",
+    "aruco_id": 5,
+    "chapter": 1,
+    "title": "การกระเจิงคอมป์ตันเชิงสัมพัทธภาพ",
+    "short": "1.6 คอมป์ตัน",
+    "image": "aruco_fig1_6.png"
+  },
+  "6": {
+    "target_id": "fig1_7",
+    "aruco_id": 6,
+    "chapter": 1,
+    "title": "การสร้างคู่และการประลัย",
+    "short": "1.7 การสร้างคู่",
+    "image": "aruco_fig1_7.png"
+  },
+  "7": {
+    "target_id": "fig1_8",
+    "aruco_id": 7,
+    "chapter": 1,
+    "title": "เครื่องชั่งคิบเบิลและตัวตรวจวัด SNSPD",
+    "short": "1.8 คิบเบิล/SNSPD",
+    "image": "aruco_fig1_8.png"
+  },
+  "8": {
+    "target_id": "fig3",
+    "aruco_id": 8,
+    "chapter": 2,
+    "title": "การทดลองเดวิสสัน-เจอร์เมอร์",
+    "short": "2.1 เดวิสสัน-เจอร์เมอร์",
+    "image": "aruco_fig3.png"
+  },
+  "9": {
+    "target_id": "fig2_2",
+    "aruco_id": 9,
+    "chapter": 2,
+    "title": "ความเร็วเฟสและความเร็วกลุ่ม",
+    "short": "2.2 ความเร็วเฟส/กลุ่ม",
+    "image": "aruco_fig2_2.png"
+  },
+  "10": {
+    "target_id": "fig2_3",
+    "aruco_id": 10,
+    "chapter": 2,
+    "title": "การกระจายตัวของกลุ่มคลื่นเกาส์เซียน",
+    "short": "2.3 การกระจายตัวคลื่น",
+    "image": "aruco_fig2_3.png"
+  },
+  "11": {
+    "target_id": "fig4",
+    "aruco_id": 11,
+    "chapter": 2,
+    "title": "การแทรกสอดช่องคู่ของอิเล็กตรอนเดี่ยว",
+    "short": "2.4 สลิตคู่อิเล็กตรอน",
+    "image": "aruco_fig4.png"
+  },
+  "12": {
+    "target_id": "fig2_5",
+    "aruco_id": 12,
+    "chapter": 2,
+    "title": "เครื่องแทรกสอดนิวตรอน COW",
+    "short": "2.5 เครื่องแทรกสอด COW",
+    "image": "aruco_fig2_5.png"
+  },
+  "13": {
+    "target_id": "fig2_6",
+    "aruco_id": 13,
+    "chapter": 2,
+    "title": "ลำกล้องอิเล็กตรอน Cryo-EM",
+    "short": "2.6 ทัศนศาสตร์ Cryo-EM",
+    "image": "aruco_fig2_6.png"
+  },
+  "14": {
+    "target_id": "fig3_1",
+    "aruco_id": 14,
+    "chapter": 3,
+    "title": "ฟังก์ชันคลื่นเชิงซ้อนและการหมุนควง",
+    "short": "3.1 ฟังก์ชันคลื่นเชิงซ้อน",
+    "image": "aruco_fig3_1.png"
+  },
+  "15": {
+    "target_id": "fig3_2",
+    "aruco_id": 15,
+    "chapter": 3,
+    "title": "ความหนาแน่นกระแสความน่าจะเป็น",
+    "short": "3.2 กระแสความน่าจะเป็น",
+    "image": "aruco_fig3_2.png"
+  },
+  "16": {
+    "target_id": "fig3_3",
+    "aruco_id": 16,
+    "chapter": 3,
+    "title": "ปริภูมิฮิลเบิร์ตและสัญกรณ์ดิแรก",
+    "short": "3.3 ปริภูมิฮิลเบิร์ต",
+    "image": "aruco_fig3_3.png"
+  },
+  "17": {
+    "target_id": "fig3_4",
+    "aruco_id": 17,
+    "chapter": 3,
+    "title": "ทฤษฎีบทเอห์เรนเฟสต์",
+    "short": "3.4 เอห์เรนเฟสต์",
+    "image": "aruco_fig3_4.png"
+  },
+  "18": {
+    "target_id": "fig3_5",
+    "aruco_id": 18,
+    "chapter": 3,
+    "title": "สถาปัตยกรรมโครงข่ายประสาทเทียม PINNs",
+    "short": "3.5 AI PINNs",
+    "image": "aruco_fig3_5.png"
+  },
+  "19": {
+    "target_id": "fig3_6",
+    "aruco_id": 19,
+    "chapter": 3,
+    "title": "การแก้สมการด้วยไฟไนต์ดิฟเฟอเรนซ์",
+    "short": "3.6 ไฟไนต์ดิฟเฟอเรนซ์",
+    "image": "aruco_fig3_6.png"
+  },
+  "20": {
+    "target_id": "fig4_1",
+    "aruco_id": 20,
+    "chapter": 4,
+    "title": "ศักย์ขั้นบันไดและการสะท้อนควอนตัม",
+    "short": "4.1 ศักย์ขั้นบันได",
+    "image": "aruco_fig4_1.png"
+  },
+  "21": {
+    "target_id": "fig4_2",
+    "aruco_id": 21,
+    "chapter": 4,
+    "title": "บ่อศักย์อนันต์และบ่อศักย์ลึกจำกัด",
+    "short": "4.2 บ่อศักย์จำกัด",
+    "image": "aruco_fig4_2.png"
+  },
+  "22": {
+    "target_id": "fig4_3",
+    "aruco_id": 22,
+    "chapter": 4,
+    "title": "การทะลุผ่านกำแพงศักย์",
+    "short": "4.3 ควอนตัมทันเนลลิง",
+    "image": "aruco_fig4_3.png"
+  },
+  "23": {
+    "target_id": "fig4_4",
+    "aruco_id": 23,
+    "chapter": 4,
+    "title": "ไดโอดทันเนลลิงแบบสั่นพ้อง RTD",
+    "short": "4.4 ไดโอด RTD",
+    "image": "aruco_fig4_4.png"
+  },
+  "24": {
+    "target_id": "fig4_5",
+    "aruco_id": 24,
+    "chapter": 4,
+    "title": "ทฤษฎีการสลายตัวให้อนุภาคแอลฟาของกามอฟ",
+    "short": "4.5 แอลฟากามอฟ",
+    "image": "aruco_fig4_5.png"
+  },
+  "25": {
+    "target_id": "fig4_6",
+    "aruco_id": 25,
+    "chapter": 4,
+    "title": "กล้องจุลทรรศน์แบบส่องกราด STM",
+    "short": "4.6 กล้อง STM อะตอม",
+    "image": "aruco_fig4_6.png"
+  },
+  "26": {
+    "target_id": "fig5_1",
+    "aruco_id": 26,
+    "chapter": 5,
+    "title": "ศักย์พาราโบลาเทียบกับมอร์ส",
+    "short": "5.1 ศักย์มอร์ส/พาราโบลา",
+    "image": "aruco_fig5_1.png"
+  },
+  "27": {
+    "target_id": "fig5_2",
+    "aruco_id": 27,
+    "chapter": 5,
+    "title": "ฟังก์ชันคลื่นฮาร์มอนิกออสซิลเลเตอร์",
+    "short": "5.2 ออสซิลเลเตอร์ QHO",
+    "image": "aruco_fig5_2.png"
+  },
+  "28": {
+    "target_id": "fig5_3",
+    "aruco_id": 28,
+    "chapter": 5,
+    "title": "พลังงานจุดศูนย์และแรงคาซิเมียร์",
+    "short": "5.3 คาซิเมียร์/จุดศูนย์",
+    "image": "aruco_fig5_3.png"
+  },
+  "29": {
+    "target_id": "fig5_4",
+    "aruco_id": 29,
+    "chapter": 5,
+    "title": "ตัวดำเนินการลด-เพิ่มขั้นบันไดดิแรก",
+    "short": "5.4 บันไดดิแรก",
+    "image": "aruco_fig5_4.png"
+  },
+  "30": {
+    "target_id": "fig5_5",
+    "aruco_id": 30,
+    "chapter": 5,
+    "title": "สถานะอาพันธ์และการหมุนในปริภูมิเฟส",
+    "short": "5.5 สถานะอาพันธ์",
+    "image": "aruco_fig5_5.png"
+  },
+  "31": {
+    "target_id": "fig5_6",
+    "aruco_id": 31,
+    "chapter": 5,
+    "title": "ออปโตเมคานิกส์และสถานะบีบอัด",
+    "short": "5.6 ออปโตเมคานิกส์",
+    "image": "aruco_fig5_6.png"
+  },
+  "32": {
+    "target_id": "fig6_1",
+    "aruco_id": 32,
+    "chapter": 6,
+    "title": "ฮาร์มอนิกทรงกลม 3 มิติ",
+    "short": "6.1 ฮาร์มอนิกทรงกลม",
+    "image": "aruco_fig6_1.png"
+  },
+  "33": {
+    "target_id": "fig6_2",
+    "aruco_id": 33,
+    "chapter": 6,
+    "title": "ฟังก์ชันความน่าจะเป็นตามแนวรัศมี",
+    "short": "6.2 รัศมีไฮโดรเจน",
+    "image": "aruco_fig6_2.png"
+  },
+  "34": {
+    "target_id": "fig6_3",
+    "aruco_id": 34,
+    "chapter": 6,
+    "title": "ออร์บิทัลอะตอมไฮโดรเจน",
+    "short": "6.3 ออร์บิทัลไฮโดรเจน",
+    "image": "aruco_fig6_3.png"
+  },
+  "35": {
+    "target_id": "fig6_4",
+    "aruco_id": 35,
+    "chapter": 6,
+    "title": "การทดลองสเติร์น-เกอร์แลคและสปิน",
+    "short": "6.4 สเติร์น-เกอร์แลค",
+    "image": "aruco_fig6_4.png"
+  },
+  "36": {
+    "target_id": "fig6_5",
+    "aruco_id": 36,
+    "chapter": 6,
+    "title": "การหมุนควงของลาร์มอร์และ NMR",
+    "short": "6.5 การหมุนควงลาร์มอร์",
+    "image": "aruco_fig6_5.png"
+  },
+  "37": {
+    "target_id": "fig6_6",
+    "aruco_id": 37,
+    "chapter": 6,
+    "title": "อันตรกิริยาสปิน-วงโคจรและสปินทรอนิกส์",
+    "short": "6.6 สปินทรอนิกส์",
+    "image": "aruco_fig6_6.png"
+  },
+  "38": {
+    "target_id": "fig7_1",
+    "aruco_id": 38,
+    "chapter": 7,
+    "title": "ปรากฏการณ์ชตาร์คและเพอร์เทอร์เบชัน",
+    "short": "7.1 ปรากฏการณ์ชตาร์ค",
+    "image": "aruco_fig7_1.png"
+  },
+  "39": {
+    "target_id": "fig7_2",
+    "aruco_id": 39,
+    "chapter": 7,
+    "title": "ระเบียบวิธีแปรผันกับอะตอมฮีเลียม",
+    "short": "7.2 วิธีแปรผันฮีเลียม",
+    "image": "aruco_fig7_2.png"
+  },
+  "40": {
+    "target_id": "fig7_3",
+    "aruco_id": 40,
+    "chapter": 7,
+    "title": "กฎทองของแฟร์มีและการเปลี่ยนสถานะ",
+    "short": "7.3 กฎทองแฟร์มี",
+    "image": "aruco_fig7_3.png"
+  },
+  "41": {
+    "target_id": "fig7_4",
+    "aruco_id": 41,
+    "chapter": 7,
+    "title": "การแจกแจงสถิติควอนตัม 3 รูปแบบ",
+    "short": "7.4 สถิติควอนตัม",
+    "image": "aruco_fig7_4.png"
+  },
+  "42": {
+    "target_id": "fig7_5",
+    "aruco_id": 42,
+    "chapter": 7,
+    "title": "ทรงกลมแฟร์มีและแก๊สอิเล็กตรอน",
+    "short": "7.5 ทรงกลมแฟร์มี",
+    "image": "aruco_fig7_5.png"
+  },
+  "43": {
+    "target_id": "fig7_6",
+    "aruco_id": 43,
+    "chapter": 7,
+    "title": "การควบแน่นโบส-ไอน์สไตน์ BEC",
+    "short": "7.6 การควบแน่น BEC",
+    "image": "aruco_fig7_6.png"
+  },
+  "44": {
+    "target_id": "fig8_1",
+    "aruco_id": 44,
+    "chapter": 8,
+    "title": "ทรงกลมบล็อคสามมิติและคิวบิต",
+    "short": "8.1 ทรงกลมบล็อค",
+    "image": "aruco_fig8_1.png"
+  },
+  "45": {
+    "target_id": "fig8_2",
+    "aruco_id": 45,
+    "chapter": 8,
+    "title": "เมทริกซ์ความหนาแน่นและสถานะผสม",
+    "short": "8.2 เมทริกซ์ความหนาแน่น",
+    "image": "aruco_fig8_2.png"
+  },
+  "46": {
+    "target_id": "fig8_3",
+    "aruco_id": 46,
+    "chapter": 8,
+    "title": "เกตควอนตัม 1 คิวบิตบนทรงกลมบล็อค",
+    "short": "8.3 เกตควอนตัม",
+    "image": "aruco_fig8_3.png"
+  },
+  "47": {
+    "target_id": "fig8_4",
+    "aruco_id": 47,
+    "chapter": 8,
+    "title": "การวัดควอนตัมและปรากฏการณ์ซีโน",
+    "short": "8.4 การวัด/ซีโน",
+    "image": "aruco_fig8_4.png"
+  },
+  "48": {
+    "target_id": "fig8_5",
+    "aruco_id": 48,
+    "chapter": 8,
+    "title": "เกต 2 คิวบิต CNOT และสถานะเบลล์",
+    "short": "8.5 เกต CNOT/เบลล์",
+    "image": "aruco_fig8_5.png"
+  },
+  "49": {
+    "target_id": "fig8_6",
+    "aruco_id": 49,
+    "chapter": 8,
+    "title": "การสูญเสียภาวะอาพันธ์ T1 และ T2",
+    "short": "8.6 ดิโคฮีเรนซ์ T1/T2",
+    "image": "aruco_fig8_6.png"
+  },
+  "50": {
+    "target_id": "fig9_1",
+    "aruco_id": 50,
+    "chapter": 9,
+    "title": "คู่พัวพัน EPR และภาวะซิงเกล็ต",
+    "short": "9.1 คู่พัวพัน EPR",
+    "image": "aruco_fig9_1.png"
+  },
+  "51": {
+    "target_id": "fig9_2",
+    "aruco_id": 51,
+    "chapter": 9,
+    "title": "อสมการเบลล์-CHSH และการละเมิดขอบเขต",
+    "short": "9.2 อสมการเบลล์-CHSH",
+    "image": "aruco_fig9_2.png"
+  },
+  "52": {
+    "target_id": "fig9_3",
+    "aruco_id": 52,
+    "chapter": 9,
+    "title": "ทฤษฎีบทห้ามโคลนควอนตัม",
+    "short": "9.3 ห้ามโคลนควอนตัม",
+    "image": "aruco_fig9_3.png"
+  },
+  "53": {
+    "target_id": "fig9_4",
+    "aruco_id": 53,
+    "chapter": 9,
+    "title": "การเทเลพอร์ตควอนตัมข้ามเครือข่าย",
+    "short": "9.4 เทเลพอร์ตควอนตัม",
+    "image": "aruco_fig9_4.png"
+  },
+  "54": {
+    "target_id": "fig9_5",
+    "aruco_id": 54,
+    "chapter": 9,
+    "title": "การเข้ารหัสแบบหนาแน่นยิ่งยวด",
+    "short": "9.5 การเข้ารหัสหนาแน่น",
+    "image": "aruco_fig9_5.png"
+  },
+  "55": {
+    "target_id": "fig9_6",
+    "aruco_id": 55,
+    "chapter": 9,
+    "title": "การแจกจ่ายกุญแจควอนตัม BB84/Ekert91",
+    "short": "9.6 รหัสลับควอนตัม QKD",
+    "image": "aruco_fig9_6.png"
+  },
+  "56": {
+    "target_id": "fig10_1",
+    "aruco_id": 56,
+    "chapter": 10,
+    "title": "ชิปควอนตัมตัวนำยิ่งยวดทรานสมอน",
+    "short": "10.1 ชิปทรานสมอน",
+    "image": "aruco_fig10_1.png"
+  },
+  "57": {
+    "target_id": "fig10_2",
+    "aruco_id": 57,
+    "chapter": 10,
+    "title": "วงจรอัลกอริทึมค้นหาของโกรเวอร์",
+    "short": "10.2 อัลกอริทึมโกรเวอร์",
+    "image": "aruco_fig10_2.png"
+  },
+  "58": {
+    "target_id": "fig10_3",
+    "aruco_id": 58,
+    "chapter": 10,
+    "title": "การแปลงฟูเรียร์ควอนตัม QFT",
+    "short": "10.3 ควอนตัมฟูเรียร์ QFT",
+    "image": "aruco_fig10_3.png"
+  },
+  "59": {
+    "target_id": "fig10_4",
+    "aruco_id": 59,
+    "chapter": 10,
+    "title": "การประมาณเฟสควอนตัม QPE",
+    "short": "10.4 ประมาณเฟส QPE",
+    "image": "aruco_fig10_4.png"
+  },
+  "60": {
+    "target_id": "fig10_5",
+    "aruco_id": 60,
+    "chapter": 10,
+    "title": "อัลกอริทึมแยกตัวประกอบของชอร์",
+    "short": "10.5 อัลกอริทึมของชอร์",
+    "image": "aruco_fig10_5.png"
+  },
+  "61": {
+    "target_id": "fig10_6",
+    "aruco_id": 61,
+    "chapter": 61,
+    "title": "การแก้ไขความผิดพลาดควอนตัม Surface Code",
+    "short": "10.6 เซอร์เฟสโค้ด QEC",
+    "image": "aruco_fig10_6.png"
+  }
+}

@@ -18,6 +18,9 @@
   <!-- Three.js & OrbitControls -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- ArUco DICT_6X6_250 6-DoF Tracker & Target Catalog -->
+  <script src="aruco_dictionary_6x6.js"></script>
+  <script src="aruco_tracker.js"></script>
 
   <style>
     :root {
@@ -2647,6 +2650,39 @@
     // Master Root Group
     const masterGroup = new THREE.Group();
     scene.add(masterGroup);
+
+    // Contact Shadow Plane (Ground Anchoring)
+    function createContactShadowMesh(radius = 2.4) {
+      const c = document.createElement('canvas');
+      c.width = 128; c.height = 128;
+      const cx = c.getContext('2d');
+      const g = cx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      g.addColorStop(0, 'rgba(0, 0, 0, 0.72)');
+      g.addColorStop(0.35, 'rgba(0, 0, 0, 0.38)');
+      g.addColorStop(0.7, 'rgba(0, 0, 0, 0.10)');
+      g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      cx.fillStyle = g;
+      cx.fillRect(0, 0, 128, 128);
+      const tex = new THREE.CanvasTexture(c);
+      const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(radius * 2, radius * 2), mat);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.y = -0.01;
+      return mesh;
+    }
+    const contactShadow = createContactShadowMesh(2.5);
+    masterGroup.add(contactShadow);
+
+    // Initialize Real-time ArUco 6-DoF Tracker
+    let arucoTrackerInstance = null;
+    try {
+      if (typeof ArUcoTracker !== 'undefined') {
+        arucoTrackerInstance = new ArUcoTracker({ width: 480, height: 360, markerPhysicalSize: 1.0 });
+        if (typeof ARUCO_DICT_6X6_MAP !== 'undefined') {
+          arucoTrackerInstance.setDictionary(ARUCO_DICT_6X6_MAP);
+        }
+      }
+    } catch(e) { console.warn('ArUco Tracker Init:', e); }
 
     // Studio & Holographic Lighting Setup for photorealistic depth
     scene.add(new THREE.AmbientLight(0xfffbeb, 0.65));
@@ -7069,7 +7105,7 @@
       missFrames = 0;
       switch3DTarget(id);
 
-      if (isARMode) {
+      if (isARMode && !isArucoActive) {
         // Tabletop desk perspective tilt ~24° so 3D model rests naturally on desk
         masterGroup.position.set(0, -0.15, 0);
         masterGroup.rotation.set(-0.42, 0, 0);
@@ -7081,11 +7117,11 @@
       const ringBar = document.getElementById('lockRingProgress');
       if (ringBar) ringBar.style.strokeDashoffset = 0;
 
-      const cfg = TARGET_CATALOG[id];
+      const cfg = TARGET_CATALOG[id] || { title: id, short: id };
       const capText = document.getElementById('capsuleText');
-      if (capText) capText.textContent = `✓ ล็อกแล้ว · ${cfg.title}`;
+      if (capText) capText.textContent = isArucoActive ? `✓ 6-DoF ArUco · ${cfg.title}` : `✓ ล็อกแล้ว · ${cfg.title}`;
 
-      updateBannerStatus('LOCKED', true);
+      updateBannerStatus(isArucoActive ? 'ARUCO 6-DOF' : 'LOCKED', true);
       setReticleHint(`🎯 ${cfg.title} · แตะเพื่อปลดล็อก`);
       playLockChime();
 
@@ -7135,49 +7171,74 @@
       const scanInterval = isTargetLocked ? 3 : 2;
       if ((frameTick++ % scanInterval) !== 0) return;
 
-      const cropSize = Math.min(vw, vh) * 0.50;
-      // Single drawImage and single getImageData per cycle (Zero GPU stalls)
-      trackerCtx.drawImage(video, (vw - cropSize) / 2, (vh - cropSize) / 2, cropSize, cropSize, 0, 0, 120, 120);
-      const frameData = trackerCtx.getImageData(0, 0, 120, 120).data;
-      const f = analyzePage(frameData);
-
+      // ========================================================
+      // STAGE 1: REAL-TIME ARUCO 6-DOF SURFACE DETECTION
+      // ========================================================
       let detected = null;
-      if (f.isPage) {
-        const scores = matchTemplates(frameData);
-        if (currentTargetMode === 'auto') {
-          let best = null, bestS = -1, runnerUpS = -1;
-          for (const id in scores) {
-            if (scores[id] > bestS) {
-              runnerUpS = bestS;
-              bestS = scores[id];
-              best = id;
-            } else if (scores[id] > runnerUpS) {
-              runnerUpS = scores[id];
+      let isArucoActive = false;
+
+      if (arucoTrackerInstance) {
+        try {
+          const markers = arucoTrackerInstance.detect(video);
+          if (markers && markers.length > 0) {
+            const m = markers[0];
+            detected = m.target_id;
+            isArucoActive = true;
+
+            // Direct 6-DOF Surface Pinning to Three.js masterGroup
+            if (m.pose) {
+              const lerpFactor = 0.35;
+              masterGroup.position.lerp(m.pose.position, lerpFactor);
+              masterGroup.quaternion.slerp(new THREE.Quaternion().setFromEuler(m.pose.rotation), lerpFactor);
+              const targetScale = Math.max(0.06, Math.min(0.24, 0.12 * m.pose.scale));
+              masterGroup.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), lerpFactor);
             }
           }
+        } catch(e) {}
+      }
 
-          if (isTargetLocked) {
-            const currentScore = scores[activeTargetId] || 0;
-            // Target switching: if a DIFFERENT target clearly wins over current target
-            if (best && best !== activeTargetId && bestS >= 0.25 && (bestS - currentScore) >= 0.04) {
-              detected = best;
-            } else if (currentScore >= 0.16) {
-              // Current target is still adequately framed in the reticle
-              detected = activeTargetId;
-            } else if (best && bestS >= DETECT.NCC_AUTO) {
-              detected = best;
+      // ========================================================
+      // STAGE 2: OPTICAL NCC TEMPLATE MATCHING FALLBACK
+      // ========================================================
+      if (!detected) {
+        const cropSize = Math.min(vw, vh) * 0.50;
+        trackerCtx.drawImage(video, (vw - cropSize) / 2, (vh - cropSize) / 2, cropSize, cropSize, 0, 0, 120, 120);
+        const frameData = trackerCtx.getImageData(0, 0, 120, 120).data;
+        const f = analyzePage(frameData);
+
+        if (f.isPage) {
+          const scores = matchTemplates(frameData);
+          if (currentTargetMode === 'auto') {
+            let best = null, bestS = -1, runnerUpS = -1;
+            for (const id in scores) {
+              if (scores[id] > bestS) {
+                runnerUpS = bestS;
+                bestS = scores[id];
+                best = id;
+              } else if (scores[id] > runnerUpS) {
+                runnerUpS = scores[id];
+              }
+            }
+
+            if (isTargetLocked) {
+              const currentScore = scores[activeTargetId] || 0;
+              if (best && best !== activeTargetId && bestS >= 0.25 && (bestS - currentScore) >= 0.04) {
+                detected = best;
+              } else if (currentScore >= 0.16) {
+                detected = activeTargetId;
+              } else if (best && bestS >= DETECT.NCC_AUTO) {
+                detected = best;
+              }
+            } else {
+              if (best && (bestS >= DETECT.NCC_AUTO || (bestS >= 0.22 && (bestS - runnerUpS) >= DETECT.NCC_AUTO_MARGIN))) {
+                detected = best;
+              }
             }
           } else {
-            // Initial acquisition: above auto threshold, or clear margin over runner-up
-            if (best && (bestS >= DETECT.NCC_AUTO || (bestS >= 0.22 && (bestS - runnerUpS) >= DETECT.NCC_AUTO_MARGIN))) {
-              detected = best;
+            const targetScore = scores[currentTargetMode] || 0;
+            if (targetScore >= DETECT.NCC_MANUAL || f.isPage) {
+              detected = currentTargetMode;
             }
-          }
-        } else {
-          // MANUAL MODE: user explicitly chose this target on the UI
-          const targetScore = scores[currentTargetMode] || 0;
-          if (targetScore >= DETECT.NCC_MANUAL || f.isPage) {
-            detected = currentTargetMode;
           }
         }
       }
@@ -10113,7 +10174,8 @@
     // URL Deep-Linking Support (?target=fig1_1, ?target=fig3, ?ar=1)
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      const targetParam = urlParams.get('target') || urlParams.get('id');
+      const rawTarget = urlParams.get('target') || urlParams.get('id');
+      const targetParam = rawTarget ? rawTarget.replace(/\\/g, '') : null;
       const arParam = urlParams.get('ar');
       if (targetParam && TARGET_CATALOG[targetParam]) {
         setTargetMode(targetParam);
